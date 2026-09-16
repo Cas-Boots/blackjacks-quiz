@@ -37,6 +37,8 @@ export interface Ronde {
   naam: string;
   suit: string;
   thema: string;
+  /** Kleursfeer van de ronde. Zie de sfeerblokken in app.css. */
+  sfeer?: string;
   type: VraagType;
   tijd: number;
   punten: number;

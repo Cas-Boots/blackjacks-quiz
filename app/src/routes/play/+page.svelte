@@ -18,6 +18,10 @@
   let mijnTeam = $derived(staat?.teams.find((t) => t.leden.includes(live.spelerId ?? -1)) ?? null);
   let alGestuurd = $derived(mijnTeam ? (staat?.ingeleverd ?? []).includes(mijnTeam.id) : false);
   let teamRonde = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
+  /* Dezelfde sfeer als op de televisie, zodat de telefoon meekleurt. */
+  let sfeer = $derived(
+    staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt') : 'vilt',
+  );
 
   // Bij een nieuwe vraag het veld leegmaken.
   $effect(() => {
@@ -64,7 +68,8 @@
 
 <svelte:head><title>Spelen — Blackjack Quiz 26/27</title></svelte:head>
 
-<div class="scherm">
+<div class="scherm" data-sfeer={sfeer}>
+  <div class="motief" aria-hidden="true"></div>
   <div class="romp" style="max-width:560px">
     <!-- Kop: waar zijn we, en hoeveel tijd is er nog -->
     <div style="display:flex;align-items:center;gap:.9rem">

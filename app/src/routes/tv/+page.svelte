@@ -13,6 +13,15 @@
   let vraag = $derived(staat?.vraag ?? null);
   let ronde = $derived(staat?.ronde ?? null);
   let rood = $derived(ronde?.suit === '♥' || ronde?.suit === '♦');
+  /* Bij een individuele ronde is elke speler zijn eigen "team". Die als
+     teamkaarten tonen zet iedere naam twee keer op het scherm; dan is een
+     rij naamplaten eerlijker én rustiger. */
+  let inTeams = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
+  /* Buiten een ronde om — aanmelden en uitslag — staat de tafel in zijn
+     eigen kleuren, zodat begin en eind herkenbaar bij elkaar horen. */
+  let sfeer = $derived(
+    staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt') : 'vilt',
+  );
 
   /** Eén sleutel per dia, zodat Svelte de overgang echt opnieuw speelt. */
   let diaSleutel = $derived(
@@ -143,7 +152,9 @@
 
 <svelte:head><title>Blackjack Quiz 26/27</title></svelte:head>
 
-<div class="scherm" class:spanning>
+<div class="scherm" class:spanning data-sfeer={sfeer}>
+  <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
+  <div class="motief" aria-hidden="true"></div>
   <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->
   <div class="spanningsrand" aria-hidden="true"></div>
 
@@ -217,29 +228,47 @@
           <hr class="rule" style="animation-delay:.3s" />
           <p class="lood" in:fly={{ y: 16, duration: 520, delay: 300, easing: cubicOut }}>{ronde?.uitleg}</p>
 
-          <div class="raster" style="margin-top:clamp(.5rem,2vh,1.5rem)">
-            {#each staat.teams as t, i (t.id)}
-              <div class="teamkaart" in:fly={{ y: 24, duration: 480, delay: 420 + i * 110, easing: cubicOut }}>
-                <span class="kop">
-                  <span class="suit" class:rood={t.suit === '♥' || t.suit === '♦'}>{t.suit}</span>
-                  {t.naam}
-                </span>
-                <div class="knoprij">
-                  {#each t.leden as id (id)}
-                    {@const sp = staat.spelers.find((x) => x.id === id)}
-                    <span class="naamplaat" style="padding:.35rem .8rem .35rem .35rem">
-                      {#if sp?.foto}
-                        <img class="avatar" style="width:1.9rem;height:1.9rem" src={sp.foto} alt="" />
-                      {:else}
-                        <span class="avatar" style="width:1.9rem;height:1.9rem;font-size:.7rem">{initialen(sp?.naam ?? '?')}</span>
-                      {/if}
-                      {sp?.naam ?? '?'}
-                    </span>
-                  {/each}
+          {#if inTeams}
+            <div class="raster" style="margin-top:clamp(.5rem,2vh,1.5rem)">
+              {#each staat.teams as t, i (t.id)}
+                <div class="teamkaart" in:fly={{ y: 24, duration: 480, delay: 420 + i * 110, easing: cubicOut }}>
+                  <span class="kop">
+                    <span class="suit" class:rood={t.suit === '♥' || t.suit === '♦'}>{t.suit}</span>
+                    {t.naam}
+                  </span>
+                  <div class="knoprij">
+                    {#each t.leden as id (id)}
+                      {@const sp = staat.spelers.find((x) => x.id === id)}
+                      <span class="naamplaat" style="padding:.35rem .8rem .35rem .35rem">
+                        {#if sp?.foto}
+                          <img class="avatar" style="width:1.9rem;height:1.9rem" src={sp.foto} alt="" />
+                        {:else}
+                          <span class="avatar" style="width:1.9rem;height:1.9rem;font-size:.7rem">{initialen(sp?.naam ?? '?')}</span>
+                        {/if}
+                        {sp?.naam ?? '?'}
+                      </span>
+                    {/each}
+                  </div>
                 </div>
+              {/each}
+            </div>
+          {:else}
+            <div style="display:flex;flex-direction:column;gap:.9rem;margin-top:clamp(.5rem,2vh,1.5rem)">
+              <p class="etiket stil">Ieder voor zich</p>
+              <div class="knoprij">
+                {#each staat.spelers as sp, i (sp.id)}
+                  <span class="naamplaat" in:fly={{ y: 20, duration: 440, delay: 420 + i * 90, easing: cubicOut }}>
+                    {#if sp.foto}
+                      <img class="avatar" src={sp.foto} alt="" />
+                    {:else}
+                      <span class="avatar">{initialen(sp.naam)}</span>
+                    {/if}
+                    <strong>{sp.naam}</strong>
+                  </span>
+                {/each}
               </div>
-            {/each}
-          </div>
+            </div>
+          {/if}
         </div>
 
         <!-- ══ De vraag ═══════════════════════════════════════════════ -->

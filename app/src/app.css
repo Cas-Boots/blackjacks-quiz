@@ -28,6 +28,9 @@
   --kaart-papier: #fbf8ef;
   --kaart-papier-diep: #ece4d0;
 
+  /* --- de lamp boven de tafel --- */
+  --lamp: rgba(201, 162, 39, 0.16);
+
   /* --- messing --- */
   --goud: #c9a227;
   --goud-licht: #f0d98c;
@@ -104,7 +107,7 @@ button {
   overflow: hidden;
   background:
     /* de lamp boven de tafel */
-    radial-gradient(70% 55% at 50% -5%, rgba(201, 162, 39, 0.16) 0%, transparent 62%),
+    radial-gradient(70% 55% at 50% -5%, var(--lamp) 0%, transparent 62%),
     /* het vilt zelf */ radial-gradient(130% 100% at 50% 0%, var(--vilt-licht) 0%, var(--vilt) 40%, var(--vilt-diep) 100%);
 }
 /* Viltkorrel. Klein genoeg om niets te kosten, genoeg om de vlakken te
@@ -406,11 +409,11 @@ button {
   fill: var(--rood-licht);
 }
 .ring.stil .voortgang {
-  stroke: var(--salie-diep);
+  stroke: var(--goud-diep);
   filter: none;
 }
 .ring.stil text {
-  fill: var(--salie-diep);
+  fill: var(--goud-diep);
 }
 /* De laatste seconden laten het scherm ademen. */
 .ring.krap {
@@ -971,4 +974,262 @@ textarea:focus {
   50% {
     box-shadow: 0 0 110px -14px rgba(201, 162, 39, 0.95);
   }
+}
+
+/* ===================================================================
+   SFEREN PER RONDE
+
+   Eén wereld, per onderwerp anders belicht. Wat verandert is het vilt,
+   de lamp erboven en het messing; wat blijft is de ivoren vraagkaart en
+   alle betekeniskleuren — groen blijft goed, rood blijft mis, en de
+   rode randgloed blijft spanning. Anders zou een speler kleur moeten
+   herleren bij elke ronde.
+
+   Omdat alles al door tokens loopt, herkleurt het overschrijven van een
+   handvol variabelen het hele scherm.
+   =================================================================== */
+
+/* Aangemeld bij de browser, zodat de overgang tussen twee sferen kan
+   vloeien in plaats van te knippen. Zonder @property zijn eigen
+   variabelen niet te animeren; browsers die het niet kennen springen
+   gewoon, en dat is prima. */
+@property --vilt {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0d1e18;
+}
+@property --vilt-licht {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1d3b30;
+}
+@property --vilt-diep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #081511;
+}
+@property --lamp {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(201, 162, 39, 0.16);
+}
+@property --goud {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #c9a227;
+}
+@property --goud-licht {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f0d98c;
+}
+
+.scherm {
+  transition:
+    --vilt 700ms var(--zacht),
+    --vilt-licht 700ms var(--zacht),
+    --vilt-diep 700ms var(--zacht),
+    --lamp 700ms var(--zacht),
+    --goud 700ms var(--zacht),
+    --goud-licht 700ms var(--zacht);
+}
+
+/* De sfeerlaag: een motief dat bij het onderwerp hoort. Altijd fluisterend —
+   het mag de vraag nooit overstemmen. */
+.motief {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms var(--zacht);
+}
+
+/* ---- Kaarttafel: de grondtoon, ongewijzigd ---------------------- */
+[data-sfeer="vilt"] {
+  /* de waarden uit :root */
+}
+
+/* ---- Sportveld onder de lichtmasten ----------------------------- */
+[data-sfeer="gras"] {
+  --vilt: #0b1f12;
+  --vilt-licht: #17351f;
+  --vilt-diep: #061409;
+  --vilt-hoog: #133024;
+  --rand: #21462c;
+  --lamp: rgba(232, 244, 217, 0.15);
+  --goud: #cfe4b4;
+  --goud-licht: #f2fae6;
+  --goud-diep: #6f8c58;
+}
+[data-sfeer="gras"] .motief {
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.022) 0 90px,
+    transparent 90px 180px
+  );
+}
+
+/* ---- Cijferronde: staal en raster ------------------------------- */
+[data-sfeer="staal"] {
+  --vilt: #101823;
+  --vilt-licht: #1d2c3d;
+  --vilt-diep: #0a1017;
+  --vilt-hoog: #18242f;
+  --rand: #2a3b4f;
+  --lamp: rgba(143, 180, 214, 0.15);
+  --goud: #8fb4d6;
+  --goud-licht: #d5e7f7;
+  --goud-diep: #46658a;
+}
+[data-sfeer="staal"] .motief {
+  opacity: 0.55;
+  background-image:
+    linear-gradient(rgba(143, 180, 214, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 180, 214, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ---- Nederland: warm oranje ------------------------------------- */
+[data-sfeer="oranje"] {
+  --vilt: #1c1208;
+  --vilt-licht: #35220c;
+  --vilt-diep: #120b04;
+  --vilt-hoog: #2a1a0b;
+  --rand: #4a3116;
+  --lamp: rgba(232, 134, 42, 0.17);
+  --goud: #e8862a;
+  --goud-licht: #ffc888;
+  --goud-diep: #8a4f11;
+}
+
+/* ---- De wereld: nachtelijke hemel ------------------------------- */
+[data-sfeer="nacht"] {
+  --vilt: #0a0e1d;
+  --vilt-licht: #161d38;
+  --vilt-diep: #05070f;
+  --vilt-hoog: #141a30;
+  --rand: #232c4a;
+  --lamp: rgba(185, 199, 240, 0.14);
+  --goud: #b9c7f0;
+  --goud-licht: #e6edff;
+  --goud-diep: #55619a;
+}
+[data-sfeer="nacht"] .motief {
+  opacity: 0.85;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 22%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 31% 64%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1.6px 1.6px at 54% 18%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.1px 1.1px at 68% 47%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 81% 72%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 91% 31%, rgba(255, 255, 255, 0.32), transparent),
+    radial-gradient(1.3px 1.3px at 22% 84%, rgba(255, 255, 255, 0.28), transparent),
+    radial-gradient(1.1px 1.1px at 45% 91%, rgba(255, 255, 255, 0.26), transparent);
+}
+
+/* ---- Taart en verre landen: warm roze --------------------------- */
+[data-sfeer="suiker"] {
+  --vilt: #1e0f18;
+  --vilt-licht: #351a2a;
+  --vilt-diep: #140a10;
+  --vilt-hoog: #2b1522;
+  --rand: #4a2338;
+  --lamp: rgba(231, 154, 180, 0.16);
+  --goud: #e79ab4;
+  --goud-licht: #ffd6e3;
+  --goud-diep: #8c4c63;
+}
+
+/* ---- Voorspellingen: violet ------------------------------------- */
+[data-sfeer="violet"] {
+  --vilt: #150f26;
+  --vilt-licht: #261a40;
+  --vilt-diep: #0d0918;
+  --vilt-hoog: #1f1636;
+  --rand: #372457;
+  --lamp: rgba(180, 154, 240, 0.16);
+  --goud: #b49af0;
+  --goud-licht: #e0d4ff;
+  --goud-diep: #6a4fa3;
+}
+
+/* ---- De poule: vol messing op diep groen ------------------------ */
+[data-sfeer="poule"] {
+  --vilt: #0e1c10;
+  --vilt-licht: #1f3819;
+  --vilt-diep: #081109;
+  --vilt-hoog: #172a15;
+  --rand: #2c4a24;
+  --lamp: rgba(224, 182, 58, 0.21);
+  --goud: #e0b63a;
+  --goud-licht: #ffe9a6;
+  --goud-diep: #8f6f13;
+}
+
+/* ---- Beeld en geluid: het rode doek ----------------------------- */
+[data-sfeer="bioscoop"] {
+  --vilt: #1c0b0c;
+  --vilt-licht: #331416;
+  --vilt-diep: #120708;
+  --vilt-hoog: #2a1113;
+  --rand: #4a1e20;
+  --lamp: rgba(224, 169, 78, 0.17);
+  --goud: #e0a94e;
+  --goud-licht: #ffdda4;
+  --goud-diep: #8a6420;
+}
+[data-sfeer="bioscoop"] .motief {
+  opacity: 0.6;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.16) 0 26px,
+    transparent 26px 62px,
+    rgba(255, 255, 255, 0.015) 62px 70px
+  );
+}
+
+/* ---- Volgend jaar: vuurwerk boven middernachtblauw -------------- */
+[data-sfeer="vuurwerk"] {
+  --vilt: #0a1526;
+  --vilt-licht: #14263f;
+  --vilt-diep: #060d18;
+  --vilt-hoog: #111f33;
+  --rand: #1e3559;
+  --lamp: rgba(242, 201, 76, 0.17);
+  --goud: #f2c94c;
+  --goud-licht: #ffeaa8;
+  --goud-diep: #8a6a14;
+}
+[data-sfeer="vuurwerk"] .motief {
+  opacity: 0.75;
+  background-image:
+    radial-gradient(2px 2px at 18% 26%, rgba(242, 201, 76, 0.55), transparent),
+    radial-gradient(1.6px 1.6px at 26% 18%, rgba(255, 234, 168, 0.45), transparent),
+    radial-gradient(1.8px 1.8px at 74% 22%, rgba(231, 154, 180, 0.4), transparent),
+    radial-gradient(1.4px 1.4px at 82% 34%, rgba(242, 201, 76, 0.4), transparent),
+    radial-gradient(2px 2px at 60% 12%, rgba(185, 199, 240, 0.35), transparent),
+    radial-gradient(1.5px 1.5px at 40% 30%, rgba(255, 234, 168, 0.3), transparent);
+}
+
+/* ---- Bliksemronde: bijna zwart, elektrisch geel ----------------- */
+[data-sfeer="bliksem"] {
+  --vilt: #0f0f0a;
+  --vilt-licht: #1f1f11;
+  --vilt-diep: #070703;
+  --vilt-hoog: #1a1a0f;
+  --rand: #3a3a1c;
+  --lamp: rgba(245, 224, 46, 0.19);
+  --goud: #f5e02e;
+  --goud-licht: #fffaa8;
+  --goud-diep: #8f8410;
+}
+[data-sfeer="bliksem"] .motief {
+  opacity: 0.4;
+  background: repeating-linear-gradient(
+    115deg,
+    rgba(245, 224, 46, 0.035) 0 3px,
+    transparent 3px 34px
+  );
 }

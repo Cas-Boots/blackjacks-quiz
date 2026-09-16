@@ -50,6 +50,7 @@ export interface PubliekeStaat {
     naam: string;
     suit: string;
     thema: string;
+    sfeer: string;
     uitleg: string;
     teamModus: string;
     vragenAantal: number;

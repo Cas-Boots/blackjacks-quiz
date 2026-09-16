@@ -189,7 +189,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     rondeAantal: rondes.length,
     ronde: ronde
       ? {
-          naam: ronde.naam, suit: ronde.suit, thema: ronde.thema, uitleg: ronde.uitleg,
+          naam: ronde.naam, suit: ronde.suit, thema: ronde.thema,
+          sfeer: ronde.sfeer ?? 'vilt', uitleg: ronde.uitleg,
           teamModus: ronde.teamModus, vragenAantal: ronde.vragen.length,
         }
       : null,
