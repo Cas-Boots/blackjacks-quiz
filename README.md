@@ -4,21 +4,49 @@ Een complete quizavond in één HTML-bestand. Geen server, geen internet, geen
 installatie, geen PowerPoint. Je opent `index.html` in een browser en je kunt
 beginnen.
 
+Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
+
 ## Snel starten
 
 1. Download `index.html` (of open de gepubliceerde link).
 2. Dubbelklik het bestand — het opent in je browser.
-3. Kies een quizpakket, pas de namen aan, druk op **Start de quiz**.
+3. Vul je naam als quizmaster in, pas de spelersnamen aan, kies de vragen.
 4. Zet je scherm op volledig scherm (`F11`, of `ctrl`+`cmd`+`F` op een Mac).
 
-Sluit je laptop aan op de tv met een HDMI-kabel, of cast het tabblad. Je kunt
-het ook gewoon op een telefoon of tablet draaien en die laten rondgaan.
+Sluit je laptop met een HDMI-kabel op de tv aan, of cast het tabblad. Oogt de
+tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
+
+## De twee pakketten
+
+| Pakket | Rondes | Vragen |
+|---|---|---|
+| Blackjacks 2026 — Het Jaaroverzicht | 13 | 96 |
+| Familie Proefronde 2026 | 7 | 50 |
+
+De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
+Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
+
+### Wat er nog ingevuld moet worden
+
+Drie rondes gaan over de groep zelf en staan klaar als sjabloon:
+
+- **De Voorspellingen** — de elf à twaalf voorspellingen van januari.
+- **De WK-poule** — te vullen met de export uit `blackjacks-cup`.
+- **Taart, Sport & Verre Landen** — uit `blackjacks-resolution`.
+
+Daarnaast is er een lege ronde **Oktober tot december 2026**, want die maanden
+hadden bij het schrijven nog niet plaatsgevonden.
+
+Die vragen dragen de markering `teVullen`. Je ziet ze terug als een rood
+label in de vragenkiezer, en de controle vooraf telt hoeveel gekozen vragen
+nog een antwoord missen — zodat je niet per ongeluk met een onbeantwoordbare
+vraag de avond in gaat.
 
 ## Hoe de avond verloopt
 
-De quizmaster bedient het scherm. Spelers schrijven hun antwoord op papier.
-Per vraag: de vraag verschijnt met een aftelklok → tijd om → **Toon het
-antwoord** → je tikt aan wie het goed had → volgende vraag.
+De quizmaster bedient het scherm en speelt zelf niet mee. Spelers schrijven hun
+antwoord op. Per vraag: de vraag verschijnt met een aftelklok → tijd om →
+**Toon het antwoord** → je tikt aan wie het goed had → volgende vraag.
 
 Na elke ronde zie je de tussenstand, aan het eind het podium.
 
@@ -28,22 +56,37 @@ Teams wisselen per ronde, maar **punten gaan altijd naar de persoon**. Zo blijft
 het klassement eerlijk, hoe vaak je ook herverdeelt. Bij een teamronde krijgt
 elk lid van een winnend team de punten.
 
-Op het ronde-scherm kun je:
+Op het ronde-scherm kun je **Herverdeel** gebruiken voor een nieuwe willekeurige
+verdeling, of op een naam tikken om die speler naar het volgende team te
+schuiven. Teams heten naar de kaartkleuren: Schoppen, Harten, Ruiten, Klaveren.
 
-- op **Herverdeel** drukken voor een nieuwe willekeurige verdeling;
-- op een naam tikken om die speler naar het volgende team te schuiven.
+## Portretten
 
-Teams heten naar de kaartkleuren: Schoppen, Harten, Ruiten, Klaveren.
+Tik op het rondje naast een spelersnaam om een foto van je apparaat te kiezen.
+De afbeelding wordt vierkant bijgesneden tot 256 bij 256 en verkleind, zodat vijf
+portretten ruim binnen de browseropslag passen. Zonder foto tonen we initialen.
 
-## Twee pakketten
+Portretten verschijnen bij de teamindeling, bij het toekennen van punten, in het
+klassement en op het podium.
 
-| Pakket | Rondes | Vragen | Duur |
-|---|---|---|---|
-| Blackjacks — Oud & Nieuw | 8 | 59 | ~75 min |
-| Familie Proefronde | 5 | 32 | ~35 min |
+## Foto's, video's en muziek bij vragen
 
-De familieversie is de generale repetitie: dezelfde motor, makkelijkere vragen,
-geschikt voor alle leeftijden.
+Een vraag kan een afbeelding, een videofragment of een muziekfragment tonen.
+
+1. Klik op het startscherm op **Bestanden inladen** en kies je bestanden.
+2. Heet een bestand precies zoals de vraag verwacht, dan koppelt hij vanzelf.
+3. Zo niet, kies het dan in de keuzelijst achter de ontbrekende regel.
+
+De bestanden gaan in IndexedDB. Dat overleeft een herlaadbeurt en kent geen
+krappe groottelimiet, in tegenstelling tot gewone browseropslag. Ze blijven op
+dit apparaat en gaan nergens heen.
+
+Ontbreekt een bestand, dan toont de vraag een nette melding en loopt de quiz
+gewoon door.
+
+> **Let op:** in de online versie werken alleen bestanden die je zelf inlaadt.
+> Externe adressen (een link naar YouTube of een afbeelding elders) worden daar
+> geblokkeerd. In het losse bestand op je eigen laptop werken ze wel.
 
 ## Waarom dit betrouwbaar is
 
@@ -70,6 +113,7 @@ Neem het bestand mee op een usb-stick als extra back-up.
 | `←` | een stap terug |
 | `P` | klok pauzeren of hervatten |
 | `T` | 30 seconden erbij |
+| `M` | muziek of video afspelen of pauzeren |
 | `Z` | laatste actie ongedaan |
 | `Esc` | venster sluiten |
 
@@ -88,6 +132,7 @@ er zo uit:
   punten: 2,                  // punten per goed antwoord
   teamModus: "teams",         // individueel | teams | samen
   aantalTeams: 2,
+  optioneel: true,            // standaard uitgevinkt in de vragenkiezer
   uitleg: "Wat je voorleest bij de start van de ronde.",
   vragen: [ /* zie hieronder */ ]
 }
@@ -111,17 +156,34 @@ En per vraagtype:
 
 // dichtstbij — dichtstbij wint, precies goed geeft bonuspunten
 {v:"Hoeveel...?", getal:206, eenheid:"botten"}
+
+// met een eigen bestand erbij
+{v:"Wie zie je hier?", a:"...", media:{soort:"beeld", bron:"2026-01.jpg"}}
+{v:"Welk nummer?",     a:"...", media:{soort:"muziek", bron:"intro-01.mp3"}}
+{v:"Welke film?",      a:"...", media:{soort:"video", bron:"clip-01.mp4"}}
+
+// nog geen antwoord: markeer hem, dan telt de controle vooraf hem mee
+{v:"Wie won de taartcompetitie?", a:"— nog invullen —", teVullen:true}
 ```
 
 Optioneel per vraag: `tijd` en `punten` overschrijven die van de ronde.
 
-De ronde **Wie van de Blackjacks?** is bewust open gelaten: daar stemt de groep
-en deel jij de punten uit met de knoppen. Vervang die vragen gerust door
-insidegrappen.
+## Bronnen voor de vragen over 2026
 
-## Wat dit (nog) niet doet
+De algemene vragen zijn nagezocht, niet uit het hoofd geschreven:
 
-Meespelen op de telefoons van de spelers, live gesynchroniseerd, zit er niet in.
-Dat vraagt een server, en daarmee een internetverbinding die op de avond zelf
-kan wegvallen — precies het risico dat we wilden vermijden. Papier en pen zijn
-hier de betrouwbare keuze.
+- [Spanje wint het WK van 2026](https://www.cbsnews.com/news/2026-fifa-world-cup-final-spain-argentina-sunday/) en [het verslag bij NPR](https://www.npr.org/2026/07/19/nx-s1-5899071/2026-world-cup-fifa-argentina-spain-final-championship)
+- [Het medailleklassement van Milaan-Cortina](https://www.olympics.com/en/milano-cortina-2026/medals)
+- [Bulgarije wint het Songfestival](https://eurovisionworld.com/esc/bulgaria-wins-the-eurovision-song-contest-2026)
+- [De eindstand van de Tour de France 2026](https://www.domestiquecycling.com/en/news/tour-de-france-2026-standings/)
+- [Het kabinet-Jetten](https://www.rijksoverheid.nl/regering/over-de-regering/kabinetten-sinds-1945/kabinet-jetten)
+- [De Formule 1 van 2026](https://www.motorsportweek.com/2026/08/16/max-verstappen-explains-frustrations-behind-major-f1-2026-regulatory-shift/)
+
+## Wat er nog aan komt
+
+- **Antwoordbriefjes op de telefoon.** Dezelfde quiz, op elke telefoon te openen
+  in spelersmodus: genummerde antwoordvelden per ronde, lokaal opgeslagen, zonder
+  netwerk. In de groepsfase deelt een team één telefoon.
+- **Een meespeelversie met server.** Live meespelen op alle telefoons, met een
+  overzicht voor de quizmaster. Draait op dezelfde leest als `blackjacks-cup`.
+  Papier blijft daarbij de achtervang.
