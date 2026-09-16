@@ -615,62 +615,61 @@ const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 const PAKKETTEN = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
-    beschrijving: "De hoofdquiz. Alles draait om het afgelopen jaar en om wat 2027 gaat brengen, met vier rondes over de Blackjacks zelf.",
+    beschrijving: "De hoofdquiz. Elk feit komt precies één keer voor, de sportvragen gaan over de marges, en twee rondes komen rechtstreeks uit onze eigen cijfers.",
     rondes: [
       {
-        naam: "Waar of Niet Waar — 2026",
-        suit: "♠", thema: "Warming-up",
+        naam: "Warmdraaien",
+        suit: "♠", thema: "Waar of niet waar",
         type: "waarnietwaar", tijd: 20, punten: 1, teamModus: "individueel",
-        uitleg: "Iedereen voor zich. Opschrijven: waar of niet waar. Eén punt per goed antwoord.",
+        uitleg: "Iedereen voor zich. Let op: de makkelijke helft is niet altijd de ware.",
         vragen: [
-          {v:"Spanje won in 2026 het WK voetbal.", goed:true,
-           toelichting:"In de finale van 19 juli werd Argentinië na verlenging met 1-0 verslagen."},
-          {v:"Nederland werd op het WK van 2026 uitgeschakeld door Marokko.", goed:true,
-           toelichting:"Het bleef 1-1, waarna Oranje de strafschoppenserie verloor."},
-          {v:"De Olympische Winterspelen van 2026 waren in Italië.", goed:true,
-           toelichting:"Milaan en Cortina d’Ampezzo, van 6 tot en met 22 februari."},
-          {v:"Bulgarije won in 2026 voor het eerst het Eurovisie Songfestival.", goed:true,
-           toelichting:"Dara won met Bangaranga, en pakte zowel de jury- als de publieksstemming."},
-          {v:"Tadej Pogačar won in 2026 zijn vijfde Tour de France.", goed:true,
-           toelichting:"Daarmee evenaarde hij het record van Merckx, Hinault, Anquetil en Indurain."},
-          {v:"De Formule 1 reed in 2026 met vrijwel dezelfde reglementen als het jaar ervoor.", goed:false,
-           toelichting:"Integendeel: 2026 bracht compleet nieuwe motor-, chassis- en brandstofregels, met veel meer nadruk op elektrisch vermogen."},
-          {v:"Het kabinet dat in februari 2026 aantrad heeft een meerderheid in de Tweede Kamer.", goed:false,
-           toelichting:"Het kabinet-Jetten is een minderheidskabinet: D66, VVD en CDA hebben samen 66 van de 150 zetels."},
-          {v:"Noorwegen won het medailleklassement van de Winterspelen van 2026.", goed:true,
-           toelichting:"Achttien keer goud en 41 medailles in totaal."}
+          {v:"De WK-finale werd pas in de verlenging beslist.", goed:true,
+           toelichting:"Na negentig minuten stond het nog 0-0."},
+          {v:"Engeland eindigde als derde op het WK.", goed:true,
+           toelichting:"Frankrijk werd vierde."},
+          {v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
+           toelichting:"Hij evenaarde het. Vijf zeges, net als Merckx, Hinault, Anquetil en Indurain."},
+          {v:"De Formule 1 reed in 2026 met vrijwel ongewijzigde reglementen.", goed:false,
+           toelichting:"Compleet nieuwe motor-, chassis-, banden- en brandstofregels. Coureurs moesten opeens hun accu-inzet over de ronde verdelen."},
+          {v:"Het kabinet-Jetten heeft een meerderheid in de Tweede Kamer.", goed:false,
+           toelichting:"Een minderheidskabinet — samen 66 van de 150 zetels."},
+          {v:"Max Verstappen stond halverwege 2026 in de top drie van het Formule 1-kampioenschap.", goed:false,
+           toelichting:"Zesde, op ruim honderd punten van de koploper. Red Bull kreeg de nieuwe regels niet aan de praat."},
+          {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
+           toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
+          {v:"Nederland won op de Winterspelen van 2026 meer dan tien keer goud.", goed:false,
+           toelichting:"Precies tien keer."}
         ]
       },
       {
-        naam: "Sport 2026",
-        suit: "♥", thema: "Het jaar op het veld, de piste en de weg",
+        naam: "Sport: de Marges",
+        suit: "♥", thema: "Niet wie er won, maar hoe",
         type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Het sportjaar 2026 in acht vragen.",
+        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
         vragen: [
-          {v:"Welk land werd in 2026 wereldkampioen voetbal?", a:"Spanje",
-           toelichting:"Hun tweede wereldtitel, na 2010."},
-          {v:"Welk land verloor de WK-finale van 2026?", a:"Argentinië"},
-          {v:"In welke drie landen werd het WK van 2026 gespeeld?", a:"De Verenigde Staten, Canada en Mexico"},
-          {v:"Door welk land werd Oranje op het WK uitgeschakeld?", a:"Marokko — na strafschoppen"},
-          {v:"In welke twee Italiaanse plaatsen waren de Olympische Winterspelen van 2026?", a:"Milaan en Cortina d’Ampezzo"},
-          {v:"Wie won in 2026 de Tour de France?", a:"Tadej Pogačar"},
-          {v:"Voor de hoeveelste keer won hij de Tour, en welk record evenaarde hij daarmee?", a:"Voor de vijfde keer — het record van Merckx, Hinault, Anquetil en Indurain"},
-          {v:"Wie eindigde in de Tour van 2026 als tweede, op ruim zes minuten?", a:"Remco Evenepoel"}
+          {v:"Wie kwam er als invaller in en besliste daarmee de WK-finale?", a:"Ferran Torres"},
+          {v:"In welk stadion werd die finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
+          {v:"Tegen welk land ging Oranje eruit, en op welke manier?", a:"Marokko — na strafschoppen, bij 1-1"},
+          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
+          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
+          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
+          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"},
+          {v:"Welke ploeg won het ploegenklassement in de Tour?", a:"Lidl-Trek"}
         ]
       },
       {
-        naam: "Dichtstbij Wint — 2026 in cijfers",
-        suit: "♦", thema: "Cijferronde",
+        naam: "Dichtstbij Wint",
+        suit: "♦", thema: "2026 in cijfers",
         type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Elk team noemt één getal. Het dichtstbijzijnde team pakt 3 punten — precies goed levert er 5 op.",
+        uitleg: "Elk team noemt één getal. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden"},
           {v:"En hoeveel woningbranden waren dat diezelfde nacht?", getal:228, eenheid:"woningbranden"},
-          {v:"Met hoeveel punten won Bulgarije het Songfestival van 2026?", getal:516, eenheid:"punten"},
-          {v:"Hoeveel gouden medailles won Noorwegen op de Winterspelen van 2026?", getal:18, eenheid:"keer goud"},
-          {v:"Hoeveel gouden medailles won Nederland daar?", getal:10, eenheid:"keer goud"},
-          {v:"Hoeveel van de 150 Tweede Kamerzetels heeft het kabinet-Jetten achter zich?", getal:66, eenheid:"zetels"},
-          {v:"De hoeveelste editie van het Eurovisie Songfestival was die van 2026?", getal:70, eenheid:"e editie"}
+          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
+          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
+          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"},
+          {v:"Op welke dag in juli werd de WK-finale gespeeld?", getal:19, eenheid:"juli"},
+          {v:"Hoeveel punten had de koploper van het Formule 1-kampioenschap na de Grand Prix van Spanje?", getal:292, eenheid:"punten"}
         ]
       },
       {
@@ -679,43 +678,76 @@ const PAKKETTEN = {
         type: "meerkeuze", tijd: 25, punten: 2, teamModus: "individueel",
         uitleg: "Weer ieder voor zich. Schrijf A, B, C of D op.",
         vragen: [
-          {v:"Wie werd in februari 2026 minister-president van Nederland?",
-           opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
-           toelichting:"Jetten (D66) werd op 23 februari beëdigd en hield twee dagen later de regeringsverklaring."},
-          {v:"Uit welke partijen bestaat het kabinet-Jetten?",
+          {v:"Wie werd in februari 2026 minister-president?",
+           opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1},
+          {v:"Uit welke partijen bestaat dat kabinet?",
            opties:["D66, VVD en CDA","D66, GroenLinks-PvdA en CDA","VVD, CDA en BBB","D66, VVD en JA21"], goed:0},
-          {v:"Wanneer werd dat kabinet beëdigd?",
-           opties:["29 oktober 2025","30 januari 2026","23 februari 2026","1 juli 2026"], goed:2},
-          {v:"Wat voor kabinet is het?",
-           opties:["Een meerderheidskabinet","Een zakenkabinet","Een demissionair kabinet","Een minderheidskabinet"], goed:3},
+          {v:"Op welke datum werd het beëdigd?",
+           opties:["30 januari 2026","3 februari 2026","23 februari 2026","1 maart 2026"], goed:2},
+          {v:"Wanneer waren de verkiezingen die tot dit kabinet leidden?",
+           opties:["29 oktober 2025","22 november 2025","18 maart 2026","6 juni 2025"], goed:0},
+          {v:"Wie werd er in november 2025 als verkenner aangesteld?",
+           opties:["Ronald Plasterk","Wouter Koolmees","Kim Putters","Herman Tjeenk Willink"], goed:1},
+          {v:"Wanneer presenteerden de drie partijen hun regeerakkoord?",
+           opties:["30 januari 2026","25 februari 2026","4 november 2025","12 december 2025"], goed:0},
           {v:"Waardoor lagen het openbaar vervoer en het vliegverkeer begin 2026 grotendeels stil?",
            opties:["Een landelijke staking","Overvloedige sneeuwval","Een computerstoring","Dichte mist"], goed:1},
           {v:"Wat gebeurde er op 1 juli 2026 met de AOW?",
-           opties:["Die ging omhoog","Die ging omlaag","Die werd bevroren","De leeftijd ging omhoog"], goed:0},
-          {v:"Wanneer waren de Tweede Kamerverkiezingen die tot dit kabinet leidden?",
-           opties:["Oktober 2025","Maart 2026","November 2026","Juni 2025"], goed:0},
-          {v:"In welk land werd het WK voetbal van 2026 juist NIET gespeeld?",
-           opties:["Canada","Mexico","Brazilië","De Verenigde Staten"], goed:2}
+           opties:["Die ging omhoog","Die ging omlaag","Die werd bevroren","De leeftijd ging omhoog"], goed:0}
         ]
       },
       {
-        naam: "Wereld & Cultuur 2026",
-        suit: "♠", thema: "Buiten het veld",
+        naam: "De Rest van de Wereld",
+        suit: "♠", thema: "Buiten de sport om",
         type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Nieuwe teams, nieuwe kansen. Het jaar buiten de sport om.",
+        uitleg: "Nieuwe teams, nieuwe kansen.",
         vragen: [
-          {v:"Welk land won in 2026 voor het eerst in de geschiedenis het Eurovisie Songfestival?", a:"Bulgarije"},
-          {v:"Met welk nummer, en van welke artiest?", a:"Bangaranga — Dara"},
-          {v:"Welke Noorse langlaufer brak op de Winterspelen van 2026 het record voor de meeste gouden medailles?", a:"Johannes Høsflot Klæbo"},
-          {v:"Welke grote verandering kreeg de Formule 1 in 2026?", a:"Compleet nieuwe reglementen, met veel meer nadruk op elektrisch vermogen",
-           toelichting:"Coureurs moesten opeens hun accu-inzet over de ronde verdelen; wie te vroeg leeg was, was een zittende eend."},
-          {v:"Welke negentienjarige coureur verraste in 2026 door lange tijd het Formule 1-kampioenschap aan te voeren?", a:"Kimi Antonelli"},
-          {v:"Welk stadion was in 2026 het toneel van de WK-finale?", a:"MetLife Stadium, in New Jersey"}
+          {v:"Welk land won het Songfestival, en met welk nummer?", a:"Bulgarije, met Bangaranga van Dara"},
+          {v:"De hoeveelste editie van het Songfestival was dat?", a:"De zeventigste"},
+          {v:"Welke Noorse langlaufer brak het record voor de meeste olympische gouden medailles?", a:"Johannes Høsflot Klæbo"},
+          {v:"In welke twee Italiaanse plaatsen waren de Winterspelen?", a:"Milaan en Cortina d’Ampezzo"},
+          {v:"Hoe heette de missie die in april vier astronauten om de maan bracht?", a:"Artemis II"},
+          {v:"Welke negentienjarige coureur voerde lange tijd het Formule 1-kampioenschap aan?", a:"Kimi Antonelli"},
+          {v:"Welke film was in 2026 de grootste kaskraker in de Amerikaanse bioscopen?", a:"Spider-Man: Brand New Day"}
+        ]
+      },
+      {
+        naam: "Onze Sportcompetitie",
+        suit: "♥", thema: "Resolution Recap — echte cijfers",
+        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Ieder voor zich.",
+        vragen: [
+          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 104 keer",
+           toelichting:"Daarna Liz met 90, Eva met 83, Bastiaan met 76, Joris met 58 en Rik met 45."},
+          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik"},
+          {v:"Welke sport deed Rik dan wel, vaker dan wie ook?", a:"Padel — 27 keer"},
+          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen"},
+          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz"},
+          {v:"Wie noteerde er twaalf keer fysio?", a:"Eva"},
+          {v:"Wie legde zichzelf in januari het hoogste doel op?", a:"Cas — 162 keer sporten"},
+          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan",
+           toelichting:"Eva 83 van 60, Liz 90 van 80, Bastiaan 76 van 70. Cas, Joris en Rik zaten er nog onder."}
+        ]
+      },
+      {
+        naam: "Taart & Verre Landen",
+        suit: "♦", thema: "Resolution Recap — de rest",
+        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Dezelfde telling, andere categorieën. Ieder voor zich.",
+        vragen: [
+          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46"},
+          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten"},
+          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan"},
+          {v:"Op welke dag gingen er vijf taarten doorheen — de drukste taartdag van het jaar?", a:"30 januari"},
+          {v:"Wie bezocht de meeste landen?", a:"Cas — twaalf stuks"},
+          {v:"Hoeveel verschillende landen bezochten we samen?", a:"Dertien"},
+          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië"},
+          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan"}
         ]
       },
       {
         naam: "De Voorspellingen",
-        suit: "♥", thema: "Wat jullie in januari dachten",
+        suit: "♣", thema: "Wat jullie in januari dachten",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
         teVullen: true,
         uitleg: "Aan het begin van 2026 deed iedereen elf à twaalf voorspellingen — Cas incluis. Nu de afrekening.",
@@ -723,45 +755,28 @@ const PAKKETTEN = {
           {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true},
           {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true},
           {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie voorspelde aan het begin van het jaar al wie het WK zou winnen?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true},
+          {v:"Hoeveel van alle voorspellingen zijn er samen uitgekomen?", a:"— nog invullen —", teVullen:true},
           {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true},
-          {v:"Hoeveel van de voorspellingen zijn er in totaal uitgekomen?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling deed iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true},
-          {v:"Wiens voorspelling van vorig jaar verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true}
+          {v:"Wiens voorspelling verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke voorspelling kan nog net uitkomen in de laatste dagen van het jaar?", a:"— nog invullen —", teVullen:true}
         ]
       },
       {
         naam: "De WK-poule",
-        suit: "♦", thema: "Blackjacks Cup",
+        suit: "♠", thema: "Blackjacks Cup",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
         teVullen: true,
-        uitleg: "Onze eigen poule rond het WK. Alles wat er in juli nog toe deed.",
+        uitleg: "Onze eigen poule. Vul deze ronde met de export uit blackjacks-cup.",
         vragen: [
-          {v:"Wie won uiteindelijk de Blackjacks-poule?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie eindigde er als laatste?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie had Spanje als wereldkampioen aangewezen?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie zat er het dichtst bij met de Gouden Schoen?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie zette zijn of haar joker op de slechtste wedstrijd?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke wedstrijd voorspelde vrijwel niemand goed?", a:"— nog invullen —", teVullen:true},
-          {v:"Hoeveel punten scoorde de winnaar in totaal?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie leidde het langst de ranglijst zonder te winnen?", a:"— nog invullen —", teVullen:true}
-        ]
-      },
-      {
-        naam: "Taart, Sport & Verre Landen",
-        suit: "♣", thema: "Blackjacks Resolution",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        teVullen: true,
-        uitleg: "Het hele jaar bijgehouden: de taartcompetitie, de sportcompetitie en de landen die we aandeden.",
-        vragen: [
-          {v:"Wie won de taartcompetitie van 2026?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie won de sportcompetitie?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie bezocht dit jaar de meeste landen?", a:"— nog invullen —", teVullen:true},
-          {v:"Hoeveel landen bezochten we samen in 2026?", a:"— nog invullen —", teVullen:true},
-          {v:"Welk land werd door meer dan één van ons bezocht?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie kwam het hele jaar niet verder dan één land?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke taart kreeg de hoogste beoordeling?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie bakte er precies nul taarten?", a:"— nog invullen —", teVullen:true}
+          {v:"Wie won uiteindelijk de poule, en met hoeveel punten?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie eindigde er onderaan?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie had Spanje vooraf als wereldkampioen aangewezen?", a:"— nog invullen —", teVullen:true},
+          {v:"Bij welke vooraf-vraag was één van ons de enige met het goede antwoord?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie haalde de meeste punten uit een joker, en op welke wedstrijd?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie verspilde een joker aan een wedstrijd die niets opleverde?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke wedstrijd voorspelde niemand van ons goed?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie pakte de meeste punten uit één enkele wedstrijd?", a:"— nog invullen —", teVullen:true}
         ]
       },
       {
@@ -783,66 +798,66 @@ const PAKKETTEN = {
         ]
       },
       {
-        naam: "2027 — Wat Komt Er Aan",
+        naam: "2027",
         suit: "♦", thema: "Vooruitkijken",
         type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Genoeg teruggekeken. Wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
-           toelichting:"De eerste keer dat het toernooi naar Zuid-Amerika komt."},
-          {v:"Welk land organiseert in 2027 het WK rugby?", a:"Australië"},
+           toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
+          {v:"Welk land organiseert het WK rugby?", a:"Australië"},
           {v:"Wat is er op 2 augustus 2027 aan de hemel te zien?", a:"Een totale zonsverduistering",
-           toelichting:"Ruim zes minuten totaliteit — een van de langste van deze eeuw — onder meer boven Noord-Afrika en Egypte."},
-          {v:"In welke maand van 2027 zijn de Franse presidentsverkiezingen?", a:"April"},
-          {v:"Welke drie landen organiseren samen het WK cricket van 2027?", a:"Zuid-Afrika, Zimbabwe en Namibië"},
-          {v:"Welke twee Europese landen houden in 2027 landelijke verkiezingen?", a:"Italië en Polen"}
+           toelichting:"Ruim zes minuten totaliteit, onder meer boven Noord-Afrika en Egypte — een van de langste van deze eeuw."},
+          {v:"In welke maand zijn de Franse presidentsverkiezingen?", a:"April"},
+          {v:"Welke drie landen organiseren samen het WK cricket?", a:"Zuid-Afrika, Zimbabwe en Namibië"},
+          {v:"Welke twee Europese landen houden landelijke verkiezingen?", a:"Italië en Polen"}
         ]
       },
       {
-        naam: "Oktober tot december 2026",
-        suit: "♠", thema: "De laatste maanden — zelf aanvullen",
-        type: "open", tijd: 25, punten: 2, teamModus: "individueel",
-        optioneel: true, teVullen: true,
-        uitleg: "De staart van het jaar, die er bij het maken van deze quiz nog niet was. Vul deze ronde in december aan.",
-        vragen: [
-          {v:"Wie werd wereldkampioen Formule 1 in 2026?", a:"— nog invullen —", teVullen:true},
-          {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
-          {v:"Welk nummer stond eind 2026 bovenaan?", a:"— nog invullen —", teVullen:true},
-          {v:"Wat gebeurde er in december dat niemand zag aankomen?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke film moest je dit najaar gezien hebben?", a:"— nog invullen —", teVullen:true},
-          {v:"Wat stond er dit jaar in de Top 2000 op nummer één?", a:"— nog invullen —", teVullen:true}
-        ]
-      },
-      {
-        naam: "Bliksemronde 2026",
+        naam: "Bliksemronde",
         suit: "♣", thema: "Tien seconden per vraag",
         type: "open", tijd: 10, punten: 1, teamModus: "individueel",
         uitleg: "Tien vragen, tien seconden elk. Ieder voor zich, één punt per stuk. Tempo!",
         vragen: [
-          {v:"Welk land won het WK voetbal 2026?", a:"Spanje"},
-          {v:"In welke maand was de WK-finale?", a:"Juli"},
-          {v:"Welk land won het Songfestival?", a:"Bulgarije"},
-          {v:"In welk land waren de Winterspelen?", a:"Italië"},
-          {v:"Wie won de Tour de France?", a:"Tadej Pogačar"},
-          {v:"Wie is sinds februari minister-president?", a:"Rob Jetten"},
-          {v:"Van welke partij is hij?", a:"D66"},
-          {v:"Welk land won het medailleklassement van de Winterspelen?", a:"Noorwegen"},
-          {v:"Welke sport kreeg in 2026 compleet nieuwe reglementen?", a:"De Formule 1"},
-          {v:"In welk werelddeel is in 2027 het WK voor vrouwen?", a:"Zuid-Amerika"}
+          {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
+          {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
+          {v:"Welk land eindigde vierde op het WK?", a:"Frankrijk"},
+          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie"},
+          {v:"Tegen wie speelde Oranje de openingswedstrijd?", a:"Japan"},
+          {v:"In welke maand waren de Winterspelen?", a:"Februari"},
+          {v:"Tegen welk Afrikaans land won Oranje in de groepsfase?", a:"Tunesië"},
+          {v:"De hoeveelste Tourzege was dit voor Pogačar?", a:"De vijfde"},
+          {v:"Welke verfilming van een Grieks epos was in 2026 een van de grootste kaskrakers?", a:"The Odyssey"},
+          {v:"Van welke Pixar-film verscheen in 2026 het vijfde deel?", a:"Toy Story"}
+        ]
+      },
+      {
+        naam: "Oktober tot december",
+        suit: "♠", thema: "De staart van het jaar — zelf aanvullen",
+        type: "open", tijd: 25, punten: 2, teamModus: "individueel",
+        optioneel: true, teVullen: true,
+        uitleg: "Deze maanden waren er nog niet toen de quiz werd gemaakt. Vul ze in december aan.",
+        vragen: [
+          {v:"Wie werd wereldkampioen Formule 1 in 2026?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat stond er dit jaar op nummer één in de Top 2000?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat gebeurde er in december dat niemand zag aankomen?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke film moest je dit najaar gezien hebben?", a:"— nog invullen —", teVullen:true},
+          {v:"Welk woord werd gekozen tot woord van het jaar?", a:"— nog invullen —", teVullen:true}
         ]
       },
       {
         naam: "Wie van de Blackjacks?",
-        suit: "♠", thema: "Slotronde",
+        suit: "♥", thema: "Slotronde",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit met de knoppen.",
+        uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit.",
         vragen: [
           {v:"Wie van de vijf heeft 2026 het best gebruikt?", a:"De groep beslist"},
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},
           {v:"Wie heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
-          {v:"Wie gaat 2027 winnen?", a:"De groep beslist"},
           {v:"Wie belt er in 2027 als eerste met groot nieuws?", a:"De groep beslist"},
-          {v:"Wie verbreekt zijn goede voornemen het snelst?", a:"De groep beslist"}
+          {v:"Wie verbreekt zijn goede voornemen het snelst?", a:"De groep beslist"},
+          {v:"Wie wint volgend jaar deze quiz?", a:"De groep beslist"}
         ]
       }
     ]
@@ -859,15 +874,18 @@ const PAKKETTEN = {
         uitleg: "Ieder voor zich. Waar of niet waar — één punt per goed antwoord.",
         vragen: [
           {v:"Spanje won in 2026 het WK voetbal.", goed:true},
-          {v:"Nederland won in 2026 het WK voetbal.", goed:false,
-           toelichting:"Oranje werd uitgeschakeld door Marokko, na strafschoppen."},
-          {v:"De Olympische Winterspelen van 2026 waren in Italië.", goed:true},
-          {v:"Nederland won op die Winterspelen tien gouden medailles.", goed:true},
-          {v:"Rob Jetten werd in 2026 minister-president.", goed:true},
           {v:"Het WK voetbal van 2026 werd in Europa gespeeld.", goed:false,
            toelichting:"In de Verenigde Staten, Canada en Mexico."},
+          {v:"Een struisvogel steekt bij gevaar zijn kop in het zand.", goed:false,
+           toelichting:"Ze gaan plat op de grond liggen. Of ze rennen — tot 70 km per uur."},
+          {v:"In 2026 vlogen er weer mensen om de maan heen.", goed:true,
+           toelichting:"Vier astronauten, met de missie Artemis II."},
           {v:"Een olifant is het enige dier dat niet kan springen.", goed:true},
-          {v:"Honing kan nooit bederven.", goed:true}
+          {v:"Honing kan na een paar jaar bederven.", goed:false,
+           toelichting:"In Egyptische graven is honing gevonden die na 3000 jaar nog eetbaar was."},
+          {v:"Een spin is een insect.", goed:false,
+           toelichting:"Spinnen hebben acht poten en twee lichaamsdelen; insecten zes en drie."},
+          {v:"De zon is een ster.", goed:true}
         ]
       },
       {
@@ -876,18 +894,18 @@ const PAKKETTEN = {
         type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Schrijf A, B, C of D op.",
         vragen: [
-          {v:"Welk land won het WK voetbal van 2026?",
-           opties:["Argentinië","Frankrijk","Spanje","Nederland"], goed:2},
           {v:"In welk land waren de Olympische Winterspelen van 2026?",
            opties:["Noorwegen","Italië","Frankrijk","Zwitserland"], goed:1},
-          {v:"Welk land won daar de meeste medailles?",
-           opties:["Noorwegen","Nederland","Italië","De Verenigde Staten"], goed:0},
           {v:"Wie won in 2026 de Tour de France?",
            opties:["Remco Evenepoel","Mathieu van der Poel","Tadej Pogačar","Jonas Vingegaard"], goed:2},
-          {v:"Op welke sport is Nederland op de Winterspelen traditioneel het sterkst?",
+          {v:"Hoeveel landen organiseerden samen het WK voetbal?",
+           opties:["Eén","Twee","Drie","Vier"], goed:2},
+          {v:"Welk land won de meeste medailles op de Winterspelen?",
+           opties:["Noorwegen","Nederland","Italië","De Verenigde Staten"], goed:0},
+          {v:"In welke sport haalt Nederland op de Winterspelen zijn medailles vooral?",
            opties:["Schaatsen","Skiën","Bobsleeën","Curling"], goed:0},
-          {v:"Hoeveel landen organiseerden samen het WK voetbal van 2026?",
-           opties:["Eén","Twee","Drie","Vier"], goed:2}
+          {v:"Tegen welk land werd Oranje op het WK uitgeschakeld?",
+           opties:["Japan","Marokko","Spanje","Argentinië"], goed:1}
         ]
       },
       {
@@ -897,10 +915,10 @@ const PAKKETTEN = {
         uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel gouden medailles won Nederland op de Winterspelen van 2026?", getal:10, eenheid:"keer goud"},
-          {v:"Hoeveel gouden medailles won Noorwegen daar?", getal:18, eenheid:"keer goud"},
           {v:"Hoeveel dagen telt een schrikkeljaar?", getal:366, eenheid:"dagen"},
           {v:"Hoeveel provincies heeft Nederland?", getal:12, eenheid:"provincies"},
-          {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"}
+          {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"},
+          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"}
         ]
       },
       {
@@ -951,7 +969,7 @@ const PAKKETTEN = {
         uitleg: "Oude familiefoto’s doen het hier altijd goed. Laad ze in op het startscherm.",
         vragen: [
           {v:"Wie zie je op deze foto?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-01.jpg"}},
-          {v:"Wie zie je op deze foto?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-02.jpg"}},
+          {v:"En wie staat hierop?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-02.jpg"}},
           {v:"Waar is deze foto genomen?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-03.jpg"}},
           {v:"Welk nummer is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"familie-muziek-01.mp3"}},
           {v:"Wat gebeurt er in dit filmpje?", a:"— nog invullen —", teVullen:true, media:{soort:"video", bron:"familie-video-01.mp4"}}
@@ -963,16 +981,16 @@ const PAKKETTEN = {
         type: "open", tijd: 15, punten: 1, teamModus: "individueel",
         uitleg: "Korte vragen. Ieder voor zich, één punt per stuk.",
         vragen: [
-          {v:"Welk land won het WK voetbal 2026?", a:"Spanje"},
-          {v:"In welk land waren de Winterspelen?", a:"Italië"},
-          {v:"Wie is minister-president van Nederland?", a:"Rob Jetten"},
+          {v:"Welk land verloor de WK-finale?", a:"Argentinië"},
+          {v:"In welke maand was die finale?", a:"Juli"},
           {v:"Hoeveel poten heeft een spin?", a:"Acht"},
           {v:"Wat is het grootste meer van Nederland?", a:"Het IJsselmeer"},
           {v:"Wat is de hoofdstad van België?", a:"Brussel"},
           {v:"Hoeveel is 7 × 8?", a:"56"},
           {v:"In welk seizoen vallen de blaadjes van de bomen?", a:"De herfst"},
           {v:"Hoeveel maanden heeft een jaar?", a:"Twaalf"},
-          {v:"Welke kleuren heeft de Nederlandse vlag?", a:"Rood, wit en blauw"}
+          {v:"Welke kleuren heeft de Nederlandse vlag?", a:"Rood, wit en blauw"},
+          {v:"Hoeveel dagen zitten er in een week?", a:"Zeven"}
         ]
       }
     ]

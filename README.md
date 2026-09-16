@@ -20,24 +20,35 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Rondes | Vragen |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 13 | 96 |
+| Blackjacks 2026 — Het Jaaroverzicht | 14 | 105 |
 | Familie Proefronde 2026 | 7 | 50 |
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
 
-### Wat er nog ingevuld moet worden
+### Rondes over de groep zelf
 
-Drie rondes gaan over de groep zelf en staan klaar als sjabloon:
+Twee rondes zijn **al gevuld** met de echte cijfers uit
+[`resolution-recap`](https://github.com/Cas-Boots/resolution-recap), overgenomen
+uit de dagelijkse back-up van 16 september:
+
+- **Onze Sportcompetitie** — wie het vaakst sportte, wie nooit in de sportschool
+  kwam, welke sport iedereen precies één keer deed, wie zijn jaardoel al haalde.
+- **Taart & Verre Landen** — de taartteller, de landenteller, de drukste
+  taartdag van het jaar.
+
+Twee rondes wachten nog op gegevens:
 
 - **De Voorspellingen** — de elf à twaalf voorspellingen van januari.
-- **De WK-poule** — te vullen met de export uit `blackjacks-cup`.
-- **Taart, Sport & Verre Landen** — uit `blackjacks-resolution`.
+- **De WK-poule** — te vullen met de export uit `blackjacks-cup` (`/api/quiz-export`).
 
-Daarnaast is er een lege ronde **Oktober tot december 2026**, want die maanden
-hadden bij het schrijven nog niet plaatsgevonden.
+Daarnaast is er een lege ronde **Oktober tot december**, want die maanden hadden
+bij het schrijven nog niet plaatsgevonden.
 
-Die vragen dragen de markering `teVullen`. Je ziet ze terug als een rood
+Werk je de cijfers bij? Draai dan de analyse opnieuw tegen de nieuwste back-up in
+`resolution-recap/backups/` en pas de antwoorden aan.
+
+De openstaande vragen dragen de markering `teVullen`. Je ziet ze terug als een rood
 label in de vragenkiezer, en de controle vooraf telt hoeveel gekozen vragen
 nog een antwoord missen — zodat je niet per ongeluk met een onbeantwoordbare
 vraag de avond in gaat.
