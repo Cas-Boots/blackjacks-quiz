@@ -475,6 +475,7 @@ input[type=file]{display:none}
   display:grid;place-items:center;font-size:.72rem;color:transparent;
 }
 .is-aan > .vinkje{background:var(--goud);border-color:var(--goud);color:var(--inkt)}
+.merkje.is-open{color:var(--rood-licht);border-color:var(--rood)}
 .kiesvraag .merkje{
   font-family:var(--mono);font-size:.66rem;color:var(--goud-diep);
   border:1px solid var(--goud-diep);border-radius:4px;padding:0 .3rem;
@@ -612,165 +613,222 @@ input[type=file]{display:none}
 const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 300'%3E%3Crect width='480' height='300' fill='rgb(13,30,24)'/%3E%3Ctext x='240' y='128' font-family='Georgia,serif' font-size='110' fill='rgb(201,162,39)' text-anchor='middle'%3E%E2%99%A0%3C/text%3E%3Ctext x='240' y='210' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='rgb(216,210,194)' text-anchor='middle'%3EVoorbeeldafbeelding%3C/text%3E%3Ctext x='240' y='245' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='rgb(138,160,150)' text-anchor='middle'%3EZo verschijnt een beeldvraag op het scherm%3C/text%3E%3C/svg%3E";
 
 const PAKKETTEN = {
-  blackjacks: {
-    naam: "Blackjacks — Oud & Nieuw",
-    beschrijving: "De hoofdquiz. Acht rondes, wisselende teams, oplopende moeilijkheid. Reken op zo’n 75 minuten.",
+  jaar2026: {
+    naam: "Blackjacks 2026 — Het Jaaroverzicht",
+    beschrijving: "De hoofdquiz. Alles draait om het afgelopen jaar en om wat 2027 gaat brengen, met vier rondes over de Blackjacks zelf.",
     rondes: [
       {
-        naam: "Waar of Niet Waar",
+        naam: "Waar of Niet Waar — 2026",
         suit: "♠", thema: "Warming-up",
         type: "waarnietwaar", tijd: 20, punten: 1, teamModus: "individueel",
         uitleg: "Iedereen voor zich. Opschrijven: waar of niet waar. Eén punt per goed antwoord.",
         vragen: [
-          {v:"Een jaar op Venus duurt korter dan een dag op Venus.", goed:true,
-           toelichting:"Venus draait extreem langzaam om zijn as: één omwenteling duurt 243 aardse dagen, één rondje om de zon 225."},
-          {v:"De Chinese Muur is met het blote oog vanuit de ruimte te zien.", goed:false,
-           toelichting:"Hardnekkige mythe. De muur is smal en heeft dezelfde kleur als het landschap eromheen."},
-          {v:"Bananen zijn botanisch gezien bessen.", goed:true,
-           toelichting:"Wel waar. Aardbeien zijn dat trouwens níet."},
-          {v:"Nederland telt meer fietsen dan inwoners.", goed:true,
-           toelichting:"Ruim 23 miljoen fietsen tegenover zo’n 18 miljoen inwoners."},
-          {v:"Goudvissen hebben een geheugen van drie seconden.", goed:false,
-           toelichting:"Ze onthouden dingen maandenlang en zijn zelfs te trainen."},
-          {v:"Het Wilhelmus is het oudste volkslied ter wereld.", goed:true,
-           toelichting:"De tekst stamt uit de 16e eeuw — ouder dan elk ander volkslied dat nog in gebruik is."},
-          {v:"Napoleon Bonaparte was uitzonderlijk klein voor zijn tijd.", goed:false,
-           toelichting:"Hij was ongeveer 1,68 m: doodnormaal voor een Fransman rond 1800. De mythe komt uit Britse spotprenten."},
-          {v:"Er zijn meer mogelijke schaakpartijen dan atomen in het waarneembare heelal.", goed:true,
-           toelichting:"Het getal van Shannon: ongeveer 10^120 partijen tegenover zo’n 10^80 atomen."}
+          {v:"Spanje won in 2026 het WK voetbal.", goed:true,
+           toelichting:"In de finale van 19 juli werd Argentinië na verlenging met 1-0 verslagen."},
+          {v:"Nederland werd op het WK van 2026 uitgeschakeld door Marokko.", goed:true,
+           toelichting:"Het bleef 1-1, waarna Oranje de strafschoppenserie verloor."},
+          {v:"De Olympische Winterspelen van 2026 waren in Italië.", goed:true,
+           toelichting:"Milaan en Cortina d’Ampezzo, van 6 tot en met 22 februari."},
+          {v:"Bulgarije won in 2026 voor het eerst het Eurovisie Songfestival.", goed:true,
+           toelichting:"Dara won met Bangaranga, en pakte zowel de jury- als de publieksstemming."},
+          {v:"Tadej Pogačar won in 2026 zijn vijfde Tour de France.", goed:true,
+           toelichting:"Daarmee evenaarde hij het record van Merckx, Hinault, Anquetil en Indurain."},
+          {v:"De Formule 1 reed in 2026 met vrijwel dezelfde reglementen als het jaar ervoor.", goed:false,
+           toelichting:"Integendeel: 2026 bracht compleet nieuwe motor-, chassis- en brandstofregels, met veel meer nadruk op elektrisch vermogen."},
+          {v:"Het kabinet dat in februari 2026 aantrad heeft een meerderheid in de Tweede Kamer.", goed:false,
+           toelichting:"Het kabinet-Jetten is een minderheidskabinet: D66, VVD en CDA hebben samen 66 van de 150 zetels."},
+          {v:"Noorwegen won het medailleklassement van de Winterspelen van 2026.", goed:true,
+           toelichting:"Achttien keer goud en 41 medailles in totaal."}
         ]
       },
       {
-        naam: "Emoji Filmquiz",
-        suit: "♥", thema: "Beeldronde",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Welke film wordt hier uitgebeeld? Twee punten per goed antwoord.",
+        naam: "Sport 2026",
+        suit: "♥", thema: "Het jaar op het veld, de piste en de weg",
+        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Het sportjaar 2026 in acht vragen.",
         vragen: [
-          {emoji:"🦁 👑", v:"Welke film?", a:"The Lion King"},
-          {emoji:"🚢 🧊 💔", v:"Welke film?", a:"Titanic"},
-          {emoji:"🤡 🎈 🩸", v:"Welke film?", a:"It"},
-          {emoji:"👨‍🚀 🥔 🔴", v:"Welke film?", a:"The Martian"},
-          {emoji:"🐠 🔍 🌊", v:"Welke film?", a:"Finding Nemo"},
-          {emoji:"🧙‍♂️ 💍 🌋", v:"Welke film?", a:"The Lord of the Rings"},
-          {emoji:"🦖 🏝️ 🧬", v:"Welke film?", a:"Jurassic Park"},
-          {emoji:"🥊 🪜 🇺🇸", v:"Welke film?", a:"Rocky"}
+          {v:"Welk land werd in 2026 wereldkampioen voetbal?", a:"Spanje",
+           toelichting:"Hun tweede wereldtitel, na 2010."},
+          {v:"Welk land verloor de WK-finale van 2026?", a:"Argentinië"},
+          {v:"In welke drie landen werd het WK van 2026 gespeeld?", a:"De Verenigde Staten, Canada en Mexico"},
+          {v:"Door welk land werd Oranje op het WK uitgeschakeld?", a:"Marokko — na strafschoppen"},
+          {v:"In welke twee Italiaanse plaatsen waren de Olympische Winterspelen van 2026?", a:"Milaan en Cortina d’Ampezzo"},
+          {v:"Wie won in 2026 de Tour de France?", a:"Tadej Pogačar"},
+          {v:"Voor de hoeveelste keer won hij de Tour, en welk record evenaarde hij daarmee?", a:"Voor de vijfde keer — het record van Merckx, Hinault, Anquetil en Indurain"},
+          {v:"Wie eindigde in de Tour van 2026 als tweede, op ruim zes minuten?", a:"Remco Evenepoel"}
         ]
       },
       {
-        naam: "Dichtstbij Wint",
+        naam: "Dichtstbij Wint — 2026 in cijfers",
         suit: "♦", thema: "Cijferronde",
         type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Elk team noemt één getal. Het dichtstbijzijnde team pakt 3 punten — precies goed levert 5 punten op.",
+        uitleg: "Elk team noemt één getal. Het dichtstbijzijnde team pakt 3 punten — precies goed levert er 5 op.",
         vragen: [
-          {v:"Hoe hoog is de Eiffeltoren, inclusief antennes?", getal:330, eenheid:"meter"},
-          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"},
-          {v:"In welk jaar werd de euro als contant geld ingevoerd in Nederland?", getal:2002, eenheid:""},
-          {v:"Hoeveel toetsen heeft een standaard piano?", getal:88, eenheid:"toetsen"},
-          {v:"Hoeveel seconden zitten er in één etmaal?", getal:86400, eenheid:"seconden"}
+          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden"},
+          {v:"En hoeveel woningbranden waren dat diezelfde nacht?", getal:228, eenheid:"woningbranden"},
+          {v:"Met hoeveel punten won Bulgarije het Songfestival van 2026?", getal:516, eenheid:"punten"},
+          {v:"Hoeveel gouden medailles won Noorwegen op de Winterspelen van 2026?", getal:18, eenheid:"keer goud"},
+          {v:"Hoeveel gouden medailles won Nederland daar?", getal:10, eenheid:"keer goud"},
+          {v:"Hoeveel van de 150 Tweede Kamerzetels heeft het kabinet-Jetten achter zich?", getal:66, eenheid:"zetels"},
+          {v:"De hoeveelste editie van het Eurovisie Songfestival was die van 2026?", getal:70, eenheid:"e editie"}
         ]
       },
       {
-        naam: "Algemene Kennis",
+        naam: "Nederland in 2026",
         suit: "♣", thema: "Meerkeuze",
         type: "meerkeuze", tijd: 25, punten: 2, teamModus: "individueel",
         uitleg: "Weer ieder voor zich. Schrijf A, B, C of D op.",
         vragen: [
-          {v:"Wat is de hoofdstad van Australië?", opties:["Sydney","Melbourne","Canberra","Perth"], goed:2},
-          {v:"Hoeveel spelers van één team staan er bij volleybal op het veld?", opties:["Vijf","Zes","Zeven","Elf"], goed:1},
-          {v:"Welke planeet heeft de meeste manen?", opties:["Jupiter","Saturnus","Uranus","Neptunus"], goed:1,
-           toelichting:"Saturnus ging Jupiter in 2023 voorbij en staat inmiddels op ruim 270 bevestigde manen."},
-          {v:"Wie schreef Het Achterhuis?", opties:["Anne Frank","Harry Mulisch","Annie M.G. Schmidt","Multatuli"], goed:0},
-          {v:"Welke zee ligt tussen Italië en Kroatië?", opties:["Egeïsche Zee","Tyrreense Zee","Adriatische Zee","Ionische Zee"], goed:2},
-          {v:"Waar staat de merknaam Wi-Fi officieel voor?", opties:["Wireless Fidelity","Wide Frequency","Nergens voor — het is puur een merknaam","Wireless Field"], goed:2,
-           toelichting:"Verzonnen door een marketingbureau. Wireless Fidelity is er later aan vastgeplakt."},
-          {v:"Hoeveel strepen telt de vlag van de Verenigde Staten?", opties:["Twaalf","Dertien","Vijftien","Vijftig"], goed:1,
-           toelichting:"Dertien strepen voor de oorspronkelijke kolonies, vijftig sterren voor de huidige staten."},
-          {v:"Welk element heeft het symbool W?", opties:["Wolfraam","Waterstof","Wismut","Wolfaniet"], goed:0,
-           toelichting:"Van het Duitse Wolfram. Waterstof is H."}
+          {v:"Wie werd in februari 2026 minister-president van Nederland?",
+           opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
+           toelichting:"Jetten (D66) werd op 23 februari beëdigd en hield twee dagen later de regeringsverklaring."},
+          {v:"Uit welke partijen bestaat het kabinet-Jetten?",
+           opties:["D66, VVD en CDA","D66, GroenLinks-PvdA en CDA","VVD, CDA en BBB","D66, VVD en JA21"], goed:0},
+          {v:"Wanneer werd dat kabinet beëdigd?",
+           opties:["29 oktober 2025","30 januari 2026","23 februari 2026","1 juli 2026"], goed:2},
+          {v:"Wat voor kabinet is het?",
+           opties:["Een meerderheidskabinet","Een zakenkabinet","Een demissionair kabinet","Een minderheidskabinet"], goed:3},
+          {v:"Waardoor lagen het openbaar vervoer en het vliegverkeer begin 2026 grotendeels stil?",
+           opties:["Een landelijke staking","Overvloedige sneeuwval","Een computerstoring","Dichte mist"], goed:1},
+          {v:"Wat gebeurde er op 1 juli 2026 met de AOW?",
+           opties:["Die ging omhoog","Die ging omlaag","Die werd bevroren","De leeftijd ging omhoog"], goed:0},
+          {v:"Wanneer waren de Tweede Kamerverkiezingen die tot dit kabinet leidden?",
+           opties:["Oktober 2025","Maart 2026","November 2026","Juni 2025"], goed:0},
+          {v:"In welk land werd het WK voetbal van 2026 juist NIET gespeeld?",
+           opties:["Canada","Mexico","Brazilië","De Verenigde Staten"], goed:2}
         ]
       },
       {
-        naam: "Oud & Nieuw Special",
-        suit: "♠", thema: "Tradities",
+        naam: "Wereld & Cultuur 2026",
+        suit: "♠", thema: "Buiten het veld",
         type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Nieuwe teams, nieuwe kansen. Alles over de jaarwisseling.",
+        uitleg: "Nieuwe teams, nieuwe kansen. Het jaar buiten de sport om.",
         vragen: [
-          {v:"In welke stad valt om middernacht de beroemde ‘ball drop’?", a:"New York — Times Square"},
-          {v:"Hoe heet oudejaarsavond in Schotland?", a:"Hogmanay"},
-          {v:"In Spanje eet men op de twaalf klokslagen twaalf van welke vrucht?", a:"Druiven",
-           toelichting:"Las doce uvas de la suerte — twaalf gelukdruiven, één per klokslag."},
-          {v:"Welk lied wordt in de Engelstalige wereld traditioneel om middernacht gezongen?", a:"Auld Lang Syne"},
-          {v:"Welk bewoond land viert als eerste ter wereld nieuwjaar?", a:"Kiribati",
-           toelichting:"Kiritimati ligt op UTC+14, de vroegste tijdzone die er bestaat."},
-          {v:"Wat gooien Denen op oudjaarsavond stuk tegen de voordeur van vrienden?", a:"Serviesgoed — borden",
-           toelichting:"Hoe groter de schervenberg op je stoep, hoe meer vrienden je hebt."},
-          {v:"Welke Nederlandse badplaats staat bekend om de grootste nieuwjaarsduik?", a:"Scheveningen"},
-          {v:"Welk dier staat in de Chinese kalender voor 2026?", a:"Het paard",
-           toelichting:"Om precies te zijn: het Vuurpaard."}
+          {v:"Welk land won in 2026 voor het eerst in de geschiedenis het Eurovisie Songfestival?", a:"Bulgarije"},
+          {v:"Met welk nummer, en van welke artiest?", a:"Bangaranga — Dara"},
+          {v:"Welke Noorse langlaufer brak op de Winterspelen van 2026 het record voor de meeste gouden medailles?", a:"Johannes Høsflot Klæbo"},
+          {v:"Welke grote verandering kreeg de Formule 1 in 2026?", a:"Compleet nieuwe reglementen, met veel meer nadruk op elektrisch vermogen",
+           toelichting:"Coureurs moesten opeens hun accu-inzet over de ronde verdelen; wie te vroeg leeg was, was een zittende eend."},
+          {v:"Welke negentienjarige coureur verraste in 2026 door lange tijd het Formule 1-kampioenschap aan te voeren?", a:"Kimi Antonelli"},
+          {v:"Welk stadion was in 2026 het toneel van de WK-finale?", a:"MetLife Stadium, in New Jersey"}
         ]
       },
       {
-        naam: "Songteksten",
-        suit: "♥", thema: "Muziek zonder muziek",
-        type: "open", tijd: 20, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "De quizmaster leest de regel voor. Welk nummer is dit — en van wie?",
+        naam: "De Voorspellingen",
+        suit: "♥", thema: "Wat jullie in januari dachten",
+        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        teVullen: true,
+        uitleg: "Aan het begin van 2026 deed iedereen elf à twaalf voorspellingen — Cas incluis. Nu de afrekening.",
         vragen: [
-          {lyric:"Is this the real life? Is this just fantasy?", v:"Welk nummer, en van wie?", a:"Bohemian Rhapsody — Queen"},
-          {lyric:"Hello, is it me you’re looking for?", v:"Welk nummer, en van wie?", a:"Hello — Lionel Richie"},
-          {lyric:"Never gonna give you up, never gonna let you down", v:"Welk nummer, en van wie?", a:"Never Gonna Give You Up — Rick Astley"},
-          {lyric:"Het is een nacht die je normaal alleen in films ziet", v:"Welk nummer, en van wie?", a:"Het Is Een Nacht (Levensecht) — Guus Meeuwis"},
-          {lyric:"Zij gelooft in mij, zij vecht voor mij", v:"Welk nummer, en van wie?", a:"Zij Gelooft In Mij — André Hazes"},
-          {lyric:"I got a feeling that tonight’s gonna be a good night", v:"Welk nummer, en van wie?", a:"I Gotta Feeling — The Black Eyed Peas"}
+          {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true},
+          {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie voorspelde aan het begin van het jaar al wie het WK zou winnen?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true},
+          {v:"Hoeveel van de voorspellingen zijn er in totaal uitgekomen?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke voorspelling deed iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true},
+          {v:"Wiens voorspelling van vorig jaar verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true}
         ]
       },
       {
-        naam: "Muziekronde",
-        suit: "♦", thema: "Intro’s raden — eigen bestanden",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        naam: "De WK-poule",
+        suit: "♦", thema: "Blackjacks Cup",
+        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        teVullen: true,
+        uitleg: "Onze eigen poule rond het WK. Alles wat er in juli nog toe deed.",
+        vragen: [
+          {v:"Wie won uiteindelijk de Blackjacks-poule?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie eindigde er als laatste?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie had Spanje als wereldkampioen aangewezen?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie zat er het dichtst bij met de Gouden Schoen?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie zette zijn of haar joker op de slechtste wedstrijd?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke wedstrijd voorspelde vrijwel niemand goed?", a:"— nog invullen —", teVullen:true},
+          {v:"Hoeveel punten scoorde de winnaar in totaal?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie leidde het langst de ranglijst zonder te winnen?", a:"— nog invullen —", teVullen:true}
+        ]
+      },
+      {
+        naam: "Taart, Sport & Verre Landen",
+        suit: "♣", thema: "Blackjacks Resolution",
+        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        teVullen: true,
+        uitleg: "Het hele jaar bijgehouden: de taartcompetitie, de sportcompetitie en de landen die we aandeden.",
+        vragen: [
+          {v:"Wie won de taartcompetitie van 2026?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie won de sportcompetitie?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie bezocht dit jaar de meeste landen?", a:"— nog invullen —", teVullen:true},
+          {v:"Hoeveel landen bezochten we samen in 2026?", a:"— nog invullen —", teVullen:true},
+          {v:"Welk land werd door meer dan één van ons bezocht?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie kwam het hele jaar niet verder dan één land?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke taart kreeg de hoogste beoordeling?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie bakte er precies nul taarten?", a:"— nog invullen —", teVullen:true}
+        ]
+      },
+      {
+        naam: "Jullie Jaar in Beeld",
+        suit: "♥", thema: "Eigen foto’s, video’s en muziek",
+        type: "open", tijd: 35, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
-        uitleg: "Laad je eigen muziekfragmenten in op het startscherm. De quizmaster drukt op afspelen; de teams raden het nummer.",
-        vragen: [
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-01.mp3", bijschrift:"Fragment 1"}},
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-02.mp3", bijschrift:"Fragment 2"}},
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-03.mp3", bijschrift:"Fragment 3"}},
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-04.mp3", bijschrift:"Fragment 4"}},
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-05.mp3", bijschrift:"Fragment 5"}},
-          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-06.mp3", bijschrift:"Fragment 6"}}
-        ]
-      },
-      {
-        naam: "Beeld & Video",
-        suit: "♣", thema: "Eigen foto’s en filmpjes",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
-        optioneel: true,
-        uitleg: "Laad je eigen foto’s en video’s in op het startscherm. Denk aan vakantiekiekjes, jeugdfoto’s of een fragment uit een serie.",
+        uitleg: "Foto’s en filmpjes uit 2026. Laad ze in op het startscherm en vervang deze vragen door je eigen tekst.",
         vragen: [
           {v:"Zo ziet een beeldvraag eruit op het scherm.", a:"Dit is de ingebouwde voorbeeldafbeelding",
            media:{soort:"beeld", bron:DEMO_BEELD, bijschrift:"Ingebouwd voorbeeld — vervang door je eigen foto"},
            toelichting:"Deze vraag heeft geen eigen bestand nodig; de afbeelding zit in de quiz zelf."},
-          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-01.jpg"}},
-          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-02.jpg"}},
-          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-03.jpg"}},
-          {v:"Uit welke film of serie komt dit fragment?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"video-01.mp4"}},
-          {v:"Uit welke film of serie komt dit fragment?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"video-02.mp4"}}
+          {v:"Waar en wanneer is deze foto genomen?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"2026-01.jpg"}},
+          {v:"Wie staat er op deze foto, en wat gebeurde er die dag?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"2026-02.jpg"}},
+          {v:"Welk moment uit 2026 zie je hier?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"2026-03.jpg"}},
+          {v:"Wat gebeurt er in dit filmpje?", a:"— nog invullen —", teVullen:true, media:{soort:"video", bron:"2026-video-01.mp4"}},
+          {v:"Welk nummer uit 2026 is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"2026-muziek-01.mp3"}},
+          {v:"En dit nummer?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"2026-muziek-02.mp3"}}
         ]
       },
       {
-        naam: "Bliksemronde",
-        suit: "♦", thema: "Tien seconden per vraag",
+        naam: "2027 — Wat Komt Er Aan",
+        suit: "♦", thema: "Vooruitkijken",
+        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "Genoeg teruggekeken. Wat staat er volgend jaar op de rol?",
+        vragen: [
+          {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
+           toelichting:"De eerste keer dat het toernooi naar Zuid-Amerika komt."},
+          {v:"Welk land organiseert in 2027 het WK rugby?", a:"Australië"},
+          {v:"Wat is er op 2 augustus 2027 aan de hemel te zien?", a:"Een totale zonsverduistering",
+           toelichting:"Ruim zes minuten totaliteit — een van de langste van deze eeuw — onder meer boven Noord-Afrika en Egypte."},
+          {v:"In welke maand van 2027 zijn de Franse presidentsverkiezingen?", a:"April"},
+          {v:"Welke drie landen organiseren samen het WK cricket van 2027?", a:"Zuid-Afrika, Zimbabwe en Namibië"},
+          {v:"Welke twee Europese landen houden in 2027 landelijke verkiezingen?", a:"Italië en Polen"}
+        ]
+      },
+      {
+        naam: "Oktober tot december 2026",
+        suit: "♠", thema: "De laatste maanden — zelf aanvullen",
+        type: "open", tijd: 25, punten: 2, teamModus: "individueel",
+        optioneel: true, teVullen: true,
+        uitleg: "De staart van het jaar, die er bij het maken van deze quiz nog niet was. Vul deze ronde in december aan.",
+        vragen: [
+          {v:"Wie werd wereldkampioen Formule 1 in 2026?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
+          {v:"Welk nummer stond eind 2026 bovenaan?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat gebeurde er in december dat niemand zag aankomen?", a:"— nog invullen —", teVullen:true},
+          {v:"Welke film moest je dit najaar gezien hebben?", a:"— nog invullen —", teVullen:true},
+          {v:"Wat stond er dit jaar in de Top 2000 op nummer één?", a:"— nog invullen —", teVullen:true}
+        ]
+      },
+      {
+        naam: "Bliksemronde 2026",
+        suit: "♣", thema: "Tien seconden per vraag",
         type: "open", tijd: 10, punten: 1, teamModus: "individueel",
         uitleg: "Tien vragen, tien seconden elk. Ieder voor zich, één punt per stuk. Tempo!",
         vragen: [
-          {v:"Hoeveel kleuren heeft een regenboog traditioneel?", a:"Zeven"},
-          {v:"Wat is de hoofdstad van Noorwegen?", a:"Oslo"},
-          {v:"Hoeveel minuten duurt één helft van een voetbalwedstrijd?", a:"45 minuten"},
-          {v:"Welk landdier is het snelst?", a:"De jachtluipaard"},
-          {v:"Hoeveel letters telt het Nederlandse alfabet?", a:"26"},
-          {v:"In welke provincie ligt Maastricht?", a:"Limburg"},
-          {v:"Wat is de chemische formule van water?", a:"H₂O"},
-          {v:"Hoeveel ogen heeft een dobbelsteen in totaal?", a:"21"},
-          {v:"Welke kleur krijg je van blauw en geel?", a:"Groen"},
-          {v:"Hoeveel kaarten zitten er in een kaartspel zonder jokers?", a:"52"}
+          {v:"Welk land won het WK voetbal 2026?", a:"Spanje"},
+          {v:"In welke maand was de WK-finale?", a:"Juli"},
+          {v:"Welk land won het Songfestival?", a:"Bulgarije"},
+          {v:"In welk land waren de Winterspelen?", a:"Italië"},
+          {v:"Wie won de Tour de France?", a:"Tadej Pogačar"},
+          {v:"Wie is sinds februari minister-president?", a:"Rob Jetten"},
+          {v:"Van welke partij is hij?", a:"D66"},
+          {v:"Welk land won het medailleklassement van de Winterspelen?", a:"Noorwegen"},
+          {v:"Welke sport kreeg in 2026 compleet nieuwe reglementen?", a:"De Formule 1"},
+          {v:"In welk werelddeel is in 2027 het WK voor vrouwen?", a:"Zuid-Amerika"}
         ]
       },
       {
@@ -779,20 +837,20 @@ const PAKKETTEN = {
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
         uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit met de knoppen.",
         vragen: [
-          {v:"Wie van de vijf komt het vaakst te laat?", a:"De groep beslist"},
-          {v:"Wie van de vijf heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
-          {v:"Wie van de vijf zou het langst overleven op een onbewoond eiland?", a:"De groep beslist"},
-          {v:"Wie van de vijf heeft de meeste foto’s op de telefoon staan?", a:"De groep beslist"},
-          {v:"Wie van de vijf kent de meeste songteksten uit het hoofd?", a:"De groep beslist"},
-          {v:"Wie van de vijf wordt als eerste miljonair?", a:"De groep beslist"}
+          {v:"Wie van de vijf heeft 2026 het best gebruikt?", a:"De groep beslist"},
+          {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},
+          {v:"Wie heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
+          {v:"Wie gaat 2027 winnen?", a:"De groep beslist"},
+          {v:"Wie belt er in 2027 als eerste met groot nieuws?", a:"De groep beslist"},
+          {v:"Wie verbreekt zijn goede voornemen het snelst?", a:"De groep beslist"}
         ]
       }
     ]
   },
 
   familie: {
-    naam: "Familie Proefronde",
-    beschrijving: "De generale repetitie. Korter, toegankelijker, geschikt voor alle leeftijden. Vink hieronder aan welke vragen je gebruikt.",
+    naam: "Familie Proefronde 2026",
+    beschrijving: "De generale repetitie. Zelfde jaar, makkelijkere vragen, geschikt voor alle leeftijden. Vink hieronder aan wat je gebruikt.",
     rondes: [
       {
         naam: "Waar of Niet Waar",
@@ -800,19 +858,73 @@ const PAKKETTEN = {
         type: "waarnietwaar", tijd: 25, punten: 1, teamModus: "individueel",
         uitleg: "Ieder voor zich. Waar of niet waar — één punt per goed antwoord.",
         vragen: [
+          {v:"Spanje won in 2026 het WK voetbal.", goed:true},
+          {v:"Nederland won in 2026 het WK voetbal.", goed:false,
+           toelichting:"Oranje werd uitgeschakeld door Marokko, na strafschoppen."},
+          {v:"De Olympische Winterspelen van 2026 waren in Italië.", goed:true},
+          {v:"Nederland won op die Winterspelen tien gouden medailles.", goed:true},
+          {v:"Rob Jetten werd in 2026 minister-president.", goed:true},
+          {v:"Het WK voetbal van 2026 werd in Europa gespeeld.", goed:false,
+           toelichting:"In de Verenigde Staten, Canada en Mexico."},
           {v:"Een olifant is het enige dier dat niet kan springen.", goed:true},
-          {v:"Honing kan nooit bederven.", goed:true,
-           toelichting:"In Egyptische graven is honing gevonden die na 3000 jaar nog eetbaar was."},
-          {v:"Kameleons veranderen van kleur om zich te camoufleren.", goed:false,
-           toelichting:"Ze doen het vooral om te communiceren en hun temperatuur te regelen."},
-          {v:"Een struisvogel steekt bij gevaar zijn kop in het zand.", goed:false,
-           toelichting:"Ze gaan plat op de grond liggen. Of ze rennen — tot 70 km/u."},
-          {v:"Een groot deel van Nederland ligt onder zeeniveau.", goed:true},
-          {v:"De zon is een ster.", goed:true},
-          {v:"Een spin is een insect.", goed:false,
-           toelichting:"Spinnen zijn spinachtigen: acht poten, twee lichaamsdelen. Insecten hebben er zes en drie."},
-          {v:"IJsberen zijn linkshandig.", goed:false,
-           toelichting:"Ook zo’n taaie mythe. Ze gebruiken beide voorpoten even goed."}
+          {v:"Honing kan nooit bederven.", goed:true}
+        ]
+      },
+      {
+        naam: "Sport van het Jaar",
+        suit: "♥", thema: "Voor iedereen te doen",
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Schrijf A, B, C of D op.",
+        vragen: [
+          {v:"Welk land won het WK voetbal van 2026?",
+           opties:["Argentinië","Frankrijk","Spanje","Nederland"], goed:2},
+          {v:"In welk land waren de Olympische Winterspelen van 2026?",
+           opties:["Noorwegen","Italië","Frankrijk","Zwitserland"], goed:1},
+          {v:"Welk land won daar de meeste medailles?",
+           opties:["Noorwegen","Nederland","Italië","De Verenigde Staten"], goed:0},
+          {v:"Wie won in 2026 de Tour de France?",
+           opties:["Remco Evenepoel","Mathieu van der Poel","Tadej Pogačar","Jonas Vingegaard"], goed:2},
+          {v:"Op welke sport is Nederland op de Winterspelen traditioneel het sterkst?",
+           opties:["Schaatsen","Skiën","Bobsleeën","Curling"], goed:0},
+          {v:"Hoeveel landen organiseerden samen het WK voetbal van 2026?",
+           opties:["Eén","Twee","Drie","Vier"], goed:2}
+        ]
+      },
+      {
+        naam: "Dichtstbij Wint",
+        suit: "♦", thema: "Cijferronde",
+        type: "dichtstbij", tijd: 40, punten: 3, teamModus: "teams", aantalTeams: 2,
+        uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
+        vragen: [
+          {v:"Hoeveel gouden medailles won Nederland op de Winterspelen van 2026?", getal:10, eenheid:"keer goud"},
+          {v:"Hoeveel gouden medailles won Noorwegen daar?", getal:18, eenheid:"keer goud"},
+          {v:"Hoeveel dagen telt een schrikkeljaar?", getal:366, eenheid:"dagen"},
+          {v:"Hoeveel provincies heeft Nederland?", getal:12, eenheid:"provincies"},
+          {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"}
+        ]
+      },
+      {
+        naam: "Nederland & de Wereld",
+        suit: "♣", thema: "Meerkeuze",
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "individueel",
+        uitleg: "Ieder voor zich. Schrijf A, B, C of D op.",
+        vragen: [
+          {v:"Wie werd in 2026 minister-president van Nederland?",
+           opties:["Rob Jetten","Henri Bontenbal","Dilan Yeşilgöz","Caroline van der Plas"], goed:0},
+          {v:"Welk land won in 2026 het Eurovisie Songfestival?",
+           opties:["Zweden","Bulgarije","Italië","Nederland"], goed:1},
+          {v:"Wat is de hoofdstad van Nederland?",
+           opties:["Den Haag","Rotterdam","Amsterdam","Utrecht"], goed:2},
+          {v:"Welk dier is het grootste ter wereld?",
+           opties:["De olifant","De blauwe vinvis","De giraf","De witte haai"], goed:1},
+          {v:"Welke planeet staat het dichtst bij de zon?",
+           opties:["Venus","Mars","Aarde","Mercurius"], goed:3},
+          {v:"Wie schilderde De Nachtwacht?",
+           opties:["Vincent van Gogh","Rembrandt van Rijn","Johannes Vermeer","Piet Mondriaan"], goed:1},
+          {v:"Wat eet een reuzenpanda vooral?",
+           opties:["Bamboe","Vis","Insecten","Vlees"], goed:0},
+          {v:"In welk werelddeel ligt Egypte?",
+           opties:["Azië","Afrika","Europa","Zuid-Amerika"], goed:1}
         ]
       },
       {
@@ -832,48 +944,17 @@ const PAKKETTEN = {
         ]
       },
       {
-        naam: "Dichtstbij Wint",
-        suit: "♦", thema: "Cijferronde",
-        type: "dichtstbij", tijd: 40, punten: 3, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
-        vragen: [
-          {v:"Hoeveel dagen telt een schrikkeljaar?", getal:366, eenheid:"dagen"},
-          {v:"Hoeveel tanden en kiezen heeft een volwassen mens, verstandskiezen meegerekend?", getal:32, eenheid:"stuks"},
-          {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"},
-          {v:"Hoe oud kan een reuzenschildpad ongeveer worden?", getal:150, eenheid:"jaar"},
-          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"}
-        ]
-      },
-      {
-        naam: "Algemene Kennis",
-        suit: "♣", thema: "Meerkeuze",
-        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "individueel",
-        uitleg: "Ieder voor zich. Schrijf A, B, C of D op.",
-        vragen: [
-          {v:"Wat is de hoofdstad van Nederland?", opties:["Den Haag","Amsterdam","Rotterdam","Utrecht"], goed:1},
-          {v:"Welk dier is het grootste ter wereld?", opties:["De olifant","De giraf","De blauwe vinvis","De witte haai"], goed:2},
-          {v:"Welke planeet staat het dichtst bij de zon?", opties:["Venus","Mars","Aarde","Mercurius"], goed:3},
-          {v:"Wie schilderde De Nachtwacht?", opties:["Vincent van Gogh","Rembrandt van Rijn","Johannes Vermeer","Piet Mondriaan"], goed:1},
-          {v:"Wat eet een reuzenpanda vooral?", opties:["Bamboe","Vis","Insecten","Vlees"], goed:0},
-          {v:"Hoeveel snaren heeft een gitaar meestal?", opties:["Vier","Vijf","Zes","Zeven"], goed:2},
-          {v:"In welk werelddeel ligt Egypte?", opties:["Azië","Afrika","Europa","Zuid-Amerika"], goed:1},
-          {v:"Hoeveel kleuren heeft de Nederlandse vlag?", opties:["Twee","Vier","Drie","Eén"], goed:2},
-          {v:"Welk land is het grootste ter wereld?", opties:["China","Canada","Rusland","De Verenigde Staten"], goed:2},
-          {v:"Hoeveel poten heeft een kever?", opties:["Vier","Zes","Acht","Tien"], goed:1}
-        ]
-      },
-      {
-        naam: "Beeld & Muziek",
-        suit: "♥", thema: "Eigen familiefoto’s",
+        naam: "Ons Jaar in Beeld",
+        suit: "♦", thema: "Eigen familiefoto’s",
         type: "open", tijd: 40, punten: 2, teamModus: "teams", aantalTeams: 2,
-        optioneel: true,
-        uitleg: "Laad je eigen foto’s, filmpjes of muziek in op het startscherm. Oude familiefoto’s doen het hier altijd goed.",
+        optioneel: true, teVullen: true,
+        uitleg: "Oude familiefoto’s doen het hier altijd goed. Laad ze in op het startscherm.",
         vragen: [
-          {v:"Wie zie je op deze foto?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-01.jpg"}},
-          {v:"Wie zie je op deze foto?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-02.jpg"}},
-          {v:"Waar is deze foto genomen?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-03.jpg"}},
-          {v:"Welk nummer is dit?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"familie-muziek-01.mp3"}},
-          {v:"Wat gebeurt er in dit filmpje?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"familie-video-01.mp4"}}
+          {v:"Wie zie je op deze foto?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-01.jpg"}},
+          {v:"Wie zie je op deze foto?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-02.jpg"}},
+          {v:"Waar is deze foto genomen?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"familie-03.jpg"}},
+          {v:"Welk nummer is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"familie-muziek-01.mp3"}},
+          {v:"Wat gebeurt er in dit filmpje?", a:"— nog invullen —", teVullen:true, media:{soort:"video", bron:"familie-video-01.mp4"}}
         ]
       },
       {
@@ -882,16 +963,16 @@ const PAKKETTEN = {
         type: "open", tijd: 15, punten: 1, teamModus: "individueel",
         uitleg: "Korte vragen. Ieder voor zich, één punt per stuk.",
         vragen: [
+          {v:"Welk land won het WK voetbal 2026?", a:"Spanje"},
+          {v:"In welk land waren de Winterspelen?", a:"Italië"},
+          {v:"Wie is minister-president van Nederland?", a:"Rob Jetten"},
           {v:"Hoeveel poten heeft een spin?", a:"Acht"},
-          {v:"Hoeveel dagen zitten er in een week?", a:"Zeven"},
           {v:"Wat is het grootste meer van Nederland?", a:"Het IJsselmeer"},
-          {v:"In welk seizoen vallen de blaadjes van de bomen?", a:"De herfst"},
           {v:"Wat is de hoofdstad van België?", a:"Brussel"},
           {v:"Hoeveel is 7 × 8?", a:"56"},
-          {v:"Welke kleur heeft een brandweerauto in Nederland?", a:"Rood"},
-          {v:"Hoeveel wielen heeft een gewone fiets?", a:"Twee"},
+          {v:"In welk seizoen vallen de blaadjes van de bomen?", a:"De herfst"},
           {v:"Hoeveel maanden heeft een jaar?", a:"Twaalf"},
-          {v:"Welk dier geeft ons melk?", a:"De koe"}
+          {v:"Welke kleuren heeft de Nederlandse vlag?", a:"Rood, wit en blauw"}
         ]
       }
     ]
@@ -910,9 +991,9 @@ const TEAMNAMEN = [
 /* -----------------------------------------------------------------
    STAAT
    ----------------------------------------------------------------- */
-const OPSLAGSLEUTEL = "blackjacks-kwis-v2";
+const OPSLAGSLEUTEL = "blackjacks-kwis-v3";
 const LEEG = () => ({
-  pakket: "blackjacks",
+  pakket: "jaar2026",
   quizmaster: STANDAARD_QUIZMASTER,
   spelers: STANDAARD_SPELERS.map((n,i) => ({id:"p"+i, naam:n, foto:null})),
   selectie: {},
@@ -1506,6 +1587,12 @@ function schermStart(){
   const nodig = mediaBehoefte(pid).filter(x => x.gekozen);
   const aanwezig = nodig.filter(x => MEDIA.urls.has(x.bestand));
   const metFoto = S.spelers.filter(s => s.foto).length;
+  let teVullenAantal = 0;
+  p.rondes.forEach((r,ri) => {
+    (selectieVan(pid)[ri] || []).forEach(vi => {
+      if(r.vragen[vi] && r.vragen[vi].teVullen) teVullenAantal++;
+    });
+  });
 
   return `
   <div class="vlak stapel-ruim">
@@ -1575,7 +1662,7 @@ function schermStart(){
               <button class="kiesronde-kop${aan ? " is-aan" : ""}" data-actie="wissel-ronde" data-id="${ri}">
                 <span class="vinkje">&#10003;</span>
                 <span class="suit${isRood(r.suit) ? " is-rood" : ""}">${r.suit}</span>
-                <span>${esc(r.naam)}${r.optioneel ? ` <span class="merkje">eigen media</span>` : ""}</span>
+                <span>${esc(r.naam)}${r.optioneel ? ` <span class="merkje">eigen media</span>` : ""}${r.teVullen ? ` <span class="merkje is-open">nog invullen</span>` : ""}</span>
                 <span class="telling">${sel.length}/${r.vragen.length}</span>
                 <span class="pijl">&#9654;</span>
               </button>
@@ -1585,7 +1672,7 @@ function schermStart(){
                   const label = q.emoji ? q.emoji + " — " + q.v : (q.lyric ? "“" + q.lyric + "”" : q.v);
                   return `<button class="kiesvraag${uit ? " is-uit" : " is-aan"}" data-actie="wissel-vraag" data-r="${ri}" data-v="${vi}">
                     <span class="vinkje">&#10003;</span>
-                    <span>${esc(label)}${q.media ? ` <span class="merkje">${SOORTICOON[q.media.soort] || "📄"} ${esc(q.media.bron.length > 28 ? "eigen bestand" : q.media.bron)}</span>` : ""}</span>
+                    <span>${esc(label)}${q.media ? ` <span class="merkje">${SOORTICOON[q.media.soort] || "📄"} ${esc(q.media.bron.length > 28 ? "eigen bestand" : q.media.bron)}</span>` : ""}${q.teVullen ? ` <span class="merkje is-open">nog invullen</span>` : ""}</span>
                   </button>`;
                 }).join("")}
               </div>
@@ -1644,6 +1731,7 @@ function schermStart(){
         <li><span class="merk${opslagWerkt ? "" : " is-let-op"}">${opslagWerkt ? "&check;" : "!"}</span><span><strong>${opslagWerkt ? "Automatisch bewaren staat aan." : "Automatisch bewaren lukt niet."}</strong> ${opslagWerkt ? "Na elke handeling wordt de stand opgeslagen." : "Je browser blokkeert opslag (privémodus?). De quiz werkt, maar herlaad de pagina niet."}</span></li>
         <li><span class="merk${metFoto === S.spelers.length ? "" : " is-let-op"}">${metFoto === S.spelers.length ? "&check;" : "!"}</span><span><strong>${metFoto} van de ${S.spelers.length} spelers heeft een portret.</strong> Portretten verschijnen bij de teams, in het klassement en op het podium.</span></li>
         <li><span class="merk${(!nodig.length || aanwezig.length === nodig.length) ? "" : " is-let-op"}">${(!nodig.length || aanwezig.length === nodig.length) ? "&check;" : "!"}</span><span><strong>${!nodig.length ? "Geen losse mediabestanden nodig." : aanwezig.length + " van de " + nodig.length + " mediabestanden ingeladen."}</strong> ${(nodig.length && aanwezig.length < nodig.length) ? "Ontbrekende bestanden tonen een nette melding; de vraag loopt gewoon door." : "Alles staat klaar."}</span></li>
+        <li><span class="merk${teVullenAantal ? " is-let-op" : ""}">${teVullenAantal ? "!" : "&check;"}</span><span><strong>${teVullenAantal ? teVullenAantal + " gekozen vragen wachten nog op een antwoord." : "Alle gekozen vragen hebben een antwoord."}</strong> ${teVullenAantal ? "Dat zijn de vragen over de Blackjacks zelf en de laatste maanden van het jaar — vul ze in of vink ze uit." : "Je kunt zo beginnen."}</span></li>
         <li><span class="merk${S.geluid ? "" : " is-let-op"}">${S.geluid ? "&check;" : "!"}</span><span><strong>Geluid staat ${S.geluid ? "aan" : "uit"}.</strong> Aftelpiepjes bij de laatste drie seconden. Te wisselen in het menu.</span></li>
         <li><span class="merk is-let-op">!</span><span><strong>Op de televisie:</strong> zet je scherm op volledig scherm (<kbd>F11</kbd>, of <kbd>ctrl</kbd>+<kbd>cmd</kbd>+<kbd>F</kbd> op een Mac) en stel de tekstgrootte bij in het menu als het vanaf de bank te klein oogt.</span></li>
       </ul>
