@@ -1,0 +1,17 @@
+services:
+  quiz:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      # Verander deze pincode vóór de avond.
+      HOST_PIN: ${HOST_PIN:-2627}
+      DATABASE_PATH: /data/quiz.db
+      PORT: '3000'
+    volumes:
+      # De stand overleeft een herstart van de container.
+      - quiz-data:/data
+    restart: unless-stopped
+
+volumes:
+  quiz-data:

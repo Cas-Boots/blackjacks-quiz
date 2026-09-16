@@ -1,0 +1,101 @@
+/* Blackjack Quiz 26/27 — dezelfde kaarttafel als de losse quiz. */
+:root {
+  --inkt: #08130f; --vilt: #0d1e18; --vilt-hoog: #142c23; --vilt-diep: #0a1813;
+  --rand: #23453a; --rand-zacht: #1a3229;
+  --ivoor: #f5f0e4; --ivoor-zacht: #d8d2c2; --salie: #8aa096; --salie-diep: #5e736a;
+  --goud: #c9a227; --goud-licht: #ebd27c; --goud-diep: #8a6e14;
+  --rood: #c0452f; --rood-licht: #e4705a; --groen: #4e9a6b; --groen-licht: #78c495;
+  --kaart: #14201b;
+  --display: "Bodoni Moda", Georgia, serif;
+  --ui: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "DM Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--vilt); color: var(--ivoor);
+  font-family: var(--ui); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--goud-licht); outline-offset: 3px; border-radius: 6px; }
+
+.scherm {
+  min-height: 100%; display: flex; flex-direction: column;
+  background: radial-gradient(120% 90% at 50% 0%, #17362b 0%, var(--vilt) 42%, var(--vilt-diep) 100%);
+}
+.romp { flex: 1 1 auto; padding: clamp(16px, 3vw, 40px); padding-block: clamp(20px, 3vh, 44px);
+  width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+.opschrift { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--goud); font-weight: 600; margin: 0; }
+.opschrift.stil { color: var(--salie); }
+.fijn { color: var(--salie); font-size: .85rem; margin: 0; }
+.lood { color: var(--ivoor-zacht); margin: 0; max-width: 62ch; }
+
+.knop {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .72rem 1.25rem; border-radius: 9px; border: 1px solid var(--rand);
+  background: var(--vilt-hoog); color: var(--ivoor-zacht);
+  font-size: .9rem; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.knop:hover { background: #1b3a2c; border-color: var(--salie-diep); color: var(--ivoor); }
+.knop:disabled { opacity: .35; cursor: not-allowed; }
+.knop.hoofd { background: linear-gradient(180deg, var(--goud-licht), var(--goud)); border-color: var(--goud-licht); color: #1a1405; font-weight: 700; }
+.knop.stil { background: transparent; border-color: transparent; color: var(--salie); }
+.knop.groot { padding: 1rem 2rem; font-size: 1.05rem; }
+.knop.vol { width: 100%; }
+.knoprij { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
+
+input[type="text"], input[type="number"], input[type="password"], textarea {
+  width: 100%; padding: .8rem .9rem; background: var(--vilt-diep);
+  border: 1px solid var(--rand); border-radius: 8px; color: var(--ivoor);
+  font-family: var(--ui); font-size: 1rem;
+}
+input:focus, textarea:focus { border-color: var(--goud-diep); outline: none; }
+
+.kaart { background: var(--vilt-hoog); border: 1px solid var(--rand); border-radius: 14px; padding: 1rem; }
+.vraagkaart {
+  background: linear-gradient(170deg, #fbf8ef, #ede6d4); color: var(--kaart);
+  border-radius: 14px; padding: clamp(20px, 3vw, 44px);
+  box-shadow: 0 22px 50px -18px rgba(0,0,0,.75), 0 0 0 1px rgba(201,162,39,.35);
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.vraagtekst { font-family: var(--display); font-size: clamp(1.3rem, 3.6vw, 3.2rem); line-height: 1.15; color: var(--kaart); margin: 0; }
+.emoji { font-size: clamp(2.4rem, 9vw, 6rem); text-align: center; letter-spacing: .08em; }
+.lyric { font-family: var(--display); font-style: italic; font-size: clamp(1.2rem, 3.4vw, 2.6rem); color: var(--kaart); margin: 0; }
+.keuzes { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+.keuze { display: flex; align-items: center; gap: .8rem; padding: .8rem 1rem;
+  background: rgba(20,32,27,.055); border: 1px solid rgba(20,32,27,.14); border-radius: 10px;
+  font-size: clamp(1rem, 2vw, 1.6rem); color: var(--kaart); }
+.keuze.goed { background: rgba(78,154,107,.18); border-color: var(--groen); }
+.letter { font-family: var(--mono); width: 1.9em; height: 1.9em; flex: 0 0 auto;
+  display: grid; place-items: center; border-radius: 50%; background: var(--kaart); color: var(--ivoor); font-size: .7em; }
+.keuze.goed .letter { background: var(--groen); }
+
+.klok { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: clamp(2rem, 6vw, 4.5rem); color: var(--goud-licht); line-height: 1; }
+.klok.krap { color: var(--rood-licht); }
+.balk { height: 4px; background: var(--rand-zacht); border-radius: 2px; overflow: hidden; }
+.balk > i { display: block; height: 100%; background: linear-gradient(90deg, var(--goud-diep), var(--goud-licht)); transition: width .25s linear; }
+.balk.krap > i { background: linear-gradient(90deg, #7a2418, var(--rood-licht)); }
+
+.avatar { width: 2.6rem; height: 2.6rem; border-radius: 50%; object-fit: cover; flex: 0 0 auto;
+  background: var(--vilt-diep); border: 1px solid var(--rand); display: grid; place-items: center;
+  color: var(--goud-licht); font-weight: 600; font-size: .85rem; text-transform: uppercase; }
+.avatar.groot { width: 4rem; height: 4rem; font-size: 1.2rem; }
+
+.stand { display: flex; flex-direction: column; }
+.standrij { display: grid; grid-template-columns: 2rem auto 1fr auto; gap: .9rem; align-items: center;
+  padding: .7rem .5rem; border-bottom: 1px solid var(--rand-zacht); }
+.standrij:first-child { background: linear-gradient(90deg, rgba(201,162,39,.14), transparent 70%); }
+.standnaam { font-family: var(--display); font-size: clamp(1.05rem, 2.4vw, 1.9rem); }
+.standpunten { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--goud-licht); font-size: clamp(1rem, 2vw, 1.6rem); }
+
+.stip { width: .5rem; height: .5rem; border-radius: 50%; background: var(--salie-diep); flex: 0 0 auto; }
+.stip.aan { background: var(--groen); }
+.stip.uit { background: var(--rood); }
+
+.raster { display: grid; gap: .65rem; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
+.verbinding { font-size: .75rem; color: var(--salie); display: flex; align-items: center; gap: .4rem; }
+.waarschuwing { border-left: 3px solid var(--goud); padding-left: .8rem; color: var(--ivoor-zacht); font-size: .85rem; }
