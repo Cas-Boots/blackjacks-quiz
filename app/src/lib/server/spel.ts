@@ -151,6 +151,19 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     .all()
     .map((r) => r.inzender);
 
+  // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
+  // sturen ziet de kamer op de televisie waar tussen gekozen wordt, in
+  // plaats van alleen de stelling.
+  const opties =
+    ronde?.type === 'waarnietwaar' ? ['Waar', 'Niet waar'] : vraag?.opties;
+  const goedeOptieIndex = !ronde || !vraag
+    ? undefined
+    : ronde.type === 'waarnietwaar'
+      ? (vraag.goed === true ? 0 : 1)
+      : typeof vraag.goed === 'number'
+        ? vraag.goed
+        : undefined;
+
   let onthulling = null;
   if (spel.fase === 'antwoord' && ronde && vraag) {
     let tekst = vraag.a ?? '';
@@ -164,7 +177,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     onthulling = {
       antwoord: tekst,
       toelichting: vraag.toelichting,
-      goedeOptie: typeof vraag.goed === 'number' ? vraag.goed : undefined,
+      goedeOptie: goedeOptieIndex,
     };
   }
 
@@ -187,7 +200,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
             aantal: ronde.vragen.length,
             type: ronde.type,
             tekst: vraag.v,
-            opties: vraag.opties,
+            opties,
             emoji: vraag.emoji,
             lyric: vraag.lyric,
             eenheid: vraag.eenheid,

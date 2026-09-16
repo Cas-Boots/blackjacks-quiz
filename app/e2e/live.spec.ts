@@ -67,7 +67,7 @@ test('een ronde spelen met televisie, quizmaster en drie telefoons', async ({ br
   await expect(host.pagina.getByText('Tik aan wie het goed had', { exact: false })).toBeVisible({ timeout: 15_000 });
 
   // Punten toekennen aan de eerste inzender en controleren dat de stand meebeweegt.
-  const eersteInzender = host.pagina.locator('.kaart[style*="grid-template-columns"]').first();
+  const eersteInzender = host.pagina.locator('.inzending').first();
   await eersteInzender.click();
   await expect(host.pagina.locator('.standpunten').first()).not.toHaveText('0', { timeout: 15_000 });
 
@@ -89,7 +89,7 @@ test('een telefoon die later binnenkomt krijgt de lopende vraag te zien', async 
   await expect(laat.pagina).toHaveURL(/\/play/, { timeout: 15_000 });
 
   // De telefoon hoort de lopende stand op te pikken zonder dat er iets gebeurt.
-  await expect(laat.pagina.locator('.vraagkaart, .kaart').first()).toBeVisible({ timeout: 15_000 });
+  await expect(laat.pagina.locator('.tafelkaart, .paneel, .onthulling').first()).toBeVisible({ timeout: 15_000 });
 
   await laat.ctx.close();
   await host.ctx.close();

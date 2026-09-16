@@ -2,32 +2,45 @@
   import { live } from '$lib/client/live.svelte';
   import { onMount } from 'svelte';
 
-  let { compact = false } = $props();
+  /** 'ring' voor de televisie, 'compact' voor telefoon en hostscherm. */
+  let { vorm = 'ring' }: { vorm?: 'ring' | 'compact' } = $props();
+
   let nu = $state(Date.now());
 
   onMount(() => {
-    const t = setInterval(() => (nu = Date.now()), 200);
+    // Tien keer per seconde: vloeiend genoeg voor de ring, goedkoop genoeg
+    // om een telefoon niet leeg te trekken.
+    const t = setInterval(() => (nu = Date.now()), 100);
     return () => clearInterval(t);
   });
 
-  // nu wordt gelezen zodat dit herberekent terwijl de klok loopt.
   let restMs = $derived.by(() => {
     void nu;
     return live.resterendMs();
   });
-  let seconden = $derived(Math.ceil(restMs / 1000));
-  let duur = $derived(live.staat?.klok?.duurMs ?? 0);
-  let deel = $derived(duur > 0 ? Math.max(0, Math.min(1, restMs / duur)) : 0);
-  let krap = $derived(seconden <= 5 && live.staat?.klok?.loopt === true);
+  let duurMs = $derived(live.staat?.klok?.duurMs ?? 0);
+  let loopt = $derived(live.staat?.klok?.loopt === true);
+  let seconden = $derived(loopt ? Math.ceil(restMs / 1000) : Math.ceil(duurMs / 1000));
+  let deel = $derived(duurMs > 0 && loopt ? Math.max(0, Math.min(1, restMs / duurMs)) : loopt ? 0 : 1);
+  let krap = $derived(loopt && seconden <= 5);
+
+  const R = 52;
+  const OMTREK = 2 * Math.PI * R;
 </script>
 
-{#if live.staat?.klok?.loopt}
-  <div style="display:flex;flex-direction:column;gap:.4rem;{compact ? '' : 'min-width:6rem'}">
-    <span class="klok" class:krap>{seconden}</span>
-    <div class="balk" class:krap><i style="width:{deel * 100}%"></i></div>
-  </div>
-{:else if live.staat?.klok?.duurMs}
-  <span class="klok" style="color:var(--salie-diep)">{Math.ceil((live.staat?.klok?.duurMs ?? 0) / 1000)}</span>
+{#if vorm === 'ring'}
+  <svg class="ring" class:krap class:stil={!loopt} viewBox="0 0 120 120" role="timer" aria-label="{seconden} seconden">
+    <circle class="baan" cx="60" cy="60" r={R} />
+    <circle
+      class="voortgang"
+      cx="60"
+      cy="60"
+      r={R}
+      stroke-dasharray={OMTREK}
+      stroke-dashoffset={OMTREK * (1 - deel)}
+    />
+    <text x="60" y="61">{duurMs ? seconden : '—'}</text>
+  </svg>
 {:else}
-  <span class="klok" style="color:var(--salie-diep)">—</span>
+  <span class="klok-compact" class:krap class:stil={!loopt}>{duurMs ? seconden : '—'}</span>
 {/if}

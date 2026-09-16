@@ -72,24 +72,24 @@
   <div class="romp">
     <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
       <div style="flex:1 1 220px;min-width:0">
-        <p class="opschrift">Quizmaster · {staat?.fase ?? '…'}</p>
+        <p class="etiket">Quizmaster · {staat?.fase ?? '…'}</p>
         <h2>{staat?.ronde?.naam ?? 'Blackjack Quiz 26/27'}</h2>
       </div>
-      <Klok compact />
+      <Klok vorm="compact" />
       <p class="verbinding">
         <span class="stip" class:aan={live.verbonden} class:uit={!live.verbonden}></span>
         {live.bron === 'stroom' ? 'live' : live.bron === 'navragen' ? 'navragen' : 'geen verbinding'}
       </p>
     </div>
 
-    {#if fout}<p class="waarschuwing" style="border-color:var(--rood)">{fout}</p>{/if}
+    {#if fout}<p class="let-op" style="border-color:var(--rood)">{fout}</p>{/if}
 
     <!-- Wie er op welke telefoon zit -->
-    <div class="kaart">
-      <p class="opschrift stil">Telefoons</p>
+    <div class="paneel">
+      <p class="etiket stil">Telefoons</p>
       <div class="knoprij" style="margin-top:.5rem">
         {#each staat?.spelers ?? [] as s (s.id)}
-          <span class="kaart" style="display:flex;align-items:center;gap:.5rem;padding:.4rem .8rem">
+          <span class="naamplaat" style="padding:.35rem .85rem">
             <span class="stip" class:aan={s.verbonden} class:uit={!s.verbonden}></span>
             {s.naam}
             {#if !s.verbonden && s.stilSinds !== null}<span class="fijn">{s.stilSinds}s stil</span>{/if}
@@ -122,8 +122,8 @@
 
     <!-- Antwoorden beoordelen -->
     {#if staat?.fase === 'vraag' || staat?.fase === 'antwoord'}
-      <div class="kaart">
-        <p class="opschrift stil">
+      <div class="paneel">
+        <p class="etiket stil">
           Ingeleverd — {inzendingen.length} van {staat.teams.length}
           {#if staat.fase === 'vraag'}<span class="fijn"> (antwoorden blijven verborgen tot je ze onthult)</span>{/if}
         </p>
@@ -132,15 +132,14 @@
           <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem">
             {#each inzendingen as i (i.inzender)}
               <button
-                class="kaart"
-                style="display:grid;grid-template-columns:1.4rem 1fr auto;gap:.75rem;align-items:center;text-align:left;cursor:pointer;
-                       border-color:{gekozen.has(i.inzender) ? 'var(--groen)' : 'var(--rand)'}"
+                class="inzending"
+                class:goedgekeurd={gekozen.has(i.inzender)}
                 onclick={() => wissel(i.inzender)}
               >
-                <span style="color:{gekozen.has(i.inzender) ? 'var(--groen-licht)' : 'var(--salie-diep)'}">✓</span>
+                <span class="vink">✓</span>
                 <span>
                   <strong>{naamVan(i.inzender)}</strong><br />
-                  <span style="font-family:var(--mono);font-size:.9rem;color:var(--ivoor-zacht)">{i.tekst || '— niets —'}</span>
+                  <span class="tekst">{i.tekst || '— niets —'}</span>
                 </span>
                 {#if i.voorstel}
                   <span class="fijn" style="text-align:right">
@@ -155,7 +154,7 @@
         {:else}
           <div class="knoprij" style="margin-top:.5rem">
             {#each staat.teams as t (t.id)}
-              <span class="kaart" style="padding:.4rem .8rem;display:flex;gap:.5rem;align-items:center">
+              <span class="naamplaat" style="padding:.35rem .85rem">
                 <span class="stip" class:aan={staat.ingeleverd.includes(t.id)}></span>{t.naam}
               </span>
             {/each}
@@ -165,14 +164,14 @@
     {/if}
 
     <!-- Stand -->
-    <div class="kaart">
-      <p class="opschrift stil">Stand</p>
+    <div class="paneel">
+      <p class="etiket stil">Stand</p>
       <div class="stand">
         {#each staat?.stand ?? [] as r, i (r.spelerId)}
           <div class="standrij">
             <span style="font-family:var(--mono);color:var(--salie)">{i + 1}</span>
             <span></span>
-            <span class="standnaam" style="font-size:1.1rem">{r.naam}</span>
+            <span class="naam" style="font-size:1.1rem">{r.naam}</span>
             <span style="display:flex;gap:.4rem;align-items:center">
               <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: -1 })}>−</button>
               <span class="standpunten" style="font-size:1.1rem">{r.punten}</span>

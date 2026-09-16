@@ -1,101 +1,878 @@
-/* Blackjack Quiz 26/27 — dezelfde kaarttafel als de losse quiz. */
+/* ===================================================================
+   Blackjack Quiz 26/27 — de kaarttafel om middernacht.
+
+   Eén idee draagt het hele ontwerp: je kijkt van bovenaf op een groen
+   viltkleed, met één lamp erboven. Vragen worden als kaarten op die tafel
+   gelegd. Alles wat glimt is messing, alles wat leest is ivoor.
+
+   Bewust één visuele wereld, geen licht/donker-schakelaar: dit is een
+   presentatiescherm voor een donkere kamer.
+   =================================================================== */
+
 :root {
-  --inkt: #08130f; --vilt: #0d1e18; --vilt-hoog: #142c23; --vilt-diep: #0a1813;
-  --rand: #23453a; --rand-zacht: #1a3229;
-  --ivoor: #f5f0e4; --ivoor-zacht: #d8d2c2; --salie: #8aa096; --salie-diep: #5e736a;
-  --goud: #c9a227; --goud-licht: #ebd27c; --goud-diep: #8a6e14;
-  --rood: #c0452f; --rood-licht: #e4705a; --groen: #4e9a6b; --groen-licht: #78c495;
-  --kaart: #14201b;
-  --display: "Bodoni Moda", Georgia, serif;
+  /* --- het vilt --- */
+  --inkt: #060f0c;
+  --vilt: #0d1e18;
+  --vilt-hoog: #152e25;
+  --vilt-diep: #081511;
+  --vilt-licht: #1d3b30;
+  --rand: #24473b;
+  --rand-zacht: #17302807;
+
+  /* --- inkt op papier --- */
+  --ivoor: #f7f3e8;
+  --ivoor-zacht: #ddd6c5;
+  --salie: #8fa69b;
+  --salie-diep: #5e736a;
+  --kaart: #131f1a;
+  --kaart-papier: #fbf8ef;
+  --kaart-papier-diep: #ece4d0;
+
+  /* --- messing --- */
+  --goud: #c9a227;
+  --goud-licht: #f0d98c;
+  --goud-diep: #7d6312;
+
+  /* --- betekenis --- */
+  --rood: #c0452f;
+  --rood-licht: #e97b63;
+  --groen: #4e9a6b;
+  --groen-licht: #8ad3a6;
+
+  /* --- letters --- */
+  --display: "Bodoni Moda", Georgia, "Times New Roman", serif;
   --ui: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --mono: "DM Mono", Consolas, monospace;
+  --mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* --- schaal: één draaiknop voor de leesafstand --- */
+  --schaal: 1;
+  --fs-mega: calc(var(--schaal) * clamp(3rem, 9vw, 9rem));
+  --fs-groot: calc(var(--schaal) * clamp(2rem, 5.5vw, 5rem));
+  --fs-vraag: calc(var(--schaal) * clamp(1.5rem, 4.2vw, 4.2rem));
+  --fs-keuze: calc(var(--schaal) * clamp(1rem, 1.7vw, 1.75rem));
+  --fs-naam: calc(var(--schaal) * clamp(1.1rem, 2.6vw, 2.6rem));
+  --fs-lood: calc(var(--schaal) * clamp(1rem, 1.5vw, 1.6rem));
+  --fs-etiket: calc(var(--schaal) * clamp(0.68rem, 0.95vw, 1.1rem));
+
+  /* --- beweging: zwaar, niet stuiterend. Een kaart die neerkomt. --- */
+  --deal: cubic-bezier(0.16, 0.84, 0.24, 1);
+  --zacht: cubic-bezier(0.32, 0.72, 0.28, 1);
+
   color-scheme: dark;
 }
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+
+* {
+  box-sizing: border-box;
+}
+html,
 body {
-  margin: 0; background: var(--vilt); color: var(--ivoor);
-  font-family: var(--ui); font-size: 16px; line-height: 1.5;
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--vilt);
+  color: var(--ivoor);
+  font-family: var(--ui);
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
-button { font-family: inherit; }
-:focus-visible { outline: 2px solid var(--goud-licht); outline-offset: 3px; border-radius: 6px; }
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  margin: 0;
+  text-wrap: balance;
+}
+button {
+  font-family: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--goud-licht);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
 
+/* ===== De tafel =================================================== */
 .scherm {
-  min-height: 100%; display: flex; flex-direction: column;
-  background: radial-gradient(120% 90% at 50% 0%, #17362b 0%, var(--vilt) 42%, var(--vilt-diep) 100%);
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    /* de lamp boven de tafel */
+    radial-gradient(70% 55% at 50% -5%, rgba(201, 162, 39, 0.16) 0%, transparent 62%),
+    /* het vilt zelf */ radial-gradient(130% 100% at 50% 0%, var(--vilt-licht) 0%, var(--vilt) 40%, var(--vilt-diep) 100%);
 }
-.romp { flex: 1 1 auto; padding: clamp(16px, 3vw, 40px); padding-block: clamp(20px, 3vh, 44px);
-  width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
-.opschrift { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--goud); font-weight: 600; margin: 0; }
-.opschrift.stil { color: var(--salie); }
-.fijn { color: var(--salie); font-size: .85rem; margin: 0; }
-.lood { color: var(--ivoor-zacht); margin: 0; max-width: 62ch; }
+/* Viltkorrel. Klein genoeg om niets te kosten, genoeg om de vlakken te
+   laten leven in plaats van als plat CSS-groen te lezen. */
+.scherm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Vignet: trekt het oog naar het midden van de tafel. */
+.scherm::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(3, 8, 6, 0.55) 100%);
+}
+.scherm > * {
+  position: relative;
+  z-index: 1;
+}
 
+.romp {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding-inline: clamp(18px, 4vw, 90px);
+  padding-block: clamp(20px, 3.5vh, 56px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vh, 2rem);
+}
+.romp.midden {
+  justify-content: center;
+}
+
+/* ===== Typografie ================================================= */
+.etiket {
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--goud);
+  font-weight: 600;
+  margin: 0;
+}
+.etiket.stil {
+  color: var(--salie);
+}
+.mega {
+  font-family: var(--display);
+  font-size: var(--fs-mega);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+.groot {
+  font-family: var(--display);
+  font-size: var(--fs-groot);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.lood {
+  color: var(--ivoor-zacht);
+  font-size: var(--fs-lood);
+  margin: 0;
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+.fijn {
+  color: var(--salie);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Messing haarlijn die zichzelf trekt. Markeert een nieuw hoofdstuk. */
+.rule {
+  height: 1px;
+  border: none;
+  margin: 0;
+  background: linear-gradient(90deg, var(--goud), var(--goud-diep) 45%, transparent);
+  transform-origin: left center;
+  animation: trek 0.7s var(--deal) both;
+}
+@keyframes trek {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ===== De vraag: een kaart die op tafel wordt gelegd ============== */
+.tafelkaart {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  background: linear-gradient(168deg, var(--kaart-papier), var(--kaart-papier-diep));
+  color: var(--kaart);
+  border-radius: 18px;
+  padding: clamp(22px, 3.4vw, 60px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.8rem, 1.6vh, 1.6rem);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.5) inset,
+    0 40px 80px -30px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(201, 162, 39, 0.4);
+  animation: leggen 0.52s var(--deal) both;
+}
+/* Kaartkleur als watermerk, zoals op een speelkaart. */
+.tafelkaart[data-suit]::after {
+  content: attr(data-suit);
+  position: absolute;
+  right: clamp(16px, 2vw, 34px);
+  bottom: clamp(6px, 1.2vw, 18px);
+  font-size: clamp(2.4rem, 6vw, 6rem);
+  line-height: 1;
+  color: rgba(19, 31, 26, 0.06);
+  pointer-events: none;
+}
+@keyframes leggen {
+  from {
+    opacity: 0;
+    transform: translateY(26px) rotate(-1.1deg) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vraagtekst {
+  font-family: var(--display);
+  font-size: var(--fs-vraag);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  margin: 0;
+  color: var(--kaart);
+  text-wrap: balance;
+}
+.vraagtekst.klein {
+  font-size: calc(var(--fs-vraag) * 0.62);
+}
+.emoji {
+  font-size: calc(var(--schaal) * clamp(2.6rem, 8vw, 7rem));
+  text-align: center;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.emoji.klein {
+  font-size: calc(var(--schaal) * clamp(1.8rem, 4vw, 3.4rem));
+}
+.lyric {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: calc(var(--fs-vraag) * 0.82);
+  line-height: 1.22;
+  margin: 0;
+  color: var(--kaart);
+  text-wrap: balance;
+}
+.lyric.klein {
+  font-size: calc(var(--fs-vraag) * 0.44);
+}
+
+/* ===== Antwoordopties ============================================= */
+.keuzes {
+  display: grid;
+  gap: clamp(0.5rem, 1vh, 0.85rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+.keuze {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.7rem, 1.2vw, 1.1rem);
+  padding: clamp(0.7rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.5vw, 1.4rem);
+  background: rgba(19, 31, 26, 0.05);
+  border: 1px solid rgba(19, 31, 26, 0.13);
+  border-radius: 12px;
+  font-size: var(--fs-keuze);
+  color: var(--kaart);
+  text-align: left;
+  transition:
+    background 0.35s var(--zacht),
+    border-color 0.35s var(--zacht),
+    transform 0.35s var(--zacht);
+}
+.keuze .letter {
+  font-family: var(--mono);
+  font-size: 0.66em;
+  font-weight: 500;
+  width: 2em;
+  height: 2em;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--kaart);
+  color: var(--ivoor);
+  transition: background 0.35s var(--zacht);
+}
+/* Het goede antwoord licht op en komt een tikje naar voren. */
+.keuze.goed {
+  background: rgba(78, 154, 107, 0.16);
+  border-color: var(--groen);
+  box-shadow: 0 0 0 1px var(--groen), 0 12px 30px -16px rgba(78, 154, 107, 0.9);
+  transform: translateX(6px);
+}
+.keuze.goed .letter {
+  background: var(--groen);
+}
+.keuze.fout {
+  opacity: 0.42;
+}
+
+/* ===== De onthulling ============================================== */
+.onthulling {
+  background: linear-gradient(120deg, var(--vilt-hoog), var(--vilt-diep));
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--groen);
+  border-radius: 16px;
+  padding: clamp(18px, 2.6vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.9);
+  animation: opkomen 0.45s 0.12s var(--deal) both;
+}
+.antwoordtekst {
+  font-family: var(--display);
+  font-size: var(--fs-groot);
+  font-weight: 600;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--groen-licht);
+  text-wrap: balance;
+}
+.toelichting {
+  margin: 0;
+  color: var(--ivoor-zacht);
+  font-size: calc(var(--fs-lood) * 0.9);
+  max-width: 68ch;
+}
+@keyframes opkomen {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===== De klok als ring =========================================== */
+.ring {
+  display: block;
+  width: clamp(58px, 5.2vw, 104px);
+  height: clamp(58px, 5.2vw, 104px);
+  flex: 0 0 auto;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.ring .baan {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+.ring .voortgang {
+  stroke: var(--goud-licht);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.25s linear, stroke 0.4s var(--zacht);
+  filter: drop-shadow(0 0 10px rgba(240, 217, 140, 0.45));
+}
+.ring.krap .voortgang {
+  stroke: var(--rood-licht);
+  filter: drop-shadow(0 0 14px rgba(233, 123, 99, 0.6));
+}
+.ring text {
+  font-family: var(--mono);
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--goud-licht);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.ring.krap text {
+  fill: var(--rood-licht);
+}
+.ring.stil .voortgang {
+  stroke: var(--salie-diep);
+  filter: none;
+}
+.ring.stil text {
+  fill: var(--salie-diep);
+}
+/* De laatste seconden laten het scherm ademen. */
+.ring.krap {
+  animation: adem 1s ease-in-out infinite;
+}
+@keyframes adem {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Compacte klok voor telefoon en hostscherm. */
+.klok-compact {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  color: var(--goud-licht);
+  line-height: 1;
+}
+.klok-compact.krap {
+  color: var(--rood-licht);
+}
+.klok-compact.stil {
+  color: var(--salie-diep);
+}
+
+/* ===== Kop van het televisiescherm ================================ */
+.rail {
+  display: flex;
+  align-items: center;
+  min-height: clamp(76px, 8vh, 132px);
+  gap: clamp(0.8rem, 2vw, 2rem);
+  padding: clamp(0.7rem, 1.4vh, 1.4rem) clamp(18px, 4vw, 90px);
+  border-bottom: 1px solid var(--rand);
+  background: linear-gradient(180deg, rgba(6, 15, 12, 0.75), transparent);
+}
+.rail .suit {
+  font-size: calc(var(--fs-naam) * 1.15);
+  line-height: 1;
+  color: var(--goud);
+}
+.rail .suit.rood {
+  color: var(--rood-licht);
+}
+.rail .titel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.rail .titel h2 {
+  font-size: calc(var(--fs-naam) * 0.9);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail .teller {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--salie);
+  font-size: calc(var(--fs-etiket) * 1.15);
+  white-space: nowrap;
+}
+
+/* ===== Spelers, teams, portretten ================================= */
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--vilt-diep);
+  border: 1px solid var(--rand);
+  display: grid;
+  place-items: center;
+  color: var(--goud-licht);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 0.85rem;
+}
+.avatar.m {
+  width: clamp(2.8rem, 4vw, 4rem);
+  height: clamp(2.8rem, 4vw, 4rem);
+  font-size: clamp(0.9rem, 1.3vw, 1.3rem);
+}
+.avatar.l {
+  width: clamp(4rem, 7vw, 7rem);
+  height: clamp(4rem, 7vw, 7rem);
+  font-size: clamp(1.2rem, 2.2vw, 2.2rem);
+}
+.avatar.goud {
+  border-color: var(--goud);
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.28);
+}
+
+.naamplaat {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 1rem 0.55rem 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  border: 1px solid var(--rand);
+  font-size: calc(var(--fs-lood) * 0.85);
+  color: var(--ivoor-zacht);
+}
+.naamplaat.aan {
+  border-color: var(--goud-diep);
+  color: var(--ivoor);
+}
+
+.teamkaart {
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  border: 1px solid var(--rand);
+  border-radius: 16px;
+  padding: clamp(0.9rem, 1.6vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  box-shadow: 0 24px 50px -34px rgba(0, 0, 0, 0.9);
+}
+.teamkaart .kop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.8);
+  color: var(--goud-licht);
+}
+.teamkaart .kop .suit.rood {
+  color: var(--rood-licht);
+}
+
+/* ===== Klassement ================================================= */
+.stand {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.standrij {
+  display: grid;
+  grid-template-columns: clamp(2rem, 3vw, 3.5rem) auto 1fr auto;
+  align-items: center;
+  gap: clamp(0.7rem, 1.6vw, 1.5rem);
+  padding: clamp(0.5rem, 1.1vh, 1rem) clamp(0.4rem, 1vw, 1rem);
+  border-bottom: 1px solid var(--rand);
+  animation: schuifIn 0.45s var(--deal) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.standrij:first-child {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.16), transparent 72%);
+  border-bottom-color: var(--goud-diep);
+}
+.standrij .plek {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: calc(var(--fs-naam) * 0.52);
+  color: var(--salie);
+}
+.standrij:first-child .plek {
+  color: var(--goud);
+}
+.standrij .naam {
+  font-family: var(--display);
+  font-size: var(--fs-naam);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.standpunten {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: calc(var(--fs-naam) * 0.85);
+  color: var(--goud-licht);
+}
+.standrij .delta {
+  font-family: var(--mono);
+  font-size: 0.45em;
+  color: var(--groen-licht);
+  margin-left: 0.5rem;
+}
+@keyframes schuifIn {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===== Podium ===================================================== */
+.podium {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: clamp(0.8rem, 1.6vw, 1.6rem);
+  align-items: end;
+  width: 100%;
+}
+.plaats {
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  border: 1px solid var(--rand);
+  border-radius: 18px;
+  padding: clamp(1.2rem, 2.4vw, 2.4rem) clamp(0.9rem, 1.6vw, 1.6rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  animation: opkomen 0.6s var(--deal) both;
+  animation-delay: calc(var(--i, 0) * 260ms);
+}
+.plaats.eerste {
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.24), var(--vilt-hoog));
+  border-color: var(--goud);
+  box-shadow: 0 0 70px -18px rgba(201, 162, 39, 0.75);
+}
+.plaats .medaille {
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
+  line-height: 1;
+}
+.plaats .naam {
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.9);
+  text-align: center;
+}
+.plaats .punten {
+  font-family: var(--mono);
+  color: var(--goud-licht);
+  font-size: calc(var(--fs-naam) * 0.6);
+}
+
+/* ===== Knoppen en formulieren ===================================== */
 .knop {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .72rem 1.25rem; border-radius: 9px; border: 1px solid var(--rand);
-  background: var(--vilt-hoog); color: var(--ivoor-zacht);
-  font-size: .9rem; font-weight: 500; cursor: pointer; white-space: nowrap;
-  transition: background .15s, border-color .15s, color .15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.3rem;
+  border-radius: 11px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  color: var(--ivoor-zacht);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s var(--zacht),
+    border-color 0.2s var(--zacht),
+    color 0.2s var(--zacht),
+    transform 0.08s;
 }
-.knop:hover { background: #1b3a2c; border-color: var(--salie-diep); color: var(--ivoor); }
-.knop:disabled { opacity: .35; cursor: not-allowed; }
-.knop.hoofd { background: linear-gradient(180deg, var(--goud-licht), var(--goud)); border-color: var(--goud-licht); color: #1a1405; font-weight: 700; }
-.knop.stil { background: transparent; border-color: transparent; color: var(--salie); }
-.knop.groot { padding: 1rem 2rem; font-size: 1.05rem; }
-.knop.vol { width: 100%; }
-.knoprij { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
-
-input[type="text"], input[type="number"], input[type="password"], textarea {
-  width: 100%; padding: .8rem .9rem; background: var(--vilt-diep);
-  border: 1px solid var(--rand); border-radius: 8px; color: var(--ivoor);
-  font-family: var(--ui); font-size: 1rem;
+.knop:hover {
+  border-color: var(--salie-diep);
+  color: var(--ivoor);
 }
-input:focus, textarea:focus { border-color: var(--goud-diep); outline: none; }
-
-.kaart { background: var(--vilt-hoog); border: 1px solid var(--rand); border-radius: 14px; padding: 1rem; }
-.vraagkaart {
-  background: linear-gradient(170deg, #fbf8ef, #ede6d4); color: var(--kaart);
-  border-radius: 14px; padding: clamp(20px, 3vw, 44px);
-  box-shadow: 0 22px 50px -18px rgba(0,0,0,.75), 0 0 0 1px rgba(201,162,39,.35);
-  display: flex; flex-direction: column; gap: 1rem;
+.knop:active {
+  transform: translateY(1px);
 }
-.vraagtekst { font-family: var(--display); font-size: clamp(1.3rem, 3.6vw, 3.2rem); line-height: 1.15; color: var(--kaart); margin: 0; }
-.emoji { font-size: clamp(2.4rem, 9vw, 6rem); text-align: center; letter-spacing: .08em; }
-.lyric { font-family: var(--display); font-style: italic; font-size: clamp(1.2rem, 3.4vw, 2.6rem); color: var(--kaart); margin: 0; }
-.keuzes { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
-.keuze { display: flex; align-items: center; gap: .8rem; padding: .8rem 1rem;
-  background: rgba(20,32,27,.055); border: 1px solid rgba(20,32,27,.14); border-radius: 10px;
-  font-size: clamp(1rem, 2vw, 1.6rem); color: var(--kaart); }
-.keuze.goed { background: rgba(78,154,107,.18); border-color: var(--groen); }
-.letter { font-family: var(--mono); width: 1.9em; height: 1.9em; flex: 0 0 auto;
-  display: grid; place-items: center; border-radius: 50%; background: var(--kaart); color: var(--ivoor); font-size: .7em; }
-.keuze.goed .letter { background: var(--groen); }
+.knop:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.knop.hoofd {
+  background: linear-gradient(180deg, var(--goud-licht), var(--goud));
+  border-color: var(--goud-licht);
+  color: #1a1405;
+  font-weight: 700;
+  box-shadow: 0 14px 30px -14px rgba(201, 162, 39, 0.85);
+}
+.knop.hoofd:hover {
+  background: linear-gradient(180deg, #f8e6a8, var(--goud-licht));
+  color: #1a1405;
+}
+.knop.stil {
+  background: none;
+  border-color: transparent;
+  color: var(--salie);
+}
+.knop.stil:hover {
+  background: var(--vilt-hoog);
+  color: var(--ivoor);
+}
+.knop.groot {
+  padding: 1.05rem 2rem;
+  font-size: 1.05rem;
+}
+.knop.vol {
+  width: 100%;
+}
+.knoprij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
 
-.klok { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: clamp(2rem, 6vw, 4.5rem); color: var(--goud-licht); line-height: 1; }
-.klok.krap { color: var(--rood-licht); }
-.balk { height: 4px; background: var(--rand-zacht); border-radius: 2px; overflow: hidden; }
-.balk > i { display: block; height: 100%; background: linear-gradient(90deg, var(--goud-diep), var(--goud-licht)); transition: width .25s linear; }
-.balk.krap > i { background: linear-gradient(90deg, #7a2418, var(--rood-licht)); }
+input[type="text"],
+input[type="number"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: var(--vilt-diep);
+  border: 1px solid var(--rand);
+  border-radius: 11px;
+  color: var(--ivoor);
+  font-family: var(--ui);
+  font-size: 1.05rem;
+}
+input:focus,
+textarea:focus {
+  border-color: var(--goud-diep);
+  outline: none;
+}
 
-.avatar { width: 2.6rem; height: 2.6rem; border-radius: 50%; object-fit: cover; flex: 0 0 auto;
-  background: var(--vilt-diep); border: 1px solid var(--rand); display: grid; place-items: center;
-  color: var(--goud-licht); font-weight: 600; font-size: .85rem; text-transform: uppercase; }
-.avatar.groot { width: 4rem; height: 4rem; font-size: 1.2rem; }
+/* ===== Panelen en kleine onderdelen =============================== */
+.paneel {
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  border: 1px solid var(--rand);
+  border-radius: 16px;
+  padding: clamp(0.9rem, 1.6vw, 1.4rem);
+}
+.raster {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+}
+.stip {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--salie-diep);
+  flex: 0 0 auto;
+  transition: background 0.3s var(--zacht);
+}
+.stip.aan {
+  background: var(--groen);
+  box-shadow: 0 0 8px rgba(138, 211, 166, 0.7);
+}
+.stip.uit {
+  background: var(--rood);
+}
+.verbinding {
+  font-size: 0.78rem;
+  color: var(--salie);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.let-op {
+  border-left: 3px solid var(--goud);
+  padding-left: 0.9rem;
+  color: var(--ivoor-zacht);
+  font-size: 0.88rem;
+}
 
-.stand { display: flex; flex-direction: column; }
-.standrij { display: grid; grid-template-columns: 2rem auto 1fr auto; gap: .9rem; align-items: center;
-  padding: .7rem .5rem; border-bottom: 1px solid var(--rand-zacht); }
-.standrij:first-child { background: linear-gradient(90deg, rgba(201,162,39,.14), transparent 70%); }
-.standnaam { font-family: var(--display); font-size: clamp(1.05rem, 2.4vw, 1.9rem); }
-.standpunten { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--goud-licht); font-size: clamp(1rem, 2vw, 1.6rem); }
+/* Voortgangsbolletjes: hoeveel vragen zijn er al geweest in deze ronde. */
+.vorderingen {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.vorderingen i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 0.3s var(--zacht), transform 0.3s var(--zacht);
+}
+.vorderingen i.gehad {
+  background: var(--goud-diep);
+}
+.vorderingen i.nu {
+  background: var(--goud-licht);
+  transform: scale(1.5);
+}
 
-.stip { width: .5rem; height: .5rem; border-radius: 50%; background: var(--salie-diep); flex: 0 0 auto; }
-.stip.aan { background: var(--groen); }
-.stip.uit { background: var(--rood); }
+/* Inleverteller op de televisie: wie is er al binnen. */
+.inleverrij {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.inleverrij .vak {
+  min-width: 3.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--rand);
+  background: var(--vilt-diep);
+  color: var(--salie-diep);
+  font-size: calc(var(--fs-lood) * 0.8);
+  text-align: center;
+  transition: all 0.35s var(--zacht);
+}
+.inleverrij .vak.binnen {
+  border-color: var(--groen);
+  background: rgba(78, 154, 107, 0.16);
+  color: var(--groen-licht);
+}
 
-.raster { display: grid; gap: .65rem; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
-.verbinding { font-size: .75rem; color: var(--salie); display: flex; align-items: center; gap: .4rem; }
-.waarschuwing { border-left: 3px solid var(--goud); padding-left: .8rem; color: var(--ivoor-zacht); font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .knop {
+    padding: 0.7rem 1.05rem;
+    font-size: 0.88rem;
+  }
+  .standrij {
+    grid-template-columns: 1.6rem auto 1fr auto;
+    gap: 0.6rem;
+  }
+}
+
+/* ===== Hostscherm: de beoordeelrij ================================ */
+.inzending {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  color: var(--ivoor-zacht);
+  cursor: pointer;
+  font-family: var(--ui);
+  font-size: 0.95rem;
+  transition: border-color 0.2s var(--zacht), background 0.2s var(--zacht);
+}
+.inzending:hover {
+  border-color: var(--salie-diep);
+}
+.inzending .vink {
+  font-size: 1.05rem;
+  color: var(--salie-diep);
+  transition: color 0.2s var(--zacht);
+}
+.inzending .tekst {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  color: var(--ivoor);
+}
+.inzending.goedgekeurd {
+  border-color: var(--groen);
+  background: linear-gradient(170deg, rgba(78, 154, 107, 0.18), var(--vilt-diep));
+  color: var(--ivoor);
+}
+.inzending.goedgekeurd .vink {
+  color: var(--groen-licht);
+}

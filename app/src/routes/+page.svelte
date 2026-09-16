@@ -36,11 +36,11 @@
 
 <div class="scherm">
   <div class="romp" style="justify-content:center;max-width:720px">
-    <p class="opschrift">Oud &amp; Nieuw</p>
-    <h1 style="font-size:clamp(2.4rem,9vw,4.5rem);line-height:1">Blackjack Quiz 26/27</h1>
+    <p class="etiket">Oud &amp; Nieuw</p>
+    <h1 class="mega" style="font-size:clamp(2.2rem,11vw,4rem)">Blackjack Quiz 26/27</h1>
     <p class="lood">Kies je naam. Je telefoon wordt je antwoordblad.</p>
 
-    {#if fout}<p class="waarschuwing" style="border-color:var(--rood)">{fout}</p>{/if}
+    {#if fout}<p class="let-op" style="border-color:var(--rood)">{fout}</p>{/if}
 
     <div class="raster">
       {#each spelers as s (s.id)}
@@ -53,7 +53,7 @@
       {/each}
     </div>
 
-    <hr style="border:none;border-top:1px solid var(--rand-zacht);margin:1rem 0" />
+    <hr class="rule" style="margin:1rem 0" />
 
     <p class="opschrift stil">Quizmaster</p>
     <div class="knoprij">
