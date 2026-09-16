@@ -1,21 +1,38 @@
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { db } from './index';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 
 let gedaan = false;
 
-/** Draait de migraties één keer per proces. Faalt hard: een verkeerd schema
- *  is niet iets om doorheen te serveren. */
+/**
+ * Waar de migraties staan.
+ *
+ * Bewust vanaf de werkmap en niet vanaf dit bestand: in de gebouwde versie
+ * wordt deze code in een chunk gepropt en klopt een relatief pad vanaf
+ * `import.meta.url` alleen zolang die chunk toevallig even diep zit. Dat is
+ * geen fundament om een avond op te bouwen. De werkmap is in dev, in Docker en
+ * onder Dokploy hetzelfde: de hoofdmap van de app.
+ */
+function migratieMap(): string {
+  return process.env.MIGRATIONS_DIR ?? resolve(process.cwd(), 'drizzle/migrations');
+}
+
+/**
+ * Draait de migraties één keer per proces.
+ *
+ * Faalt hard als de map ontbreekt. Een ontbrekend schema stilletjes overslaan
+ * levert een app op die start en pas omvalt zodra iemand een vraag beantwoordt
+ * — veel liever een container die weigert op te komen, want dat zie je meteen.
+ */
 export function zorgVoorMigraties() {
   if (gedaan) return;
-  const hier = dirname(fileURLToPath(import.meta.url));
-  const map = resolve(hier, '../../../../drizzle/migrations');
+  const map = migratieMap();
   if (!existsSync(map)) {
-    console.warn('[migratie] map niet gevonden, overgeslagen:', map);
-    gedaan = true;
-    return;
+    throw new Error(
+      `Migratiemap niet gevonden op ${map}. ` +
+        'Draai vanuit de hoofdmap van de app, of zet MIGRATIONS_DIR naar de juiste map.',
+    );
   }
   migrate(db, { migrationsFolder: map });
   gedaan = true;
