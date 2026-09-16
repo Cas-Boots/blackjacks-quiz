@@ -6,7 +6,8 @@
 /* ---------------------------------------------------------------
    Blackjacks Kwis — een kaarttafel om middernacht.
    Bewust één visuele wereld (donker vilt): dit is een presentatie-
-   scherm voor een donkere kamer. Alle kleuren expliciet gezet.
+   scherm voor een donkere kamer, bedoeld voor een grote televisie.
+   Alle kleuren expliciet gezet.
    --------------------------------------------------------------- */
 :root{
   --inkt:#08130F;
@@ -26,11 +27,26 @@
   --rood-licht:#E4705A;
   --groen:#4E9A6B;
   --groen-licht:#78C495;
+  --kaart:#14201B;
 
   --sp-1:.35rem; --sp-2:.65rem; --sp-3:1rem; --sp-4:1.5rem;
   --sp-5:2.25rem; --sp-6:3.25rem;
   --radius:14px;
-  --rail-h:clamp(56px,9vh,76px);
+
+  /* Eén draaiknop voor de leesbaarheid op afstand. */
+  --schaal:1;
+
+  --fs-titel:    calc(var(--schaal) * clamp(2.4rem,7.5vw,7rem));
+  --fs-kop:      calc(var(--schaal) * clamp(1.7rem,4.6vw,4rem));
+  --fs-vraag:    calc(var(--schaal) * clamp(1.35rem,3.9vw,3.5rem));
+  --fs-antwoord: calc(var(--schaal) * clamp(1.5rem,4.4vw,3.8rem));
+  --fs-keuze:    calc(var(--schaal) * clamp(1rem,2.1vw,1.9rem));
+  --fs-emoji:    calc(var(--schaal) * clamp(2.6rem,10vw,7rem));
+  --fs-klok:     calc(var(--schaal) * clamp(1.6rem,4vw,3.6rem));
+  --fs-naam:     calc(var(--schaal) * clamp(1.1rem,2.7vw,2.3rem));
+  --fs-punten:   calc(var(--schaal) * clamp(1.05rem,2.4vw,2rem));
+  --fs-lood:     calc(var(--schaal) * clamp(.95rem,1.35vw,1.4rem));
+  --fs-railnaam: calc(var(--schaal) * clamp(.98rem,2vw,1.8rem));
 
   --display:"Bodoni Moda",Georgia,"Times New Roman",serif;
   --ui:"Archivo","Helvetica Neue",Arial,sans-serif;
@@ -54,7 +70,6 @@ body{
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--goud-licht);outline-offset:3px;border-radius:6px}
 
-/* ---- Tafel ---------------------------------------------------- */
 #app{
   position:relative;
   height:100%;
@@ -63,50 +78,38 @@ button{font-family:inherit}
   background:
     radial-gradient(120% 90% at 50% 0%, #17362B 0%, var(--vilt) 42%, var(--vilt-diep) 100%);
 }
-#confetti{
-  position:absolute;inset:0;width:100%;height:100%;
-  pointer-events:none;z-index:40;
-}
+#confetti{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
 
 /* ---- Bovenrail ------------------------------------------------- */
 .rail{
   flex:0 0 auto;
   display:flex;align-items:center;gap:var(--sp-3);
-  padding:0 clamp(16px,3vw,32px);
-  min-height:var(--rail-h);
-  padding-top:env(safe-area-inset-top,0px);
+  padding:var(--sp-2) clamp(16px,3vw,48px);
+  padding-top:calc(var(--sp-2) + env(safe-area-inset-top,0px));
   background:linear-gradient(180deg,rgba(8,19,15,.92),rgba(8,19,15,.55));
   border-bottom:1px solid var(--rand-zacht);
   position:relative;z-index:20;
 }
-.rail-suit{
-  font-size:clamp(1.3rem,2.6vw,1.9rem);
-  color:var(--goud);
-  line-height:1;
-}
+.rail-suit{font-size:calc(var(--fs-railnaam) * 1.1);color:var(--goud);line-height:1}
 .rail-suit.is-rood{color:var(--rood-licht)}
 .rail-info{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .rail-ronde{
-  font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  font-size:calc(var(--schaal) * clamp(.66rem,.9vw,1rem));
+  letter-spacing:.16em;text-transform:uppercase;
   color:var(--salie);font-weight:600;
 }
 .rail-naam{
-  font-family:var(--display);
-  font-size:clamp(.98rem,2.3vw,1.4rem);
-  line-height:1.15;
-  color:var(--ivoor);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:var(--display);font-size:var(--fs-railnaam);line-height:1.15;
+  color:var(--ivoor);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .rail-teller{
-  font-family:var(--mono);font-size:.82rem;color:var(--salie);
-  font-variant-numeric:tabular-nums;white-space:nowrap;
+  font-family:var(--mono);
+  font-size:calc(var(--schaal) * clamp(.82rem,1.1vw,1.25rem));
+  color:var(--salie);font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 .klok{
-  font-family:var(--mono);
-  font-size:clamp(1.6rem,4.4vw,2.6rem);
-  font-weight:500;
-  font-variant-numeric:tabular-nums;
-  color:var(--goud-licht);
+  font-family:var(--mono);font-size:var(--fs-klok);font-weight:500;
+  font-variant-numeric:tabular-nums;color:var(--goud-licht);
   line-height:1;min-width:2.6ch;text-align:right;
 }
 .klok.is-waarschuwing{color:var(--goud)}
@@ -114,7 +117,7 @@ button{font-family:inherit}
 .klok.is-uit{color:var(--salie-diep)}
 @keyframes pols{50%{opacity:.45}}
 .balk{
-  position:absolute;left:0;bottom:-1px;height:2px;
+  position:absolute;left:0;bottom:-1px;height:3px;
   background:linear-gradient(90deg,var(--goud-diep),var(--goud-licht));
   width:100%;transform-origin:left center;z-index:21;
 }
@@ -122,20 +125,15 @@ button{font-family:inherit}
 
 /* ---- Speelvlak ------------------------------------------------- */
 #podium{
-  flex:1 1 auto;
-  overflow-y:auto;
-  overflow-x:hidden;
+  flex:1 1 auto;overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
   display:flex;flex-direction:column;
-  padding:clamp(16px,3vw,32px);
-  padding-block:clamp(18px,3.5vh,40px);
+  padding-inline:clamp(16px,3vw,48px);
+  padding-block:clamp(18px,3vh,44px);
 }
 .vlak{
-  width:100%;max-width:min(1100px,100%);
-  margin:0 auto;
-  display:flex;flex-direction:column;
-  gap:var(--sp-4);
-  flex:1 1 auto;
+  width:100%;max-width:min(1500px,100%);margin:0 auto;
+  display:flex;flex-direction:column;gap:var(--sp-4);flex:1 1 auto;
   animation:opkomen .32s cubic-bezier(.2,.7,.3,1) both;
 }
 .vlak.is-gecentreerd{justify-content:center;text-align:center;align-items:center}
@@ -144,180 +142,175 @@ button{font-family:inherit}
   .vlak{animation:none}
   .klok.is-kritiek{animation:none}
 }
+/* Grote televisies: ruimer kader, weg van de overscanrand. */
+@media (min-width:1500px){
+  #podium{padding-inline:clamp(48px,5vw,120px)}
+  .rail{padding-inline:clamp(48px,5vw,120px)}
+  .besturing{padding-inline:clamp(40px,4vw,100px)}
+}
 
 /* ---- Typografie ------------------------------------------------ */
 .opschrift{
-  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  font-size:calc(var(--schaal) * clamp(.68rem,.92vw,1.05rem));
+  letter-spacing:.2em;text-transform:uppercase;
   color:var(--goud);font-weight:600;margin:0;
 }
 .opschrift.is-stil{color:var(--salie)}
 h1.titel{
-  font-family:var(--display);
-  font-size:clamp(2.4rem,8vw,5rem);
-  font-weight:700;line-height:.98;margin:0;
-  text-wrap:balance;color:var(--ivoor);
+  font-family:var(--display);font-size:var(--fs-titel);
+  font-weight:700;line-height:.98;margin:0;text-wrap:balance;color:var(--ivoor);
 }
 h2.kop{
-  font-family:var(--display);
-  font-size:clamp(1.7rem,5vw,3rem);
-  font-weight:600;line-height:1.05;margin:0;
-  text-wrap:balance;color:var(--ivoor);
+  font-family:var(--display);font-size:var(--fs-kop);
+  font-weight:600;line-height:1.05;margin:0;text-wrap:balance;color:var(--ivoor);
 }
-h3.subkop{
-  font-family:var(--ui);font-size:.95rem;font-weight:600;
-  letter-spacing:.02em;margin:0;color:var(--ivoor-zacht);
-}
-p.lood{
-  margin:0;color:var(--ivoor-zacht);
-  font-size:clamp(.95rem,1.5vw,1.08rem);
-  max-width:62ch;text-wrap:pretty;
-}
-p.fijn{margin:0;color:var(--salie);font-size:.85rem;max-width:64ch}
-.hint{
-  font-family:var(--display);font-style:italic;
-  color:var(--goud-light,var(--goud-licht));
-  font-size:clamp(.95rem,2vw,1.15rem);
-}
+h3.subkop{font-family:var(--ui);font-size:.95rem;font-weight:600;margin:0;color:var(--ivoor-zacht)}
+p.lood{margin:0;color:var(--ivoor-zacht);font-size:var(--fs-lood);max-width:62ch;text-wrap:pretty}
+p.fijn{margin:0;color:var(--salie);font-size:.85rem;max-width:66ch}
 
 /* ---- De vraag (het enige kaartobject op de pagina) -------------- */
 .vraagkaart{
   background:linear-gradient(170deg,#FBF8EF,#EDE6D4);
-  color:#14201B;
-  border-radius:var(--radius);
-  padding:clamp(20px,4vw,44px);
+  color:var(--kaart);border-radius:var(--radius);
+  padding:clamp(20px,3vw,48px);
   box-shadow:0 22px 50px -18px rgba(0,0,0,.75), 0 0 0 1px rgba(201,162,39,.35);
-  display:flex;flex-direction:column;gap:var(--sp-3);
-  position:relative;
+  display:flex;flex-direction:column;gap:var(--sp-3);position:relative;
 }
 .vraagkaart::after{
-  content:attr(data-suit);
-  position:absolute;right:clamp(14px,2.5vw,22px);bottom:clamp(8px,2vw,14px);
-  font-size:clamp(2rem,6vw,3.4rem);color:rgba(20,32,27,.07);
+  content:attr(data-suit);position:absolute;
+  right:clamp(14px,2vw,26px);bottom:clamp(8px,1.5vw,16px);
+  font-size:clamp(2rem,5vw,4rem);color:rgba(20,32,27,.07);
   line-height:1;pointer-events:none;
 }
 .vraagtekst{
-  font-family:var(--display);
-  font-size:clamp(1.35rem,4.2vw,2.5rem);
-  font-weight:600;line-height:1.16;margin:0;
-  text-wrap:balance;color:#14201B;
+  font-family:var(--display);font-size:var(--fs-vraag);
+  font-weight:600;line-height:1.16;margin:0;text-wrap:balance;color:var(--kaart);
 }
+.vraagtekst.is-klein{font-size:calc(var(--fs-vraag) * .55)}
 .emoji-raadsel{
-  font-size:clamp(2.6rem,11vw,5.5rem);
-  line-height:1.25;letter-spacing:.08em;
-  text-align:center;margin:var(--sp-2) 0;
-  word-break:break-word;
+  font-size:var(--fs-emoji);line-height:1.25;letter-spacing:.08em;
+  text-align:center;margin:var(--sp-2) 0;word-break:break-word;
 }
+.emoji-raadsel.is-klein{font-size:calc(var(--fs-emoji) * .5)}
 .lyric{
-  font-family:var(--display);font-style:italic;
-  font-size:clamp(1.4rem,4.6vw,2.6rem);
-  line-height:1.25;color:#14201B;margin:0;text-wrap:balance;
+  font-family:var(--display);font-style:italic;font-size:var(--fs-vraag);
+  line-height:1.25;color:var(--kaart);margin:0;text-wrap:balance;
 }
+.lyric.is-klein{font-size:calc(var(--fs-vraag) * .5)}
 .lyric::before{content:"\201C"}
 .lyric::after{content:"\201D"}
 
-/* ---- Keuzes ---------------------------------------------------- */
-.keuzes{
-  display:grid;gap:var(--sp-2);
-  grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));
+/* ---- Media in de vraag ----------------------------------------- */
+.vraagmedia{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+.vraagmedia img,.vraagmedia video{
+  width:100%;max-width:100%;max-height:52vh;
+  border-radius:10px;display:block;background:#000;
 }
+.vraagmedia img{object-fit:contain}
+.vraagmedia.is-klein img,.vraagmedia.is-klein video{max-height:24vh}
+.mediabijschrift{font-size:.8rem;color:rgba(20,32,27,.55);margin:0}
+.media-mist{
+  border:1.5px dashed rgba(20,32,27,.3);border-radius:10px;
+  padding:var(--sp-4) var(--sp-3);text-align:center;
+  color:rgba(20,32,27,.6);font-size:.9rem;
+  display:flex;flex-direction:column;gap:var(--sp-1);
+}
+.media-mist strong{color:var(--kaart);font-family:var(--mono);font-size:.85rem}
+
+.audiospeler{
+  display:flex;align-items:center;gap:var(--sp-3);
+  background:rgba(20,32,27,.06);border:1px solid rgba(20,32,27,.14);
+  border-radius:12px;padding:clamp(12px,1.6vw,20px);
+}
+.audio-knop{
+  width:clamp(3rem,5vw,4.5rem);height:clamp(3rem,5vw,4.5rem);flex:0 0 auto;
+  border-radius:50%;border:none;background:var(--kaart);color:var(--ivoor);
+  font-size:clamp(1.1rem,2vw,1.7rem);cursor:pointer;display:grid;place-items:center;
+  transition:transform .08s;
+}
+.audio-knop:hover{background:#1E3229}
+.audio-knop:active{transform:scale(.94)}
+.audio-romp{flex:1 1 auto;display:flex;flex-direction:column;gap:.45rem;min-width:0}
+.audio-balk{
+  height:8px;background:rgba(20,32,27,.16);border-radius:4px;
+  cursor:pointer;position:relative;overflow:hidden;
+}
+.audio-voortgang{height:100%;background:var(--kaart);border-radius:4px;width:0}
+.audio-tijd{
+  font-family:var(--mono);font-size:.82rem;color:rgba(20,32,27,.6);
+  font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;
+}
+.audio-titel{font-size:.85rem;color:rgba(20,32,27,.75);font-weight:500}
+
+/* ---- Keuzes ---------------------------------------------------- */
+.keuzes{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))}
 .keuze{
   display:flex;align-items:center;gap:var(--sp-3);
-  padding:clamp(12px,2vw,18px) clamp(14px,2.2vw,20px);
-  background:rgba(20,32,27,.055);
-  border:1px solid rgba(20,32,27,.14);
-  border-radius:10px;
-  font-size:clamp(1rem,2.2vw,1.25rem);
-  color:#14201B;text-align:left;
+  padding:clamp(12px,1.5vw,22px) clamp(14px,1.6vw,24px);
+  background:rgba(20,32,27,.055);border:1px solid rgba(20,32,27,.14);
+  border-radius:10px;font-size:var(--fs-keuze);color:var(--kaart);text-align:left;
 }
 .keuze-letter{
-  font-family:var(--mono);font-size:.95rem;font-weight:500;
-  width:1.9rem;height:1.9rem;flex:0 0 auto;
-  display:grid;place-items:center;border-radius:50%;
-  background:#14201B;color:var(--ivoor);
+  font-family:var(--mono);font-size:calc(var(--fs-keuze) * .72);font-weight:500;
+  width:1.9em;height:1.9em;flex:0 0 auto;display:grid;place-items:center;
+  border-radius:50%;background:var(--kaart);color:var(--ivoor);
 }
-.keuze.is-goed{
-  background:rgba(78,154,107,.18);
-  border-color:var(--groen);
-  box-shadow:inset 0 0 0 1px var(--groen);
-}
+.keuze.is-goed{background:rgba(78,154,107,.18);border-color:var(--groen);box-shadow:inset 0 0 0 1px var(--groen)}
 .keuze.is-goed .keuze-letter{background:var(--groen)}
 
 /* ---- Antwoordonthulling ---------------------------------------- */
 .onthulling{
-  background:var(--vilt-hoog);
-  border:1px solid var(--rand);
-  border-left:3px solid var(--groen);
-  border-radius:var(--radius);
-  padding:clamp(16px,3vw,28px);
-  display:flex;flex-direction:column;gap:var(--sp-2);
+  background:var(--vilt-hoog);border:1px solid var(--rand);
+  border-left:3px solid var(--groen);border-radius:var(--radius);
+  padding:clamp(16px,2.4vw,32px);display:flex;flex-direction:column;gap:var(--sp-2);
 }
 .antwoordtekst{
-  font-family:var(--display);
-  font-size:clamp(1.5rem,5vw,2.8rem);
-  font-weight:600;line-height:1.1;margin:0;
-  color:var(--groen-licht);text-wrap:balance;
+  font-family:var(--display);font-size:var(--fs-antwoord);
+  font-weight:600;line-height:1.1;margin:0;color:var(--groen-licht);text-wrap:balance;
 }
-.toelichting{margin:0;color:var(--ivoor-zacht);font-size:.95rem;max-width:66ch}
+.toelichting{margin:0;color:var(--ivoor-zacht);font-size:var(--fs-lood);max-width:66ch}
 
-/* ---- Puntentoekenning ------------------------------------------ */
-.toekennen{display:flex;flex-direction:column;gap:var(--sp-2)}
-.toekennen-rij{
-  display:grid;gap:var(--sp-2);
-  grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));
+/* ---- Portretjes ------------------------------------------------ */
+.avatar{
+  border-radius:50%;object-fit:cover;flex:0 0 auto;overflow:hidden;
+  background:var(--vilt-diep);border:1px solid var(--rand);
+  display:grid;place-items:center;
+  font-family:var(--ui);font-weight:600;color:var(--goud-licht);
+  text-transform:uppercase;letter-spacing:.02em;line-height:1;
 }
-.punt-knop{
-  display:flex;align-items:center;gap:var(--sp-2);
-  padding:var(--sp-3);
-  background:var(--vilt-hoog);
-  border:1px solid var(--rand);
-  border-radius:10px;
-  color:var(--ivoor-zacht);
-  cursor:pointer;text-align:left;
-  transition:background .15s,border-color .15s,color .15s;
-  font-size:.95rem;
+.avatar-s{width:2rem;height:2rem;font-size:.72rem}
+.avatar-m{width:2.75rem;height:2.75rem;font-size:.9rem}
+.avatar-l{width:clamp(3rem,5vw,5rem);height:clamp(3rem,5vw,5rem);font-size:clamp(1rem,1.6vw,1.6rem)}
+.avatar-xl{width:clamp(4.5rem,9vw,9rem);height:clamp(4.5rem,9vw,9rem);font-size:clamp(1.4rem,2.6vw,2.8rem)}
+.avatar.is-goud{border-color:var(--goud)}
+.avatar-knop{padding:0;border:none;background:none;cursor:pointer;position:relative;flex:0 0 auto}
+.avatar-knop .wissel{
+  position:absolute;right:-2px;bottom:-2px;
+  width:1.15rem;height:1.15rem;border-radius:50%;
+  background:var(--goud);color:var(--inkt);
+  font-size:.62rem;display:grid;place-items:center;
+  border:2px solid var(--vilt);
 }
-.punt-knop:hover{border-color:var(--salie-diep);background:#193527}
-.punt-knop.is-toegekend{
-  background:rgba(78,154,107,.16);
-  border-color:var(--groen);
-  color:var(--ivoor);
-}
-.punt-vink{
-  width:1.55rem;height:1.55rem;flex:0 0 auto;
-  border-radius:50%;border:1.5px solid var(--salie-diep);
-  display:grid;place-items:center;font-size:.85rem;color:transparent;
-}
-.punt-knop.is-toegekend .punt-vink{
-  background:var(--groen);border-color:var(--groen);color:#08130F;
-}
-.punt-naam{flex:1 1 auto;min-width:0}
-.punt-leden{display:block;font-size:.72rem;color:var(--salie);margin-top:1px}
 
-/* ---- Teams / spelers ------------------------------------------- */
-.teamgrid{
-  display:grid;gap:var(--sp-3);
-  grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));
-}
+/* ---- Teams ----------------------------------------------------- */
+.teamgrid{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))}
 .teamkaart{
-  background:var(--vilt-hoog);
-  border:1px solid var(--rand);
-  border-radius:var(--radius);
-  padding:var(--sp-3);
-  display:flex;flex-direction:column;gap:var(--sp-2);
+  background:var(--vilt-hoog);border:1px solid var(--rand);border-radius:var(--radius);
+  padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2);
 }
 .teamkaart-kop{
   display:flex;align-items:center;gap:var(--sp-2);
-  font-family:var(--display);font-size:1.15rem;font-weight:600;
-  color:var(--goud-licht);
+  font-family:var(--display);font-size:calc(var(--schaal) * clamp(1.15rem,1.8vw,1.8rem));
+  font-weight:600;color:var(--goud-licht);
 }
-.teamkaart-kop .suit{font-size:1.25rem}
+.teamkaart-kop .suit{font-size:1.25em}
 .teamkaart-kop .suit.is-rood{color:var(--rood-licht)}
-.chiprij{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.chiprij{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
 .chip{
-  display:inline-flex;align-items:center;gap:.4rem;
-  padding:.38rem .7rem;border-radius:999px;
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.3rem .75rem .3rem .3rem;border-radius:999px;
   background:var(--vilt-diep);border:1px solid var(--rand);
-  color:var(--ivoor-zacht);font-size:.85rem;
+  color:var(--ivoor-zacht);font-size:calc(var(--schaal) * clamp(.85rem,1.2vw,1.15rem));
   cursor:pointer;transition:border-color .15s,color .15s;
 }
 .chip:hover{border-color:var(--goud-diep);color:var(--ivoor)}
@@ -327,95 +320,86 @@ p.fijn{margin:0;color:var(--salie);font-size:.85rem;max-width:64ch}
 /* ---- Klassement ------------------------------------------------ */
 .klassement{display:flex;flex-direction:column;gap:2px;width:100%}
 .klassement-rij{
-  display:grid;
-  grid-template-columns:2.2rem 1fr auto;
+  display:grid;grid-template-columns:2.2rem auto 1fr auto;
   align-items:center;gap:var(--sp-3);
-  padding:clamp(10px,1.8vh,16px) var(--sp-3);
+  padding:clamp(8px,1.4vh,18px) var(--sp-3);
   border-bottom:1px solid var(--rand-zacht);
-  transition:background .2s;
 }
 .klassement-rij:first-child{
   background:linear-gradient(90deg,rgba(201,162,39,.14),transparent 70%);
   border-bottom-color:var(--goud-diep);
 }
-.klassement-plek{
-  font-family:var(--mono);font-size:.95rem;color:var(--salie);
-  font-variant-numeric:tabular-nums;
-}
+.klassement-plek{font-family:var(--mono);font-size:calc(var(--fs-naam)*.6);color:var(--salie);font-variant-numeric:tabular-nums}
 .klassement-rij:first-child .klassement-plek{color:var(--goud)}
 .klassement-naam{
-  font-family:var(--display);
-  font-size:clamp(1.1rem,3vw,1.7rem);
-  font-weight:600;color:var(--ivoor);
+  font-family:var(--display);font-size:var(--fs-naam);font-weight:600;color:var(--ivoor);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .klassement-punten{
-  font-family:var(--mono);
-  font-size:clamp(1.05rem,2.8vw,1.6rem);
+  font-family:var(--mono);font-size:var(--fs-punten);
   color:var(--goud-licht);font-variant-numeric:tabular-nums;
 }
-.klassement-delta{
-  font-family:var(--mono);font-size:.78rem;color:var(--groen-licht);
-  margin-left:.4rem;
-}
+.klassement-delta{font-family:var(--mono);font-size:.6em;color:var(--groen-licht);margin-left:.4rem}
 
 /* ---- Podium ---------------------------------------------------- */
-.podiumrij{
-  display:grid;gap:var(--sp-3);
-  grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));
-  width:100%;align-items:end;
-}
+.podiumrij{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));width:100%;align-items:end}
 .podiumplek{
-  background:var(--vilt-hoog);border:1px solid var(--rand);
-  border-radius:var(--radius);padding:var(--sp-4) var(--sp-3);
-  display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);
+  background:var(--vilt-hoog);border:1px solid var(--rand);border-radius:var(--radius);
+  padding:var(--sp-4) var(--sp-3);display:flex;flex-direction:column;align-items:center;gap:var(--sp-2);
 }
 .podiumplek.is-eerste{
   background:linear-gradient(180deg,rgba(201,162,39,.2),var(--vilt-hoog));
-  border-color:var(--goud);
-  box-shadow:0 0 44px -14px rgba(201,162,39,.6);
+  border-color:var(--goud);box-shadow:0 0 44px -14px rgba(201,162,39,.6);
 }
-.podium-medaille{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1}
-.podium-naam{
-  font-family:var(--display);font-size:clamp(1.2rem,3.4vw,1.9rem);
-  font-weight:600;color:var(--ivoor);text-align:center;
+.podium-medaille{font-size:clamp(1.8rem,3.4vw,3.2rem);line-height:1}
+.podium-naam{font-family:var(--display);font-size:calc(var(--fs-naam)*.95);font-weight:600;color:var(--ivoor);text-align:center}
+.podium-punten{font-family:var(--mono);color:var(--goud-licht);font-size:calc(var(--fs-punten)*.75)}
+
+/* ---- Puntentoekenning ------------------------------------------ */
+.toekennen{display:flex;flex-direction:column;gap:var(--sp-2)}
+.toekennen-rij{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.punt-knop{
+  display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);
+  background:var(--vilt-hoog);border:1px solid var(--rand);border-radius:10px;
+  color:var(--ivoor-zacht);cursor:pointer;text-align:left;
+  transition:background .15s,border-color .15s,color .15s;
+  font-size:calc(var(--schaal) * clamp(.95rem,1.3vw,1.25rem));
 }
-.podium-punten{font-family:var(--mono);color:var(--goud-licht);font-size:1.05rem}
+.punt-knop:hover{border-color:var(--salie-diep);background:#193527}
+.punt-knop.is-toegekend{background:rgba(78,154,107,.16);border-color:var(--groen);color:var(--ivoor)}
+.punt-vink{
+  width:1.55rem;height:1.55rem;flex:0 0 auto;border-radius:50%;
+  border:1.5px solid var(--salie-diep);display:grid;place-items:center;
+  font-size:.85rem;color:transparent;
+}
+.punt-knop.is-toegekend .punt-vink{background:var(--groen);border-color:var(--groen);color:#08130F}
+.punt-naam{flex:1 1 auto;min-width:0}
+.punt-leden{display:block;font-size:.72em;color:var(--salie);margin-top:1px}
 
 /* ---- Formulieren ----------------------------------------------- */
 .veld{display:flex;flex-direction:column;gap:var(--sp-1)}
-.veld-label{
-  font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--salie);font-weight:600;
-}
 input[type=text],input[type=number],textarea,select{
-  width:100%;padding:.7rem .85rem;
-  background:var(--vilt-diep);
-  border:1px solid var(--rand);
-  border-radius:8px;color:var(--ivoor);
+  width:100%;padding:.7rem .85rem;background:var(--vilt-diep);
+  border:1px solid var(--rand);border-radius:8px;color:var(--ivoor);
   font-family:var(--ui);font-size:1rem;
 }
 input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
 textarea{font-family:var(--mono);font-size:.8rem;line-height:1.5;resize:vertical}
 input::placeholder,textarea::placeholder{color:var(--salie-diep)}
 input:focus,textarea:focus,select:focus{border-color:var(--goud-diep);outline:none}
+input[type=file]{display:none}
 
 .spelerlijst{display:flex;flex-direction:column;gap:var(--sp-2)}
 .spelerrij{display:flex;align-items:center;gap:var(--sp-2)}
-.spelerrij .volgnr{
-  font-family:var(--mono);font-size:.8rem;color:var(--salie-diep);
-  width:1.5rem;flex:0 0 auto;text-align:right;
-}
+.spelerrij .volgnr{font-family:var(--mono);font-size:.8rem;color:var(--salie-diep);width:1.3rem;flex:0 0 auto;text-align:right}
 
 /* ---- Knoppen --------------------------------------------------- */
 .knop{
   display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
-  padding:.72rem 1.25rem;border-radius:9px;
-  border:1px solid var(--rand);
+  padding:.72rem 1.25rem;border-radius:9px;border:1px solid var(--rand);
   background:var(--vilt-hoog);color:var(--ivoor-zacht);
   font-size:.9rem;font-weight:500;cursor:pointer;
-  transition:background .15s,border-color .15s,color .15s,transform .08s;
-  white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s,transform .08s;white-space:nowrap;
 }
 .knop:hover{background:#1B3A2C;border-color:var(--salie-diep);color:var(--ivoor)}
 .knop:active{transform:translateY(1px)}
@@ -432,89 +416,115 @@ input:focus,textarea:focus,select:focus{border-color:var(--goud-diep);outline:no
 .knop.is-gevaar:hover{border-color:var(--rood);color:var(--rood-licht);background:rgba(192,69,47,.12)}
 .knoprij{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center}
 
-/* ---- Onderbalk (quizmasterbediening) --------------------------- */
+/* ---- Onderbalk ------------------------------------------------- */
 .besturing{
-  flex:0 0 auto;
-  display:flex;align-items:center;gap:var(--sp-2);
+  flex:0 0 auto;display:flex;align-items:center;gap:var(--sp-2);
   padding:var(--sp-2) clamp(12px,3vw,24px);
   padding-bottom:calc(var(--sp-2) + env(safe-area-inset-bottom,0px));
-  background:rgba(8,19,15,.94);
-  border-top:1px solid var(--rand-zacht);
-  overflow-x:auto;scrollbar-width:thin;
-  position:relative;z-index:20;
+  background:rgba(8,19,15,.94);border-top:1px solid var(--rand-zacht);
+  overflow-x:auto;scrollbar-width:thin;position:relative;z-index:20;
 }
 .besturing::-webkit-scrollbar{height:4px}
 .besturing::-webkit-scrollbar-thumb{background:var(--rand);border-radius:2px}
 .besturing .rek{flex:1 1 auto;min-width:var(--sp-1)}
 
-/* ---- Paneel (overlay) ------------------------------------------ */
+/* ---- Paneel ---------------------------------------------------- */
 .paneel-achtergrond{
-  position:absolute;inset:0;z-index:50;
-  background:rgba(4,10,8,.78);
-  display:flex;align-items:center;justify-content:center;
-  padding:clamp(12px,3vw,28px);
+  position:absolute;inset:0;z-index:50;background:rgba(4,10,8,.8);
+  display:flex;align-items:center;justify-content:center;padding:clamp(12px,3vw,28px);
 }
 .paneel{
-  background:var(--vilt);
-  border:1px solid var(--rand);
-  border-radius:var(--radius);
-  width:min(620px,100%);
-  max-height:min(86vh,720px);
-  overflow-y:auto;
-  padding:clamp(18px,3.5vw,32px);
-  display:flex;flex-direction:column;gap:var(--sp-3);
+  background:var(--vilt);border:1px solid var(--rand);border-radius:var(--radius);
+  width:min(680px,100%);max-height:min(88vh,860px);overflow-y:auto;
+  padding:clamp(18px,3vw,32px);display:flex;flex-direction:column;gap:var(--sp-3);
   box-shadow:0 30px 70px -20px rgba(0,0,0,.9);
 }
 .paneel-kop{display:flex;align-items:flex-start;gap:var(--sp-3)}
-.paneel-kop h2{
-  font-family:var(--display);font-size:1.5rem;font-weight:600;
-  margin:0;flex:1 1 auto;color:var(--ivoor);
+.paneel-kop h2{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;flex:1 1 auto;color:var(--ivoor)}
+
+/* ---- Vragen kiezen --------------------------------------------- */
+.kiesronde{border:1px solid var(--rand);border-radius:10px;overflow:hidden;background:var(--vilt-diep)}
+.kiesronde + .kiesronde{margin-top:var(--sp-2)}
+.kiesronde-kop{
+  display:flex;align-items:center;gap:var(--sp-2);width:100%;
+  padding:.7rem .85rem;background:var(--vilt-hoog);border:none;
+  color:var(--ivoor);cursor:pointer;text-align:left;font-size:.92rem;
+}
+.kiesronde-kop .suit{font-size:1.05rem;color:var(--goud)}
+.kiesronde-kop .suit.is-rood{color:var(--rood-licht)}
+.kiesronde-kop .telling{
+  font-family:var(--mono);font-size:.74rem;color:var(--salie);
+  margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.kiesronde-kop .pijl{color:var(--salie);font-size:.7rem;transition:transform .15s}
+.kiesronde.is-open .kiesronde-kop .pijl{transform:rotate(90deg)}
+.kiesvragen{display:none;flex-direction:column;padding:var(--sp-2)}
+.kiesronde.is-open .kiesvragen{display:flex}
+.kiesvraag{
+  display:flex;align-items:flex-start;gap:var(--sp-2);width:100%;
+  padding:.45rem .3rem;background:none;border:none;
+  color:var(--ivoor-zacht);cursor:pointer;text-align:left;font-size:.85rem;line-height:1.45;
+  border-bottom:1px solid var(--rand-zacht);
+}
+.kiesvraag:last-child{border-bottom:none}
+.kiesvraag:hover{color:var(--ivoor)}
+.kiesvraag.is-uit{color:var(--salie-diep);text-decoration:line-through}
+.vinkje{
+  width:1.15rem;height:1.15rem;flex:0 0 auto;margin-top:.12rem;
+  border-radius:5px;border:1.5px solid var(--salie-diep);
+  display:grid;place-items:center;font-size:.72rem;color:transparent;
+}
+.is-aan > .vinkje{background:var(--goud);border-color:var(--goud);color:var(--inkt)}
+.kiesvraag .merkje{
+  font-family:var(--mono);font-size:.66rem;color:var(--goud-diep);
+  border:1px solid var(--goud-diep);border-radius:4px;padding:0 .3rem;
+  margin-left:.35rem;white-space:nowrap;
 }
 
-/* ---- Checklist ------------------------------------------------- */
+/* ---- Medialijst ------------------------------------------------ */
+.medialijst{display:flex;flex-direction:column;gap:2px;max-height:230px;overflow-y:auto}
+.mediarij{
+  display:grid;grid-template-columns:1.6rem 1fr auto auto;
+  align-items:center;gap:var(--sp-2);padding:.45rem .2rem;
+  border-bottom:1px solid var(--rand-zacht);font-size:.82rem;color:var(--ivoor-zacht);
+}
+.mediarij:last-child{border-bottom:none}
+.mediarij .soort{font-size:.95rem}
+.mediarij .bestand{font-family:var(--mono);font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.mediarij .maat{font-family:var(--mono);font-size:.7rem;color:var(--salie);white-space:nowrap}
+.mediarij.is-mist .bestand{color:var(--rood-licht)}
+
+/* ---- Checklist / rondelijst / pakketten ------------------------ */
 .checklist{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
 .checklist li{
-  display:flex;gap:var(--sp-2);align-items:flex-start;
-  padding:.55rem 0;border-bottom:1px solid var(--rand-zacht);
-  font-size:.9rem;color:var(--ivoor-zacht);
+  display:flex;gap:var(--sp-2);align-items:flex-start;padding:.55rem 0;
+  border-bottom:1px solid var(--rand-zacht);font-size:.9rem;color:var(--ivoor-zacht);
 }
 .checklist li:last-child{border-bottom:none}
 .checklist .merk{color:var(--groen-licht);flex:0 0 auto;font-size:.95rem;line-height:1.5}
 .checklist .merk.is-let-op{color:var(--goud)}
 
-/* ---- Overzicht rondes ------------------------------------------ */
 .rondelijst{display:flex;flex-direction:column;gap:2px}
 .ronderij{
-  display:grid;grid-template-columns:1.6rem 1fr auto;
-  align-items:center;gap:var(--sp-3);
-  padding:.6rem 0;border-bottom:1px solid var(--rand-zacht);
-  font-size:.9rem;text-align:left;width:100%;
-  background:none;border-left:none;border-right:none;border-top:none;
+  display:grid;grid-template-columns:1.6rem 1fr auto;align-items:center;gap:var(--sp-3);
+  padding:.6rem 0;border-bottom:1px solid var(--rand-zacht);font-size:.9rem;
+  text-align:left;width:100%;background:none;border-left:none;border-right:none;border-top:none;
   color:var(--ivoor-zacht);cursor:pointer;
 }
 .ronderij:hover{color:var(--ivoor)}
 .ronderij .suit{font-size:1.1rem;color:var(--goud)}
 .ronderij .suit.is-rood{color:var(--rood-licht)}
-.ronderij .meta{
-  font-family:var(--mono);font-size:.75rem;color:var(--salie);
-  font-variant-numeric:tabular-nums;white-space:nowrap;
-}
+.ronderij .meta{font-family:var(--mono);font-size:.75rem;color:var(--salie);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-/* ---- Pakketkeuze ----------------------------------------------- */
-.pakketkeuze{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+.pakketkeuze{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr))}
 .pakketknop{
-  text-align:left;padding:var(--sp-3);
-  background:var(--vilt-hoog);border:1px solid var(--rand);
-  border-radius:var(--radius);cursor:pointer;color:var(--ivoor-zacht);
-  display:flex;flex-direction:column;gap:.3rem;
+  text-align:left;padding:var(--sp-3);background:var(--vilt-hoog);
+  border:1px solid var(--rand);border-radius:var(--radius);cursor:pointer;
+  color:var(--ivoor-zacht);display:flex;flex-direction:column;gap:.3rem;
   transition:border-color .15s,background .15s;
 }
 .pakketknop:hover{border-color:var(--salie-diep)}
-.pakketknop.is-actief{
-  border-color:var(--goud);
-  background:linear-gradient(180deg,rgba(201,162,39,.13),var(--vilt-hoog));
-  color:var(--ivoor);
-}
+.pakketknop.is-actief{border-color:var(--goud);background:linear-gradient(180deg,rgba(201,162,39,.13),var(--vilt-hoog));color:var(--ivoor)}
 .pakketknop .naam{font-family:var(--display);font-size:1.2rem;font-weight:600;color:var(--ivoor)}
 .pakketknop .beschrijving{font-size:.82rem;color:var(--salie);line-height:1.45}
 .pakketknop .cijfers{font-family:var(--mono);font-size:.74rem;color:var(--goud-diep);letter-spacing:.04em}
@@ -523,57 +533,41 @@ input:focus,textarea:focus,select:focus{border-color:var(--goud-diep);outline:no
 /* ---- Meldingen -------------------------------------------------- */
 .melding{
   position:absolute;left:50%;bottom:calc(var(--sp-4) + env(safe-area-inset-bottom,0px));
-  transform:translateX(-50%);z-index:60;
-  background:var(--vilt-hoog);border:1px solid var(--goud-diep);
-  color:var(--ivoor);padding:.6rem 1.1rem;border-radius:999px;
-  font-size:.85rem;white-space:nowrap;max-width:calc(100% - 32px);
-  overflow:hidden;text-overflow:ellipsis;
-  box-shadow:0 14px 34px -12px rgba(0,0,0,.8);
-  animation:opkomen .25s ease-out both;
+  transform:translateX(-50%);z-index:60;background:var(--vilt-hoog);
+  border:1px solid var(--goud-diep);color:var(--ivoor);
+  padding:.6rem 1.1rem;border-radius:999px;font-size:.85rem;white-space:nowrap;
+  max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 14px 34px -12px rgba(0,0,0,.8);animation:opkomen .25s ease-out both;
 }
 
 /* ---- Diversen --------------------------------------------------- */
 .scheiding{height:1px;background:var(--rand-zacht);border:none;margin:0;width:100%}
 .stapel{display:flex;flex-direction:column;gap:var(--sp-3)}
 .stapel-ruim{display:flex;flex-direction:column;gap:var(--sp-4)}
-.tweekolom{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))}
-.telkaarten{
-  display:grid;gap:var(--sp-2);
-  grid-template-columns:repeat(auto-fit,minmax(min(130px,45%),1fr));
-}
-.telkaart{
-  background:var(--vilt-hoog);border:1px solid var(--rand);
-  border-radius:10px;padding:var(--sp-3);
-  display:flex;flex-direction:column;gap:.15rem;
-}
-.telkaart .waarde{
-  font-family:var(--mono);font-size:1.5rem;color:var(--goud-licht);
-  font-variant-numeric:tabular-nums;line-height:1.1;
-}
+.tweekolom{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))}
+.telkaarten{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(min(130px,45%),1fr))}
+.telkaart{background:var(--vilt-hoog);border:1px solid var(--rand);border-radius:10px;padding:var(--sp-3);display:flex;flex-direction:column;gap:.15rem}
+.telkaart .waarde{font-family:var(--mono);font-size:1.5rem;color:var(--goud-licht);font-variant-numeric:tabular-nums;line-height:1.1}
 .telkaart .etiket{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--salie)}
-.gissing-rij{
-  display:grid;grid-template-columns:1fr 7rem;
-  gap:var(--sp-2);align-items:center;
-}
-.gissing-rij .naam{font-size:.92rem;color:var(--ivoor-zacht);min-width:0}
+.gissing-rij{display:grid;grid-template-columns:1fr 7rem;gap:var(--sp-2);align-items:center}
+.gissing-rij .naam{font-size:.92rem;color:var(--ivoor-zacht);min-width:0;display:flex;align-items:center;gap:var(--sp-2)}
 .gissing-rij .naam small{display:block;color:var(--salie);font-size:.72rem}
-.sneltoetsen{
-  display:grid;gap:var(--sp-1);
-  grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));
-  font-size:.82rem;color:var(--salie);
+.sneltoetsen{display:grid;gap:var(--sp-1);grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));font-size:.82rem;color:var(--salie)}
+.sneltoetsen kbd,.checklist kbd{
+  font-family:var(--mono);font-size:.75rem;background:var(--vilt-diep);
+  border:1px solid var(--rand);border-radius:4px;padding:.1rem .4rem;
+  color:var(--ivoor-zacht);margin-right:.45rem;
 }
-.sneltoetsen kbd{
-  font-family:var(--mono);font-size:.75rem;
-  background:var(--vilt-diep);border:1px solid var(--rand);
-  border-radius:4px;padding:.1rem .4rem;color:var(--ivoor-zacht);
-  margin-right:.45rem;
-}
+.schaalrij{display:flex;align-items:center;gap:var(--sp-2)}
+.schaalrij .waarde{font-family:var(--mono);font-size:.85rem;color:var(--goud-licht);min-width:3.5ch;text-align:center}
+
 @media (max-width:560px){
   .rail-teller{display:none}
   .knop{padding:.62rem 1rem;font-size:.85rem}
   .besturing{flex-wrap:wrap;overflow-x:visible;row-gap:var(--sp-2)}
   .besturing .rek{display:none}
   .besturing .knop.is-hoofd{order:-1;flex:1 1 100%}
+  .klassement-rij{grid-template-columns:1.6rem auto 1fr auto;gap:var(--sp-2)}
 }
 </style>
 
@@ -589,27 +583,34 @@ input:focus,textarea:focus,select:focus{border-color:var(--goud-diep);outline:no
     <span class="klok is-uit" id="klok">&mdash;</span>
     <div class="balk" id="balk" style="transform:scaleX(0)"></div>
   </header>
-
   <main id="podium" tabindex="-1"></main>
-
   <footer class="besturing" id="besturing" hidden></footer>
 </div>
+<input type="file" id="fotoKiezer" accept="image/*">
+<input type="file" id="mediaKiezer" accept="image/*,video/*,audio/*" multiple>
 
 <script>
 /* =================================================================
    BLACKJACKS KWIS — quizmotor
    Werkt volledig offline. Geen server, geen internet, geen account.
-   Alles staat in dit ene bestand.
+   Alles staat in dit ene bestand; media en portretjes komen van je
+   eigen apparaat en blijven in de browser.
    ================================================================= */
 "use strict";
 
 /* -----------------------------------------------------------------
    DE VRAGEN
-   Wil je eigen vragen? Pas hieronder de pakketten aan. Elke ronde:
-     naam, suit, thema, type, tijd (sec), punten, teamModus, vragen[]
    Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij"
-   Extra velden per vraag: emoji, lyric, toelichting, tijd (override)
+   Extra per vraag: emoji, lyric, toelichting, tijd, punten, media
+   Media:  media:{soort:"beeld"|"video"|"muziek", bron:"bestand.jpg",
+                  bijschrift:"optioneel"}
+   "bron" mag een bestandsnaam zijn die je op het startscherm inlaadt,
+   of een data:-URI. Externe adressen werken alleen in het losse
+   bestand, niet in de online versie.
+   Zet optioneel:true op een ronde om hem standaard uit te vinken.
    ----------------------------------------------------------------- */
+const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 300'%3E%3Crect width='480' height='300' fill='rgb(13,30,24)'/%3E%3Ctext x='240' y='128' font-family='Georgia,serif' font-size='110' fill='rgb(201,162,39)' text-anchor='middle'%3E%E2%99%A0%3C/text%3E%3Ctext x='240' y='210' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='rgb(216,210,194)' text-anchor='middle'%3EVoorbeeldafbeelding%3C/text%3E%3Ctext x='240' y='245' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='rgb(138,160,150)' text-anchor='middle'%3EZo verschijnt een beeldvraag op het scherm%3C/text%3E%3C/svg%3E";
+
 const PAKKETTEN = {
   blackjacks: {
     naam: "Blackjacks — Oud & Nieuw",
@@ -700,7 +701,7 @@ const PAKKETTEN = {
            toelichting:"Las doce uvas de la suerte — twaalf gelukdruiven, één per klokslag."},
           {v:"Welk lied wordt in de Engelstalige wereld traditioneel om middernacht gezongen?", a:"Auld Lang Syne"},
           {v:"Welk bewoond land viert als eerste ter wereld nieuwjaar?", a:"Kiribati",
-           toelichting:"Kiritimati (Christmas Island) ligt op UTC+14, de vroegste tijdzone die er bestaat."},
+           toelichting:"Kiritimati ligt op UTC+14, de vroegste tijdzone die er bestaat."},
           {v:"Wat gooien Denen op oudjaarsavond stuk tegen de voordeur van vrienden?", a:"Serviesgoed — borden",
            toelichting:"Hoe groter de schervenberg op je stoep, hoe meer vrienden je hebt."},
           {v:"Welke Nederlandse badplaats staat bekend om de grootste nieuwjaarsduik?", a:"Scheveningen"},
@@ -723,6 +724,38 @@ const PAKKETTEN = {
         ]
       },
       {
+        naam: "Muziekronde",
+        suit: "♦", thema: "Intro’s raden — eigen bestanden",
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        optioneel: true,
+        uitleg: "Laad je eigen muziekfragmenten in op het startscherm. De quizmaster drukt op afspelen; de teams raden het nummer.",
+        vragen: [
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-01.mp3", bijschrift:"Fragment 1"}},
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-02.mp3", bijschrift:"Fragment 2"}},
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-03.mp3", bijschrift:"Fragment 3"}},
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-04.mp3", bijschrift:"Fragment 4"}},
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-05.mp3", bijschrift:"Fragment 5"}},
+          {v:"Welk nummer is dit, en van wie?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"muziek-06.mp3", bijschrift:"Fragment 6"}}
+        ]
+      },
+      {
+        naam: "Beeld & Video",
+        suit: "♣", thema: "Eigen foto’s en filmpjes",
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        optioneel: true,
+        uitleg: "Laad je eigen foto’s en video’s in op het startscherm. Denk aan vakantiekiekjes, jeugdfoto’s of een fragment uit een serie.",
+        vragen: [
+          {v:"Zo ziet een beeldvraag eruit op het scherm.", a:"Dit is de ingebouwde voorbeeldafbeelding",
+           media:{soort:"beeld", bron:DEMO_BEELD, bijschrift:"Ingebouwd voorbeeld — vervang door je eigen foto"},
+           toelichting:"Deze vraag heeft geen eigen bestand nodig; de afbeelding zit in de quiz zelf."},
+          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-01.jpg"}},
+          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-02.jpg"}},
+          {v:"Wie of wat zie je hier?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"beeld-03.jpg"}},
+          {v:"Uit welke film of serie komt dit fragment?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"video-01.mp4"}},
+          {v:"Uit welke film of serie komt dit fragment?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"video-02.mp4"}}
+        ]
+      },
+      {
         naam: "Bliksemronde",
         suit: "♦", thema: "Tien seconden per vraag",
         type: "open", tijd: 10, punten: 1, teamModus: "individueel",
@@ -742,16 +775,16 @@ const PAKKETTEN = {
       },
       {
         naam: "Wie van de Blackjacks?",
-        suit: "♣", thema: "Slotronde",
+        suit: "♠", thema: "Slotronde",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
         uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit met de knoppen.",
         vragen: [
-          {v:"Wie van ons komt het vaakst te laat?", a:"De groep beslist"},
-          {v:"Wie van ons heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
-          {v:"Wie van ons zou het langst overleven op een onbewoond eiland?", a:"De groep beslist"},
-          {v:"Wie van ons heeft de meeste foto’s op de telefoon staan?", a:"De groep beslist"},
-          {v:"Wie van ons kent de meeste songteksten uit het hoofd?", a:"De groep beslist"},
-          {v:"Wie van ons wordt als eerste miljonair?", a:"De groep beslist"}
+          {v:"Wie van de vijf komt het vaakst te laat?", a:"De groep beslist"},
+          {v:"Wie van de vijf heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
+          {v:"Wie van de vijf zou het langst overleven op een onbewoond eiland?", a:"De groep beslist"},
+          {v:"Wie van de vijf heeft de meeste foto’s op de telefoon staan?", a:"De groep beslist"},
+          {v:"Wie van de vijf kent de meeste songteksten uit het hoofd?", a:"De groep beslist"},
+          {v:"Wie van de vijf wordt als eerste miljonair?", a:"De groep beslist"}
         ]
       }
     ]
@@ -759,7 +792,7 @@ const PAKKETTEN = {
 
   familie: {
     naam: "Familie Proefronde",
-    beschrijving: "De generale repetitie. Korter, toegankelijker, geschikt voor alle leeftijden. Ongeveer 35 minuten.",
+    beschrijving: "De generale repetitie. Korter, toegankelijker, geschikt voor alle leeftijden. Vink hieronder aan welke vragen je gebruikt.",
     rondes: [
       {
         naam: "Waar of Niet Waar",
@@ -775,7 +808,11 @@ const PAKKETTEN = {
           {v:"Een struisvogel steekt bij gevaar zijn kop in het zand.", goed:false,
            toelichting:"Ze gaan plat op de grond liggen. Of ze rennen — tot 70 km/u."},
           {v:"Een groot deel van Nederland ligt onder zeeniveau.", goed:true},
-          {v:"De zon is een ster.", goed:true}
+          {v:"De zon is een ster.", goed:true},
+          {v:"Een spin is een insect.", goed:false,
+           toelichting:"Spinnen zijn spinachtigen: acht poten, twee lichaamsdelen. Insecten hebben er zes en drie."},
+          {v:"IJsberen zijn linkshandig.", goed:false,
+           toelichting:"Ook zo’n taaie mythe. Ze gebruiken beide voorpoten even goed."}
         ]
       },
       {
@@ -789,7 +826,9 @@ const PAKKETTEN = {
           {emoji:"👧 🔴 🧺 🐺", v:"Welk sprookje?", a:"Roodkapje"},
           {emoji:"🤖 🌱 🚀", v:"Welke film?", a:"WALL·E"},
           {emoji:"🧸 🍯 🐝", v:"Welk verhaal?", a:"Winnie de Poeh"},
-          {emoji:"🚗 ⚡ 🏁", v:"Welke film?", a:"Cars"}
+          {emoji:"🚗 ⚡ 🏁", v:"Welke film?", a:"Cars"},
+          {emoji:"🦁 👑 🌅", v:"Welke film?", a:"The Lion King"},
+          {emoji:"🐘 👂 🎪", v:"Welke film?", a:"Dumbo"}
         ]
       },
       {
@@ -801,7 +840,8 @@ const PAKKETTEN = {
           {v:"Hoeveel dagen telt een schrikkeljaar?", getal:366, eenheid:"dagen"},
           {v:"Hoeveel tanden en kiezen heeft een volwassen mens, verstandskiezen meegerekend?", getal:32, eenheid:"stuks"},
           {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"},
-          {v:"Hoe oud kan een reuzenschildpad ongeveer worden?", getal:150, eenheid:"jaar"}
+          {v:"Hoe oud kan een reuzenschildpad ongeveer worden?", getal:150, eenheid:"jaar"},
+          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"}
         ]
       },
       {
@@ -817,14 +857,30 @@ const PAKKETTEN = {
           {v:"Wat eet een reuzenpanda vooral?", opties:["Bamboe","Vis","Insecten","Vlees"], goed:0},
           {v:"Hoeveel snaren heeft een gitaar meestal?", opties:["Vier","Vijf","Zes","Zeven"], goed:2},
           {v:"In welk werelddeel ligt Egypte?", opties:["Azië","Afrika","Europa","Zuid-Amerika"], goed:1},
-          {v:"Hoeveel kleuren heeft de Nederlandse vlag?", opties:["Twee","Vier","Drie","Eén"], goed:2}
+          {v:"Hoeveel kleuren heeft de Nederlandse vlag?", opties:["Twee","Vier","Drie","Eén"], goed:2},
+          {v:"Welk land is het grootste ter wereld?", opties:["China","Canada","Rusland","De Verenigde Staten"], goed:2},
+          {v:"Hoeveel poten heeft een kever?", opties:["Vier","Zes","Acht","Tien"], goed:1}
+        ]
+      },
+      {
+        naam: "Beeld & Muziek",
+        suit: "♥", thema: "Eigen familiefoto’s",
+        type: "open", tijd: 40, punten: 2, teamModus: "teams", aantalTeams: 2,
+        optioneel: true,
+        uitleg: "Laad je eigen foto’s, filmpjes of muziek in op het startscherm. Oude familiefoto’s doen het hier altijd goed.",
+        vragen: [
+          {v:"Wie zie je op deze foto?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-01.jpg"}},
+          {v:"Wie zie je op deze foto?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-02.jpg"}},
+          {v:"Waar is deze foto genomen?", a:"Vul je eigen antwoord in", media:{soort:"beeld", bron:"familie-03.jpg"}},
+          {v:"Welk nummer is dit?", a:"Vul je eigen antwoord in", media:{soort:"muziek", bron:"familie-muziek-01.mp3"}},
+          {v:"Wat gebeurt er in dit filmpje?", a:"Vul je eigen antwoord in", media:{soort:"video", bron:"familie-video-01.mp4"}}
         ]
       },
       {
         naam: "Bliksemronde",
         suit: "♠", thema: "Vijftien seconden per vraag",
         type: "open", tijd: 15, punten: 1, teamModus: "individueel",
-        uitleg: "Acht korte vragen. Ieder voor zich, één punt per stuk.",
+        uitleg: "Korte vragen. Ieder voor zich, één punt per stuk.",
         vragen: [
           {v:"Hoeveel poten heeft een spin?", a:"Acht"},
           {v:"Hoeveel dagen zitten er in een week?", a:"Zeven"},
@@ -833,14 +889,17 @@ const PAKKETTEN = {
           {v:"Wat is de hoofdstad van België?", a:"Brussel"},
           {v:"Hoeveel is 7 × 8?", a:"56"},
           {v:"Welke kleur heeft een brandweerauto in Nederland?", a:"Rood"},
-          {v:"Hoeveel wielen heeft een gewone fiets?", a:"Twee"}
+          {v:"Hoeveel wielen heeft een gewone fiets?", a:"Twee"},
+          {v:"Hoeveel maanden heeft een jaar?", a:"Twaalf"},
+          {v:"Welk dier geeft ons melk?", a:"De koe"}
         ]
       }
     ]
   }
 };
 
-const STANDAARD_SPELERS = ["Cas","Sanne","Thijs","Noor","Daan"];
+const STANDAARD_SPELERS = ["Liz","Bastiaan","Joris","Rik","Eva"];
+const STANDAARD_QUIZMASTER = "Cas";
 const TEAMNAMEN = [
   {naam:"Schoppen", suit:"♠"},
   {naam:"Harten",   suit:"♥"},
@@ -851,25 +910,24 @@ const TEAMNAMEN = [
 /* -----------------------------------------------------------------
    STAAT
    ----------------------------------------------------------------- */
-const OPSLAGSLEUTEL = "blackjacks-kwis-v1";
+const OPSLAGSLEUTEL = "blackjacks-kwis-v2";
 const LEEG = () => ({
   pakket: "blackjacks",
-  spelers: STANDAARD_SPELERS.map((n,i) => ({id:"p"+i, naam:n})),
+  quizmaster: STANDAARD_QUIZMASTER,
+  spelers: STANDAARD_SPELERS.map((n,i) => ({id:"p"+i, naam:n, foto:null})),
+  selectie: {},
+  spel: null,
   fase: "start",
   r: 0, v: 0,
-  punten: {},
-  teams: {},
-  toegekend: {},
-  uitgedeeld: {},
-  gissingen: {},
-  standVoorRonde: {},
-  geluid: true,
-  gestartOp: null
+  punten: {}, teams: {}, toegekend: {}, uitgedeeld: {},
+  gissingen: {}, standVoorRonde: {},
+  geluid: true, schaal: 1, gestartOp: null
 });
 
 let S = LEEG();
 let historie = [];
 let meldingTimer = 0;
+let fotoDoelSpeler = null;
 
 const $ = (id) => document.getElementById(id);
 const podium = $("podium"), besturing = $("besturing"), rail = $("rail");
@@ -881,7 +939,8 @@ function esc(s){
 }
 
 function bewaar(){
-  try{ localStorage.setItem(OPSLAGSLEUTEL, JSON.stringify(S)); }catch(e){ /* privémodus: quiz loopt gewoon door */ }
+  try{ localStorage.setItem(OPSLAGSLEUTEL, JSON.stringify(S)); }
+  catch(e){ meld("Opslaan lukte niet — waarschijnlijk te veel portretfoto’s"); }
 }
 function laadOpgeslagen(){
   try{
@@ -896,8 +955,7 @@ function wisOpslag(){ try{ localStorage.removeItem(OPSLAGSLEUTEL); }catch(e){} }
 
 function momentopname(){
   historie.push(JSON.stringify({
-    fase:S.fase, r:S.r, v:S.v,
-    punten:S.punten, toegekend:S.toegekend,
+    fase:S.fase, r:S.r, v:S.v, punten:S.punten, toegekend:S.toegekend,
     uitgedeeld:S.uitgedeeld, gissingen:S.gissingen, teams:S.teams
   }));
   if(historie.length > 50) historie.shift();
@@ -906,24 +964,22 @@ function herstel(){
   const laatste = historie.pop();
   if(!laatste){ meld("Niets om terug te draaien"); return; }
   Object.assign(S, JSON.parse(laatste));
-  stopKlok();
-  bewaar(); teken();
+  stopKlok(); bewaar(); teken();
   meld("Laatste actie teruggedraaid");
 }
 
 /* -----------------------------------------------------------------
    AFGELEIDE WAARDEN
    ----------------------------------------------------------------- */
-const pakket  = () => PAKKETTEN[S.pakket];
-const rondes  = () => pakket().rondes;
+const rondes  = () => (S.spel && S.spel.rondes) || [];
 const ronde   = () => rondes()[S.r];
-const vragen  = () => ronde().vragen;
+const vragen  = () => (ronde() || {vragen:[]}).vragen;
 const vraag   = () => vragen()[S.v];
 const sleutel = () => S.r + ":" + S.v;
 const isRood  = (suit) => suit === "♥" || suit === "♦";
 const speler  = (id) => S.spelers.find(p => p.id === id);
-const vraagTijd = () => (vraag() && vraag().tijd) || ronde().tijd || 30;
-const vraagPunten = () => (vraag() && vraag().punten) || ronde().punten || 1;
+const vraagTijd = () => (vraag() && vraag().tijd) || (ronde() || {}).tijd || 30;
+const vraagPunten = () => (vraag() && vraag().punten) || (ronde() || {}).punten || 1;
 const totaalVragen = () => rondes().reduce((n,r) => n + r.vragen.length, 0);
 
 function klassement(){
@@ -931,13 +987,206 @@ function klassement(){
     .map(p => ({...p, punten: S.punten[p.id] || 0}))
     .sort((a,b) => b.punten - a.punten || a.naam.localeCompare(b.naam,"nl"));
 }
+function initialen(sp){
+  const n = ((sp && sp.naam) || "?").trim();
+  const d = n.split(/\s+/);
+  return (d.length > 1 ? d[0][0] + d[1][0] : n.slice(0,2)) || "?";
+}
+function avatar(sp, maat, extra){
+  const cls = "avatar avatar-" + maat + (extra ? " " + extra : "");
+  if(sp && sp.foto) return `<img class="${cls}" src="${esc(sp.foto)}" alt="${esc(sp.naam)}">`;
+  return `<span class="${cls}" aria-hidden="true">${esc(initialen(sp))}</span>`;
+}
+
+/* -----------------------------------------------------------------
+   VRAGEN KIEZEN — welke rondes en vragen doen mee
+   ----------------------------------------------------------------- */
+function standaardSelectie(pakketId){
+  const uit = {};
+  PAKKETTEN[pakketId].rondes.forEach((r,ri) => {
+    uit[ri] = r.optioneel ? [] : r.vragen.map((_,i) => i);
+  });
+  return uit;
+}
+function selectieVan(pakketId){
+  if(!S.selectie[pakketId]) S.selectie[pakketId] = standaardSelectie(pakketId);
+  return S.selectie[pakketId];
+}
+function vraagAan(pakketId, ri, vi){
+  return (selectieVan(pakketId)[ri] || []).indexOf(vi) >= 0;
+}
+function wisselVraag(pakketId, ri, vi){
+  const sel = selectieVan(pakketId);
+  const lijst = (sel[ri] || []).slice();
+  const i = lijst.indexOf(vi);
+  if(i >= 0) lijst.splice(i,1); else lijst.push(vi);
+  lijst.sort((a,b) => a - b);
+  sel[ri] = lijst;
+  bewaar();
+}
+function wisselRonde(pakketId, ri){
+  const sel = selectieVan(pakketId);
+  const alles = PAKKETTEN[pakketId].rondes[ri].vragen.map((_,i) => i);
+  sel[ri] = (sel[ri] || []).length ? [] : alles;
+  bewaar();
+}
+function gekozenAantal(pakketId){
+  const sel = selectieVan(pakketId);
+  let vragenTotaal = 0, rondesTotaal = 0;
+  PAKKETTEN[pakketId].rondes.forEach((r,ri) => {
+    const n = (sel[ri] || []).length;
+    if(n){ rondesTotaal++; vragenTotaal += n; }
+  });
+  return {rondes: rondesTotaal, vragen: vragenTotaal};
+}
+function stelSamen(){
+  const p = PAKKETTEN[S.pakket];
+  const sel = selectieVan(S.pakket);
+  const lijst = [];
+  p.rondes.forEach((r,ri) => {
+    const idx = (sel[ri] || []).slice().sort((a,b) => a - b);
+    if(!idx.length) return;
+    lijst.push(Object.assign({}, r, {vragen: idx.map(i => r.vragen[i]).filter(Boolean)}));
+  });
+  return {naam: p.naam, pakket: S.pakket, rondes: lijst};
+}
+
+/* -----------------------------------------------------------------
+   MEDIABIBLIOTHEEK — eigen foto's, video's en muziek
+   Bestanden gaan in IndexedDB, zodat ze een herlaadbeurt overleven
+   en niet tegen de kleine localStorage-limiet aanlopen.
+   ----------------------------------------------------------------- */
+const MEDIA = {db:null, blobs:new Map(), urls:new Map(), gereed:false};
+
+function mediaOpenDb(){
+  return new Promise((res) => {
+    try{
+      if(!window.indexedDB) return res(null);
+      const req = indexedDB.open("blackjacks-media", 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains("bestanden")) db.createObjectStore("bestanden");
+      };
+      req.onsuccess = (e) => res(e.target.result);
+      req.onerror = () => res(null);
+      req.onblocked = () => res(null);
+    }catch(e){ res(null); }
+  });
+}
+function mediaOnthoud(naam, blob){
+  MEDIA.blobs.set(naam, blob);
+  const oud = MEDIA.urls.get(naam);
+  if(oud) URL.revokeObjectURL(oud);
+  MEDIA.urls.set(naam, URL.createObjectURL(blob));
+}
+async function mediaLaadAlles(){
+  MEDIA.db = await mediaOpenDb();
+  if(!MEDIA.db){ MEDIA.gereed = true; return; }
+  await new Promise((res) => {
+    try{
+      const tx = MEDIA.db.transaction("bestanden","readonly");
+      const cur = tx.objectStore("bestanden").openCursor();
+      cur.onsuccess = (e) => {
+        const c = e.target.result;
+        if(c){ mediaOnthoud(c.key, c.value); c.continue(); } else res();
+      };
+      cur.onerror = () => res();
+    }catch(e){ res(); }
+  });
+  MEDIA.gereed = true;
+}
+function mediaBewaar(naam, blob){
+  mediaOnthoud(naam, blob);
+  if(!MEDIA.db) return Promise.resolve(false);
+  return new Promise((res) => {
+    try{
+      const tx = MEDIA.db.transaction("bestanden","readwrite");
+      tx.objectStore("bestanden").put(blob, naam);
+      tx.oncomplete = () => res(true);
+      tx.onerror = () => res(false);
+    }catch(e){ res(false); }
+  });
+}
+function mediaWis(naam){
+  const url = MEDIA.urls.get(naam);
+  if(url) URL.revokeObjectURL(url);
+  MEDIA.urls.delete(naam); MEDIA.blobs.delete(naam);
+  if(!MEDIA.db) return Promise.resolve();
+  return new Promise((res) => {
+    try{
+      const tx = MEDIA.db.transaction("bestanden","readwrite");
+      tx.objectStore("bestanden").delete(naam);
+      tx.oncomplete = () => res(); tx.onerror = () => res();
+    }catch(e){ res(); }
+  });
+}
+function mediaBron(m){
+  if(!m || !m.bron) return null;
+  if(/^(data:|blob:|https?:)/i.test(m.bron)) return m.bron;
+  return MEDIA.urls.get(m.bron) || null;
+}
+/* Welke bestandsnamen vraagt dit pakket, en welke daarvan hebben we? */
+function mediaBehoefte(pakketId){
+  const nodig = [];
+  PAKKETTEN[pakketId].rondes.forEach((r,ri) => {
+    r.vragen.forEach((q,vi) => {
+      if(q.media && q.media.bron && !/^(data:|blob:|https?:)/i.test(q.media.bron)){
+        nodig.push({bestand:q.media.bron, soort:q.media.soort, ri, vi, gekozen:vraagAan(pakketId, ri, vi)});
+      }
+    });
+  });
+  return nodig;
+}
+function maatTekst(bytes){
+  if(bytes < 1024) return bytes + " B";
+  if(bytes < 1024*1024) return Math.round(bytes/1024) + " kB";
+  return (bytes/1048576).toFixed(1).replace(".",",") + " MB";
+}
+const SOORTICOON = {beeld:"🖼️", video:"🎬", muziek:"🎵"};
+function soortVanBestand(naam, type){
+  const t = (type || "").toLowerCase();
+  if(t.startsWith("image/")) return "beeld";
+  if(t.startsWith("video/")) return "video";
+  if(t.startsWith("audio/")) return "muziek";
+  if(/\.(jpe?g|png|gif|webp|avif|svg)$/i.test(naam)) return "beeld";
+  if(/\.(mp4|webm|mov|m4v|ogv)$/i.test(naam)) return "video";
+  if(/\.(mp3|m4a|wav|ogg|aac|flac)$/i.test(naam)) return "muziek";
+  return "beeld";
+}
+
+/* -----------------------------------------------------------------
+   PORTRETJES — verkleind tot een vierkant, zodat ze in de
+   browseropslag passen
+   ----------------------------------------------------------------- */
+function verkleinTotVierkant(file, maat){
+  return new Promise((res, rej) => {
+    const lezer = new FileReader();
+    lezer.onerror = () => rej(new Error("lezen mislukt"));
+    lezer.onload = () => {
+      const img = new Image();
+      img.onerror = () => rej(new Error("geen geldige afbeelding"));
+      img.onload = () => {
+        try{
+          const doek = document.createElement("canvas");
+          doek.width = maat; doek.height = maat;
+          const c = doek.getContext("2d");
+          const kant = Math.min(img.width, img.height);
+          c.drawImage(img, (img.width - kant)/2, (img.height - kant)/2, kant, kant, 0, 0, maat, maat);
+          res(doek.toDataURL("image/jpeg", 0.82));
+        }catch(e){ rej(e); }
+      };
+      img.src = lezer.result;
+    };
+    lezer.readAsDataURL(file);
+  });
+}
 
 /* -----------------------------------------------------------------
    TEAMS — wisselen per ronde, punten gaan altijd naar de persoon
    ----------------------------------------------------------------- */
 function maakTeams(rondeIndex){
   const r = rondes()[rondeIndex];
-  const modus = r.teamModus || "individueel";
+  const modus = (r && r.teamModus) || "individueel";
   if(modus === "individueel"){
     return S.spelers.map(p => ({id:"s_"+p.id, naam:p.naam, suit:r.suit, leden:[p.id]}));
   }
@@ -945,16 +1194,14 @@ function maakTeams(rondeIndex){
     return [{id:"allen", naam:"Iedereen", suit:r.suit, leden:S.spelers.map(p=>p.id)}];
   }
   const aantal = Math.max(2, Math.min(r.aantalTeams || 2, Math.max(2, S.spelers.length)));
-  const gehusseld = S.spelers.map(p=>p.id);
+  const gehusseld = S.spelers.map(p => p.id);
   for(let i = gehusseld.length - 1; i > 0; i--){
     const j = Math.floor(Math.random() * (i + 1));
     [gehusseld[i], gehusseld[j]] = [gehusseld[j], gehusseld[i]];
   }
   const teams = Array.from({length: aantal}, (_,i) => ({
-    id: "t" + i,
-    naam: TEAMNAMEN[i % TEAMNAMEN.length].naam,
-    suit: TEAMNAMEN[i % TEAMNAMEN.length].suit,
-    leden: []
+    id:"t"+i, naam:TEAMNAMEN[i % TEAMNAMEN.length].naam,
+    suit:TEAMNAMEN[i % TEAMNAMEN.length].suit, leden:[]
   }));
   gehusseld.forEach((pid, i) => teams[i % aantal].leden.push(pid));
   return teams;
@@ -979,10 +1226,7 @@ function zetUitdeling(key, verdeling){
   const oud = S.uitgedeeld[key] || {};
   for(const sid in oud) S.punten[sid] = (S.punten[sid] || 0) - oud[sid];
   let leeg = true;
-  for(const sid in verdeling){
-    S.punten[sid] = (S.punten[sid] || 0) + verdeling[sid];
-    leeg = false;
-  }
+  for(const sid in verdeling){ S.punten[sid] = (S.punten[sid] || 0) + verdeling[sid]; leeg = false; }
   if(leeg) delete S.uitgedeeld[key]; else S.uitgedeeld[key] = verdeling;
 }
 function verdelingUitTeams(teamIds, puntenPerTeam){
@@ -1013,21 +1257,21 @@ function berekenDichtstbij(){
   const doel = vraag().getal;
   const gissingen = S.gissingen[key] || {};
   const ingevuld = teams.filter(t => gissingen[t.id] != null && gissingen[t.id] !== "");
-  if(!ingevuld.length){ meld("Vul eerst minstens één getal in"); historie.pop(); return; }
+  if(!ingevuld.length){ historie.pop(); meld("Vul eerst minstens één getal in"); return; }
 
-  let besteAfstand = Infinity;
+  let beste = Infinity;
   ingevuld.forEach(t => {
     const afstand = Math.abs(Number(gissingen[t.id]) - doel);
-    if(afstand < besteAfstand) besteAfstand = afstand;
+    if(afstand < beste) beste = afstand;
   });
-  const winnaars = ingevuld.filter(t => Math.abs(Number(gissingen[t.id]) - doel) === besteAfstand);
+  const winnaars = ingevuld.filter(t => Math.abs(Number(gissingen[t.id]) - doel) === beste);
   const puntenPerTeam = {};
-  winnaars.forEach(t => { puntenPerTeam[t.id] = besteAfstand === 0 ? vraagPunten() + 2 : vraagPunten(); });
+  winnaars.forEach(t => { puntenPerTeam[t.id] = beste === 0 ? vraagPunten() + 2 : vraagPunten(); });
 
   S.toegekend[key] = winnaars.map(t => t.id);
   zetUitdeling(key, verdelingUitTeams(S.toegekend[key], puntenPerTeam));
   bewaar(); teken();
-  meld(besteAfstand === 0 ? "Precies goed — bonuspunten!" : "Punten toegekend");
+  meld(beste === 0 ? "Precies goed — bonuspunten!" : "Punten toegekend");
 }
 
 /* -----------------------------------------------------------------
@@ -1039,8 +1283,7 @@ const klokEl = $("klok"), balkEl = $("balk");
 function startKlok(seconden){
   K.totaal = seconden; K.rest = seconden * 1000;
   K.eind = Date.now() + K.rest; K.loopt = true; K.gepiept = {};
-  lusKlok();
-  tekenBesturing();
+  lusKlok(); tekenBesturing();
 }
 function stopKlok(){
   K.loopt = false;
@@ -1057,9 +1300,7 @@ function verlengKlok(sec){
   if(!K.totaal) return;
   K.totaal += sec;
   if(K.loopt) K.eind += sec * 1000; else K.rest += sec * 1000;
-  K.gepiept = {};
-  toonKlok();
-  meld("+" + sec + " seconden");
+  K.gepiept = {}; toonKlok(); meld("+" + sec + " seconden");
 }
 function lusKlok(){
   toonKlok();
@@ -1075,15 +1316,14 @@ function toonKlok(){
   }
   const over = K.loopt ? Math.max(0, K.eind - Date.now()) : K.rest;
   const sec = Math.ceil(over / 1000);
-  klokEl.textContent = K.loopt || over > 0 ? sec : "0";
+  klokEl.textContent = (K.loopt || over > 0) ? sec : "0";
   klokEl.className = "klok" + (sec <= 5 ? " is-kritiek" : sec <= 10 ? " is-waarschuwing" : "");
   if(!K.loopt) klokEl.className += " is-uit";
   balkEl.className = "balk" + (sec <= 5 ? " is-kritiek" : "");
   balkEl.style.transform = "scaleX(" + Math.max(0, over / (K.totaal * 1000)) + ")";
-
   if(K.loopt){
-    if(sec <= 3 && sec > 0 && !K.gepiept[sec]){ K.gepiept[sec] = 1; piep(660, .07); }
-    if(over <= 0){ stopKlok(); piep(300, .5); meld("Tijd is om"); tekenBesturing(); }
+    if(sec <= 3 && sec > 0 && !K.gepiept[sec]){ K.gepiept[sec] = 1; piep(660,.07); }
+    if(over <= 0){ stopKlok(); piep(300,.5); meld("Tijd is om"); tekenBesturing(); }
   }
 }
 
@@ -1116,9 +1356,6 @@ function fanfare(){
   [523,659,784,1047].forEach((hz,i) => setTimeout(() => piep(hz,.28), i*130));
 }
 
-/* -----------------------------------------------------------------
-   MELDINGEN
-   ----------------------------------------------------------------- */
 function meld(tekst){
   const oud = document.querySelector(".melding");
   if(oud) oud.remove();
@@ -1127,26 +1364,108 @@ function meld(tekst){
   el.className = "melding"; el.textContent = tekst;
   el.setAttribute("role","status");
   $("app").appendChild(el);
-  meldingTimer = setTimeout(() => el.remove(), 2600);
+  meldingTimer = setTimeout(() => el.remove(), 2800);
+}
+
+/* -----------------------------------------------------------------
+   MEDIA IN DE VRAAG
+   ----------------------------------------------------------------- */
+function blokMedia(q, klein){
+  const m = q && q.media;
+  if(!m) return "";
+  const bron = mediaBron(m);
+  const kl = klein ? " is-klein" : "";
+  const icoon = SOORTICOON[m.soort] || "📄";
+
+  if(!bron){
+    return `<div class="vraagmedia${kl}">
+      <div class="media-mist">
+        <span>${icoon} Dit bestand is nog niet ingeladen</span>
+        <strong>${esc(m.bron)}</strong>
+        <span>Laad het in op het startscherm — of stel de vraag gewoon voor zonder beeld.</span>
+      </div>
+    </div>`;
+  }
+  const bijschrift = m.bijschrift ? `<p class="mediabijschrift">${esc(m.bijschrift)}</p>` : "";
+  const id = "media-" + S.r + "-" + S.v;
+
+  if(m.soort === "video"){
+    return `<div class="vraagmedia${kl}">
+      <video id="${id}" src="${esc(bron)}" controls playsinline preload="metadata"></video>
+      ${bijschrift}
+    </div>`;
+  }
+  if(m.soort === "muziek"){
+    return `<div class="vraagmedia${kl}">
+      <div class="audiospeler">
+        <button class="audio-knop" data-actie="audio-speel" data-id="${id}" aria-label="Afspelen of pauzeren">&#9654;</button>
+        <span class="audio-romp">
+          <span class="audio-titel">${esc(m.bijschrift || "Fragment")}</span>
+          <span class="audio-balk" data-actie="audio-zoek" data-id="${id}"><span class="audio-voortgang"></span></span>
+          <span class="audio-tijd"><span class="nu">0:00</span><span class="totaal">--:--</span></span>
+        </span>
+        <audio id="${id}" src="${esc(bron)}" preload="metadata"></audio>
+      </div>
+    </div>`;
+  }
+  return `<div class="vraagmedia${kl}">
+    <img src="${esc(bron)}" alt="${esc(m.bijschrift || "Afbeelding bij de vraag")}">
+    ${bijschrift}
+  </div>`;
+}
+
+function tijdTekst(sec){
+  if(!isFinite(sec) || sec < 0) return "--:--";
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return m + ":" + String(s).padStart(2,"0");
+}
+function stopAlleMedia(){
+  podium.querySelectorAll("audio,video").forEach(el => { try{ el.pause(); }catch(e){} });
+}
+function koppelMedia(){
+  podium.querySelectorAll("audio").forEach(el => {
+    const wrap = el.closest(".audiospeler");
+    if(!wrap) return;
+    const voortgang = wrap.querySelector(".audio-voortgang");
+    const nu = wrap.querySelector(".nu");
+    const totaal = wrap.querySelector(".totaal");
+    const knop = wrap.querySelector(".audio-knop");
+    const bij = () => {
+      const d = el.duration;
+      voortgang.style.width = (d ? (el.currentTime / d) * 100 : 0) + "%";
+      nu.textContent = tijdTekst(el.currentTime);
+      totaal.textContent = tijdTekst(d);
+    };
+    el.onloadedmetadata = bij;
+    el.ontimeupdate = bij;
+    el.onplay  = () => { knop.innerHTML = "&#10073;&#10073;"; };
+    el.onpause = () => { knop.innerHTML = "&#9654;"; };
+    el.onended = () => { knop.innerHTML = "&#9654;"; voortgang.style.width = "0%"; };
+    el.onerror = () => { wrap.innerHTML = '<div class="media-mist"><span>Dit bestand kon niet worden afgespeeld.</span></div>'; };
+    bij();
+  });
 }
 
 /* -----------------------------------------------------------------
    TEKENEN
    ----------------------------------------------------------------- */
 function teken(){
+  document.documentElement.style.setProperty("--schaal", S.schaal || 1);
+  stopAlleMedia();
   const metRail = S.fase !== "start";
   rail.hidden = !metRail;
   besturing.hidden = S.fase === "start";
   if(metRail) tekenRail();
   podium.scrollTop = 0;
 
-  if(S.fase === "start")        podium.innerHTML = schermStart();
-  else if(S.fase === "ronde")   podium.innerHTML = schermRonde();
-  else if(S.fase === "vraag")   podium.innerHTML = schermVraag();
-  else if(S.fase === "antwoord")podium.innerHTML = schermAntwoord();
-  else if(S.fase === "stand")   podium.innerHTML = schermStand();
-  else if(S.fase === "einde")   podium.innerHTML = schermEinde();
+  if(S.fase === "start")         podium.innerHTML = schermStart();
+  else if(S.fase === "ronde")    podium.innerHTML = schermRonde();
+  else if(S.fase === "vraag")    podium.innerHTML = schermVraag();
+  else if(S.fase === "antwoord") podium.innerHTML = schermAntwoord();
+  else if(S.fase === "stand")    podium.innerHTML = schermStand();
+  else if(S.fase === "einde")    podium.innerHTML = schermEinde();
 
+  koppelMedia();
   tekenBesturing();
   toonKlok();
 }
@@ -1165,20 +1484,33 @@ function tekenRail(){
 }
 
 /* ---- Startscherm ---- */
+function etiketTeam(r){
+  const m = r.teamModus || "individueel";
+  if(m === "individueel") return "ieder voor zich";
+  if(m === "samen") return "samen tegen de klok";
+  return (r.aantalTeams || 2) + " teams, opnieuw verdeeld";
+}
+
 function schermStart(){
   const opgeslagen = laadOpgeslagen();
   const kanHervatten = opgeslagen && opgeslagen.fase && opgeslagen.fase !== "start";
-  const p = pakket();
-  const nVragen = p.rondes.reduce((n,r) => n + r.vragen.length, 0);
-  const minuten = Math.round(p.rondes.reduce((n,r) => n + r.vragen.length * ((r.tijd||30) + 25), 0) / 60);
+  const pid = S.pakket, p = PAKKETTEN[pid];
+  const telling = gekozenAantal(pid);
+  const minuten = Math.round(p.rondes.reduce((n,r,ri) => {
+    return n + (selectieVan(pid)[ri] || []).length * ((r.tijd || 30) + 25);
+  }, 0) / 60);
 
   let opslagWerkt = true;
   try{ localStorage.setItem("__test__","1"); localStorage.removeItem("__test__"); }catch(e){ opslagWerkt = false; }
 
+  const nodig = mediaBehoefte(pid).filter(x => x.gekozen);
+  const aanwezig = nodig.filter(x => MEDIA.urls.has(x.bestand));
+  const metFoto = S.spelers.filter(s => s.foto).length;
+
   return `
   <div class="vlak stapel-ruim">
     <div class="stapel">
-      <p class="opschrift">Quizmaster &middot; ${esc(S.spelers.length)} spelers</p>
+      <p class="opschrift">Quizmaster &middot; ${esc(S.quizmaster || "niet ingevuld")}</p>
       <h1 class="titel">Blackjacks Kwis</h1>
       <p class="lood">Een quiz die volledig in dit ene scherm draait. Geen internet nodig, geen PowerPoint, geen installatie. De stand wordt na elke handeling bewaard, dus een dichtgeklapte laptop kost je niets.</p>
     </div>
@@ -1196,24 +1528,36 @@ function schermStart(){
     <div class="stapel">
       <p class="opschrift is-stil">Kies een quizpakket</p>
       <div class="pakketkeuze">
-        ${Object.entries(PAKKETTEN).map(([id,pk]) => `
-          <button class="pakketknop${id === S.pakket ? " is-actief" : ""}" data-actie="kies-pakket" data-id="${id}">
+        ${Object.entries(PAKKETTEN).map(([id,pk]) => {
+          const t = gekozenAantal(id);
+          return `<button class="pakketknop${id === pid ? " is-actief" : ""}" data-actie="kies-pakket" data-id="${id}">
             <span class="naam">${esc(pk.naam)}</span>
             <span class="beschrijving">${esc(pk.beschrijving)}</span>
-            <span class="cijfers">${pk.rondes.length} rondes &middot; ${pk.rondes.reduce((n,r)=>n+r.vragen.length,0)} vragen</span>
-          </button>`).join("")}
+            <span class="cijfers">${t.rondes} rondes &middot; ${t.vragen} vragen gekozen</span>
+          </button>`;
+        }).join("")}
       </div>
     </div>
 
     <div class="tweekolom">
       <div class="stapel">
-        <p class="opschrift is-stil">Spelers &mdash; pas de namen aan</p>
+        <p class="opschrift is-stil">Quizmaster</p>
+        <input type="text" id="quizmaster" value="${esc(S.quizmaster)}" maxlength="24"
+               placeholder="Jouw naam" data-invoer="quizmaster" aria-label="Naam van de quizmaster">
+        <p class="fijn">De quizmaster speelt niet mee en staat niet in het klassement.</p>
+
+        <p class="opschrift is-stil" style="margin-top:var(--sp-2)">Spelers &mdash; tik op een portret om een foto te kiezen</p>
         <div class="spelerlijst">
           ${S.spelers.map((sp,i) => `
             <div class="spelerrij">
               <span class="volgnr">${i+1}</span>
+              <button class="avatar-knop" data-actie="kies-foto" data-id="${esc(sp.id)}" aria-label="Kies een foto voor ${esc(sp.naam)}">
+                ${avatar(sp,"m", sp.foto ? "is-goud" : "")}
+                <span class="wissel">${sp.foto ? "&#10003;" : "+"}</span>
+              </button>
               <input type="text" id="speler-${esc(sp.id)}" value="${esc(sp.naam)}" maxlength="24"
                      data-invoer="spelernaam" data-id="${esc(sp.id)}" aria-label="Naam van speler ${i+1}">
+              ${sp.foto ? `<button class="knop is-stil" data-actie="foto-weg" data-id="${esc(sp.id)}" aria-label="Verwijder de foto van ${esc(sp.naam)}">Foto weg</button>` : ""}
               ${S.spelers.length > 2 ? `<button class="knop is-stil is-gevaar" data-actie="speler-weg" data-id="${esc(sp.id)}" aria-label="Verwijder ${esc(sp.naam)}">&times;</button>` : ""}
             </div>`).join("")}
         </div>
@@ -1221,20 +1565,76 @@ function schermStart(){
       </div>
 
       <div class="stapel">
-        <p class="opschrift is-stil">De rondes</p>
-        <div class="rondelijst">
-          ${p.rondes.map((r,i) => `
-            <div class="ronderij" style="cursor:default">
-              <span class="suit${isRood(r.suit) ? " is-rood" : ""}">${r.suit}</span>
-              <span>${esc(r.naam)}<br><span style="color:var(--salie);font-size:.78rem">${esc(r.thema)} &middot; ${etiketTeam(r)}</span></span>
-              <span class="meta">${r.vragen.length} &times; ${r.tijd}s</span>
-            </div>`).join("")}
+        <p class="opschrift is-stil">Welke vragen doen mee</p>
+        <p class="fijn">Vink rondes of losse vragen uit. Handig om de familieversie anders samen te stellen dan de avond met de Blackjacks.</p>
+        <div>
+          ${p.rondes.map((r,ri) => {
+            const sel = selectieVan(pid)[ri] || [];
+            const aan = sel.length > 0;
+            return `<div class="kiesronde${aan ? " is-open" : ""}" data-ronde="${ri}">
+              <button class="kiesronde-kop${aan ? " is-aan" : ""}" data-actie="wissel-ronde" data-id="${ri}">
+                <span class="vinkje">&#10003;</span>
+                <span class="suit${isRood(r.suit) ? " is-rood" : ""}">${r.suit}</span>
+                <span>${esc(r.naam)}${r.optioneel ? ` <span class="merkje">eigen media</span>` : ""}</span>
+                <span class="telling">${sel.length}/${r.vragen.length}</span>
+                <span class="pijl">&#9654;</span>
+              </button>
+              <div class="kiesvragen">
+                ${r.vragen.map((q,vi) => {
+                  const uit = sel.indexOf(vi) < 0;
+                  const label = q.emoji ? q.emoji + " — " + q.v : (q.lyric ? "“" + q.lyric + "”" : q.v);
+                  return `<button class="kiesvraag${uit ? " is-uit" : " is-aan"}" data-actie="wissel-vraag" data-r="${ri}" data-v="${vi}">
+                    <span class="vinkje">&#10003;</span>
+                    <span>${esc(label)}${q.media ? ` <span class="merkje">${SOORTICOON[q.media.soort] || "📄"} ${esc(q.media.bron.length > 28 ? "eigen bestand" : q.media.bron)}</span>` : ""}</span>
+                  </button>`;
+                }).join("")}
+              </div>
+            </div>`;
+          }).join("")}
         </div>
         <div class="telkaarten">
-          <div class="telkaart"><span class="waarde">${nVragen}</span><span class="etiket">vragen</span></div>
+          <div class="telkaart"><span class="waarde">${telling.vragen}</span><span class="etiket">vragen gekozen</span></div>
           <div class="telkaart"><span class="waarde">~${minuten}</span><span class="etiket">minuten</span></div>
         </div>
       </div>
+    </div>
+
+    <div class="stapel">
+      <p class="opschrift is-stil">Eigen foto’s, video’s en muziek</p>
+      <p class="fijn">De bestanden blijven op dit apparaat en overleven een herlaadbeurt. Noem ze zoals de vraag ze verwacht — of laad ze in en koppel ze daarna.</p>
+      <div class="knoprij">
+        <button class="knop" data-actie="kies-media">Bestanden inladen</button>
+        ${MEDIA.urls.size ? `<button class="knop is-stil is-gevaar" data-actie="media-leeg">Alles wissen</button>` : ""}
+        <span class="fijn">${nodig.length ? `${aanwezig.length} van ${nodig.length} gevraagde bestanden gevonden` : "Geen van de gekozen vragen vraagt om een bestand"}</span>
+      </div>
+      ${(nodig.length || MEDIA.urls.size) ? `
+      <div class="medialijst">
+        ${nodig.map(x => {
+          const er = MEDIA.urls.has(x.bestand);
+          const blob = MEDIA.blobs.get(x.bestand);
+          return `<div class="mediarij${er ? "" : " is-mist"}">
+            <span class="soort">${SOORTICOON[x.soort] || "📄"}</span>
+            <span class="bestand">${esc(x.bestand)}</span>
+            <span class="maat">${er ? maatTekst(blob ? blob.size : 0) : "ontbreekt"}</span>
+            ${er
+              ? `<button class="knop is-stil is-gevaar" data-actie="media-weg" data-id="${esc(x.bestand)}" aria-label="Verwijder ${esc(x.bestand)}">&times;</button>`
+              : (function(){
+                  const losse = Array.from(MEDIA.urls.keys()).filter(n => !nodig.some(y => y.bestand === n));
+                  if(!losse.length) return `<span></span>`;
+                  return `<select data-invoer="koppel" data-id="${esc(x.bestand)}" style="width:auto;padding:.28rem .45rem;font-size:.74rem" aria-label="Koppel een ingeladen bestand aan ${esc(x.bestand)}"><option value="">koppel&hellip;</option>${losse.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("")}</select>`;
+                })()}
+          </div>`;
+        }).join("")}
+        ${Array.from(MEDIA.urls.keys()).filter(n => !nodig.some(x => x.bestand === n)).map(n => {
+          const blob = MEDIA.blobs.get(n);
+          return `<div class="mediarij">
+            <span class="soort">${SOORTICOON[soortVanBestand(n, blob && blob.type)] || "📄"}</span>
+            <span class="bestand" style="color:var(--salie)">${esc(n)} — niet gekoppeld</span>
+            <span class="maat">${maatTekst(blob ? blob.size : 0)}</span>
+            <button class="knop is-stil is-gevaar" data-actie="media-weg" data-id="${esc(n)}" aria-label="Verwijder ${esc(n)}">&times;</button>
+          </div>`;
+        }).join("")}
+      </div>` : ""}
     </div>
 
     <div class="stapel">
@@ -1242,24 +1642,19 @@ function schermStart(){
       <ul class="checklist">
         <li><span class="merk">&check;</span><span><strong>Werkt zonder internet.</strong> Alles zit in dit bestand. Ook als de wifi eruit ligt, loopt de quiz door.</span></li>
         <li><span class="merk${opslagWerkt ? "" : " is-let-op"}">${opslagWerkt ? "&check;" : "!"}</span><span><strong>${opslagWerkt ? "Automatisch bewaren staat aan." : "Automatisch bewaren lukt niet."}</strong> ${opslagWerkt ? "Na elke handeling wordt de stand opgeslagen." : "Je browser blokkeert opslag (privémodus?). De quiz werkt, maar herlaad de pagina niet."}</span></li>
+        <li><span class="merk${metFoto === S.spelers.length ? "" : " is-let-op"}">${metFoto === S.spelers.length ? "&check;" : "!"}</span><span><strong>${metFoto} van de ${S.spelers.length} spelers heeft een portret.</strong> Portretten verschijnen bij de teams, in het klassement en op het podium.</span></li>
+        <li><span class="merk${(!nodig.length || aanwezig.length === nodig.length) ? "" : " is-let-op"}">${(!nodig.length || aanwezig.length === nodig.length) ? "&check;" : "!"}</span><span><strong>${!nodig.length ? "Geen losse mediabestanden nodig." : aanwezig.length + " van de " + nodig.length + " mediabestanden ingeladen."}</strong> ${(nodig.length && aanwezig.length < nodig.length) ? "Ontbrekende bestanden tonen een nette melding; de vraag loopt gewoon door." : "Alles staat klaar."}</span></li>
         <li><span class="merk${S.geluid ? "" : " is-let-op"}">${S.geluid ? "&check;" : "!"}</span><span><strong>Geluid staat ${S.geluid ? "aan" : "uit"}.</strong> Aftelpiepjes bij de laatste drie seconden. Te wisselen in het menu.</span></li>
-        <li><span class="merk is-let-op">!</span><span><strong>Zet je scherm op volledig scherm.</strong> Op de meeste laptops met <kbd>F11</kbd>, op een Mac met <kbd>ctrl</kbd>+<kbd>cmd</kbd>+<kbd>F</kbd>.</span></li>
-        <li><span class="merk is-let-op">!</span><span><strong>Pen en papier voor iedereen.</strong> Spelers schrijven hun antwoord op; jij onthult en deelt de punten uit.</span></li>
+        <li><span class="merk is-let-op">!</span><span><strong>Op de televisie:</strong> zet je scherm op volledig scherm (<kbd>F11</kbd>, of <kbd>ctrl</kbd>+<kbd>cmd</kbd>+<kbd>F</kbd> op een Mac) en stel de tekstgrootte bij in het menu als het vanaf de bank te klein oogt.</span></li>
       </ul>
     </div>
 
     <div class="knoprij">
-      <button class="knop is-hoofd is-groot" data-actie="start-quiz">Start de quiz</button>
+      <button class="knop is-hoofd is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Start de quiz</button>
       <button class="knop is-stil" data-actie="menu">Menu &amp; sneltoetsen</button>
+      ${telling.vragen ? "" : `<span class="fijn" style="color:var(--rood-licht)">Kies eerst minstens één vraag.</span>`}
     </div>
   </div>`;
-}
-
-function etiketTeam(r){
-  const m = r.teamModus || "individueel";
-  if(m === "individueel") return "ieder voor zich";
-  if(m === "samen") return "samen tegen de klok";
-  return (r.aantalTeams || 2) + " teams, opnieuw verdeeld";
 }
 
 /* ---- Ronde-intro ---- */
@@ -1283,7 +1678,10 @@ function schermRonde(){
             <div class="teamkaart-kop"><span class="suit${isRood(t.suit) ? " is-rood" : ""}">${t.suit}</span> ${esc(t.naam)}</div>
             <div class="chiprij">
               ${t.leden.length
-                ? t.leden.map(id => `<button class="chip${inTeams ? "" : " is-vast"}" ${inTeams ? `data-actie="verplaats" data-id="${esc(id)}"` : "disabled"}>${esc((speler(id)||{}).naam || "?")}</button>`).join("")
+                ? t.leden.map(id => {
+                    const sp = speler(id);
+                    return `<button class="chip${inTeams ? "" : " is-vast"}" ${inTeams ? `data-actie="verplaats" data-id="${esc(id)}"` : "disabled"}>${avatar(sp,"s")}${esc((sp||{}).naam || "?")}</button>`;
+                  }).join("")
                 : `<span class="fijn">leeg</span>`}
             </div>
           </div>`).join("")}
@@ -1306,11 +1704,12 @@ function schermVraag(){
   <div class="vlak" style="justify-content:center">
     <div class="vraagkaart" data-suit="${r.suit}">
       <p class="opschrift">Vraag ${S.v + 1} &middot; ${vraagPunten()} ${vraagPunten() === 1 ? "punt" : "punten"}</p>
+      ${blokMedia(q, false)}
       ${q.emoji ? `<div class="emoji-raadsel">${q.emoji}</div>` : ""}
       ${q.lyric ? `<p class="lyric">${esc(q.lyric)}</p>` : ""}
       <p class="vraagtekst">${esc(q.v)}</p>
       ${blokKeuzes(q, r, false)}
-      ${q.eenheid ? `<p class="fijn" style="color:#5D6F66">Antwoord in ${esc(q.eenheid)}.</p>` : ""}
+      ${q.eenheid ? `<p class="mediabijschrift">Antwoord in ${esc(q.eenheid)}.</p>` : ""}
     </div>
   </div>`;
 }
@@ -1345,9 +1744,10 @@ function schermAntwoord(){
   <div class="vlak">
     <div class="vraagkaart" data-suit="${r.suit}">
       <p class="opschrift">Vraag ${S.v + 1} van ${vragen().length}</p>
-      ${q.emoji ? `<div class="emoji-raadsel" style="font-size:clamp(2rem,7vw,3.4rem)">${q.emoji}</div>` : ""}
-      ${q.lyric ? `<p class="lyric" style="font-size:clamp(1.1rem,3vw,1.6rem)">${esc(q.lyric)}</p>` : ""}
-      <p class="vraagtekst" style="font-size:clamp(1.1rem,2.8vw,1.6rem)">${esc(q.v)}</p>
+      ${blokMedia(q, true)}
+      ${q.emoji ? `<div class="emoji-raadsel is-klein">${q.emoji}</div>` : ""}
+      ${q.lyric ? `<p class="lyric is-klein">${esc(q.lyric)}</p>` : ""}
+      <p class="vraagtekst is-klein">${esc(q.v)}</p>
       ${blokKeuzes(q, r, true)}
     </div>
 
@@ -1369,13 +1769,16 @@ function blokToekennen(){
   <div class="toekennen">
     <p class="opschrift is-stil">Wie had het goed? &mdash; ${vraagPunten()} ${vraagPunten() === 1 ? "punt" : "punten"} per keer</p>
     <div class="toekennen-rij">
-      ${teams.map(t => `
-        <button class="punt-knop${gekozen.includes(t.id) ? " is-toegekend" : ""}" data-actie="ken-toe" data-id="${esc(t.id)}">
+      ${teams.map(t => {
+        const soloSpeler = !inTeams && t.leden.length === 1 ? speler(t.leden[0]) : null;
+        return `<button class="punt-knop${gekozen.includes(t.id) ? " is-toegekend" : ""}" data-actie="ken-toe" data-id="${esc(t.id)}">
           <span class="punt-vink">&check;</span>
+          ${soloSpeler ? avatar(soloSpeler,"m") : ""}
           <span class="punt-naam">${esc(t.naam)}
             ${inTeams ? `<small class="punt-leden">${esc(t.leden.map(id => (speler(id)||{}).naam).join(", ") || "leeg")}</small>` : ""}
           </span>
-        </button>`).join("")}
+        </button>`;
+      }).join("")}
     </div>
   </div>`;
 }
@@ -1393,11 +1796,12 @@ function blokGissingen(){
       ${teams.map(t => {
         const waarde = gissingen[t.id];
         const afstand = (waarde != null && waarde !== "") ? Math.abs(Number(waarde) - doel) : null;
+        const solo = t.leden.length === 1 ? speler(t.leden[0]) : null;
         return `
         <div class="gissing-rij">
-          <span class="naam">${esc(t.naam)}${gekozen.includes(t.id) ? ' <span style="color:var(--groen-licht)">&check;</span>' : ""}
-            ${afstand != null ? `<small>${afstand === 0 ? "precies goed" : afstand.toLocaleString("nl-NL") + " ernaast"}</small>` : "<small>nog niets</small>"}
-          </span>
+          <span class="naam">${solo ? avatar(solo,"s") : ""}<span>${esc(t.naam)}${gekozen.includes(t.id) ? ' <span style="color:var(--groen-licht)">&check;</span>' : ""}
+            <small>${afstand != null ? (afstand === 0 ? "precies goed" : afstand.toLocaleString("nl-NL") + " ernaast") : "nog niets"}</small>
+          </span></span>
           <input type="number" id="gis-${esc(t.id)}" inputmode="numeric" placeholder="getal"
                  value="${waarde != null ? esc(waarde) : ""}"
                  data-invoer="gissing" data-id="${esc(t.id)}" aria-label="Getal van ${esc(t.naam)}">
@@ -1422,7 +1826,7 @@ function schermStand(){
       <p class="opschrift">${esc(r.naam)} zit erop</p>
       <h2 class="kop">Tussenstand</h2>
       ${S.r + 1 < rondes().length
-        ? `<p class="lood">Hierna: <strong>${esc(rondes()[S.r+1].naam)}</strong> &mdash; ${esc(rondes()[S.r+1].thema.toLowerCase())}, ${etiketTeam(rondes()[S.r+1])}.</p>`
+        ? `<p class="lood">Hierna: <strong>${esc(rondes()[S.r+1].naam)}</strong> &mdash; ${esc(String(rondes()[S.r+1].thema).toLowerCase())}, ${etiketTeam(rondes()[S.r+1])}.</p>`
         : `<p class="lood">Dit was de laatste ronde. Tijd voor de uitslag.</p>`}
     </div>
     <div class="klassement">
@@ -1431,6 +1835,7 @@ function schermStand(){
         return `
         <div class="klassement-rij">
           <span class="klassement-plek">${i+1}</span>
+          ${avatar(p,"l", i === 0 ? "is-goud" : "")}
           <span class="klassement-naam">${esc(p.naam)}</span>
           <span class="klassement-punten">${p.punten}${winst > 0 ? `<span class="klassement-delta">+${winst}</span>` : ""}</span>
         </div>`;
@@ -1448,24 +1853,26 @@ function schermEinde(){
   return `
   <div class="vlak stapel-ruim is-gecentreerd">
     <div class="stapel is-gecentreerd" style="align-items:center">
-      <p class="opschrift">${esc(pakket().naam)}</p>
+      <p class="opschrift">${esc(S.spel ? S.spel.naam : "")}</p>
       <h1 class="titel">${esc(lijst[0] ? lijst[0].naam : "Niemand")} wint</h1>
-      <p class="lood" style="text-align:center">Met ${lijst[0] ? lijst[0].punten : 0} punten uit ${totaalVragen()} vragen.</p>
+      <p class="lood" style="text-align:center">Met ${lijst[0] ? lijst[0].punten : 0} punten uit ${totaalVragen()} vragen. Quizmaster: ${esc(S.quizmaster || "—")}.</p>
     </div>
 
     <div class="podiumrij">
       ${volgorde.map(i => top[i] ? `
         <div class="podiumplek${i === 0 ? " is-eerste" : ""}">
           <span class="podium-medaille">${medailles[i]}</span>
+          ${avatar(top[i],"xl", i === 0 ? "is-goud" : "")}
           <span class="podium-naam">${esc(top[i].naam)}</span>
           <span class="podium-punten">${top[i].punten} punten</span>
         </div>` : "").join("")}
     </div>
 
-    <div class="klassement" style="max-width:520px">
+    <div class="klassement" style="max-width:620px">
       ${lijst.map((p,i) => `
         <div class="klassement-rij">
           <span class="klassement-plek">${i+1}</span>
+          ${avatar(p,"m")}
           <span class="klassement-naam">${esc(p.naam)}</span>
           <span class="klassement-punten">${p.punten}</span>
         </div>`).join("")}
@@ -1535,36 +1942,27 @@ function naarRonde(i){
   bewaar(); teken();
 }
 function startRonde(){
-  if(!S.standVoorRonde[S.r]) S.standVoorRonde[S.r] = {...S.punten};
+  if(!S.standVoorRonde[S.r]) S.standVoorRonde[S.r] = Object.assign({}, S.punten);
   S.v = 0; S.fase = "vraag";
   bewaar(); teken(); startKlok(vraagTijd());
 }
-function toonAntwoord(){
-  stopKlok();
-  S.fase = "antwoord";
-  bewaar(); teken();
-}
+function toonAntwoord(){ stopKlok(); S.fase = "antwoord"; bewaar(); teken(); }
 function volgendeVraag(){
   stopKlok();
   if(S.v + 1 < vragen().length){
-    S.v++; S.fase = "vraag";
-    bewaar(); teken(); startKlok(vraagTijd());
+    S.v++; S.fase = "vraag"; bewaar(); teken(); startKlok(vraagTijd());
   } else {
-    S.fase = "stand"; K.totaal = 0;
-    bewaar(); teken();
+    S.fase = "stand"; K.totaal = 0; bewaar(); teken();
   }
 }
 function terug(){
   stopKlok(); K.totaal = 0;
   if(S.fase === "vraag"){
     if(S.v > 0){ S.v--; S.fase = "antwoord"; } else { S.fase = "ronde"; }
-  } else if(S.fase === "antwoord"){
-    S.fase = "vraag";
-  } else if(S.fase === "stand"){
-    S.fase = "antwoord"; S.v = vragen().length - 1;
-  } else if(S.fase === "einde"){
-    S.fase = "stand"; S.r = rondes().length - 1;
-  } else if(S.fase === "ronde"){
+  } else if(S.fase === "antwoord"){ S.fase = "vraag"; }
+  else if(S.fase === "stand"){ S.fase = "antwoord"; S.v = vragen().length - 1; }
+  else if(S.fase === "einde"){ S.fase = "stand"; S.r = rondes().length - 1; }
+  else if(S.fase === "ronde"){
     if(S.r > 0){ S.r--; S.v = vragen().length - 1; S.fase = "stand"; }
     else { S.fase = "start"; }
   }
@@ -1572,8 +1970,7 @@ function terug(){
 }
 function naarEinde(){
   stopKlok(); K.totaal = 0;
-  S.fase = "einde";
-  bewaar(); teken();
+  S.fase = "einde"; bewaar(); teken();
   fanfare(); vierFeest();
 }
 
@@ -1599,6 +1996,7 @@ function openPaneel(html){
 
 function paneelMenu(){
   const lijst = klassement();
+  const inSpel = S.fase !== "start" && S.spel;
   openPaneel(`
     <div class="paneel-kop">
       <h2>Menu</h2>
@@ -1606,10 +2004,22 @@ function paneelMenu(){
     </div>
 
     <div class="stapel">
+      <p class="opschrift is-stil">Tekstgrootte op de televisie</p>
+      <div class="schaalrij">
+        <button class="knop" data-actie="schaal-neer" aria-label="Kleiner">A&minus;</button>
+        <span class="waarde">${Math.round((S.schaal || 1) * 100)}%</span>
+        <button class="knop" data-actie="schaal-op" aria-label="Groter">A+</button>
+        <span class="fijn">Groter maken als het vanaf de bank te klein oogt.</span>
+      </div>
+    </div>
+
+    <hr class="scheiding">
+
+    <div class="stapel">
       <p class="opschrift is-stil">Stand handmatig bijstellen</p>
       ${lijst.map(p => `
         <div class="gissing-rij" style="grid-template-columns:1fr auto">
-          <span class="naam">${esc(p.naam)}<small>${p.punten} punten</small></span>
+          <span class="naam">${avatar(p,"s")}<span>${esc(p.naam)}<small>${p.punten} punten</small></span></span>
           <span class="knoprij">
             <button class="knop" data-actie="punt-min" data-id="${esc(p.id)}">&minus;1</button>
             <button class="knop" data-actie="punt-plus" data-id="${esc(p.id)}">+1</button>
@@ -1617,8 +2027,8 @@ function paneelMenu(){
         </div>`).join("")}
     </div>
 
+    ${inSpel ? `
     <hr class="scheiding">
-
     <div class="stapel">
       <p class="opschrift is-stil">Spring naar een ronde</p>
       <div class="rondelijst">
@@ -1629,7 +2039,7 @@ function paneelMenu(){
             <span class="meta">${i === S.r ? "nu" : r.vragen.length + " vragen"}</span>
           </button>`).join("")}
       </div>
-    </div>
+    </div>` : ""}
 
     <hr class="scheiding">
 
@@ -1648,8 +2058,8 @@ function paneelMenu(){
         <span><kbd>&larr;</kbd>een stap terug</span>
         <span><kbd>P</kbd>klok pauzeren</span>
         <span><kbd>T</kbd>30 seconden erbij</span>
+        <span><kbd>M</kbd>muziek of video afspelen</span>
         <span><kbd>Z</kbd>laatste actie ongedaan</span>
-        <span><kbd>Esc</kbd>venster sluiten</span>
       </div>
     </div>
   `);
@@ -1658,8 +2068,9 @@ function paneelMenu(){
 function bouwUitslag(){
   const lijst = klassement();
   const regels = [];
-  regels.push("BLACKJACKS KWIS — " + pakket().naam);
+  regels.push("BLACKJACKS KWIS — " + (S.spel ? S.spel.naam : PAKKETTEN[S.pakket].naam));
   regels.push(new Date().toLocaleString("nl-NL"));
+  regels.push("Quizmaster: " + (S.quizmaster || "—"));
   regels.push("");
   regels.push("EINDSTAND");
   lijst.forEach((p,i) => regels.push((i+1) + ". " + p.naam + " — " + p.punten + " punten"));
@@ -1669,9 +2080,7 @@ function bouwUitslag(){
     const basis = S.standVoorRonde[ri];
     if(!basis) return;
     const volgende = S.standVoorRonde[ri+1] || S.punten;
-    const winst = S.spelers
-      .map(p => p.naam + " " + ((volgende[p.id] || 0) - (basis[p.id] || 0)))
-      .join(", ");
+    const winst = S.spelers.map(p => p.naam + " " + ((volgende[p.id] || 0) - (basis[p.id] || 0))).join(", ");
     regels.push((ri+1) + ". " + r.suit + " " + r.naam + " — " + winst);
   });
   return regels.join("\n");
@@ -1713,15 +2122,12 @@ function vierFeest(){
   if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   pasDoekAan();
   const kleuren = ["#C9A227","#EBD27C","#F5F0E4","#C0452F","#4E9A6B"];
-  snippers = Array.from({length: 150}, () => ({
+  snippers = Array.from({length: 170}, () => ({
     x: Math.random() * doek.clientWidth,
     y: -20 - Math.random() * doek.clientHeight * .6,
-    b: 5 + Math.random() * 6,
-    h: 8 + Math.random() * 10,
-    vy: 1.8 + Math.random() * 2.6,
-    vx: -1 + Math.random() * 2,
-    hoek: Math.random() * Math.PI,
-    draai: -.08 + Math.random() * .16,
+    b: 5 + Math.random() * 7, h: 9 + Math.random() * 11,
+    vy: 1.8 + Math.random() * 2.8, vx: -1 + Math.random() * 2,
+    hoek: Math.random() * Math.PI, draai: -.08 + Math.random() * .16,
     kleur: kleuren[Math.floor(Math.random() * kleuren.length)]
   }));
   if(feestRaf) cancelAnimationFrame(feestRaf);
@@ -1748,20 +2154,41 @@ window.addEventListener("resize", pasDoekAan);
 /* -----------------------------------------------------------------
    ACTIES
    ----------------------------------------------------------------- */
+function speelPauzeerMedia(id){
+  const el = id ? $(id) : podium.querySelector("audio,video");
+  if(!el) return;
+  if(el.paused) el.play().catch(() => meld("Afspelen lukte niet")); else el.pause();
+}
+
 const ACTIES = {
   "kies-pakket": (id) => { S.pakket = id; S.teams = {}; bewaar(); teken(); },
+  "wissel-ronde": (id) => { wisselRonde(S.pakket, Number(id)); teken(); },
+  "wissel-vraag": (id, el) => { wisselVraag(S.pakket, Number(el.dataset.r), Number(el.dataset.v)); teken(); },
+
   "speler-erbij": () => {
-    const nr = S.spelers.length + 1;
-    S.spelers.push({id:"p" + Date.now().toString(36), naam:"Speler " + nr});
+    S.spelers.push({id:"p" + Date.now().toString(36), naam:"Speler " + (S.spelers.length + 1), foto:null});
     S.teams = {}; bewaar(); teken();
   },
   "speler-weg": (id) => {
     S.spelers = S.spelers.filter(p => p.id !== id);
     delete S.punten[id]; S.teams = {}; bewaar(); teken();
   },
+  "kies-foto": (id) => { fotoDoelSpeler = id; $("fotoKiezer").value = ""; $("fotoKiezer").click(); },
+  "foto-weg": (id) => { const sp = speler(id); if(sp){ sp.foto = null; bewaar(); teken(); } },
+
+  "kies-media": () => { $("mediaKiezer").value = ""; $("mediaKiezer").click(); },
+  "media-weg": async (id) => { await mediaWis(id); teken(); meld("Bestand verwijderd"); },
+  "media-leeg": async () => {
+    if(!confirm("Alle ingeladen mediabestanden wissen?")) return;
+    for(const naam of Array.from(MEDIA.urls.keys())) await mediaWis(naam);
+    teken(); meld("Mediabibliotheek geleegd");
+  },
+
   "start-quiz": () => {
     wekGeluid();
     S.spelers.forEach((p,i) => { if(!p.naam.trim()) p.naam = "Speler " + (i+1); });
+    S.spel = stelSamen();
+    if(!S.spel.rondes.length){ meld("Kies eerst minstens één vraag"); return; }
     S.punten = {}; S.toegekend = {}; S.uitgedeeld = {}; S.gissingen = {};
     S.teams = {}; S.standVoorRonde = {}; historie = [];
     S.gestartOp = Date.now();
@@ -1772,12 +2199,13 @@ const ACTIES = {
     if(!d){ meld("Geen opgeslagen quiz gevonden"); return; }
     wekGeluid();
     S = Object.assign(LEEG(), d);
-    historie = [];
-    stopKlok(); K.totaal = 0;
+    if(!S.spel || !S.spel.rondes || !S.spel.rondes.length){ S.fase = "start"; S.spel = null; }
+    historie = []; stopKlok(); K.totaal = 0;
     teken();
     meld("Quiz hervat — de klok staat stil");
   },
   "vergeet": () => { wisOpslag(); teken(); meld("Opgeslagen quiz gewist"); },
+
   "herverdeel": () => { momentopname(); S.teams[S.r] = maakTeams(S.r); bewaar(); teken(); meld("Teams opnieuw verdeeld"); },
   "verplaats": (id) => { momentopname(); verplaatsSpeler(id); bewaar(); teken(); },
   "start-ronde": () => { wekGeluid(); startRonde(); },
@@ -1787,21 +2215,28 @@ const ACTIES = {
   "naar-einde": naarEinde,
   "terug": terug,
   "pauze": pauzeerKlok,
-  "klok-start": () => { startKlok(vraagTijd()); tekenBesturing(); },
+  "klok-start": () => { startKlok(vraagTijd()); },
   "plus30": () => verlengKlok(30),
   "ken-toe": (id) => wisselToekenning(id),
   "bereken": berekenDichtstbij,
   "undo": herstel,
+  "audio-speel": (id) => speelPauzeerMedia(id),
+  "audio-zoek": (id, el) => {
+    const a = $(id);
+    if(!a || !a.duration) return;
+    const vak = el.getBoundingClientRect();
+    const deel = Math.min(1, Math.max(0, (laatsteKlikX - vak.left) / vak.width));
+    a.currentTime = deel * a.duration;
+  },
+
   "menu": paneelMenu,
   "sluit": sluitPaneel,
   "spring": (id) => { sluitPaneel(); naarRonde(Number(id)); },
-  "punt-plus": (id) => { momentopname(); S.punten[id] = (S.punten[id]||0) + 1; bewaar(); paneelMenu(); teken(); },
-  "punt-min":  (id) => { momentopname(); S.punten[id] = (S.punten[id]||0) - 1; bewaar(); paneelMenu(); teken(); },
-  "geluid": () => {
-    S.geluid = !S.geluid;
-    if(S.geluid){ wekGeluid(); piep(880,.1); }
-    bewaar(); paneelMenu(); teken();
-  },
+  "schaal-op":   () => { S.schaal = Math.min(1.6, Math.round(((S.schaal||1) + .1) * 10) / 10); bewaar(); teken(); paneelMenu(); },
+  "schaal-neer": () => { S.schaal = Math.max(0.8, Math.round(((S.schaal||1) - .1) * 10) / 10); bewaar(); teken(); paneelMenu(); },
+  "punt-plus": (id) => { momentopname(); S.punten[id] = (S.punten[id]||0) + 1; bewaar(); teken(); paneelMenu(); },
+  "punt-min":  (id) => { momentopname(); S.punten[id] = (S.punten[id]||0) - 1; bewaar(); teken(); paneelMenu(); },
+  "geluid": () => { S.geluid = !S.geluid; if(S.geluid){ wekGeluid(); piep(880,.1); } bewaar(); teken(); paneelMenu(); },
   "exporteer": () => { sluitPaneel(); paneelExport(); },
   "kopieer": () => {
     const ta = $("uitslag-tekst");
@@ -1822,38 +2257,75 @@ const ACTIES = {
     }catch(e){ meld("Opslaan lukte niet — gebruik Kopieer"); }
   },
   "opnieuw": () => {
-    if(!confirm("Weet je het zeker? De hele stand wordt gewist.")) return;
+    if(!confirm("Weet je het zeker? De hele stand wordt gewist. Spelers, portretten en media blijven bewaard.")) return;
     sluitPaneel(); wisOpslag();
-    const geluid = S.geluid;
-    S = LEEG(); S.geluid = geluid;
+    const bewaard = {
+      spelers:S.spelers, quizmaster:S.quizmaster, selectie:S.selectie,
+      geluid:S.geluid, schaal:S.schaal, pakket:S.pakket
+    };
+    S = Object.assign(LEEG(), bewaard);
     historie = []; stopKlok(); K.totaal = 0;
-    teken();
+    bewaar(); teken();
   }
 };
 
 /* -----------------------------------------------------------------
    GEBEURTENISSEN
    ----------------------------------------------------------------- */
+let laatsteKlikX = 0;
 $("app").addEventListener("click", (e) => {
+  laatsteKlikX = e.clientX;
   const doel = e.target.closest("[data-actie]");
   if(!doel) return;
   const fn = ACTIES[doel.dataset.actie];
-  if(fn) fn(doel.dataset.id);
+  if(fn) fn(doel.dataset.id, doel);
 });
 
 $("app").addEventListener("input", (e) => {
   const doel = e.target.closest("[data-invoer]");
   if(!doel) return;
-  if(doel.dataset.invoer === "spelernaam"){
+  const soort = doel.dataset.invoer;
+  if(soort === "spelernaam"){
     const p = speler(doel.dataset.id);
     if(p){ p.naam = doel.value; bewaar(); }
-  }
-  if(doel.dataset.invoer === "gissing"){
+  } else if(soort === "quizmaster"){
+    S.quizmaster = doel.value; bewaar();
+  } else if(soort === "gissing"){
     const key = sleutel();
     if(!S.gissingen[key]) S.gissingen[key] = {};
     S.gissingen[key][doel.dataset.id] = doel.value;
     bewaar();
   }
+});
+
+$("app").addEventListener("change", (e) => {
+  const doel = e.target.closest("[data-invoer='koppel']");
+  if(!doel || !doel.value) return;
+  const blob = MEDIA.blobs.get(doel.value);
+  if(!blob) return;
+  mediaBewaar(doel.dataset.id, blob).then(() => { teken(); meld("Bestand gekoppeld"); });
+});
+
+$("fotoKiezer").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file || !fotoDoelSpeler) return;
+  try{
+    const data = await verkleinTotVierkant(file, 256);
+    const sp = speler(fotoDoelSpeler);
+    if(sp){ sp.foto = data; bewaar(); teken(); meld("Portret ingesteld"); }
+  }catch(err){ meld("Die afbeelding kon niet worden gelezen"); }
+  fotoDoelSpeler = null;
+});
+
+$("mediaKiezer").addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  let gelukt = 0;
+  for(const f of files){
+    try{ await mediaBewaar(f.name, f); gelukt++; }catch(err){}
+  }
+  teken();
+  meld(gelukt + (gelukt === 1 ? " bestand ingeladen" : " bestanden ingeladen") + (MEDIA.db ? "" : " — niet bewaard na herladen"));
 });
 
 document.addEventListener("keydown", (e) => {
@@ -1873,6 +2345,7 @@ document.addEventListener("keydown", (e) => {
   else if(e.key === "ArrowRight"){ e.preventDefault(); if(S.fase === "vraag") toonAntwoord(); else if(S.fase === "antwoord") volgendeVraag(); }
   else if(e.key === "p" || e.key === "P"){ if(S.fase === "vraag") pauzeerKlok(); }
   else if(e.key === "t" || e.key === "T"){ if(S.fase === "vraag") verlengKlok(30); }
+  else if(e.key === "m" || e.key === "M"){ speelPauzeerMedia(null); }
   else if(e.key === "z" || e.key === "Z"){ herstel(); }
 });
 
@@ -1884,6 +2357,9 @@ document.addEventListener("keydown", (e) => {
   if(d && d.fase === "start") S = Object.assign(LEEG(), d);
   pasDoekAan();
   teken();
+
+  mediaLaadAlles().then(() => { if(S.fase === "start") teken(); });
+
   if(window.claude && typeof window.claude.use === "function"){
     window.claude.use("downloads")
       .then(cap => { downloadsCap = cap || null; })
