@@ -4,6 +4,10 @@
   import { cubicOut } from 'svelte/easing';
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
+  import Teller from '$lib/client/Teller.svelte';
+  import Confetti from '$lib/client/Confetti.svelte';
+  import { flip } from 'svelte/animate';
+  import * as geluid from '$lib/client/geluid';
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
@@ -24,17 +28,136 @@
     return naam.slice(0, 2);
   }
 
+  /* ---- Geluid ---------------------------------------------------------
+     Browsers laten pas geluid toe na een echte aanraking, dus de eerste klik
+     of toetsaanslag wekt de audio. Tot dat moment staat er een discrete
+     hint in beeld. */
+  let geluidAan = $state(true);
+  let gewekt = $state(false);
+
+  function wekGeluid() {
+    geluid.wek();
+    gewekt = geluid.isGewekt();
+  }
+
+  function wisselGeluid() {
+    wekGeluid();
+    geluidAan = !geluidAan;
+    geluid.zetAan(geluidAan);
+  }
+
+  /* ---- De stand: eerst de oude volgorde, dan schuiven ------------------
+     Het scorebord verschijnt in de volgorde van vóór deze ronde en gaat pas
+     daarna naar de nieuwe. Dat is het moment waar het bij een quiz om draait:
+     je ziet iemand stijgen. */
+  let toonNieuweVolgorde = $state(false);
+
+  let standOud = $derived(
+    [...(staat?.stand ?? [])].sort((a, b) => {
+      const pa = live.vorigePunten[a.spelerId] ?? a.punten;
+      const pb = live.vorigePunten[b.spelerId] ?? b.punten;
+      return pb - pa || a.naam.localeCompare(b.naam, 'nl');
+    }),
+  );
+  let standNu = $derived(toonNieuweVolgorde ? (staat?.stand ?? []) : standOud);
+
+  /* ---- Geluidsmomenten -------------------------------------------------
+     Elk geluid hangt aan een overgang, niet aan een toestand. Zonder deze
+     vergelijking met de vorige waarde zou elke binnenkomende momentopname
+     het geluid opnieuw afspelen. */
+  let vorigeFase = $state('');
+  let vorigeVraag = $state('');
+  let vorigAantalIngeleverd = $state(0);
+  let vorigeSeconde = $state(99);
+  let vorigePuntenSom = $state(-1);
+
+  $effect(() => {
+    const st = live.staat;
+    if (!st) return;
+    const vraagSleutel = `${st.rondeIndex}:${st.vraag?.index ?? -1}`;
+
+    if (st.fase !== vorigeFase) {
+      if (st.fase === 'ronde') geluid.rondeStart();
+      if (st.fase === 'antwoord') geluid.onthul();
+      if (st.fase === 'stand' || st.fase === 'einde') {
+        toonNieuweVolgorde = false;
+        geluid.roffel();
+        // Even de oude volgorde laten staan, dan laten schuiven.
+        setTimeout(() => (toonNieuweVolgorde = true), 900);
+        if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), 1100);
+      }
+      vorigeFase = st.fase;
+    }
+
+    if (st.fase === 'vraag' && vraagSleutel !== vorigeVraag) {
+      geluid.vraagOp();
+      vorigeVraag = vraagSleutel;
+      vorigAantalIngeleverd = 0;
+      vorigeSeconde = 99;
+    }
+
+    if (st.fase === 'vraag' && st.ingeleverd.length > vorigAantalIngeleverd) {
+      geluid.ingeleverd();
+    }
+    vorigAantalIngeleverd = st.ingeleverd.length;
+
+    // Punten erbij tijdens de onthulling: een kort signaal.
+    const som = st.stand.reduce((n, r) => n + r.punten, 0);
+    if (vorigePuntenSom >= 0 && som > vorigePuntenSom && st.fase === 'antwoord') geluid.juist();
+    vorigePuntenSom = som;
+  });
+
+  /* ---- Aftikken in de laatste seconden -------------------------------- */
+  let restSec = $state(99);
+  onMount(() => {
+    const t = setInterval(() => {
+      const st = live.staat;
+      if (!st?.klok?.loopt) {
+        restSec = 99;
+        return;
+      }
+      const sec = Math.ceil(live.resterendMs() / 1000);
+      restSec = sec;
+      if (sec < vorigeSeconde && sec <= 5 && sec > 0) geluid.tik(sec <= 3);
+      if (sec <= 0 && vorigeSeconde > 0) geluid.tijdOm();
+      vorigeSeconde = sec;
+    }, 120);
+    return () => clearInterval(t);
+  });
+
+  let spanning = $derived(restSec <= 5 && live.staat?.klok?.loopt === true);
+
   onMount(() => {
     live.start();
     void live.meld('tv').catch(() => {});
-    return () => live.stop();
+    const opGebaar = () => wekGeluid();
+    window.addEventListener('pointerdown', opGebaar, { once: true });
+    window.addEventListener('keydown', opGebaar, { once: true });
+    return () => {
+      live.stop();
+      window.removeEventListener('pointerdown', opGebaar);
+      window.removeEventListener('keydown', opGebaar);
+    };
   });
 </script>
 
 <svelte:head><title>Blackjack Quiz 26/27</title></svelte:head>
 
-<div class="scherm">
-  {#if staat && staat.fase !== 'lobby'}
+<div class="scherm" class:spanning>
+  <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->
+  <div class="spanningsrand" aria-hidden="true"></div>
+
+  <button
+    class="geluidsknop"
+    onclick={wisselGeluid}
+    title={gewekt ? (geluidAan ? 'Geluid uit' : 'Geluid aan') : 'Klik om geluid aan te zetten'}
+    aria-label={geluidAan ? 'Geluid uit' : 'Geluid aan'}
+  >
+    {#if !gewekt}🔇 klik voor geluid{:else if geluidAan}🔊{:else}🔈{/if}
+  </button>
+
+  <!-- De rondekop hoort bij het spel, niet bij het aanmelden of de uitslag. -->
+  {#if staat && staat.fase !== 'lobby' && staat.fase !== 'einde'}
     <header class="rail">
       <span class="suit" class:rood>{ronde?.suit}</span>
       <span class="titel">
@@ -189,16 +312,18 @@
           <h1 class="groot" in:fly={{ y: 22, duration: 520, delay: 60, easing: cubicOut }}>Tussenstand</h1>
           <hr class="rule" style="animation-delay:.25s" />
           <div class="stand">
-            {#each staat.stand as r, i (r.spelerId)}
-              <div class="standrij" style="--i:{i}">
+            {#each standNu as r, i (r.spelerId)}
+              <div class="standrij" class:leider={toonNieuweVolgorde && i === 0} style="--i:{i}" animate:flip={{ duration: 720, easing: cubicOut }}>
                 <span class="plek">{i + 1}</span>
                 {#if r.foto}
-                  <img class="avatar m" class:goud={i === 0} src={r.foto} alt="" />
+                  <img class="avatar m" class:goud={toonNieuweVolgorde && i === 0} src={r.foto} alt="" />
                 {:else}
-                  <span class="avatar m" class:goud={i === 0}>{initialen(r.naam)}</span>
+                  <span class="avatar m" class:goud={toonNieuweVolgorde && i === 0}>{initialen(r.naam)}</span>
                 {/if}
                 <span class="naam">{r.naam}</span>
-                <span class="standpunten">{r.punten}</span>
+                <span class="standpunten">
+                  <Teller naar={r.punten} van={live.vorigePunten[r.spelerId] ?? r.punten} vertraging={250} />
+                </span>
               </div>
             {/each}
           </div>
@@ -206,6 +331,7 @@
 
         <!-- ══ De uitslag ═════════════════════════════════════════════ -->
       {:else if staat.fase === 'einde'}
+        <Confetti />
         <div style="display:flex;flex-direction:column;gap:clamp(1rem,2.5vh,2rem);align-items:center;text-align:center">
           <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
           <h1 class="mega" in:scale={{ start: 0.86, duration: 760, delay: 200, easing: cubicOut }}>
@@ -226,7 +352,10 @@
                     <span class="avatar l" class:goud={idx === 0}>{initialen(top3[idx].naam)}</span>
                   {/if}
                   <span class="naam">{top3[idx].naam}</span>
-                  <span class="punten">{top3[idx].punten} punten</span>
+                  <span class="punten">
+                    <Teller naar={top3[idx].punten} van={live.vorigePunten[top3[idx].spelerId] ?? top3[idx].punten} vertraging={600 + positie * 200} />
+                    punten
+                  </span>
                 </div>
               {/if}
             {/each}

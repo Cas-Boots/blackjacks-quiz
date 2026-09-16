@@ -168,7 +168,7 @@
       <p class="etiket stil">Stand</p>
       <div class="stand">
         {#each staat?.stand ?? [] as r, i (r.spelerId)}
-          <div class="standrij">
+          <div class="standrij" class:leider={i === 0}>
             <span style="font-family:var(--mono);color:var(--salie)">{i + 1}</span>
             <span></span>
             <span class="naam" style="font-size:1.1rem">{r.naam}</span>

@@ -21,6 +21,9 @@ class Live {
   afwijking = $state(0);
   /** Waar de stand vandaan komt, voor het hostscherm. */
   bron = $state<'stroom' | 'navragen' | 'geen'>('geen');
+  /** De punten zoals ze vóór de laatste wijziging stonden. Hiermee kan het
+   *  scorebord van oud naar nieuw tellen in plaats van te springen. */
+  vorigePunten = $state<Record<number, number>>({});
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -47,6 +50,16 @@ class Live {
     if (!staat) return;
     // Nooit terug in de tijd.
     if (this.staat && staat.versie < this.staat.versie) return;
+
+    // Bewaar de vorige punten zodra ze echt veranderen.
+    if (this.staat) {
+      const oud = Object.fromEntries(this.staat.stand.map((r) => [r.spelerId, r.punten]));
+      const nieuw = Object.fromEntries(staat.stand.map((r) => [r.spelerId, r.punten]));
+      const verschil = staat.stand.some((r) => (oud[r.spelerId] ?? 0) !== r.punten);
+      if (verschil) this.vorigePunten = oud;
+      else if (!Object.keys(this.vorigePunten).length) this.vorigePunten = nieuw;
+    }
+
     this.afwijking = staat.serverTijd - Date.now();
     this.staat = staat;
   }

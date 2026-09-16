@@ -164,7 +164,7 @@
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
         <div class="stand" style="margin-top:.5rem">
           {#each staat.stand as r, i (r.spelerId)}
-            <div class="standrij" style="--i:{i}">
+            <div class="standrij" class:leider={i === 0} style="--i:{i}">
               <span class="plek">{i + 1}</span>
               {#if r.foto}
                 <img class="avatar" class:goud={i === 0} src={r.foto} alt="" />
