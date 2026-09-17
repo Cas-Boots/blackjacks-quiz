@@ -1,5 +1,16 @@
-// AUTOMATISCH GEGENEREERD — niet met de hand aanpassen.
-// Bron: ../../index.html. Opnieuw genereren met: npm run content:sync
+/**
+ * DE VRAGEN — dit is de enige plek waar je ze aanpast.
+ *
+ * Dit bestand is getypt (zie types.ts), dus een vergeten antwoord of een
+ * verkeerd vraagtype valt bij `npm run check` al om. De losse HTML-quiz in
+ * ../../../index.html krijgt hetzelfde blok via `npm run content:sync`;
+ * CI controleert dat de twee gelijk lopen.
+ *
+ * Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij" | "stem"
+ * Bij "stem" kiest iedereen op zijn telefoon een medespeler; wie met de
+ * meerderheid meestemt krijgt de punten. Zet er toch een `a` bij: dat is
+ * wat de losse quiz laat zien, waar de groep het met de hand beslist.
+ */
 import type { Pakketten } from './types';
 
 const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 300'%3E%3Crect width='480' height='300' fill='rgb(13,30,24)'/%3E%3Ctext x='240' y='128' font-family='Georgia,serif' font-size='110' fill='rgb(201,162,39)' text-anchor='middle'%3E%E2%99%A0%3C/text%3E%3Ctext x='240' y='210' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='rgb(216,210,194)' text-anchor='middle'%3EVoorbeeldafbeelding%3C/text%3E%3Ctext x='240' y='245' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='rgb(138,160,150)' text-anchor='middle'%3EZo verschijnt een beeldvraag op het scherm%3C/text%3E%3C/svg%3E";
@@ -241,8 +252,8 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Wie van de Blackjacks?",
         suit: "♥", thema: "Slotronde", sfeer: "vilt",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit.",
+        type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [
           {v:"Wie van de vijf heeft 2026 het best gebruikt?", a:"De groep beslist"},
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},

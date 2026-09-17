@@ -11,6 +11,8 @@
   import Media from '$lib/client/Media.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
+  import { houdWakker } from '$lib/client/wakker';
+  import { prijsIcoon } from '$lib/shared/prijzen';
   import {
     kies, kanteling, metNaam, BEGROETINGEN, WACHTZINNEN, RONDEZINNEN, NIEMAND,
     IEDEREEN_FOUT, IEDEREEN_GOED, LANTAARN, POEDEL, VER_ERNAAST,
@@ -251,11 +253,14 @@
     const wacht = setInterval(() => (wachtTeller += 1), 7000);
     live.start();
     void live.meld('tv').catch(() => {});
+    // De laptop aan de televisie mag niet halverwege in de schermbeveiliging schieten.
+    const laatSlapen = houdWakker();
     const opGebaar = () => wekGeluid();
     window.addEventListener('pointerdown', opGebaar, { once: true });
     window.addEventListener('keydown', opGebaar, { once: true });
     return () => {
       clearInterval(wacht);
+      laatSlapen();
       live.stop();
       window.removeEventListener('pointerdown', opGebaar);
       window.removeEventListener('keydown', opGebaar);
@@ -509,7 +514,23 @@
             <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
           {/if}
           {#if staat.inzendingen.length}
-            {#if vraag.type === 'dichtstbij' && staat.onthulling?.getal !== undefined}
+            {#if vraag.type === 'stem' && staat.onthulling?.stemmen}
+              <div class="stemtelling" in:fade={{ duration: 400, delay: 500 }}>
+                {#each staat.onthulling.stemmen as t, n (t.naam)}
+                  {@const sp = staat.spelers.find((x) => x.naam === t.naam)}
+                  {@const meeste = staat.onthulling.stemmen[0].aantal}
+                  <div class="stemrij" class:wint={t.aantal === meeste} style="--i:{n}" in:fly={{ x: -18, duration: 380, delay: 500 + n * 120, easing: cubicOut }}>
+                    <span class="kroonhouder" class:kroon={t.aantal === meeste}>
+                      {#if sp?.foto}<img class="avatar m" src={sp.foto} alt="" />{:else}<span class="avatar m">{initialen(t.naam)}</span>{/if}
+                    </span>
+                    <span class="naam">{t.naam}</span>
+                    <span class="stembalk"><i style="--deel:{t.aantal / Math.max(1, staat.inzendingen.length)}"></i></span>
+                    <span class="stemaantal">{t.aantal}</span>
+                    <span class="stemmers">{t.van.map(naamVan).join(', ')}</span>
+                  </div>
+                {/each}
+              </div>
+            {:else if vraag.type === 'dichtstbij' && staat.onthulling?.getal !== undefined}
               <div in:fade={{ duration: 400, delay: 600 }}>
                 <Getallenlijn
                   doel={staat.onthulling.getal}
@@ -598,10 +619,10 @@
               {/if}
               {#each staat.prijzen as p, i (p.sleutel)}
                 <div class="prijs" in:fly={{ y: 20, duration: 520, delay: WINNAAR_NA_MS + 1200 + i * 260, easing: cubicOut }}>
-                  <span class="prijsicoon" aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
+                  <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
                   <span class="prijstitel">{p.titel}</span>
-                  <span class="prijsnaam">{p.namen.join(' & ')}</span>
-                  <span class="prijsdetail">{p.detail}</span>
+                  {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}
+                  <span class="prijsdetail" class:lang={!p.namen.length}>{p.detail}</span>
                 </div>
               {/each}
             </div>
@@ -619,6 +640,9 @@
               {/each}
             </div>
           {/if}
+          <p class="fijn" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 2600 }}>
+            De hele avond staat op {joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}/uitslag/{staat.spelId}
+          </p>
         </div>
       {/if}
     </div>

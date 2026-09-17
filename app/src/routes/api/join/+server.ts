@@ -44,12 +44,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       const naam = String(body.naam ?? '').trim();
       if (!naam) error(400, 'vul een naam in');
       if (naam.length > MAX_NAAM_TEKENS) error(400, `een naam is hooguit ${MAX_NAAM_TEKENS} tekens`);
+      let nieuw = false;
       try {
-        speler = voegDeelnemerToe(spel, naam);
+        ({ speler, nieuw } = voegDeelnemerToe(spel, naam));
       } catch (e) {
         error(400, (e as Error).message);
       }
-      schrijfLog(spel.id, 'gast', `${speler.naam} schuift aan`, null);
+      if (nieuw) schrijfLog(spel.id, 'gast', `${speler.naam} schuift aan`, null);
     } else {
       const spelerId = Number(body.spelerId);
       speler = db.select().from(spelers).where(eq(spelers.id, spelerId)).get();

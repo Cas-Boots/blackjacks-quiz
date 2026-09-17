@@ -4,6 +4,8 @@
 
   let pin = $state('');
   let fout = $state('');
+  let gastNaam = $state('');
+  let bezig = $state(false);
   let spelers = $derived(live.staat?.spelers ?? []);
 
   onMount(() => {
@@ -18,6 +20,26 @@
       location.href = '/play';
     } catch (e) {
       fout = 'Aanmelden lukte niet. Probeer het nog eens.';
+    }
+  }
+
+  /** Iemand die niet in de lijst staat: naam intikken en aanschuiven. */
+  async function alsGast() {
+    const naam = gastNaam.trim();
+    if (!naam || bezig) return;
+    fout = '';
+    bezig = true;
+    try {
+      await live.meld('speler', { naam });
+      location.href = '/play';
+    } catch (e) {
+      let reden = '';
+      try {
+        reden = JSON.parse(String((e as Error).message)).message ?? '';
+      } catch { /* geen JSON */ }
+      fout = reden || 'Aanschuiven lukte niet. Probeer het nog eens.';
+    } finally {
+      bezig = false;
     }
   }
 
@@ -53,6 +75,15 @@
       {/each}
     </div>
 
+    <p class="opschrift stil" style="margin-top:.6rem">Sta je er niet bij?</p>
+    <div class="knoprij">
+      <input
+        type="text" bind:value={gastNaam} placeholder="Je naam" maxlength="24" autocomplete="off"
+        style="max-width:14rem" onkeydown={(e) => e.key === 'Enter' && alsGast()} aria-label="Je naam"
+      />
+      <button class="knop" onclick={alsGast} disabled={bezig || !gastNaam.trim()}>Schuif aan</button>
+    </div>
+
     <hr class="rule" style="margin:1rem 0" />
 
     <p class="opschrift stil">Quizmaster</p>
@@ -63,6 +94,7 @@
       />
       <button class="knop" onclick={alsQuizmaster}>Hostscherm</button>
       <a class="knop stil" href="/tv">Televisiescherm</a>
+      <a class="knop stil" href="/uitslag">Eerdere uitslagen</a>
     </div>
   </div>
 </div>

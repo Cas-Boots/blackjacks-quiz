@@ -7,6 +7,8 @@
   import Media from '$lib/client/Media.svelte';
   import Podium from '$lib/client/Podium.svelte';
   import { maakPortret } from '$lib/client/portret';
+  import { houdWakker } from '$lib/client/wakker';
+  import { prijsIcoon } from '$lib/shared/prijzen';
   import { kies, kanteling, JUICH, TROOST, NIETS_INGELEVERD, REACTIES } from '$lib/shared/kwinkslagen';
 
   let antwoord = $state('');
@@ -105,7 +107,12 @@
 
   onMount(() => {
     live.start();
-    return () => live.stop();
+    // Een telefoon die op slot gaat, mist de vraag. Dus: wakker blijven.
+    const laatSlapen = houdWakker();
+    return () => {
+      live.stop();
+      laatSlapen();
+    };
   });
 
   async function stuur(tekst?: string) {
@@ -200,6 +207,12 @@
         : 'geen verbinding — je antwoord blijft staan'}
     </p>
 
+    {#if live.por}
+      <p class="por" role="alert" in:fly={{ y: -12, duration: 260, easing: cubicOut }} out:fade={{ duration: 300 }}>
+        👉 {live.por.tekst}
+      </p>
+    {/if}
+
     {#if !staat}
       <p class="fijn">Verbinden…</p>
     {:else if staat.fase === 'lobby'}
@@ -240,6 +253,17 @@
         <div class="knoprij" style="gap:.7rem">
           <button class="knop groot" class:gekozen={antwoord === 'Waar'} style="flex:1" onclick={() => stuur('Waar')}>Waar</button>
           <button class="knop groot" class:gekozen={antwoord === 'Niet waar'} style="flex:1" onclick={() => stuur('Niet waar')}>Niet waar</button>
+        </div>
+      {:else if vraag.type === 'stem' && vraag.opties}
+        <p class="fijn">Tik op een naam. Wie met de meerderheid meestemt, krijgt de punten.</p>
+        <div class="raster">
+          {#each vraag.opties as naam (naam)}
+            {@const sp = staat.spelers.find((x) => x.naam === naam)}
+            <button class="knop groot stemknop" class:gekozen={antwoord === naam} onclick={() => stuur(naam)}>
+              {#if sp?.foto}<img class="avatar" src={sp.foto} alt="" />{:else}<span class="avatar">{initialen(naam)}</span>{/if}
+              {naam}
+            </button>
+          {/each}
         </div>
       {:else if vraag.opties}
         <div style="display:flex;flex-direction:column;gap:.6rem">
@@ -306,6 +330,16 @@
         {#if staat.onthulling?.toelichting}
           <p class="toelichting" style="font-size:.95rem">{staat.onthulling.toelichting}</p>
         {/if}
+        {#if staat.onthulling?.stemmen?.length}
+          <div class="stemtelling" style="margin-top:.8rem">
+            {#each staat.onthulling.stemmen as t (t.naam)}
+              <p class="fijn" style="display:flex;justify-content:space-between;gap:.8rem;padding:.15rem 0">
+                <span>{t.naam}</span>
+                <span style="font-family:var(--mono)">{t.aantal} {t.aantal === 1 ? 'stem' : 'stemmen'}</span>
+              </p>
+            {/each}
+          </div>
+        {/if}
       </div>
       <div class="reactierij" aria-label="Reageer op de televisie">
         {#each REACTIES as emoji (emoji)}
@@ -339,12 +373,13 @@
             <p class="etiket stil">Prijzen</p>
             {#each staat.prijzen as p (p.sleutel)}
               <p style="display:flex;gap:.6rem;align-items:baseline;margin:.5rem 0 0">
-                <span aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
-                <span><strong>{p.titel}:</strong> {p.namen.join(' & ')} <span class="fijn">— {p.detail}</span></span>
+                <span aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
+                <span><strong>{p.titel}:</strong> {p.namen.length ? p.namen.join(' & ') : ''} <span class="fijn">{p.namen.length ? '— ' : ''}{p.detail}</span></span>
               </p>
             {/each}
           </div>
         {/if}
+        <a class="knop vol" href="/uitslag/{staat.spelId}">Bekijk en deel de uitslag</a>
       {/if}
       <div class="reactierij" aria-label="Reageer op de televisie">
         {#each REACTIES as emoji (emoji)}

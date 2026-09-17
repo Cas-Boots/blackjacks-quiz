@@ -1916,3 +1916,160 @@ kbd {
     animation: none;
   }
 }
+
+/* ---- Por: een duwtje van de quizmaster op de telefoon ------------------ */
+.por {
+  background: var(--goud);
+  color: #1a1405;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  animation: porschud 0.5s ease-in-out 2;
+}
+@keyframes porschud {
+  25% { transform: translateX(-6px) rotate(-1deg); }
+  75% { transform: translateX(6px) rotate(1deg); }
+}
+
+/* ---- Stemronde ---------------------------------------------------------- */
+.stemknop {
+  justify-content: flex-start;
+}
+.stemtelling {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.8vh, 0.6rem);
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+.stemrij {
+  display: grid;
+  grid-template-columns: auto minmax(7ch, 0.6fr) 1fr auto minmax(0, 0.8fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--rand);
+}
+.stemrij.wint {
+  border-color: var(--goud);
+  background: rgba(201, 162, 39, 0.1);
+}
+.stemrij .naam {
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stembalk {
+  height: 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.stembalk i {
+  display: block;
+  height: 100%;
+  width: calc(var(--deel) * 100%);
+  background: linear-gradient(90deg, var(--goud), var(--goud-licht));
+  transform-origin: left;
+  animation: stemgroei 0.7s var(--deal) both;
+  animation-delay: calc(0.6s + var(--i) * 0.12s);
+}
+@keyframes stemgroei {
+  from { transform: scaleX(0); }
+}
+.stemaantal {
+  font-family: var(--mono);
+  font-size: calc(var(--fs-naam) * 0.8);
+  color: var(--goud-licht);
+}
+.stemmers {
+  font-size: var(--fs-etiket);
+  color: var(--salie);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prijsdetail.lang {
+  font-style: italic;
+  white-space: normal;
+}
+
+/* ---- Logboek van de quizmaster ----------------------------------------- */
+.logboek {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+}
+.logregel {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  padding: 0.2rem 0;
+  border-bottom: 1px dashed var(--rand);
+}
+.logregel .tijd {
+  font-family: var(--mono);
+  color: var(--salie);
+  font-size: 0.8rem;
+  flex: 0 0 auto;
+}
+.logregel.ongedaan {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+/* ---- Uitslagpagina ------------------------------------------------------ */
+button.naamplaat {
+  cursor: pointer;
+  font: inherit;
+}
+a.uitslagrij {
+  text-decoration: none;
+  color: inherit;
+}
+a.uitslagrij:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.uitslagtabel {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+}
+.uitslagtabel th,
+.uitslagtabel td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--rand);
+  text-align: left;
+  white-space: nowrap;
+}
+.uitslagtabel th {
+  font-family: var(--ui);
+  font-weight: 600;
+  color: var(--salie);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.uitslagtabel .cijfer {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.uitslagtabel .cijfer.best {
+  color: var(--goud-licht);
+}
+.uitslagtabel .totaal td {
+  border-top: 2px solid var(--goud-diep);
+  border-bottom: 0;
+  font-weight: 700;
+  color: var(--goud-licht);
+}

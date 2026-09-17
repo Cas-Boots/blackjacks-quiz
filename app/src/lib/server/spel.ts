@@ -119,9 +119,8 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
     .from(deelnemers)
     .where(and(eq(deelnemers.spelId, spel.id), eq(deelnemers.spelerId, speler.id)))
     .get();
-  if (!alDeelnemer) {
-    db.insert(deelnemers).values({ spelId: spel.id, spelerId: speler.id }).run();
-  }
+  if (alDeelnemer) return { speler, nieuw: false };
+  db.insert(deelnemers).values({ spelId: spel.id, spelerId: speler.id }).run();
 
   // Zit er al een teamindeling voor de huidige ronde, dan hoort de gast daar bij.
   const ronde = samengesteld(spel)[spel.rondeIndex];
@@ -142,7 +141,7 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
       }
     }
   }
-  return speler;
+  return { speler, nieuw: true };
 }
 
 export function standVan(spelId: number) {

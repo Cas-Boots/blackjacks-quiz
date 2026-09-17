@@ -225,13 +225,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       const naam = String(body.naam ?? '').trim();
       if (!naam) error(400, 'vul een naam in');
       if (naam.length > MAX_NAAM_TEKENS) error(400, `een naam is hooguit ${MAX_NAAM_TEKENS} tekens`);
-      let speler;
+      let speler: { naam: string };
+      let nieuw = false;
       try {
-        speler = voegDeelnemerToe(spel, naam);
+        ({ speler, nieuw } = voegDeelnemerToe(spel, naam));
       } catch (e) {
         error(400, (e as Error).message);
       }
-      log = { omschrijving: `${speler.naam} doet mee`, terug: false };
+      if (nieuw) log = { omschrijving: `${speler.naam} doet mee`, terug: false };
       break;
     }
     case 'ongedaan': {
