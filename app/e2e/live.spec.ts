@@ -19,6 +19,8 @@ test('een ronde spelen met televisie, quizmaster en drie telefoons', async ({ br
   const tv = await nieuwApparaat(browser, '/tv');
   const host = await nieuwApparaat(browser, '/');
   await expect(tv.pagina.getByRole('heading', { name: 'Blackjack Quiz 26/27' })).toBeVisible();
+  // De televisie toont een QR-code met het adres waarop de telefoons kunnen meedoen.
+  await expect(tv.pagina.getByAltText('QR-code om mee te doen')).toBeVisible({ timeout: 15_000 });
 
   // De quizmaster meldt zich met de pincode.
   await host.pagina.getByPlaceholder('Pincode').fill('2627');
@@ -66,10 +68,20 @@ test('een ronde spelen met televisie, quizmaster en drie telefoons', async ({ br
   await expect(tv.pagina.getByText('Het antwoord')).toBeVisible({ timeout: 15_000 });
   await expect(host.pagina.getByText('Tik aan wie het goed had', { exact: false })).toBeVisible({ timeout: 15_000 });
 
+  // Bij de onthulling ziet iedereen wat er was ingetikt: de televisie toont
+  // de antwoorden als kaartjes, de telefoon zegt dat er nog beoordeeld wordt.
+  await expect(tv.pagina.locator('.antwoordkaart')).toHaveCount(2, { timeout: 15_000 });
+  await expect(telefoons[0].pagina.locator('.uitslag')).toBeVisible({ timeout: 15_000 });
+
   // Punten toekennen aan de eerste inzender en controleren dat de stand meebeweegt.
   const eersteInzender = host.pagina.locator('.inzending').first();
   await eersteInzender.click();
   await expect(host.pagina.locator('.standpunten').first()).not.toHaveText('0', { timeout: 15_000 });
+
+  // De eerste inzender was de eerste telefoon: die hoort nu 'Goed!' te zien,
+  // met de punten erbij, en de televisie zet een vinkje op dat kaartje.
+  await expect(telefoons[0].pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('Goed', { timeout: 15_000 });
+  await expect(tv.pagina.locator('.antwoordkaart.goed')).toHaveCount(1, { timeout: 15_000 });
 
   for (const t of telefoons) await t.ctx.close();
   await host.ctx.close();

@@ -25,13 +25,81 @@ HOST_PIN=1234 docker compose up --build
 
 | Scherm | Adres | Voor wie |
 |---|---|---|
-| Televisie | `/tv` | het grote scherm; vraag, klok en tussenstand |
-| Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten |
-| Telefoon | `/` → kies je naam | de spelers; antwoordblad |
+| Televisie | `/tv` | het grote scherm; QR-code, vraag, klok, onthulling, tussenstand, podium |
+| Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
+| Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
 hostscherm laat zien wie er op welke naam zit.
+
+### Meedoen via de televisie
+
+In de lobby toont de televisie een QR-code met het adres waarop hij zelf de
+quiz opende. Iedereen scant, kiest zijn naam en heeft zijn antwoordblad in
+handen. Open het televisiescherm daarom via het netwerkadres van de laptop
+(bijvoorbeeld `http://192.168.1.10:3000/tv`), niet via `localhost` — het
+scherm waarschuwt als je dat toch doet. Onder de namen staat hoeveel telefoons
+er al bij zijn.
+
+Op de telefoon kun je in de lobby een selfie kiezen. Die wordt op de telefoon
+zelf bijgesneden en verkleind (256 bij 256) en staat daarna bij je naam op de
+televisie, in de stand en op het podium. Tik later op je portret in de kop om
+hem te vervangen.
+
+### Zo verloopt een vraag
+
+1. **De vraag** staat op de televisie en op elke telefoon. Waar/niet waar en
+   meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld. De
+   televisie laat zien wie er al heeft ingeleverd, zonder de inhoud.
+2. **De onthulling.** De televisie toont het antwoord én wat iedereen had
+   ingetikt, als kaartjes. Bij dichtstbij wordt dat een getallenlijn met het
+   doel erop. Elke telefoon zegt of je het goed had en hoeveel punten dat
+   opleverde — met een trilling — en laat zien wat de rest had.
+3. **De quizmaster tikt aan** wie het goed had, of drukt op *Vink aan wat goed
+   lijkt* (sneltoets `A`) om in één keer alles te nemen wat de machine met
+   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee.
+
+Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
+"Je staat 2e van 5." Aan het eind het podium, met daaronder drie prijzen:
+**scherpschutter** (meeste vragen goed), **snelste vinger** (het snelste goede
+antwoord) en **beste ronde**. Een prijs die meer dan twee mensen zouden delen
+valt weg. Bij een gelijkspel bovenaan winnen ze allebei.
+
+### Het hostscherm
+
+Bovenaan staat de vraag die open staat, met een **spiekbriefje** dat je zelf
+openklapt voor het antwoord. Daaronder de knoppen van dat moment, met
+sneltoetsen zoals in de losse quiz:
+
+| Toets | Doet |
+|---|---|
+| `spatie`, `Enter`, `→` | verder: ronde starten, antwoord tonen, volgende vraag |
+| `←` | een stap terug |
+| `P` | klok pauzeren of hervatten |
+| `T` | 30 seconden erbij |
+| `M` | fragment afspelen of stoppen |
+| `A` | vink aan wat goed lijkt |
+
+Onderaan het overzicht **Rondes**: alle rondes van het pakket met de vragen
+en antwoorden erin, en rode labels bij wat nog ingevuld moet worden. Vóór de
+eerste vraag vink je hier aan welke rondes en vragen vanavond meedoen; daarna
+ligt de samenstelling vast (anders zouden de rondenummers en daarmee de stand
+verschuiven) en spring je er naar een andere ronde. *Nieuw spel* begint
+opnieuw met een pakket; de oude stand blijft in de database bewaard.
+
+### Foto's, video's en muziek bij vragen
+
+Zet de bestanden in de map `media/` naast de app; een vraag verwijst ernaar
+met `media.bron`. Zie `media/README.md` voor de ondersteunde bestandstypen.
+De bestanden worden op het moment zelf gelezen, dus herstarten is niet nodig,
+en in Docker koppelt `docker-compose.yml` de map aan de container.
+
+Foto's verschijnen op de televisie én op de telefoons. Filmpjes en muziek
+spelen alleen op de televisie; de quizmaster start en stopt ze vanaf het
+hostscherm, zodat niemand naar de laptop hoeft te lopen. Elke stap naar een
+andere dia zet het fragment stil. Ontbreekt een bestand, dan toont de
+televisie een nette melding en loopt de quiz gewoon door.
 
 ## Hoe het samenwerkt met teams
 
@@ -75,9 +143,12 @@ CHROMIUM_PAD=/pad/naar/chrome npx playwright test
 ```
 
 Opent een televisie, een hostscherm en drie telefoons als losse browsers met
-eigen koekjespotten, en controleert dat een vraag op alle schermen tegelijk
-verschijnt, dat inleveren werkt en dat de stand meebeweegt. `CHROMIUM_PAD` mag
-weg als Playwright zijn eigen browsers heeft.
+eigen koekjespotten, en controleert dat de QR-code er staat, dat een vraag op
+alle schermen tegelijk verschijnt, dat inleveren werkt, dat de onthulling op
+televisie en telefoon klopt en dat de stand meebeweegt. `CHROMIUM_PAD` mag
+weg als Playwright zijn eigen browsers heeft; staat er al een Chromium op de
+machine (bijvoorbeeld `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`),
+dan wijs je daarheen in plaats van te downloaden.
 
 ### Eenheidstests
 
@@ -113,11 +184,10 @@ En als alles tegenzit: `../index.html` openen en de avond op papier draaien.
 
 ## Wat er nog niet in zit
 
-- Media bij vragen (foto's, video, muziek) werkt in de losse quiz, nog niet hier.
-- Portretten zijn in het model voorzien (`spelers.foto`), maar er is nog geen
-  scherm om ze te uploaden.
-- De vragenkiezer zit nog niet in het hostscherm; de samenstelling komt nu uit
-  `standaardSamenstelling()`.
+- De rondes *De Voorspellingen*, *De WK-poule* en *Oktober tot december* wachten
+  nog op hun antwoorden; het hostscherm telt hoeveel gekozen vragen er nog een
+  antwoord missen. Vul ze in `../index.html` en draai `npm run content:sync`.
+- Vragen aanpassen kan alleen in `../index.html`; er is geen editor in de app.
 
 ## Bekende hobbels
 
