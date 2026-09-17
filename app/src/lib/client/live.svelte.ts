@@ -53,8 +53,9 @@ class Live {
     if ('rol' in pakket && pakket.rol) this.rol = pakket.rol;
     if ('spelerId' in pakket) this.spelerId = pakket.spelerId ?? null;
     if (!staat) return;
-    // Nooit terug in de tijd.
-    if (this.staat && staat.versie < this.staat.versie) return;
+    // Nooit terug in de tijd — binnen hetzelfde spel. Een nieuw spel begint
+    // weer bij versie 1, en dat pakketje moet juist wél door.
+    if (this.staat && staat.spelId === this.staat.spelId && staat.versie < this.staat.versie) return;
 
     // Bewaar de vorige punten zodra ze echt veranderen.
     if (this.staat) {
