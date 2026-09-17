@@ -24,6 +24,8 @@ class Live {
   /** De punten zoals ze vóór de laatste wijziging stonden. Hiermee kan het
    *  scorebord van oud naar nieuw tellen in plaats van te springen. */
   vorigePunten = $state<Record<number, number>>({});
+  /** Reacties van telefoons die nu over het scherm zweven. Vluchtig. */
+  reacties = $state<{ id: number; emoji: string; naam: string; x: number }[]>([]);
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -85,6 +87,17 @@ class Live {
         this.verbonden = true;
       });
 
+      bron.addEventListener('reactie', (e) => {
+        try {
+          const r = JSON.parse((e as MessageEvent).data);
+          this.reacties = [...this.reacties.slice(-24), r];
+          // Na de zweefanimatie mag hij weg.
+          setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
       bron.onerror = () => {
         this.verbonden = false;
         this.#mislukt += 1;
@@ -135,6 +148,14 @@ class Live {
     });
     if (!r.ok) throw new Error(await r.text());
     return r.json();
+  }
+
+  async reageer(emoji: string) {
+    await fetch('/api/reactie', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ emoji }),
+    });
   }
 
   async meld(rol: string, extra: Record<string, unknown> = {}) {

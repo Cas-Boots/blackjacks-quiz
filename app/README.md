@@ -66,6 +66,28 @@ Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
 antwoord) en **beste ronde**. Een prijs die meer dan twee mensen zouden delen
 valt weg. Bij een gelijkspel bovenaan winnen ze allebei.
 
+### De gekke momenten
+
+De tafel blijft chic, maar af en toe mag het gek. Alles hieronder is kort en
+komt alleen op een moment dat het mag:
+
+- **Stempels.** *TIJD!* slaat op de kaart als de klok op nul staat, *Iedereen
+  fout* (met treurige trombone) of *Iedereen goed* op het antwoordpaneel, en
+  *Goed!* of *Mis* op je telefoon.
+- **Kwinkslagen.** Een welkom als iemand binnenkomt ("Rik heeft de wifi
+  gevonden."), wachtzinnen in de lobby, een regel bij elke ronde, en op je
+  telefoon een aanmoediging of troost. Ze worden gekozen op de vraag, niet op
+  toeval, dus televisie en telefoons zeggen hetzelfde. Aanpassen kan in
+  `src/lib/shared/kwinkslagen.ts`.
+- **Reacties.** Bij de onthulling en de stand staan er zes emoji's op je
+  telefoon; ze zweven met je naam over de televisie omhoog. Vluchtig, niets
+  wordt bewaard, hooguit één per 400 ms per telefoon.
+- **Kroontje, lantaarn, stijger.** De koploper draagt een kroontje, de laatste
+  een rode lantaarn, en wie het meest klom krijgt *Stijger* achter zijn naam.
+  Bij dichtstbij krijgt een gok die er hopeloos naast zat een label.
+- **Poedelprijs** voor de laatste op het podium.
+- De vraagkaart ligt nooit precies recht en trilt in de laatste vijf seconden.
+
 ### Het hostscherm
 
 Bovenaan staat de vraag die open staat, met een **spiekbriefje** dat je zelf

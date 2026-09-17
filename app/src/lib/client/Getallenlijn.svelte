@@ -8,11 +8,27 @@
     doel,
     eenheid = '',
     gokken,
+    verLabel = '',
   }: {
     doel: number;
     eenheid?: string;
     gokken: { naam: string; getal: number; wint: boolean }[];
+    /** Tekst bij de gok die er het verst naast zat; leeg laat hem weg. */
+    verLabel?: string;
   } = $props();
+
+  /* Wie zat er hopeloos naast. Alleen als er echt iets te lachen valt:
+     de slechtste gok zit minstens drie keer zo ver weg als de beste én
+     minstens de helft van het doel ernaast. Een exact goede gok maakt de
+     eerste eis vanzelf waar, vandaar de tweede. */
+  let verIndex = $derived.by(() => {
+    if (!verLabel || gokken.length < 2) return -1;
+    const afstanden = gokken.map((g) => Math.abs(g.getal - doel));
+    const beste = Math.min(...afstanden);
+    const slechtste = Math.max(...afstanden);
+    if (slechtste === 0 || slechtste < beste * 3 || slechtste < Math.abs(doel) * 0.5) return -1;
+    return afstanden.indexOf(slechtste);
+  });
 
   let bereik = $derived.by(() => {
     const waarden = [doel, ...gokken.map((g) => g.getal)];
@@ -55,7 +71,7 @@
   </div>
   {#each gokken as g, i (g.naam + i)}
     <div class="gok" class:wint={g.wint} style="left:{positie(g.getal)}%;--rij:{rijen[i]}">
-      <span class="naam">{g.naam}</span>
+      <span class="naam">{g.naam}{#if i === verIndex} <span class="ver">🥴 {verLabel}</span>{/if}</span>
       <span class="stip"></span>
       <span class="waarde">{fmt(g.getal)}</span>
     </div>
@@ -147,5 +163,12 @@
   }
   .gok.wint .waarde {
     color: var(--groen-licht);
+  }
+  .gok .ver {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 0.85em;
+    color: var(--rood-licht);
+    animation: opkomen 0.5s 0.9s var(--deal) both;
   }
 </style>

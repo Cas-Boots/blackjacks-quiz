@@ -6,6 +6,7 @@
   import Klok from '$lib/client/Klok.svelte';
   import Media from '$lib/client/Media.svelte';
   import { maakPortret } from '$lib/client/portret';
+  import { kies, kanteling, JUICH, TROOST, NIETS_INGELEVERD, REACTIES } from '$lib/shared/kwinkslagen';
 
   let antwoord = $state('');
   let verstuurd = $state(false);
@@ -66,6 +67,28 @@
     } catch {
       /* geen trilmotor, geen probleem */
     }
+  }
+
+  /* Dezelfde zin als op de televisie: gekozen op de vraag, niet op toeval. */
+  let kwinkslag = $derived(
+    uitslag === 'goed' ? kies(JUICH, `${sleutel}:${live.spelerId}`)
+      : uitslag === 'fout' ? kies(TROOST, `${sleutel}:${live.spelerId}`)
+        : uitslag === 'niets' ? kies(NIETS_INGELEVERD, `${sleutel}:${live.spelerId}`)
+          : '',
+  );
+  let kantelingNu = $derived(kanteling(sleutel));
+
+  /* ---- Reacties naar de televisie ----------------------------------- */
+  let laatsteReactie = $state('');
+  async function reageer(emoji: string) {
+    laatsteReactie = emoji;
+    try {
+      navigator.vibrate?.(20);
+    } catch { /* geen trilmotor */ }
+    try {
+      await live.reageer(emoji);
+    } catch { /* de volgende komt wel door */ }
+    setTimeout(() => (laatsteReactie = ''), 500);
   }
 
   /* ---- Waar sta je ------------------------------------------------- */
@@ -201,7 +224,7 @@
       </div>
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
-        <div class="tafelkaart" data-suit={ronde?.suit} style="padding:1.2rem">
+        <div class="tafelkaart" data-suit={ronde?.suit} style="padding:1.2rem;--kanteling:{kantelingNu}deg">
           <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
           {#if vraag.emoji}<div class="emoji" style="font-size:2.6rem">{vraag.emoji}</div>{/if}
           {#if vraag.lyric}<p class="lyric" style="font-size:1.25rem">“{vraag.lyric}”</p>{/if}
@@ -214,14 +237,15 @@
 
       {#if vraag.type === 'waarnietwaar'}
         <div class="knoprij" style="gap:.7rem">
-          <button class="knop groot" style="flex:1" onclick={() => stuur('Waar')}>Waar</button>
-          <button class="knop groot" style="flex:1" onclick={() => stuur('Niet waar')}>Niet waar</button>
+          <button class="knop groot" class:gekozen={antwoord === 'Waar'} style="flex:1" onclick={() => stuur('Waar')}>Waar</button>
+          <button class="knop groot" class:gekozen={antwoord === 'Niet waar'} style="flex:1" onclick={() => stuur('Niet waar')}>Niet waar</button>
         </div>
       {:else if vraag.opties}
         <div style="display:flex;flex-direction:column;gap:.6rem">
           {#each vraag.opties as optie, i}
             <button
               class="knop"
+              class:gekozen={antwoord === String.fromCharCode(65 + i)}
               style="justify-content:flex-start;gap:.9rem;padding:1rem;text-align:left;white-space:normal"
               onclick={() => stuur(String.fromCharCode(65 + i))}
             >
@@ -255,21 +279,23 @@
       {#key uitslag}
         <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
           {#if uitslag === 'goed'}
+            <span class="stempel groen" style="--hoek:8deg">Goed!</span>
             <span class="teken">✓</span>
             <span>
-              <strong>Goed!</strong>
+              <strong>{kwinkslag}</strong>
               <span class="plus">+{mijnPunten}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
             </span>
           {:else if uitslag === 'fout'}
+            <span class="stempel" style="--hoek:-9deg">Mis</span>
             <span class="teken">✗</span>
-            <span><strong>Helaas.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
+            <span><strong>{kwinkslag}</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
           {:else if uitslag === 'wacht'}
             <span class="teken">…</span>
             <span><strong>De quizmaster kijkt ernaar.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
           {:else}
             <span class="teken">—</span>
-            <span><strong>Niets ingeleverd.</strong> <span class="fijn">Volgende vraag beter.</span></span>
+            <span><strong>{kwinkslag}</strong></span>
           {/if}
         </div>
       {/key}
@@ -279,6 +305,11 @@
         {#if staat.onthulling?.toelichting}
           <p class="toelichting" style="font-size:.95rem">{staat.onthulling.toelichting}</p>
         {/if}
+      </div>
+      <div class="reactierij" aria-label="Reageer op de televisie">
+        {#each REACTIES as emoji (emoji)}
+          <button onclick={() => reageer(emoji)} aria-label="Stuur {emoji}" style={laatsteReactie === emoji ? 'transform:scale(1.25) rotate(-8deg)' : ''}>{emoji}</button>
+        {/each}
       </div>
       {#if staat.inzendingen.length > 1}
         <div class="paneel" style="padding:.9rem 1rem">
@@ -311,6 +342,11 @@
           </div>
         {/if}
       {/if}
+      <div class="reactierij" aria-label="Reageer op de televisie">
+        {#each REACTIES as emoji (emoji)}
+          <button onclick={() => reageer(emoji)} aria-label="Stuur {emoji}" style={laatsteReactie === emoji ? 'transform:scale(1.25) rotate(-8deg)' : ''}>{emoji}</button>
+        {/each}
+      </div>
       <div class="paneel">
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
         {#if rangwoord}<p class="lood" style="font-size:1.05rem;margin-top:.3rem">{rangwoord}</p>{/if}

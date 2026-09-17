@@ -1651,9 +1651,9 @@ kbd {
 /* ===== De prijzen onder het podium ================================ */
 .prijzen {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: clamp(0.6rem, 1.2vw, 1.2rem);
-  width: min(100%, 1100px);
+  width: min(100%, 1400px);
   margin-top: clamp(0.5rem, 1.5vh, 1.2rem);
 }
 .prijs {
@@ -1678,8 +1678,9 @@ kbd {
 }
 .prijstitel {
   grid-area: titel;
-  font-size: var(--fs-etiket);
-  letter-spacing: 0.18em;
+  font-size: calc(var(--fs-etiket) * 0.92);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   text-transform: uppercase;
   color: var(--goud);
 }
@@ -1694,4 +1695,286 @@ kbd {
   grid-area: detail;
   font-size: calc(var(--fs-lood) * 0.8);
   color: var(--salie);
+}
+
+/* ===================================================================
+   DE GEKKE MOMENTEN
+
+   De tafel blijft chic; wat er af en toe op neerkomt niet. Stempels,
+   een kroontje dat wiebelt, een rode lantaarn, emoji's die omhoog
+   zweven. Allemaal kort, allemaal op een moment dat het mag.
+   =================================================================== */
+
+/* ---- De rubberen stempel ---------------------------------------- */
+.stempel {
+  position: absolute;
+  z-index: 6;
+  padding: 0.15em 0.55em;
+  border: 0.14em solid currentColor;
+  border-radius: 0.25em;
+  font-family: var(--ui);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4.2vw, 4rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--rood);
+  background: rgba(251, 248, 239, 0.92);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+  mix-blend-mode: multiply;
+  transform: rotate(var(--hoek, -9deg));
+  animation: stempelen 0.42s var(--deal) both;
+  pointer-events: none;
+  /* Inktrandje, alsof het stempelkussen bijna op was. */
+  -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgba(0, 0, 0, 0.75) 100%);
+  mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgba(0, 0, 0, 0.75) 100%);
+}
+.stempel.groen {
+  color: #2f7a4d;
+}
+.stempel.goud {
+  color: var(--goud-diep);
+}
+.stempel.rechtsboven {
+  top: clamp(-10px, -1vw, -18px);
+  right: clamp(8px, 2vw, 40px);
+}
+.stempel.midden {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(var(--hoek, -9deg));
+  animation-name: stempelenMidden;
+}
+@keyframes stempelen {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--hoek, -9deg)) scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(var(--hoek, -9deg)) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(var(--hoek, -9deg)) scale(1);
+  }
+}
+@keyframes stempelenMidden {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(1);
+  }
+}
+/* Bij de onthulling staat de stempel op het antwoordpaneel, waar rechts
+   ruimte is — niet over de vraag heen. */
+.onthulling {
+  position: relative;
+}
+.onthulling .stempel {
+  top: 12%;
+  right: 4%;
+  font-size: clamp(1.4rem, 3.4vw, 3.2rem);
+  /* Vermenigvuldigen is voor de ivoren kaart; op het donkere paneel zou
+     de stempel erin verdwijnen. */
+  mix-blend-mode: normal;
+  background: rgba(251, 248, 239, 0.96);
+}
+/* Op de telefoon: kleiner, en over de uitslag heen. */
+.uitslag {
+  position: relative;
+  overflow: visible;
+}
+.uitslag .stempel {
+  font-size: 1.1rem;
+  top: -0.7rem;
+  right: 0.6rem;
+  border-width: 0.16em;
+}
+
+/* ---- De kaart ligt scheef en trilt in de laatste seconden ------- */
+.tafelkaart {
+  transform: rotate(var(--kanteling, 0deg));
+}
+.scherm.spanning .tafelkaart {
+  animation: trillen 0.32s ease-in-out infinite;
+}
+@keyframes trillen {
+  0%, 100% { transform: rotate(var(--kanteling, 0deg)) translate(0, 0); }
+  25% { transform: rotate(calc(var(--kanteling, 0deg) - 0.25deg)) translate(-1px, 1px); }
+  75% { transform: rotate(calc(var(--kanteling, 0deg) + 0.25deg)) translate(1px, -1px); }
+}
+/* De 'leggen'-animatie zet transform: none; laat hem eindigen in de kanteling. */
+@keyframes leggen {
+  from {
+    opacity: 0;
+    transform: translateY(26px) rotate(calc(var(--kanteling, 0deg) - 1.1deg)) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--kanteling, 0deg));
+  }
+}
+
+/* ---- Het kroontje en de rode lantaarn --------------------------- */
+/* Het kroontje hangt aan een houder om het portret heen, want op een
+   <img> kan geen pseudo-element, en overflow op het portret zelf zou de
+   ronde uitsnede tenietdoen. */
+.kroonhouder {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.kroonhouder.kroon::after {
+  content: "👑";
+  position: absolute;
+  top: -0.45em;
+  left: 50%;
+  font-size: clamp(1.1rem, 1.8vw, 1.8rem);
+  line-height: 1;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(-16deg);
+  animation: kroonWiebel 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+@keyframes kroonWiebel {
+  0%, 100% { transform: translateX(-50%) rotate(-16deg); }
+  50% { transform: translateX(-46%) rotate(-8deg) translateY(-2px); }
+}
+.standrij.laatste .naam::after {
+  content: " 🏮";
+  font-size: 0.7em;
+  animation: lantaarnZwaai 2.6s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: 50% 0;
+}
+@keyframes lantaarnZwaai {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+.standrij .badge {
+  margin-left: 0.6rem;
+  vertical-align: middle;
+  font-size: 0.55em;
+  letter-spacing: 0.1em;
+}
+.badge.stijger {
+  border-color: var(--groen);
+  color: var(--groen-licht);
+  animation: opkomen 0.5s 0.9s var(--deal) both;
+}
+
+/* ---- Reacties die omhoog zweven --------------------------------- */
+.reacties {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  overflow: hidden;
+}
+.reactie {
+  position: absolute;
+  bottom: -3rem;
+  left: var(--x, 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  transform: translateX(-50%);
+  animation: zweven 3s cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+}
+.reactie .emoji {
+  font-size: clamp(2.2rem, 4.5vw, 4.4rem);
+  line-height: 1;
+  animation: zwabberen 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+.reactie .van {
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ivoor);
+  background: rgba(8, 21, 17, 0.7);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+@keyframes zweven {
+  0% { transform: translate(-50%, 0); opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(-50%, calc(-100vh + 4rem)); opacity: 0; }
+}
+@keyframes zwabberen {
+  0%, 100% { transform: rotate(-12deg) translateX(-4px); }
+  50% { transform: rotate(12deg) translateX(4px); }
+}
+.reactierij {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+.reactierij button {
+  flex: 1 1 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0.55rem 0;
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+.reactierij button:active {
+  transform: scale(1.25) rotate(-8deg);
+}
+
+/* ---- Antwoordknoppen op de telefoon: wat je koos licht op ------- */
+.knop.gekozen {
+  border-color: var(--goud-licht);
+  background: linear-gradient(180deg, rgba(240, 217, 140, 0.22), var(--vilt-diep));
+  color: var(--ivoor);
+  box-shadow: 0 0 0 1px var(--goud), 0 10px 26px -14px rgba(201, 162, 39, 0.9);
+}
+
+/* ---- Een kwinkslag: cursief, ivoor, nooit schreeuwend ----------- */
+.kwinkslag {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: calc(var(--fs-lood) * 1.05);
+  color: var(--ivoor-zacht);
+  margin: 0;
+  animation: opkomen 0.5s var(--deal) both;
+}
+.kwinkslag.begroeting {
+  color: var(--goud-licht);
+  animation: opkomen 0.5s var(--deal) both, wegzakken 0.6s 4.4s var(--zacht) both;
+}
+@keyframes wegzakken {
+  to { opacity: 0; transform: translateY(6px); }
+}
+.plaats.poedel {
+  border-style: dashed;
+  opacity: 0.9;
+}
+.plaats.poedel .medaille {
+  animation: lantaarnZwaai 2.6s ease-in-out infinite;
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar.kroon::after,
+  .standrij.laatste .naam::after,
+  .reactie .emoji,
+  .scherm.spanning .tafelkaart,
+  .plaats.poedel .medaille {
+    animation: none;
+  }
 }

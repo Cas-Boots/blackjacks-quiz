@@ -10,6 +10,10 @@
   import Media from '$lib/client/Media.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
+  import {
+    kies, kanteling, metNaam, BEGROETINGEN, WACHTZINNEN, RONDEZINNEN, NIEMAND,
+    IEDEREEN_FOUT, IEDEREEN_GOED, LANTAARN, POEDEL, VER_ERNAAST,
+  } from '$lib/shared/kwinkslagen';
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
@@ -46,6 +50,63 @@
       return '';
     }
   }
+
+  /* ---- De gekke momenten ----------------------------------------------
+     Alles hier is een kwinkslag op een moment dat het mag. De keuze van
+     de zin hangt aan de vraag, zodat elke telefoon dezelfde ziet. */
+  let vraagSleutelNu = $derived(`${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}`);
+  /** Een gelegde kaart ligt nooit precies recht. */
+  let kantelingNu = $derived(kanteling(diaSleutel));
+  let niemandIngeleverd = $derived(staat?.fase === 'antwoord' && staat.inzendingen.length === 0);
+  let beoordeeld = $derived(
+    (staat?.inzendingen ?? []).length > 0 && (staat?.inzendingen ?? []).every((i) => i.isGoed !== null),
+  );
+  let alleFout = $derived(beoordeeld && (staat?.inzendingen ?? []).every((i) => i.isGoed === false));
+  let alleGoed = $derived(
+    beoordeeld && (staat?.inzendingen ?? []).every((i) => i.isGoed === true)
+      && (staat?.inzendingen ?? []).length >= Math.max(2, staat?.teams.length ?? 0),
+  );
+
+  /* Een wachtzin in de lobby, om de zoveel tijd een andere. */
+  let wachtTeller = $state(0);
+  let wachtzin = $derived(kies(WACHTZINNEN, `wacht:${wachtTeller}`));
+
+  /* Wie er net binnenkomt krijgt een welkom; vijf seconden later is het weg. */
+  let begroeting = $state('');
+  // Boekhouding, geen toestand voor het scherm: bewust niet reactief, anders
+  // zou het effect zichzelf bij elke schrijfactie opnieuw aanzwengelen.
+  let begroetingTeller = 0;
+  let eerderVerbonden = new Set<number>();
+  $effect(() => {
+    const st = live.staat;
+    if (!st) return;
+    const nu = new Set(st.spelers.filter((s) => s.verbonden).map((s) => s.id));
+    const nieuw = st.spelers.find((s) => nu.has(s.id) && !eerderVerbonden.has(s.id) && eerderVerbonden.size > 0);
+    if (nieuw && st.fase === 'lobby') {
+      begroetingTeller += 1;
+      begroeting = metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
+      geluid.boing();
+    }
+    // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
+    eerderVerbonden = nu;
+  });
+
+  /* Wie is er het meest gestegen sinds de vorige stand. */
+  let stijgerId = $derived.by(() => {
+    if (!staat) return null;
+    const oudePlek = new Map(standOud.map((r, i) => [r.spelerId, i]));
+    let beste = { id: null as number | null, sprong: 0 };
+    staat.stand.forEach((r, i) => {
+      const sprong = (oudePlek.get(r.spelerId) ?? i) - i;
+      if (sprong > beste.sprong) beste = { id: r.spelerId, sprong };
+    });
+    return beste.id;
+  });
+  let laatsteId = $derived((staat?.stand.length ?? 0) >= 3 ? staat!.stand[staat!.stand.length - 1].spelerId : null);
+  let lantaarnZin = $derived(kies(LANTAARN, `lantaarn:${staat?.rondeIndex ?? 0}`));
+  let poedel = $derived(
+    (staat?.stand.length ?? 0) >= 3 ? staat!.stand[staat!.stand.length - 1] : null,
+  );
 
   let top3 = $derived((staat?.stand ?? []).slice(0, 3));
   /** Bij een gelijkspel bovenaan winnen ze allebei; dat verdient een eigen zin. */
@@ -110,6 +171,23 @@
   let vorigAantalIngeleverd = $state(0);
   let vorigeSeconde = $state(99);
   let vorigePuntenSom = $state(-1);
+  let vorigAlleFout = false;
+  let vorigTijdOm = false;
+  let vorigAantalReacties = 0;
+
+  $effect(() => {
+    if (alleFout && !vorigAlleFout) geluid.wahwah();
+    vorigAlleFout = alleFout;
+  });
+  $effect(() => {
+    if (tijdOm && !vorigTijdOm) geluid.stempel();
+    vorigTijdOm = tijdOm;
+  });
+  $effect(() => {
+    const n = live.reacties.length;
+    if (n > vorigAantalReacties) geluid.plop();
+    vorigAantalReacties = n;
+  });
 
   $effect(() => {
     const st = live.staat;
@@ -165,16 +243,20 @@
     return () => clearInterval(t);
   });
 
-  let spanning = $derived(restSec <= 5 && live.staat?.klok?.loopt === true);
+  let spanning = $derived(restSec <= 5 && restSec > 0 && live.staat?.klok?.loopt === true);
+  /** De klok staat op nul en de quizmaster heeft nog niet onthuld. */
+  let tijdOm = $derived(live.staat?.fase === 'vraag' && live.staat?.klok?.loopt === true && restSec <= 0);
 
   onMount(() => {
     joinAdres = `${location.origin}/`;
+    const wacht = setInterval(() => (wachtTeller += 1), 7000);
     live.start();
     void live.meld('tv').catch(() => {});
     const opGebaar = () => wekGeluid();
     window.addEventListener('pointerdown', opGebaar, { once: true });
     window.addEventListener('keydown', opGebaar, { once: true });
     return () => {
+      clearInterval(wacht);
       live.stop();
       window.removeEventListener('pointerdown', opGebaar);
       window.removeEventListener('keydown', opGebaar);
@@ -189,6 +271,15 @@
   <div class="motief" aria-hidden="true"></div>
   <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->
   <div class="spanningsrand" aria-hidden="true"></div>
+  <!-- Reacties van de telefoons zweven omhoog en zijn dan weg. -->
+  <div class="reacties" aria-hidden="true">
+    {#each live.reacties as r (r.id)}
+      <div class="reactie" style="--x:{r.x}%">
+        <span class="emoji">{r.emoji}</span>
+        <span class="van">{r.naam}</span>
+      </div>
+    {/each}
+  </div>
 
   <button
     class="geluidsknop"
@@ -253,6 +344,13 @@
                 {aantalVerbonden} van {staat.spelers.length} telefoons erbij
               {/if}
             </p>
+            {#key begroeting || wachtzin}
+              {#if begroeting}
+                <p class="kwinkslag begroeting" onanimationend={(e) => e.animationName === 'wegzakken' && (begroeting = '')}>{begroeting}</p>
+              {:else}
+                <p class="kwinkslag">{wachtzin}</p>
+              {/if}
+            {/key}
           </div>
 
           {#if joinAdres}
@@ -282,6 +380,7 @@
           </h1>
           <hr class="rule" style="animation-delay:.3s" />
           <p class="lood" in:fly={{ y: 16, duration: 520, delay: 300, easing: cubicOut }}>{ronde?.uitleg}</p>
+          <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
 
           {#if inTeams}
             <div class="raster" style="margin-top:clamp(.5rem,2vh,1.5rem)">
@@ -329,7 +428,10 @@
         <!-- ══ De vraag ═══════════════════════════════════════════════ -->
       {:else if staat.fase === 'vraag' && vraag}
         <div style="display:flex;flex-direction:column;gap:clamp(.8rem,2vh,1.6rem)">
-          <div class="tafelkaart" data-suit={ronde?.suit}>
+          <div class="tafelkaart" data-suit={ronde?.suit} style="--kanteling:{kantelingNu}deg">
+            {#if tijdOm}
+              <span class="stempel rechtsboven" style="--hoek:-11deg">Tijd!</span>
+            {/if}
             <p class="etiket">Vraag {vraag.index + 1} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
             {#if vraag.emoji}<div class="emoji">{vraag.emoji}</div>{/if}
             {#if vraag.lyric}<p class="lyric">“{vraag.lyric}”</p>{/if}
@@ -364,7 +466,7 @@
         <!-- ══ De onthulling ══════════════════════════════════════════ -->
       {:else if staat.fase === 'antwoord' && vraag}
         <div style="display:flex;flex-direction:column;gap:clamp(.8rem,2vh,1.4rem)">
-          <div class="tafelkaart" data-suit={ronde?.suit} style="padding-block:clamp(16px,2vw,32px)">
+          <div class="tafelkaart" data-suit={ronde?.suit} style="padding-block:clamp(16px,2vw,32px);--kanteling:{kantelingNu}deg">
             {#if vraag.emoji}<div class="emoji klein">{vraag.emoji}</div>{/if}
             {#if vraag.lyric}<p class="lyric klein">“{vraag.lyric}”</p>{/if}
             <p class="vraagtekst klein">{vraag.tekst}</p>
@@ -387,6 +489,11 @@
           </div>
 
           <div class="onthulling">
+            {#if alleFout}
+              <span class="stempel" style="--hoek:-8deg">Iedereen fout</span>
+            {:else if alleGoed}
+              <span class="stempel groen" style="--hoek:6deg">Iedereen goed</span>
+            {/if}
             <p class="etiket stil">Het antwoord</p>
             <p class="antwoordtekst">{staat.onthulling?.antwoord}</p>
             {#if staat.onthulling?.toelichting}
@@ -395,12 +502,20 @@
           </div>
 
           <!-- Wat iedereen had ingetikt. Dit is het moment waar de tafel op wacht. -->
+          {#if niemandIngeleverd}
+            <p class="kwinkslag" style="text-align:center;animation-delay:.5s">{kies(NIEMAND, vraagSleutelNu)}</p>
+          {:else if alleFout}
+            <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_FOUT, vraagSleutelNu)}</p>
+          {:else if alleGoed}
+            <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
+          {/if}
           {#if staat.inzendingen.length}
             {#if vraag.type === 'dichtstbij' && staat.onthulling?.getal !== undefined}
               <div in:fade={{ duration: 400, delay: 600 }}>
                 <Getallenlijn
                   doel={staat.onthulling.getal}
                   eenheid={staat.onthulling.eenheid ?? ''}
+                  verLabel={kies(VER_ERNAAST, vraagSleutelNu)}
                   gokken={staat.inzendingen
                     .filter((i) => i.getal !== null)
                     .map((i) => ({ naam: naamVan(i.inzender), getal: i.getal as number, wint: i.isGoed === true }))}
@@ -431,16 +546,24 @@
           <p class="etiket" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>{ronde?.naam} zit erop</p>
           <h1 class="groot" in:fly={{ y: 22, duration: 520, delay: 60, easing: cubicOut }}>Tussenstand</h1>
           <hr class="rule" style="animation-delay:.25s" />
+          {#if toonNieuweVolgorde && laatsteId !== null && standNu[standNu.length - 1].punten < standNu[0].punten}
+            <p class="kwinkslag" style="animation-delay:1.1s">{staat.stand[staat.stand.length - 1].naam}: {lantaarnZin.charAt(0).toLowerCase() + lantaarnZin.slice(1)}</p>
+          {/if}
           <div class="stand">
             {#each standNu as r, i (r.spelerId)}
-              <div class="standrij" class:leider={toonNieuweVolgorde && i === 0} style="--i:{i}" animate:flip={{ duration: 720, easing: cubicOut }}>
+              <div class="standrij" class:leider={toonNieuweVolgorde && i === 0} class:laatste={toonNieuweVolgorde && r.spelerId === laatsteId && r.punten < standNu[0].punten} style="--i:{i}" animate:flip={{ duration: 720, easing: cubicOut }}>
                 <span class="plek">{i + 1}</span>
-                {#if r.foto}
-                  <img class="avatar m" class:goud={toonNieuweVolgorde && i === 0} src={r.foto} alt="" />
-                {:else}
-                  <span class="avatar m" class:goud={toonNieuweVolgorde && i === 0}>{initialen(r.naam)}</span>
-                {/if}
-                <span class="naam">{r.naam}</span>
+                <span class="kroonhouder" class:kroon={toonNieuweVolgorde && i === 0}>
+                  {#if r.foto}
+                    <img class="avatar m" class:goud={toonNieuweVolgorde && i === 0} src={r.foto} alt="" />
+                  {:else}
+                    <span class="avatar m" class:goud={toonNieuweVolgorde && i === 0}>{initialen(r.naam)}</span>
+                  {/if}
+                </span>
+                <span class="naam">
+                  {r.naam}
+                  {#if toonNieuweVolgorde && r.spelerId === stijgerId}<span class="badge stijger">📈 Stijger</span>{/if}
+                </span>
                 <span class="standpunten">
                   <Teller naar={r.punten} van={live.vorigePunten[r.spelerId] ?? r.punten} vertraging={250} />
                 </span>
@@ -466,11 +589,13 @@
               {#if top3[idx]}
                 <div class="plaats" class:eerste={idx === 0} style="--i:{positie}">
                   <span class="medaille">{medailles[idx]}</span>
-                  {#if top3[idx].foto}
-                    <img class="avatar l" class:goud={idx === 0} src={top3[idx].foto} alt="" />
-                  {:else}
-                    <span class="avatar l" class:goud={idx === 0}>{initialen(top3[idx].naam)}</span>
-                  {/if}
+                  <span class="kroonhouder" class:kroon={idx === 0}>
+                    {#if top3[idx].foto}
+                      <img class="avatar l" class:goud={idx === 0} src={top3[idx].foto} alt="" />
+                    {:else}
+                      <span class="avatar l" class:goud={idx === 0}>{initialen(top3[idx].naam)}</span>
+                    {/if}
+                  </span>
                   <span class="naam">{top3[idx].naam}</span>
                   <span class="punten">
                     <Teller naar={top3[idx].punten} van={live.vorigePunten[top3[idx].spelerId] ?? top3[idx].punten} vertraging={600 + positie * 200} />
@@ -481,8 +606,16 @@
             {/each}
           </div>
 
-          {#if staat.prijzen.length}
+          {#if staat.prijzen.length || poedel}
             <div class="prijzen">
+              {#if poedel && poedel.punten < staat.stand[0].punten}
+                <div class="prijs" style="border-style:dashed" in:fly={{ y: 20, duration: 520, delay: 1600 + staat.prijzen.length * 260, easing: cubicOut }}>
+                  <span class="prijsicoon" aria-hidden="true">🏮</span>
+                  <span class="prijstitel">Poedelprijs</span>
+                  <span class="prijsnaam">{poedel.naam}</span>
+                  <span class="prijsdetail">{kies(POEDEL, `poedel:${poedel.spelerId}`)}</span>
+                </div>
+              {/if}
               {#each staat.prijzen as p, i (p.sleutel)}
                 <div class="prijs" in:fly={{ y: 20, duration: 520, delay: 1600 + i * 260, easing: cubicOut }}>
                   <span class="prijsicoon" aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
