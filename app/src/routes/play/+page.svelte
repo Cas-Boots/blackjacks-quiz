@@ -5,6 +5,7 @@
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
   import Media from '$lib/client/Media.svelte';
+  import { maakPortret } from '$lib/client/portret';
 
   let antwoord = $state('');
   let verstuurd = $state(false);
@@ -69,6 +70,11 @@
 
   /* ---- Waar sta je ------------------------------------------------- */
   let mijnPlek = $derived((staat?.stand ?? []).findIndex((r) => r.spelerId === live.spelerId) + 1);
+  let winnaars = $derived((staat?.stand ?? []).filter((r, _, alle) => alle.length && r.punten === alle[0].punten));
+  let winZin = $derived(
+    winnaars.length === 0 ? 'Niemand wint' : winnaars.length === 1 ? `${winnaars[0].naam} wint` : `${winnaars.map((w) => w.naam).join(' & ')} winnen`,
+  );
+  let ikWin = $derived(winnaars.some((w) => w.spelerId === live.spelerId));
   let rangwoord = $derived(
     mijnPlek === 1 ? 'Je staat bovenaan.' : mijnPlek > 0 ? `Je staat ${mijnPlek}e van ${staat?.stand.length ?? 0}.` : '',
   );
@@ -104,6 +110,36 @@
   function initialen(naam: string) {
     return naam.slice(0, 2);
   }
+
+  /* ---- Je portret ---------------------------------------------------
+     Een selfie vanaf de telefoon, verkleind vóór het versturen. Hij staat
+     daarna op de televisie bij je naam, in de stand en op het podium. */
+  let ik = $derived(staat?.spelers.find((s) => s.id === live.spelerId) ?? null);
+  let fotoBezig = $state(false);
+  let fotoMelding = $state('');
+  let fotoInvoer = $state<HTMLInputElement | null>(null);
+
+  async function kiesFoto(e: Event) {
+    const bestand = (e.target as HTMLInputElement).files?.[0];
+    if (!bestand) return;
+    fotoBezig = true;
+    fotoMelding = '';
+    try {
+      const foto = await maakPortret(bestand);
+      const r = await fetch('/api/foto', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ foto }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      fotoMelding = 'Je staat op het scherm.';
+    } catch {
+      fotoMelding = 'Dat lukte niet. Probeer een andere foto.';
+    } finally {
+      fotoBezig = false;
+      if (fotoInvoer) fotoInvoer.value = '';
+    }
+  }
 </script>
 
 <svelte:head><title>Spelen — Blackjack Quiz 26/27</title></svelte:head>
@@ -113,6 +149,11 @@
   <div class="romp" style="max-width:560px">
     <!-- Kop: waar zijn we, en hoeveel tijd is er nog -->
     <div style="display:flex;align-items:center;gap:.9rem">
+      {#if ik}
+        <button class="portretknop" onclick={() => fotoInvoer?.click()} disabled={fotoBezig} aria-label="Foto kiezen">
+          {#if ik.foto}<img class="avatar" src={ik.foto} alt="" />{:else}<span class="avatar">{initialen(ik.naam)}</span>{/if}
+        </button>
+      {/if}
       <span style="flex:1 1 auto;min-width:0">
         <p class="etiket">{ronde?.naam ?? 'Blackjack Quiz 26/27'}</p>
         <p class="fijn" style="margin-top:.15rem">
@@ -139,7 +180,18 @@
       <p class="fijn">Verbinden…</p>
     {:else if staat.fase === 'lobby'}
       <div class="paneel" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>
-        <p class="lood">Klaar om te beginnen. De quizmaster start zo.</p>
+        <p class="etiket">Je doet mee{ik ? ` als ${ik.naam}` : ''}</p>
+        <p class="lood" style="font-size:1rem;margin-top:.4rem">Je staat op de televisie. De quizmaster start zo.</p>
+      </div>
+      <div class="paneel" style="display:flex;gap:1rem;align-items:center" in:fly={{ y: 16, duration: 420, delay: 80, easing: cubicOut }}>
+        {#if ik?.foto}<img class="avatar l" src={ik.foto} alt="" />{:else}<span class="avatar l">{initialen(ik?.naam ?? '?')}</span>{/if}
+        <span style="flex:1 1 auto;min-width:0">
+          <p class="lood" style="font-size:1rem">{ik?.foto ? 'Mooi. Zo sta je op het podium.' : 'Zet je gezicht op het scherm.'}</p>
+          <button class="knop" style="margin-top:.6rem" onclick={() => fotoInvoer?.click()} disabled={fotoBezig}>
+            {fotoBezig ? 'Bezig…' : ik?.foto ? 'Andere foto' : 'Selfie of foto kiezen'}
+          </button>
+          {#if fotoMelding}<p class="fijn" style="margin-top:.4rem">{fotoMelding}</p>{/if}
+        </span>
       </div>
     {:else if staat.fase === 'ronde'}
       <div class="paneel" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>
@@ -241,6 +293,24 @@
         </div>
       {/if}
     {:else if staat.fase === 'stand' || staat.fase === 'einde'}
+      {#if staat.fase === 'einde'}
+        <div class="paneel" style="text-align:center" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>
+          <p class="etiket">De uitslag</p>
+          <h2 class="groot" style="font-size:1.8rem;margin-top:.3rem">{winZin}</h2>
+          {#if ikWin}<p class="lood" style="font-size:1rem;margin-top:.3rem">Dat ben jij. Gefeliciteerd!</p>{/if}
+        </div>
+        {#if staat.prijzen.length}
+          <div class="paneel">
+            <p class="etiket stil">Prijzen</p>
+            {#each staat.prijzen as p (p.sleutel)}
+              <p style="display:flex;gap:.6rem;align-items:baseline;margin:.5rem 0 0">
+                <span aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
+                <span><strong>{p.titel}:</strong> {p.namen.join(' & ')} <span class="fijn">— {p.detail}</span></span>
+              </p>
+            {/each}
+          </div>
+        {/if}
+      {/if}
       <div class="paneel">
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
         {#if rangwoord}<p class="lood" style="font-size:1.05rem;margin-top:.3rem">{rangwoord}</p>{/if}
@@ -260,5 +330,6 @@
         </div>
       </div>
     {/if}
+    <input bind:this={fotoInvoer} type="file" accept="image/*" capture="user" onchange={kiesFoto} hidden />
   </div>
 </div>

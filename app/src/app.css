@@ -1634,3 +1634,64 @@ kbd {
 .vragenlijst li.uit {
   opacity: 0.5;
 }
+
+/* ===== Telefoon: je portret in de kop ============================= */
+.portretknop {
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 0;
+}
+.portretknop:disabled {
+  opacity: 0.5;
+}
+
+/* ===== De prijzen onder het podium ================================ */
+.prijzen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: clamp(0.6rem, 1.2vw, 1.2rem);
+  width: min(100%, 1100px);
+  margin-top: clamp(0.5rem, 1.5vh, 1.2rem);
+}
+.prijs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icoon titel"
+    "icoon naam"
+    "icoon detail";
+  column-gap: 0.8rem;
+  align-items: center;
+  text-align: left;
+  padding: clamp(0.7rem, 1.2vw, 1.1rem) clamp(0.9rem, 1.4vw, 1.3rem);
+  border-radius: 14px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+}
+.prijsicoon {
+  grid-area: icoon;
+  font-size: clamp(1.6rem, 2.6vw, 2.6rem);
+  line-height: 1;
+}
+.prijstitel {
+  grid-area: titel;
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--goud);
+}
+.prijsnaam {
+  grid-area: naam;
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.75);
+  line-height: 1.1;
+  color: var(--ivoor);
+}
+.prijsdetail {
+  grid-area: detail;
+  font-size: calc(var(--fs-lood) * 0.8);
+  color: var(--salie);
+}

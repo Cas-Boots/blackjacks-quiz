@@ -80,6 +80,8 @@ export interface PubliekeStaat {
   klok: { eindigtOp: number | null; duurMs: number; loopt: boolean } | null;
   /** Of het fragment (video of muziek) bij deze vraag hoort te spelen. */
   mediaSpeelt: boolean;
+  /** De prijzen van de avond. Alleen gevuld in de fase 'einde'. */
+  prijzen: { sleutel: string; titel: string; namen: string[]; detail: string }[];
   /** Antwoorden die al binnen zijn, per speler- of team-id. Alleen namen, geen inhoud. */
   ingeleverd: string[];
   /** De ingeleverde antwoorden zelf. Alleen gevuld in de fase 'antwoord'. */

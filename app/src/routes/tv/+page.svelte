@@ -48,6 +48,11 @@
   }
 
   let top3 = $derived((staat?.stand ?? []).slice(0, 3));
+  /** Bij een gelijkspel bovenaan winnen ze allebei; dat verdient een eigen zin. */
+  let winnaars = $derived((staat?.stand ?? []).filter((r, _, alle) => alle.length && r.punten === alle[0].punten));
+  let winZin = $derived(
+    winnaars.length === 0 ? 'Niemand wint' : winnaars.length === 1 ? `${winnaars[0].naam} wint` : `${winnaars.map((w) => w.naam).join(' & ')} winnen`,
+  );
   /** Tweede, eerste, derde — zoals een echt podium staat. */
   let podiumVolgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i));
   const medailles = ['🥇', '🥈', '🥉'];
@@ -450,10 +455,10 @@
         <div style="display:flex;flex-direction:column;gap:clamp(1rem,2.5vh,2rem);align-items:center;text-align:center">
           <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
           <h1 class="mega" in:scale={{ start: 0.86, duration: 760, delay: 200, easing: cubicOut }}>
-            {staat.stand[0]?.naam ?? 'Niemand'} wint
+            {winZin}
           </h1>
           <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: 700 }}>
-            Met {staat.stand[0]?.punten ?? 0} punten.
+            Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
           </p>
 
           <div class="podium" style="margin-top:clamp(.5rem,2vh,1.5rem)">
@@ -469,12 +474,25 @@
                   <span class="naam">{top3[idx].naam}</span>
                   <span class="punten">
                     <Teller naar={top3[idx].punten} van={live.vorigePunten[top3[idx].spelerId] ?? top3[idx].punten} vertraging={600 + positie * 200} />
-                    punten
+                    {top3[idx].punten === 1 ? 'punt' : 'punten'}
                   </span>
                 </div>
               {/if}
             {/each}
           </div>
+
+          {#if staat.prijzen.length}
+            <div class="prijzen">
+              {#each staat.prijzen as p, i (p.sleutel)}
+                <div class="prijs" in:fly={{ y: 20, duration: 520, delay: 1600 + i * 260, easing: cubicOut }}>
+                  <span class="prijsicoon" aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
+                  <span class="prijstitel">{p.titel}</span>
+                  <span class="prijsnaam">{p.namen.join(' & ')}</span>
+                  <span class="prijsdetail">{p.detail}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
 
           {#if staat.stand.length > 3}
             <div class="stand" style="max-width:560px;margin-top:1rem">

@@ -14,6 +14,7 @@ import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
 import { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, gissingenUitAntwoorden, telStand } from './scoring';
 import { beoordeel, leesGetal } from './antwoord';
+import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
 import type { PubliekeStaat, PubliekeInzending, Fase, Rol } from '$lib/shared/state';
 
@@ -96,6 +97,40 @@ export function standVan(spelId: number) {
     rijen.map((r) => JSON.parse(r.verdeling)),
     cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
   );
+}
+
+/**
+ * De prijzen voor de uitslag. Rekent alleen bij de uitslag zelf, want het
+ * leest alle antwoorden van de avond — vaak genoeg, niet bij elke tik.
+ */
+export function prijzenVan(spel: { id: number; pakket: string; samenstelling: string }, lijst: { id: number; naam: string }[]): Prijs[] {
+  const rondes = samengesteld(spel);
+  const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
+  const antwoordRijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.isGoed, true))).all();
+  const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
+  const ledenVan = (rondeIndex: number, inzender: string): number[] => {
+    const t = teamRijen.find((r) => r.rondeIndex === rondeIndex && r.teamKey === inzender);
+    try {
+      return t ? (JSON.parse(t.leden) as number[]) : [];
+    } catch {
+      return [];
+    }
+  };
+  return bepaalPrijzen({
+    spelers: lijst,
+    uitdelingen: uitdelingRijen.map((r) => {
+      try {
+        return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
+      } catch {
+        return { vraagSleutel: r.vraagSleutel, verdeling: {} };
+      }
+    }),
+    goedeAntwoorden: antwoordRijen.map((r) => ({
+      spelerIds: ledenVan(Number(r.vraagSleutel.split(':')[0]), r.inzender),
+      naMs: r.naMs,
+    })),
+    rondeNamen: rondes.map((r) => r.naam),
+  });
 }
 
 /** Bump de versie en laat de luisteraars weten dat er iets veranderd is. */
@@ -254,6 +289,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       loopt: spel.klokLoopt,
     },
     mediaSpeelt: spel.mediaSpeelt,
+    prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
     ingeleverd,
     inzendingen,
     uitdeling,
