@@ -283,9 +283,11 @@
           {/each}
         </div>
       {:else}
+        <!-- Bewust geen type="number": dan wordt de waarde een getal en valt
+             de knop uit; bovendien mag "1,5" gewoon. Het toetsenbord blijft numeriek. -->
         <input
-          type={vraag.type === 'dichtstbij' ? 'number' : 'text'}
-          inputmode={vraag.type === 'dichtstbij' ? 'numeric' : 'text'}
+          type="text"
+          inputmode={vraag.type === 'dichtstbij' ? 'decimal' : 'text'}
           bind:value={antwoord}
           placeholder={vraag.type === 'dichtstbij' ? 'Jullie getal' : 'Jullie antwoord'}
           onkeydown={(e) => e.key === 'Enter' && stuur()}

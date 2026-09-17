@@ -130,15 +130,18 @@ Neem het bestand mee op een usb-stick als extra back-up.
 
 ## Eigen vragen toevoegen
 
-Open `index.html` in een teksteditor en zoek `const PAKKETTEN`. Elke ronde ziet
-er zo uit:
+De vragen staan op één plek: `app/src/lib/content/packs.ts`. Pas ze daar aan
+en draai in `app/` `npm run content:sync`; dat schrijft hetzelfde blok naar
+`index.html`. (Zonder Node kun je ook rechtstreeks in `index.html` werken, bij
+`const PAKKETTEN`, maar dan lopen de twee versies uit elkaar tot je synct.)
+Elke ronde ziet er zo uit:
 
 ```js
 {
   naam: "Mijn ronde",
   suit: "♠",                  // ♠ ♥ ♦ ♣
   thema: "Korte ondertitel",
-  type: "open",               // waarnietwaar | meerkeuze | open | dichtstbij
+  type: "open",               // waarnietwaar | meerkeuze | open | dichtstbij | stem
   tijd: 30,                   // seconden per vraag
   punten: 2,                  // punten per goed antwoord
   teamModus: "teams",         // individueel | teams | samen
@@ -168,6 +171,10 @@ En per vraagtype:
 // dichtstbij — dichtstbij wint, precies goed geeft bonuspunten
 {v:"Hoeveel...?", getal:206, eenheid:"botten"}
 
+// stem — iedereen kiest een medespeler; in de meespeelversie beslist de
+// meerderheid vanzelf, in dit bestand beslist de groep aan tafel
+{v:"Wie kwam het vaakst te laat?", a:"De groep beslist"}
+
 // met een eigen bestand erbij
 {v:"Wie zie je hier?", a:"...", media:{soort:"beeld", bron:"2026-01.jpg"}}
 {v:"Welk nummer?",     a:"...", media:{soort:"muziek", bron:"intro-01.mp3"}}
@@ -194,13 +201,16 @@ De algemene vragen zijn nagezocht, niet uit het hoofd geschreven:
 
 In de map [`app/`](app/) staat dezelfde quiz als live meespeelversie: de vragen
 op de grote televisie, iedereen op zijn eigen telefoon, en een hostscherm voor
-de quizmaster. De televisie toont een QR-code om mee te doen, bij de onthulling
-zie je wat iedereen had ingetikt, je telefoon zegt of je het goed had, en aan
-het eind staan er portretten op het podium met prijzen eronder. Zie
+de quizmaster. De televisie toont een QR-code om mee te doen, een gast schuift
+aan met alleen zijn naam, bij de onthulling zie je wat iedereen had ingetikt,
+je telefoon zegt of je het goed had, de slotronde is een echte stemronde, en
+aan het eind staan er portretten op het podium met prijzen eronder. Elke avond
+blijft bewaard op een uitslagpagina die je kunt delen. Zie
 [`app/README.md`](app/README.md) voor het starten en het draaiboek.
 
-Beide versies draaien dezelfde vragen: `npm run content:sync` in `app/` haalt
-ze uit dit `index.html`. Dit losse bestand blijft de achtervang die zonder
+Beide versies draaien dezelfde vragen: ze staan in
+`app/src/lib/content/packs.ts`, en `npm run content:sync` in `app/` schrijft ze
+naar dit `index.html`. Dit losse bestand blijft de achtervang die zonder
 netwerk werkt.
 
 ## Wat er nog aan komt

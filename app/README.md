@@ -28,6 +28,7 @@ HOST_PIN=1234 docker compose up --build
 | Televisie | `/tv` | het grote scherm; QR-code, vraag, klok, onthulling, tussenstand, podium |
 | Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
+| Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
@@ -42,6 +43,15 @@ handen. Open het televisiescherm daarom via het netwerkadres van de laptop
 scherm waarschuwt als je dat toch doet. Onder de namen staat hoeveel telefoons
 er al bij zijn.
 
+Staat iemand niet in de lijst? Onder de namen tikt een gast zijn naam in en
+schuift aan, ook midden in een ronde: hij krijgt meteen een plek in de
+teamindeling. De quizmaster kan hetzelfde doen met *+ Gast* op het
+hostscherm. Een gast doet niet vanzelf mee aan het volgende spel.
+
+Telefoon en televisie houden het scherm wakker zolang de quiz open staat, dus
+een vraag verdwijnt niet achter een slotscherm en de laptop schiet niet in de
+schermbeveiliging.
+
 Op de telefoon kun je in de lobby een selfie kiezen. Die wordt op de telefoon
 zelf bijgesneden en verkleind (256 bij 256) en staat daarna bij je naam op de
 televisie, in de stand en op het podium. Tik later op je portret in de kop om
@@ -50,12 +60,16 @@ hem te vervangen.
 ### Zo verloopt een vraag
 
 1. **De vraag** staat op de televisie en op elke telefoon. Waar/niet waar en
-   meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld. De
-   televisie laat zien wie er al heeft ingeleverd, zonder de inhoud.
+   meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld, en bij een
+   stemvraag zijn de mensen aan tafel de knoppen. De televisie laat zien wie er
+   al heeft ingeleverd, zonder de inhoud. Blijft iemand achter, dan **port** de
+   quizmaster hem: een trilling en een gele balk op die telefoon.
 2. **De onthulling.** De televisie toont het antwoord én wat iedereen had
    ingetikt, als kaartjes. Bij dichtstbij wordt dat een getallenlijn met het
-   doel erop. Elke telefoon zegt of je het goed had en hoeveel punten dat
-   opleverde — met een trilling — en laat zien wat de rest had.
+   doel erop, bij een stemvraag een telling met balkjes en wie op wie stemde.
+   Dichtstbij en stem rekent de server op dit moment meteen uit. Elke telefoon
+   zegt of je het goed had en hoeveel punten dat opleverde — met een trilling —
+   en laat zien wat de rest had.
 3. **De quizmaster tikt aan** wie het goed had, of drukt op *Vink aan wat goed
    lijkt* (sneltoets `A`) om in één keer alles te nemen wat de machine met
    zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee.
@@ -63,10 +77,27 @@ hem te vervangen.
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
 "Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
 zilver en brons die één voor één uit de vloer rijzen, van drie naar één, met
-de fanfare als de winnaar bovenaan staat. Daaronder drie prijzen:
+de fanfare als de winnaar bovenaan staat. Daaronder de prijzen:
 **scherpschutter** (meeste vragen goed), **snelste vinger** (het snelste goede
-antwoord) en **beste ronde**. Een prijs die meer dan twee mensen zouden delen
-valt weg. Bij een gelijkspel bovenaan winnen ze allebei.
+antwoord), **beste ronde**, **langste reeks** (drie of meer op rij goed),
+**comeback van de avond** (wie na een ronde het diepst stond en het meest is
+geklommen) en de **moeilijkste vraag** (de vraag die de minste mensen goed
+hadden). Een prijs die meer dan twee mensen zouden delen valt weg. Bij een
+gelijkspel bovenaan winnen ze allebei.
+
+Onder het podium staat het adres van de uitslagpagina, en op elke telefoon een
+knop *Bekijk en deel de uitslag*. Die pagina blijft bestaan: `/uitslag` toont
+alle avonden, `/uitslag/7` één avond met de eindstand, de prijzen, de punten
+per ronde en per vraag wie het goed had. *Deel de uitslag* zet een samenvatting
+in de groepsapp of op het klembord.
+
+### De stemronde
+
+De slotronde *Wie van de Blackjacks?* is een stemvraag (`type: "stem"`):
+iedereen kiest op zijn telefoon een medespeler. De meerderheid beslist; wie
+met de meerderheid meestemde krijgt de punten. Bij een gelijke stand bovenaan
+tellen beide kampen. De quizmaster kan het resultaat altijd nog met de hand
+aanpassen.
 
 ### De gekke momenten
 
@@ -104,6 +135,19 @@ sneltoetsen zoals in de losse quiz:
 | `T` | 30 seconden erbij |
 | `M` | fragment afspelen of stoppen |
 | `A` | vink aan wat goed lijkt |
+| `Z` | de laatste handeling ongedaan maken |
+
+Bij een open vraag staat er een knop **Por de achterblijvers**; tik op een naam
+in de inleverrij om één telefoon te porren.
+
+Het **logboek** houdt elke handeling bij: ronde gestart, antwoord getoond,
+punten voor wie, correcties. Elke handeling die de stand of de plek in de quiz
+verandert draagt een momentopname van ervoor, dus *Ongedaan* (of `Z`) zet hem
+in zijn geheel terug — ook na een verkeerd vinkje of een per ongeluk overgeslagen
+vraag. Meerdere keren achter elkaar mag.
+
+*← Terug* werkt overal: vanaf de titelkaart van een ronde ga je naar de
+tussenstand van de vorige ronde, vanaf de uitslag naar de laatste tussenstand.
 
 Onderaan het overzicht **Rondes**: alle rondes van het pakket met de vragen
 en antwoorden erin, en rode labels bij wat nog ingevuld moet worden. Vóór de
@@ -166,10 +210,13 @@ npm run build
 CHROMIUM_PAD=/pad/naar/chrome npx playwright test
 ```
 
-Opent een televisie, een hostscherm en drie telefoons als losse browsers met
-eigen koekjespotten, en controleert dat de QR-code er staat, dat een vraag op
-alle schermen tegelijk verschijnt, dat inleveren werkt, dat de onthulling op
-televisie en telefoon klopt en dat de stand meebeweegt. `CHROMIUM_PAD` mag
+Opent een televisie, een hostscherm en telefoons als losse browsers met eigen
+koekjespotten, en speelt de avond na: de QR-code, een vraag op alle schermen
+tegelijk, inleveren, de onthulling en de stand (`live.spec.ts`); dichtstbij
+met de automatische berekening, een teamronde, een beeldvraag, de stemronde
+met een gast, een por, ongedaan maken, het podium met de prijzen, de
+uitslagpagina en een telefoon zonder live stroom (`avond.spec.ts`).
+`CHROMIUM_PAD` mag
 weg als Playwright zijn eigen browsers heeft; staat er al een Chromium op de
 machine (bijvoorbeeld `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`),
 dan wijs je daarheen in plaats van te downloaden.
@@ -180,8 +227,14 @@ dan wijs je daarheen in plaats van te downloaden.
 npm test
 ```
 
-Dekt de beoordeling van antwoorden, de puntentelling en de teamindeling — de
-drie plekken waar een fout de avond zou verpesten.
+Dekt de beoordeling van antwoorden, de puntentelling (ook de stemronde), de
+prijzen en de teamindeling — de plekken waar een fout de avond zou verpesten.
+
+### In CI
+
+`.github/workflows/ci.yml` draait bij elke push en pull request de typecontrole,
+de eenheidstests, de controle dat `index.html` gelijk loopt met de vragen, de
+build en daarna de browsertests.
 
 ## Waarom het blijft werken als de wifi hapert
 
@@ -206,12 +259,29 @@ drie plekken waar een fout de avond zou verpesten.
 
 En als alles tegenzit: `../index.html` openen en de avond op papier draaien.
 
+## De vragen aanpassen
+
+De vragen staan op één plek: `src/lib/content/packs.ts`. Dat bestand is
+getypt, dus een vergeten antwoord of een verkeerd vraagtype valt bij `npm run
+check` al om. Daarna:
+
+```bash
+npm run content:sync    # schrijft hetzelfde blok naar ../index.html
+npm run content:check   # alleen controleren; dit draait ook in CI
+```
+
+De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
+vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
+vraag.
+
 ## Wat er nog niet in zit
 
 - De rondes *De Voorspellingen*, *De WK-poule* en *Oktober tot december* wachten
   nog op hun antwoorden; het hostscherm telt hoeveel gekozen vragen er nog een
-  antwoord missen. Vul ze in `../index.html` en draai `npm run content:sync`.
-- Vragen aanpassen kan alleen in `../index.html`; er is geen editor in de app.
+  antwoord missen.
+- Een por komt alleen aan op een telefoon met een open live stroom; een
+  telefoon die op navragen is teruggevallen mist hem.
+- Er is geen editor in de app; vragen pas je aan in `src/lib/content/packs.ts`.
 
 ## Bekende hobbels
 

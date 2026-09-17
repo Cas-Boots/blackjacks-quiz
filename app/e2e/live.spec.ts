@@ -16,16 +16,18 @@ async function nieuwApparaat(browser: BrowserContext['browser'], pad: string): P
 }
 
 test('een ronde spelen met televisie, quizmaster en drie telefoons', async ({ browser }) => {
-  const tv = await nieuwApparaat(browser, '/tv');
-  const host = await nieuwApparaat(browser, '/');
-  await expect(tv.pagina.getByRole('heading', { name: 'Blackjack Quiz 26/27' })).toBeVisible();
-  // De televisie toont een QR-code met het adres waarop de telefoons kunnen meedoen.
-  await expect(tv.pagina.getByAltText('QR-code om mee te doen')).toBeVisible({ timeout: 15_000 });
-
   // De quizmaster meldt zich met de pincode.
+  const host = await nieuwApparaat(browser, '/');
   await host.pagina.getByPlaceholder('Pincode').fill('2627');
   await host.pagina.getByRole('button', { name: 'Hostscherm' }).click();
   await expect(host.pagina.getByText('Quizmaster', { exact: false })).toBeVisible({ timeout: 15_000 });
+  // Een schoon spel met de standaardsamenstelling, wat de andere proeven ook achterlieten.
+  await host.pagina.request.post('/api/host', { data: { opdracht: 'nieuw-spel', pakket: 'jaar2026' } });
+
+  const tv = await nieuwApparaat(browser, '/tv');
+  await expect(tv.pagina.getByRole('heading', { name: 'Blackjack Quiz 26/27' })).toBeVisible();
+  // De televisie toont een QR-code met het adres waarop de telefoons kunnen meedoen.
+  await expect(tv.pagina.getByAltText('QR-code om mee te doen')).toBeVisible({ timeout: 15_000 });
 
   // Drie telefoons kiezen een naam.
   const namen = ['Liz', 'Bastiaan', 'Joris'];

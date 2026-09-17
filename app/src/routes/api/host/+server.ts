@@ -264,6 +264,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         if (!/^\d+$/.test(k) || !Array.isArray(v)) continue;
         keuze[k] = v.map(Number).filter((n) => Number.isInteger(n) && n >= 0);
       }
+      // De teamindeling hangt aan de rondenummers, en de lobby heeft voor
+      // ronde 0 al een indeling aangemaakt. Die hoort bij de oude volgorde.
+      db.delete(teamsTabel).where(eq(teamsTabel.spelId, spel.id)).run();
       zet({ samenstelling: JSON.stringify(keuze), rondeIndex: 0, vraagIndex: 0 });
       log = { omschrijving: 'Samenstelling aangepast', terug: true };
       break;
