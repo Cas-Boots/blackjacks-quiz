@@ -76,6 +76,8 @@ export const antwoorden = sqliteTable(
     tekst: text('tekst').notNull(),
     /** Unix-ms volgens de serverklok. */
     ingediendOp: integer('ingediend_op').notNull(),
+    /** Hoeveel ms na het opengaan van de vraag dit binnenkwam; null als de klok niet liep. */
+    naMs: integer('na_ms'),
     /** Door de quizmaster goedgekeurd; null zolang er niet beoordeeld is. */
     isGoed: integer('is_goed', { mode: 'boolean' }),
   },

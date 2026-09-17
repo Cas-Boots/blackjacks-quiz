@@ -6,6 +6,7 @@
   import Klok from '$lib/client/Klok.svelte';
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
+  import Getallenlijn from '$lib/client/Getallenlijn.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
 
@@ -52,6 +53,13 @@
 
   function initialen(naam: string) {
     return naam.slice(0, 2);
+  }
+
+  /** De naam waaronder een inzender op het scherm staat: speler of team. */
+  function naamVan(inzender: string): string {
+    const team = staat?.teams.find((t) => t.id === inzender);
+    if (!team) return '?';
+    return team.leden.length === 1 && !inTeams ? team.naam : `${team.suit} ${team.naam}`;
   }
 
   /* ---- Geluid ---------------------------------------------------------
@@ -373,6 +381,36 @@
               <p class="toelichting" in:fade={{ duration: 400, delay: 450 }}>{staat.onthulling.toelichting}</p>
             {/if}
           </div>
+
+          <!-- Wat iedereen had ingetikt. Dit is het moment waar de tafel op wacht. -->
+          {#if staat.inzendingen.length}
+            {#if vraag.type === 'dichtstbij' && staat.onthulling?.getal !== undefined}
+              <div in:fade={{ duration: 400, delay: 600 }}>
+                <Getallenlijn
+                  doel={staat.onthulling.getal}
+                  eenheid={staat.onthulling.eenheid ?? ''}
+                  gokken={staat.inzendingen
+                    .filter((i) => i.getal !== null)
+                    .map((i) => ({ naam: naamVan(i.inzender), getal: i.getal as number, wint: i.isGoed === true }))}
+                />
+              </div>
+            {:else}
+              <div class="antwoordenrij">
+                {#each staat.inzendingen as i, n (i.inzender)}
+                  <div
+                    class="antwoordkaart"
+                    class:goed={i.isGoed === true}
+                    class:fout={i.isGoed === false}
+                    in:fly={{ y: 16, duration: 380, delay: 500 + n * 90, easing: cubicOut }}
+                  >
+                    <span class="wie">{naamVan(i.inzender)}</span>
+                    <span class="wat">{i.tekst || '—'}</span>
+                    <span class="oordeel" aria-hidden="true">{i.isGoed === true ? '✓' : i.isGoed === false ? '✗' : ''}</span>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          {/if}
         </div>
 
         <!-- ══ Tussenstand ════════════════════════════════════════════ -->

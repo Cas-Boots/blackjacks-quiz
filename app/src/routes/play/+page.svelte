@@ -33,6 +33,45 @@
     }
   });
 
+  /* ---- Jouw uitslag bij de onthulling ---------------------------------
+     De server stuurt bij de onthulling alle antwoorden en de uitdeling van
+     deze vraag mee. Daaruit volgt precies één zin voor deze telefoon. */
+  let mijnInzending = $derived(
+    mijnTeam ? (staat?.inzendingen ?? []).find((i) => i.inzender === mijnTeam.id) ?? null : null,
+  );
+  let mijnPunten = $derived(live.spelerId != null ? (staat?.uitdeling?.[live.spelerId] ?? 0) : 0);
+  let uitslag = $derived.by((): 'goed' | 'fout' | 'wacht' | 'niets' | null => {
+    if (!staat || staat.fase !== 'antwoord') return null;
+    if (!mijnInzending) return 'niets';
+    if (mijnPunten > 0) return 'goed';
+    if (mijnInzending.isGoed === false) return 'fout';
+    return 'wacht';
+  });
+
+  // Een trilling bij het oordeel: kort en blij, of één lange voor 'helaas'.
+  let vorigeUitslag = $state<string | null>(null);
+  $effect(() => {
+    const nu = uitslag;
+    if (nu !== vorigeUitslag) {
+      if (nu === 'goed') tril([40, 60, 40, 60, 80]);
+      else if (nu === 'fout') tril([120]);
+      vorigeUitslag = nu;
+    }
+  });
+  function tril(patroon: number[]) {
+    try {
+      navigator.vibrate?.(patroon);
+    } catch {
+      /* geen trilmotor, geen probleem */
+    }
+  }
+
+  /* ---- Waar sta je ------------------------------------------------- */
+  let mijnPlek = $derived((staat?.stand ?? []).findIndex((r) => r.spelerId === live.spelerId) + 1);
+  let rangwoord = $derived(
+    mijnPlek === 1 ? 'Je staat bovenaan.' : mijnPlek > 0 ? `Je staat ${mijnPlek}e van ${staat?.stand.length ?? 0}.` : '',
+  );
+
   onMount(() => {
     live.start();
     return () => live.stop();
@@ -157,6 +196,27 @@
         <p class="fijn" in:fade={{ duration: 220 }}>Je antwoord staat genoteerd.</p>
       {/if}
     {:else if staat.fase === 'antwoord'}
+      {#key uitslag}
+        <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
+          {#if uitslag === 'goed'}
+            <span class="teken">✓</span>
+            <span>
+              <strong>Goed!</strong>
+              <span class="plus">+{mijnPunten}</span>
+              <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
+            </span>
+          {:else if uitslag === 'fout'}
+            <span class="teken">✗</span>
+            <span><strong>Helaas.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
+          {:else if uitslag === 'wacht'}
+            <span class="teken">…</span>
+            <span><strong>De quizmaster kijkt ernaar.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
+          {:else}
+            <span class="teken">—</span>
+            <span><strong>Niets ingeleverd.</strong> <span class="fijn">Volgende vraag beter.</span></span>
+          {/if}
+        </div>
+      {/key}
       <div class="onthulling" style="padding:1.2rem">
         <p class="etiket stil">Het antwoord</p>
         <p class="antwoordtekst" style="font-size:1.6rem">{staat.onthulling?.antwoord}</p>
@@ -164,12 +224,25 @@
           <p class="toelichting" style="font-size:.95rem">{staat.onthulling.toelichting}</p>
         {/if}
       </div>
+      {#if staat.inzendingen.length > 1}
+        <div class="paneel" style="padding:.9rem 1rem">
+          <p class="etiket stil" style="margin-bottom:.4rem">Wat de rest had</p>
+          {#each staat.inzendingen as i (i.inzender)}
+            {@const team = staat.teams.find((t) => t.id === i.inzender)}
+            <p class="fijn" style="display:flex;justify-content:space-between;gap:.8rem;padding:.2rem 0;color:var(--ivoor-zacht)">
+              <span style="color:var(--salie)">{team ? (team.leden.length === 1 && !teamRonde ? team.naam : `${team.suit} ${team.naam}`) : '?'}</span>
+              <span style="text-align:right">{i.tekst || '—'} {i.isGoed === true ? '✓' : i.isGoed === false ? '✗' : ''}</span>
+            </p>
+          {/each}
+        </div>
+      {/if}
     {:else if staat.fase === 'stand' || staat.fase === 'einde'}
       <div class="paneel">
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
+        {#if rangwoord}<p class="lood" style="font-size:1.05rem;margin-top:.3rem">{rangwoord}</p>{/if}
         <div class="stand" style="margin-top:.5rem">
           {#each staat.stand as r, i (r.spelerId)}
-            <div class="standrij" class:leider={i === 0} style="--i:{i}">
+            <div class="standrij" class:leider={i === 0} class:ik={r.spelerId === live.spelerId} style="--i:{i}">
               <span class="plek">{i + 1}</span>
               {#if r.foto}
                 <img class="avatar" class:goud={i === 0} src={r.foto} alt="" />

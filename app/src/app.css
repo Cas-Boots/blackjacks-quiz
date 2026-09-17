@@ -1302,3 +1302,121 @@ textarea:focus {
     justify-self: center;
   }
 }
+
+/* ===== De onthulling: wat iedereen had ingetikt ==================== */
+.antwoordenrij {
+  display: grid;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.antwoordkaart {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "wie oordeel"
+    "wat oordeel";
+  gap: 0.15rem 0.6rem;
+  align-items: center;
+  padding: clamp(0.6rem, 1.1vw, 1rem) clamp(0.8rem, 1.3vw, 1.2rem);
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  transition: border-color 0.35s var(--zacht), background 0.35s var(--zacht), opacity 0.35s var(--zacht);
+}
+.antwoordkaart .wie {
+  grid-area: wie;
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--salie);
+}
+.antwoordkaart .wat {
+  grid-area: wat;
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.7);
+  line-height: 1.15;
+  color: var(--ivoor);
+  overflow-wrap: anywhere;
+}
+.antwoordkaart .oordeel {
+  grid-area: oordeel;
+  font-size: calc(var(--fs-naam) * 0.8);
+  line-height: 1;
+  width: 1.2em;
+  text-align: center;
+}
+.antwoordkaart.goed {
+  border-color: var(--groen);
+  background: linear-gradient(170deg, rgba(78, 154, 107, 0.2), var(--vilt-diep));
+}
+.antwoordkaart.goed .oordeel {
+  color: var(--groen-licht);
+}
+.antwoordkaart.goed .wie {
+  color: var(--groen-licht);
+}
+.antwoordkaart.fout {
+  opacity: 0.62;
+}
+.antwoordkaart.fout .oordeel {
+  color: var(--rood-licht);
+}
+
+/* ===== Telefoon: jouw uitslag bij de onthulling =================== */
+.uitslag {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+.uitslag .teken {
+  font-size: 1.8rem;
+  line-height: 1;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--vilt-diep);
+  border: 1px solid var(--rand);
+  color: var(--salie);
+}
+.uitslag .plus {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  color: var(--goud-licht);
+  margin: 0 0.3rem;
+}
+.uitslag[data-uitslag="goed"] {
+  border-color: var(--groen);
+  background: linear-gradient(170deg, rgba(78, 154, 107, 0.26), var(--vilt-diep));
+  box-shadow: 0 0 40px -12px rgba(78, 154, 107, 0.7);
+}
+.uitslag[data-uitslag="goed"] .teken {
+  background: var(--groen);
+  border-color: var(--groen-licht);
+  color: #06120b;
+}
+.uitslag[data-uitslag="fout"] .teken {
+  color: var(--rood-licht);
+  border-color: var(--rood);
+}
+.standrij.ik {
+  background: linear-gradient(90deg, rgba(240, 217, 140, 0.1), transparent 70%);
+}
+.standrij.ik .naam::after {
+  content: " · jij";
+  font-family: var(--ui);
+  font-size: 0.6em;
+  color: var(--goud);
+  font-weight: 500;
+}
