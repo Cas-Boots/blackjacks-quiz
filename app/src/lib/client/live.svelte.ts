@@ -1,4 +1,4 @@
-import type { PubliekeStaat, Rol } from '$lib/shared/state';
+import type { PubliekeStaat, Rol, Por } from '$lib/shared/state';
 
 /**
  * De live verbinding met de server.
@@ -26,6 +26,9 @@ class Live {
   vorigePunten = $state<Record<number, number>>({});
   /** Reacties van telefoons die nu over het scherm zweven. Vluchtig. */
   reacties = $state<{ id: number; emoji: string; naam: string; x: number }[]>([]);
+  /** De laatste por van de quizmaster aan deze telefoon; verdwijnt vanzelf. */
+  por = $state<Por | null>(null);
+  #porTimer: ReturnType<typeof setTimeout> | null = null;
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -93,6 +96,22 @@ class Live {
           this.reacties = [...this.reacties.slice(-24), r];
           // Na de zweefanimatie mag hij weg.
           setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('por', (e) => {
+        try {
+          const por = JSON.parse((e as MessageEvent).data) as Por;
+          this.por = por;
+          try {
+            navigator.vibrate?.([80, 60, 80, 60, 160]);
+          } catch {
+            /* geen trilmotor */
+          }
+          if (this.#porTimer) clearTimeout(this.#porTimer);
+          this.#porTimer = setTimeout(() => (this.por = null), 5000);
         } catch {
           /* kapot pakketje, laat maar */
         }

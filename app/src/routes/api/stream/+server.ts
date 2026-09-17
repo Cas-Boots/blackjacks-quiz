@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { luister, luisterReacties } from '$lib/server/bus';
+import { luister, luisterReacties, luisterPorren } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
 import { TOKEN_COOKIE } from '../../../hooks.server';
 
@@ -13,11 +13,13 @@ import { TOKEN_COOKIE } from '../../../hooks.server';
  */
 export const GET: RequestHandler = ({ locals, cookies }) => {
   const rol = locals.rol;
+  const spelerId = locals.spelerId;
   const token = cookies.get(TOKEN_COOKIE);
-  if (token) raakApparaatAan(token, rol, locals.spelerId, null);
+  if (token) raakApparaatAan(token, rol, spelerId, null);
 
   let stop: (() => void) | null = null;
   let stopReacties: (() => void) | null = null;
+  let stopPorren: (() => void) | null = null;
   let hartslag: ReturnType<typeof setInterval> | null = null;
 
   const stroom = new ReadableStream({
@@ -33,17 +35,22 @@ export const GET: RequestHandler = ({ locals, cookies }) => {
       stuur('staat', bouwStaat(rol));
       stop = luister(() => stuur('staat', bouwStaat(rol)));
       stopReacties = luisterReacties((bericht) => stuur('reactie', bericht));
+      // Een por is alleen voor de telefoon waar hij voor bedoeld is.
+      stopPorren = luisterPorren((por) => {
+        if (spelerId !== null && por.spelerIds.includes(spelerId)) stuur('por', por);
+      });
 
       // Houdt tussenliggende proxies wakker en laat de client merken dat de
       // verbinding nog leeft.
       hartslag = setInterval(() => {
-        if (token) raakApparaatAan(token, rol, locals.spelerId, null);
+        if (token) raakApparaatAan(token, rol, spelerId, null);
         stuur('hartslag', { t: Date.now() });
       }, 10_000);
     },
     cancel() {
       stop?.();
       stopReacties?.();
+      stopPorren?.();
       if (hartslag) clearInterval(hartslag);
     },
   });

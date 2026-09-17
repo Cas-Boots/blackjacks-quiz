@@ -8,6 +8,8 @@ export const spelers = sqliteTable('spelers', {
   /** Portret als data-URI; klein gehouden (256x256 JPEG). */
   foto: text('foto'),
   isQuizmaster: integer('is_quizmaster', { mode: 'boolean' }).notNull().default(false),
+  /** Een gast van één avond: doet niet vanzelf mee aan het volgende spel. */
+  isGast: integer('is_gast', { mode: 'boolean' }).notNull().default(false),
   aangemaaktOp: text('aangemaakt_op').notNull().default(sql`(datetime('now'))`),
 });
 
@@ -127,4 +129,23 @@ export const apparaten = sqliteTable(
     laatstGezien: integer('laatst_gezien').notNull(),
   },
   (t) => [index('apparaten_speler').on(t.spelerId)],
+);
+
+/** Wat de quizmaster deed, in volgorde. Elke regel draagt een momentopname
+ *  van vóór de handeling, zodat hij in zijn geheel kan worden teruggedraaid. */
+export const logboek = sqliteTable(
+  'logboek',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    spelId: integer('spel_id').notNull().references(() => spellen.id, { onDelete: 'cascade' }),
+    opdracht: text('opdracht').notNull(),
+    /** Leesbare omschrijving voor het hostscherm. */
+    omschrijving: text('omschrijving').notNull(),
+    /** JSON met de toestand van vóór de handeling; null als hij niet terug kan. */
+    vorige: text('vorige'),
+    /** Of deze handeling al is teruggedraaid. */
+    isOngedaan: integer('is_ongedaan', { mode: 'boolean' }).notNull().default(false),
+    aangemaaktOp: integer('aangemaakt_op').notNull(),
+  },
+  (t) => [index('logboek_spel').on(t.spelId)],
 );
