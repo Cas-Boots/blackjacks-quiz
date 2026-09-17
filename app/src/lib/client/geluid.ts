@@ -162,3 +162,29 @@ export function fanfare(): void {
 export function roffel(): void {
   for (let i = 0; i < 14; i++) ruis(i * 0.055, 0.05, 0.08 + i * 0.006);
 }
+
+/* ---- De gekke momenten --------------------------------------------- */
+
+/** De treurige trombone: iedereen fout. */
+export function wahwah(): void {
+  const noten = [392, 370, 349, 330];
+  noten.forEach((hz, i) => toon(hz, i * 0.28, 0.3, { vorm: 'sawtooth', volume: 0.22, glijNaar: hz * 0.94 }));
+  toon(311, 1.12, 0.9, { vorm: 'sawtooth', volume: 0.24, glijNaar: 262 });
+}
+
+/** Een veer die uitschiet: iemand komt binnen. */
+export function boing(): void {
+  toon(180, 0, 0.32, { vorm: 'sine', volume: 0.32, glijNaar: 720 });
+  toon(720, 0.3, 0.18, { vorm: 'sine', volume: 0.18, glijNaar: 540 });
+}
+
+/** Een klein plopje: een reactie zweeft voorbij. */
+export function plop(): void {
+  toon(520, 0, 0.07, { vorm: 'sine', volume: 0.16, glijNaar: 260 });
+}
+
+/** De stempel komt neer. */
+export function stempel(): void {
+  ruis(0, 0.06, 0.3);
+  toon(110, 0, 0.16, { vorm: 'square', volume: 0.22, glijNaar: 60 });
+}

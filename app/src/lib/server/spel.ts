@@ -13,9 +13,10 @@ import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
 import { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, gissingenUitAntwoorden, telStand } from './scoring';
-import { beoordeel } from './antwoord';
+import { beoordeel, leesGetal } from './antwoord';
+import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
-import type { PubliekeStaat, Fase, Rol } from '$lib/shared/state';
+import type { PubliekeStaat, PubliekeInzending, Fase, Rol } from '$lib/shared/state';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -98,6 +99,40 @@ export function standVan(spelId: number) {
   );
 }
 
+/**
+ * De prijzen voor de uitslag. Rekent alleen bij de uitslag zelf, want het
+ * leest alle antwoorden van de avond — vaak genoeg, niet bij elke tik.
+ */
+export function prijzenVan(spel: { id: number; pakket: string; samenstelling: string }, lijst: { id: number; naam: string }[]): Prijs[] {
+  const rondes = samengesteld(spel);
+  const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
+  const antwoordRijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.isGoed, true))).all();
+  const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
+  const ledenVan = (rondeIndex: number, inzender: string): number[] => {
+    const t = teamRijen.find((r) => r.rondeIndex === rondeIndex && r.teamKey === inzender);
+    try {
+      return t ? (JSON.parse(t.leden) as number[]) : [];
+    } catch {
+      return [];
+    }
+  };
+  return bepaalPrijzen({
+    spelers: lijst,
+    uitdelingen: uitdelingRijen.map((r) => {
+      try {
+        return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
+      } catch {
+        return { vraagSleutel: r.vraagSleutel, verdeling: {} };
+      }
+    }),
+    goedeAntwoorden: antwoordRijen.map((r) => ({
+      spelerIds: ledenVan(Number(r.vraagSleutel.split(':')[0]), r.inzender),
+      naMs: r.naMs,
+    })),
+    rondeNamen: rondes.map((r) => r.naam),
+  });
+}
+
 /** Bump de versie en laat de luisteraars weten dat er iets veranderd is. */
 export function bumpVersie(spelId: number): number {
   const spel = db.select().from(spellen).where(eq(spellen.id, spelId)).get();
@@ -144,12 +179,35 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   }
 
   const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
-  const ingeleverd = db
-    .select({ inzender: antwoorden.inzender })
+  const inzendingRijen = db
+    .select()
     .from(antwoorden)
     .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel)))
     .all()
-    .map((r) => r.inzender);
+    .sort((a, b) => a.ingediendOp - b.ingediendOp);
+  const ingeleverd = inzendingRijen.map((r) => r.inzender);
+
+  // Pas bij de onthulling mag de kamer zien wat iedereen heeft ingetikt.
+  // Tot die tijd blijft het bij namen, anders kan een team meelezen.
+  const onthuld = spel.fase === 'antwoord';
+  const inzendingen: PubliekeInzending[] = onthuld
+    ? inzendingRijen.map((r) => ({
+        inzender: r.inzender,
+        tekst: r.tekst,
+        isGoed: r.isGoed,
+        naMs: r.naMs,
+        getal: ronde?.type === 'dichtstbij' ? leesGetal(r.tekst) : null,
+      }))
+    : [];
+  const uitdelingRij = onthuld
+    ? db.select().from(uitdelingen).where(and(eq(uitdelingen.spelId, spel.id), eq(uitdelingen.vraagSleutel, sleutel))).get()
+    : undefined;
+  let uitdeling: Record<number, number> = {};
+  try {
+    uitdeling = uitdelingRij ? JSON.parse(uitdelingRij.verdeling) : {};
+  } catch {
+    uitdeling = {};
+  }
 
   // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
   // sturen ziet de kamer op de televisie waar tussen gekozen wordt, in
@@ -178,6 +236,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       antwoord: tekst,
       toelichting: vraag.toelichting,
       goedeOptie: goedeOptieIndex,
+      getal: ronde.type === 'dichtstbij' && typeof vraag.getal === 'number' ? vraag.getal : undefined,
+      eenheid: ronde.type === 'dichtstbij' ? vraag.eenheid : undefined,
     };
   }
 
@@ -228,7 +288,11 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       duurMs: spel.klokDuurMs,
       loopt: spel.klokLoopt,
     },
-    ingeleverd: rol === 'quizmaster' || spel.fase === 'antwoord' ? ingeleverd : ingeleverd,
+    mediaSpeelt: spel.mediaSpeelt,
+    prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
+    ingeleverd,
+    inzendingen,
+    uitdeling,
   };
 }
 

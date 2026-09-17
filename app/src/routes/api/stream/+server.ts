@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { luister } from '$lib/server/bus';
+import { luister, luisterReacties } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
 import { TOKEN_COOKIE } from '../../../hooks.server';
 
@@ -17,6 +17,7 @@ export const GET: RequestHandler = ({ locals, cookies }) => {
   if (token) raakApparaatAan(token, rol, locals.spelerId, null);
 
   let stop: (() => void) | null = null;
+  let stopReacties: (() => void) | null = null;
   let hartslag: ReturnType<typeof setInterval> | null = null;
 
   const stroom = new ReadableStream({
@@ -31,6 +32,7 @@ export const GET: RequestHandler = ({ locals, cookies }) => {
 
       stuur('staat', bouwStaat(rol));
       stop = luister(() => stuur('staat', bouwStaat(rol)));
+      stopReacties = luisterReacties((bericht) => stuur('reactie', bericht));
 
       // Houdt tussenliggende proxies wakker en laat de client merken dat de
       // verbinding nog leeft.
@@ -41,6 +43,7 @@ export const GET: RequestHandler = ({ locals, cookies }) => {
     },
     cancel() {
       stop?.();
+      stopReacties?.();
       if (hartslag) clearInterval(hartslag);
     },
   });

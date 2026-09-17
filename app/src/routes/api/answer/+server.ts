@@ -35,6 +35,12 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
   const nu = Date.now();
 
+  // Hoe lang na het opengaan van de vraag dit binnenkwam. De klok kan
+  // gepauzeerd of verlengd zijn; verstreken = totale duur min wat er nog
+  // op staat, en dat klopt in alle drie de gevallen.
+  const rest = spel.klokLoopt ? Math.max(0, (spel.klokEindigtOp ?? nu) - nu) : spel.klokRestMs;
+  const naMs = spel.klokDuurMs > 0 ? Math.max(0, spel.klokDuurMs - rest) : null;
+
   const bestaand = db
     .select()
     .from(antwoorden)
@@ -43,12 +49,12 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 
   if (bestaand) {
     db.update(antwoorden)
-      .set({ tekst, ingediendOp: nu, spelerId: locals.spelerId, isGoed: null })
+      .set({ tekst, ingediendOp: nu, naMs, spelerId: locals.spelerId, isGoed: null })
       .where(eq(antwoorden.id, bestaand.id))
       .run();
   } else {
     db.insert(antwoorden)
-      .values({ spelId: spel.id, vraagSleutel: sleutel, inzender: mijnTeam.id, spelerId: locals.spelerId, tekst, ingediendOp: nu })
+      .values({ spelId: spel.id, vraagSleutel: sleutel, inzender: mijnTeam.id, spelerId: locals.spelerId, tekst, ingediendOp: nu, naMs })
       .run();
   }
 

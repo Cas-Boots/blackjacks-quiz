@@ -19,6 +19,7 @@ RUN npm ci --omit=dev --no-audit --no-fund --legacy-peer-deps \
 COPY --from=bouw /app/build ./build
 COPY --from=bouw /app/drizzle ./drizzle
 COPY --from=bouw /app/src/lib/server/db ./src/lib/server/db
+RUN mkdir -p /app/media
 ENV DATABASE_PATH=/data/quiz.db
 ENV PORT=3000
 EXPOSE 3000

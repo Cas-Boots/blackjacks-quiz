@@ -11,6 +11,8 @@ services:
     volumes:
       # De stand overleeft een herstart van de container.
       - quiz-data:/data
+      # Foto's, filmpjes en muziek bij vragen. Bestand erin zetten is genoeg.
+      - ./media:/app/media
     restart: unless-stopped
     healthcheck:
       test:

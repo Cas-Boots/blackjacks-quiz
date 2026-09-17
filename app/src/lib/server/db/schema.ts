@@ -28,6 +28,8 @@ export const spellen = sqliteTable('spellen', {
   klokLoopt: integer('klok_loopt', { mode: 'boolean' }).notNull().default(false),
   /** Rest bij pauze, zodat hervatten exact doorloopt. */
   klokRestMs: integer('klok_rest_ms').notNull().default(0),
+  /** Of het fragment bij de huidige vraag speelt. De quizmaster zet dit aan en uit. */
+  mediaSpeelt: integer('media_speelt', { mode: 'boolean' }).notNull().default(false),
   /** Loopt op bij elke wijziging. Clients negeren pakketjes met een lagere versie. */
   versie: integer('versie').notNull().default(0),
   isActief: integer('is_actief', { mode: 'boolean' }).notNull().default(true),
@@ -76,6 +78,8 @@ export const antwoorden = sqliteTable(
     tekst: text('tekst').notNull(),
     /** Unix-ms volgens de serverklok. */
     ingediendOp: integer('ingediend_op').notNull(),
+    /** Hoeveel ms na het opengaan van de vraag dit binnenkwam; null als de klok niet liep. */
+    naMs: integer('na_ms'),
     /** Door de quizmaster goedgekeurd; null zolang er niet beoordeeld is. */
     isGoed: integer('is_goed', { mode: 'boolean' }),
   },

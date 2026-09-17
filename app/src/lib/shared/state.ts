@@ -37,6 +37,21 @@ export interface Onthulling {
   antwoord: string;
   toelichting?: string;
   goedeOptie?: number;
+  /** Bij dichtstbij: het doelgetal, voor de getallenlijn op de televisie. */
+  getal?: number;
+  eenheid?: string;
+}
+
+/** Een ingeleverd antwoord zoals de kamer het na de onthulling mag zien. */
+export interface PubliekeInzending {
+  inzender: string;
+  tekst: string;
+  /** null zolang de quizmaster nog niet heeft beoordeeld. */
+  isGoed: boolean | null;
+  /** Milliseconden na het opengaan van de vraag; null als dat onbekend is. */
+  naMs: number | null;
+  /** Bij dichtstbij: het getal dat uit de tekst is gelezen. */
+  getal: number | null;
 }
 
 export interface PubliekeStaat {
@@ -63,8 +78,16 @@ export interface PubliekeStaat {
   /** Servertijd in ms bij het versturen — de client corrigeert zijn eigen klok hiermee. */
   serverTijd: number;
   klok: { eindigtOp: number | null; duurMs: number; loopt: boolean } | null;
+  /** Of het fragment (video of muziek) bij deze vraag hoort te spelen. */
+  mediaSpeelt: boolean;
+  /** De prijzen van de avond. Alleen gevuld in de fase 'einde'. */
+  prijzen: { sleutel: string; titel: string; namen: string[]; detail: string }[];
   /** Antwoorden die al binnen zijn, per speler- of team-id. Alleen namen, geen inhoud. */
   ingeleverd: string[];
+  /** De ingeleverde antwoorden zelf. Alleen gevuld in de fase 'antwoord'. */
+  inzendingen: PubliekeInzending[];
+  /** Punten die bij de huidige vraag zijn uitgedeeld, per speler. Alleen in de fase 'antwoord'. */
+  uitdeling: Record<number, number>;
 }
 
 export interface AntwoordInzending {

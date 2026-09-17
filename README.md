@@ -190,11 +190,21 @@ De algemene vragen zijn nagezocht, niet uit het hoofd geschreven:
 - [Het kabinet-Jetten](https://www.rijksoverheid.nl/regering/over-de-regering/kabinetten-sinds-1945/kabinet-jetten)
 - [De Formule 1 van 2026](https://www.motorsportweek.com/2026/08/16/max-verstappen-explains-frustrations-behind-major-f1-2026-regulatory-shift/)
 
+## De meespeelversie: televisie plus telefoons
+
+In de map [`app/`](app/) staat dezelfde quiz als live meespeelversie: de vragen
+op de grote televisie, iedereen op zijn eigen telefoon, en een hostscherm voor
+de quizmaster. De televisie toont een QR-code om mee te doen, bij de onthulling
+zie je wat iedereen had ingetikt, je telefoon zegt of je het goed had, en aan
+het eind staan er portretten op het podium met prijzen eronder. Zie
+[`app/README.md`](app/README.md) voor het starten en het draaiboek.
+
+Beide versies draaien dezelfde vragen: `npm run content:sync` in `app/` haalt
+ze uit dit `index.html`. Dit losse bestand blijft de achtervang die zonder
+netwerk werkt.
+
 ## Wat er nog aan komt
 
-- **Antwoordbriefjes op de telefoon.** Dezelfde quiz, op elke telefoon te openen
+- **Antwoordbriefjes zonder server.** Dezelfde quiz, op elke telefoon te openen
   in spelersmodus: genummerde antwoordvelden per ronde, lokaal opgeslagen, zonder
-  netwerk. In de groepsfase deelt een team één telefoon.
-- **Een meespeelversie met server.** Live meespelen op alle telefoons, met een
-  overzicht voor de quizmaster. Draait op dezelfde leest als `blackjacks-cup`.
-  Papier blijft daarbij de achtervang.
+  netwerk. Voor als er geen laptop met server in de buurt is.
