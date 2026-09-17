@@ -1501,3 +1501,136 @@ textarea:focus {
 @media (prefers-reduced-motion: reduce) {
   .media-muziek.speelt .balken i { height: 60%; }
 }
+
+/* ===== Hostscherm: vraag, spiekbriefje en rondes ================== */
+.host-vraagtekst {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin: 0.4rem 0 0;
+  color: var(--ivoor);
+}
+.spiek {
+  margin-top: 0.7rem;
+  border-top: 1px solid var(--rand);
+  padding-top: 0.5rem;
+}
+.spiek summary {
+  cursor: pointer;
+  color: var(--salie);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.spiek p {
+  margin: 0.4rem 0 0;
+  color: var(--groen-licht);
+  font-size: 1.05rem;
+}
+kbd {
+  font-family: var(--mono);
+  font-size: 0.78em;
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--rand);
+  border-radius: 5px;
+  background: var(--vilt-diep);
+  color: var(--ivoor-zacht);
+}
+.rondes > summary {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  cursor: pointer;
+  list-style: none;
+}
+.rondes > summary::-webkit-details-marker {
+  display: none;
+}
+.rondes > summary::before {
+  content: "▸";
+  color: var(--salie);
+  font-size: 0.8rem;
+}
+.rondes[open] > summary::before {
+  content: "▾";
+}
+.rondelijst {
+  display: flex;
+  flex-direction: column;
+}
+.ronderij {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.7rem;
+  align-items: start;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--rand);
+}
+.ronderij.uit {
+  opacity: 0.55;
+}
+.ronderij.nu {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.14), transparent 70%);
+}
+.ronderij input[type="checkbox"],
+.vragenlijst input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--goud);
+}
+.ronderij .volgnummer {
+  font-family: var(--mono);
+  color: var(--salie);
+  width: 1.4rem;
+  text-align: center;
+  padding-top: 0.1rem;
+}
+.rondedetails summary {
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  list-style: none;
+}
+.rondedetails summary::-webkit-details-marker {
+  display: none;
+}
+.rondedetails summary .suit {
+  color: var(--goud);
+}
+.rondedetails summary .suit.rood {
+  color: var(--rood-licht);
+}
+.badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--rand);
+  color: var(--salie);
+}
+.badge.rood {
+  border-color: var(--rood);
+  color: var(--rood-licht);
+}
+.vragenlijst {
+  margin: 0.5rem 0 0.2rem;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  color: var(--ivoor-zacht);
+}
+.vragenlijst li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.vragenlijst li.uit {
+  opacity: 0.5;
+}

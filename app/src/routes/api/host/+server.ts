@@ -177,7 +177,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       break;
     }
     case 'zet-samenstelling': {
-      zet({ samenstelling: JSON.stringify(body.samenstelling ?? {}) });
+      // De teamindeling en de uitdelingen hangen aan de rondenummers van de
+      // gespeelde volgorde. Zodra er gespeeld is, zou een andere samenstelling
+      // die nummers verschuiven en de stand door elkaar gooien. Dan kan het
+      // alleen nog met een nieuw spel.
+      const gespeeld = db.select({ id: antwoorden.id }).from(antwoorden).where(eq(antwoorden.spelId, spel.id)).get()
+        ?? db.select({ id: uitdelingen.id }).from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).get();
+      if (spel.fase !== 'lobby' || gespeeld) {
+        error(409, 'De samenstelling kan alleen veranderen zolang er nog niet gespeeld is. Begin daarvoor een nieuw spel.');
+      }
+      const keuze: Record<string, number[]> = {};
+      const invoer = body.samenstelling && typeof body.samenstelling === 'object' ? body.samenstelling : {};
+      for (const [k, v] of Object.entries(invoer as Record<string, unknown>)) {
+        if (!/^\d+$/.test(k) || !Array.isArray(v)) continue;
+        keuze[k] = v.map(Number).filter((n) => Number.isInteger(n) && n >= 0);
+      }
+      zet({ samenstelling: JSON.stringify(keuze), rondeIndex: 0, vraagIndex: 0 });
+      break;
+    }
+    case 'naar-lobby': {
+      stopKlok();
+      zet({ fase: 'lobby', rondeIndex: 0, vraagIndex: 0 });
       break;
     }
     case 'zet-foto': {
