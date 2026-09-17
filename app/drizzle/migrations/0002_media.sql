@@ -1,0 +1,1 @@
+ALTER TABLE `spellen` ADD `media_speelt` integer DEFAULT false NOT NULL;

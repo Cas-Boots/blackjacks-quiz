@@ -78,6 +78,8 @@ export interface PubliekeStaat {
   /** Servertijd in ms bij het versturen — de client corrigeert zijn eigen klok hiermee. */
   serverTijd: number;
   klok: { eindigtOp: number | null; duurMs: number; loopt: boolean } | null;
+  /** Of het fragment (video of muziek) bij deze vraag hoort te spelen. */
+  mediaSpeelt: boolean;
   /** Antwoorden die al binnen zijn, per speler- of team-id. Alleen namen, geen inhoud. */
   ingeleverd: string[];
   /** De ingeleverde antwoorden zelf. Alleen gevuld in de fase 'antwoord'. */

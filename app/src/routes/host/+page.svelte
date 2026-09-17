@@ -108,7 +108,17 @@
         <button class="knop hoofd" onclick={() => doe('toon-antwoord')} disabled={bezig}>Toon het antwoord</button>
         <button class="knop" onclick={() => doe('klok-pauze')} disabled={bezig}>{staat.klok?.loopt ? 'Pauze' : 'Hervat'}</button>
         <button class="knop" onclick={() => doe('klok-verleng', { seconden: 30 })} disabled={bezig}>+30s</button>
+        {#if vraag?.media && vraag.media.soort !== 'beeld'}
+          <button class="knop" onclick={() => doe('media-wissel')} disabled={bezig}>
+            {staat.mediaSpeelt ? '⏸ Fragment stoppen' : '▶ Fragment afspelen'}
+          </button>
+        {/if}
       {:else if staat?.fase === 'antwoord'}
+        {#if vraag?.media && vraag.media.soort !== 'beeld'}
+          <button class="knop" onclick={() => doe('media-wissel')} disabled={bezig}>
+            {staat.mediaSpeelt ? '⏸ Fragment stoppen' : '▶ Nog eens afspelen'}
+          </button>
+        {/if}
         {#if dichtstbij}
           <button class="knop" onclick={() => doe('bereken-dichtstbij')} disabled={bezig}>Bereken dichtstbij</button>
         {/if}

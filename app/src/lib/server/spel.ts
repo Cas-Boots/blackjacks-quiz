@@ -253,6 +253,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       duurMs: spel.klokDuurMs,
       loopt: spel.klokLoopt,
     },
+    mediaSpeelt: spel.mediaSpeelt,
     ingeleverd,
     inzendingen,
     uitdeling,

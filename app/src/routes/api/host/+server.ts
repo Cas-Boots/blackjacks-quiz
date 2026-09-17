@@ -31,11 +31,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const zet = (waarden: Partial<typeof spellen.$inferInsert>) =>
     db.update(spellen).set(waarden).where(eq(spellen.id, spel.id)).run();
 
-  const stopKlok = () => zet({ klokLoopt: false, klokEindigtOp: null, klokDuurMs: 0, klokRestMs: 0 });
+  // Elke stap naar een andere dia zet ook het fragment stil: een liedje dat
+  // doorspeelt over de volgende vraag heen is precies wat je niet wilt.
+  const stopKlok = () => zet({ klokLoopt: false, klokEindigtOp: null, klokDuurMs: 0, klokRestMs: 0, mediaSpeelt: false });
 
   const startKlok = (seconden: number) => {
     const duur = seconden * 1000;
-    zet({ klokLoopt: true, klokDuurMs: duur, klokEindigtOp: Date.now() + duur, klokRestMs: duur });
+    zet({ klokLoopt: true, klokDuurMs: duur, klokEindigtOp: Date.now() + duur, klokRestMs: duur, mediaSpeelt: false });
   };
 
   switch (opdracht) {
@@ -91,6 +93,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     case 'toon-antwoord': {
       stopKlok();
       zet({ fase: 'antwoord' });
+      break;
+    }
+    case 'media-wissel': {
+      if (!vraag?.media) error(409, 'deze vraag heeft geen fragment');
+      zet({ mediaSpeelt: !spel.mediaSpeelt });
       break;
     }
     case 'volgende': {

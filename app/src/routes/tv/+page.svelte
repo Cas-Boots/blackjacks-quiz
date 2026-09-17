@@ -7,6 +7,7 @@
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
   import Getallenlijn from '$lib/client/Getallenlijn.svelte';
+  import Media from '$lib/client/Media.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
 
@@ -328,6 +329,9 @@
             {#if vraag.emoji}<div class="emoji">{vraag.emoji}</div>{/if}
             {#if vraag.lyric}<p class="lyric">“{vraag.lyric}”</p>{/if}
             <p class="vraagtekst">{vraag.tekst}</p>
+            {#if vraag.media}
+              <Media media={vraag.media} speelt={staat.mediaSpeelt} />
+            {/if}
             {#if vraag.opties}
               <div class="keuzes">
                 {#each vraag.opties as optie, i}
@@ -359,6 +363,9 @@
             {#if vraag.emoji}<div class="emoji klein">{vraag.emoji}</div>{/if}
             {#if vraag.lyric}<p class="lyric klein">“{vraag.lyric}”</p>{/if}
             <p class="vraagtekst klein">{vraag.tekst}</p>
+            {#if vraag.media}
+              <Media media={vraag.media} speelt={staat.mediaSpeelt} klein />
+            {/if}
             {#if vraag.opties}
               <div class="keuzes">
                 {#each vraag.opties as optie, i}

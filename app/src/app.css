@@ -1420,3 +1420,84 @@ textarea:focus {
   color: var(--goud);
   font-weight: 500;
 }
+
+/* ===== Media bij een vraag ======================================== */
+.media-beeld {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.media-beeld img,
+.media-beeld video {
+  display: block;
+  max-width: 100%;
+  max-height: min(42vh, 560px);
+  border-radius: 12px;
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.9);
+  background: #000;
+}
+.media-beeld.klein img,
+.media-beeld.klein video {
+  max-height: min(30vh, 380px);
+}
+.media-beeld figcaption {
+  font-size: calc(var(--fs-lood) * 0.8);
+  color: rgba(19, 31, 26, 0.6);
+  text-align: center;
+}
+.media-ontbreekt {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(19, 31, 26, 0.2);
+  border-radius: 10px;
+  color: rgba(19, 31, 26, 0.7);
+  font-size: calc(var(--fs-lood) * 0.85);
+}
+.media-ontbreekt code {
+  font-family: var(--mono);
+}
+.media-muziek {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: clamp(1rem, 2.4vh, 2rem);
+  border-radius: 14px;
+  background: rgba(19, 31, 26, 0.06);
+  border: 1px solid rgba(19, 31, 26, 0.12);
+  color: var(--kaart);
+}
+.media-muziek .tekst {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: calc(var(--fs-vraag) * 0.5);
+}
+.media-muziek .balken {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  height: clamp(2.4rem, 7vh, 5rem);
+}
+.media-muziek .balken i {
+  display: block;
+  width: clamp(0.4rem, 0.8vw, 0.8rem);
+  height: 18%;
+  border-radius: 3px;
+  background: var(--kaart);
+  opacity: 0.35;
+  transition: height 0.3s var(--zacht), opacity 0.3s var(--zacht);
+}
+.media-muziek.speelt .balken i {
+  opacity: 0.85;
+  animation: dansen 0.9s ease-in-out infinite;
+  animation-delay: calc(var(--n) * -0.13s);
+}
+@keyframes dansen {
+  0%, 100% { height: 22%; }
+  50% { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .media-muziek.speelt .balken i { height: 60%; }
+}

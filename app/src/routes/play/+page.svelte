@@ -4,6 +4,7 @@
   import { cubicOut } from 'svelte/easing';
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
+  import Media from '$lib/client/Media.svelte';
 
   let antwoord = $state('');
   let verstuurd = $state(false);
@@ -153,6 +154,9 @@
           {#if vraag.emoji}<div class="emoji" style="font-size:2.6rem">{vraag.emoji}</div>{/if}
           {#if vraag.lyric}<p class="lyric" style="font-size:1.25rem">“{vraag.lyric}”</p>{/if}
           <p class="vraagtekst" style="font-size:1.35rem">{vraag.tekst}</p>
+          {#if vraag.media}
+            <Media media={vraag.media} alleenBeeld klein />
+          {/if}
         </div>
       {/key}
 
