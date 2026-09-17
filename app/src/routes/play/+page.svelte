@@ -5,6 +5,7 @@
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
   import Media from '$lib/client/Media.svelte';
+  import Podium from '$lib/client/Podium.svelte';
   import { maakPortret } from '$lib/client/portret';
   import { kies, kanteling, JUICH, TROOST, NIETS_INGELEVERD, REACTIES } from '$lib/shared/kwinkslagen';
 
@@ -329,6 +330,9 @@
           <p class="etiket">De uitslag</p>
           <h2 class="groot" style="font-size:1.8rem;margin-top:.3rem">{winZin}</h2>
           {#if ikWin}<p class="lood" style="font-size:1rem;margin-top:.3rem">Dat ben jij. Gefeliciteerd!</p>{/if}
+        </div>
+        <div style="padding:1.6rem .2rem .2rem">
+          <Podium top3={staat.stand.slice(0, 3)} compact />
         </div>
         {#if staat.prijzen.length}
           <div class="paneel">

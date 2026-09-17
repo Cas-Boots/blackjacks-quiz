@@ -7,6 +7,7 @@
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
   import Getallenlijn from '$lib/client/Getallenlijn.svelte';
+  import Podium, { WINNAAR_NA_MS } from '$lib/client/Podium.svelte';
   import Media from '$lib/client/Media.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
@@ -114,9 +115,6 @@
   let winZin = $derived(
     winnaars.length === 0 ? 'Niemand wint' : winnaars.length === 1 ? `${winnaars[0].naam} wint` : `${winnaars.map((w) => w.naam).join(' & ')} winnen`,
   );
-  /** Tweede, eerste, derde — zoals een echt podium staat. */
-  let podiumVolgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i));
-  const medailles = ['🥇', '🥈', '🥉'];
 
   function initialen(naam: string) {
     return naam.slice(0, 2);
@@ -202,7 +200,8 @@
         geluid.roffel();
         // Even de oude volgorde laten staan, dan laten schuiven.
         setTimeout(() => (toonNieuweVolgorde = true), 900);
-        if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), 1100);
+        // De fanfare pas als de eerste trede van het podium staat.
+        if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), WINNAAR_NA_MS);
       }
       vorigeFase = st.fase;
     }
@@ -577,39 +576,20 @@
         <Confetti />
         <div style="display:flex;flex-direction:column;gap:clamp(1rem,2.5vh,2rem);align-items:center;text-align:center">
           <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
-          <h1 class="mega" in:scale={{ start: 0.86, duration: 760, delay: 200, easing: cubicOut }}>
+          <!-- De naam van de winnaar valt pas als de eerste trede staat. -->
+          <h1 class="mega" in:scale={{ start: 0.86, duration: 760, delay: WINNAAR_NA_MS, easing: cubicOut }}>
             {winZin}
           </h1>
-          <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: 700 }}>
+          <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
             Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
           </p>
 
-          <div class="podium" style="margin-top:clamp(.5rem,2vh,1.5rem)">
-            {#each podiumVolgorde as idx, positie (top3[idx]?.spelerId ?? positie)}
-              {#if top3[idx]}
-                <div class="plaats" class:eerste={idx === 0} style="--i:{positie}">
-                  <span class="medaille">{medailles[idx]}</span>
-                  <span class="kroonhouder" class:kroon={idx === 0}>
-                    {#if top3[idx].foto}
-                      <img class="avatar l" class:goud={idx === 0} src={top3[idx].foto} alt="" />
-                    {:else}
-                      <span class="avatar l" class:goud={idx === 0}>{initialen(top3[idx].naam)}</span>
-                    {/if}
-                  </span>
-                  <span class="naam">{top3[idx].naam}</span>
-                  <span class="punten">
-                    <Teller naar={top3[idx].punten} van={live.vorigePunten[top3[idx].spelerId] ?? top3[idx].punten} vertraging={600 + positie * 200} />
-                    {top3[idx].punten === 1 ? 'punt' : 'punten'}
-                  </span>
-                </div>
-              {/if}
-            {/each}
-          </div>
+          <Podium {top3} vorigePunten={live.vorigePunten} />
 
           {#if staat.prijzen.length || poedel}
             <div class="prijzen">
               {#if poedel && poedel.punten < staat.stand[0].punten}
-                <div class="prijs" style="border-style:dashed" in:fly={{ y: 20, duration: 520, delay: 1600 + staat.prijzen.length * 260, easing: cubicOut }}>
+                <div class="prijs" style="border-style:dashed" in:fly={{ y: 20, duration: 520, delay: WINNAAR_NA_MS + 1200 + staat.prijzen.length * 260, easing: cubicOut }}>
                   <span class="prijsicoon" aria-hidden="true">🏮</span>
                   <span class="prijstitel">Poedelprijs</span>
                   <span class="prijsnaam">{poedel.naam}</span>
@@ -617,7 +597,7 @@
                 </div>
               {/if}
               {#each staat.prijzen as p, i (p.sleutel)}
-                <div class="prijs" in:fly={{ y: 20, duration: 520, delay: 1600 + i * 260, easing: cubicOut }}>
+                <div class="prijs" in:fly={{ y: 20, duration: 520, delay: WINNAAR_NA_MS + 1200 + i * 260, easing: cubicOut }}>
                   <span class="prijsicoon" aria-hidden="true">{p.sleutel === 'scherpschutter' ? '🎯' : p.sleutel === 'snelste' ? '⚡' : '🔥'}</span>
                   <span class="prijstitel">{p.titel}</span>
                   <span class="prijsnaam">{p.namen.join(' & ')}</span>

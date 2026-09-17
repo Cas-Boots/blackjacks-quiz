@@ -608,46 +608,6 @@ button {
   }
 }
 
-/* ===== Podium ===================================================== */
-.podium {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: clamp(0.8rem, 1.6vw, 1.6rem);
-  align-items: end;
-  width: 100%;
-}
-.plaats {
-  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
-  border: 1px solid var(--rand);
-  border-radius: 18px;
-  padding: clamp(1.2rem, 2.4vw, 2.4rem) clamp(0.9rem, 1.6vw, 1.6rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-  animation: opkomen 0.6s var(--deal) both;
-  animation-delay: calc(var(--i, 0) * 260ms);
-}
-.plaats.eerste {
-  background: linear-gradient(180deg, rgba(201, 162, 39, 0.24), var(--vilt-hoog));
-  border-color: var(--goud);
-  box-shadow: 0 0 70px -18px rgba(201, 162, 39, 0.75);
-}
-.plaats .medaille {
-  font-size: clamp(2rem, 3.6vw, 3.4rem);
-  line-height: 1;
-}
-.plaats .naam {
-  font-family: var(--display);
-  font-size: calc(var(--fs-naam) * 0.9);
-  text-align: center;
-}
-.plaats .punten {
-  font-family: var(--mono);
-  color: var(--goud-licht);
-  font-size: calc(var(--fs-naam) * 0.6);
-}
-
 /* ===== Knoppen en formulieren ===================================== */
 .knop {
   display: inline-flex;
@@ -960,19 +920,6 @@ textarea:focus {
   }
   100% {
     transform: rotateX(0deg) scale(1);
-  }
-}
-
-/* ===== Podium: de winnaar pulseert zacht ========================== */
-.plaats.eerste {
-  animation:
-    opkomen 0.6s var(--deal) both,
-    gloed 2.6s 1.2s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 260ms), 1.2s;
-}
-@keyframes gloed {
-  50% {
-    box-shadow: 0 0 110px -14px rgba(201, 162, 39, 0.95);
   }
 }
 
@@ -1960,21 +1907,12 @@ kbd {
 @keyframes wegzakken {
   to { opacity: 0; transform: translateY(6px); }
 }
-.plaats.poedel {
-  border-style: dashed;
-  opacity: 0.9;
-}
-.plaats.poedel .medaille {
-  animation: lantaarnZwaai 2.6s ease-in-out infinite;
-  display: inline-block;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .avatar.kroon::after,
   .standrij.laatste .naam::after,
   .reactie .emoji,
-  .scherm.spanning .tafelkaart,
-  .plaats.poedel .medaille {
+  .scherm.spanning .tafelkaart {
     animation: none;
   }
 }

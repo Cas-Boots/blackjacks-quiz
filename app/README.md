@@ -61,7 +61,9 @@ hem te vervangen.
    zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee.
 
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
-"Je staat 2e van 5." Aan het eind het podium, met daaronder drie prijzen:
+"Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
+zilver en brons die één voor één uit de vloer rijzen, van drie naar één, met
+de fanfare als de winnaar bovenaan staat. Daaronder drie prijzen:
 **scherpschutter** (meeste vragen goed), **snelste vinger** (het snelste goede
 antwoord) en **beste ronde**. Een prijs die meer dan twee mensen zouden delen
 valt weg. Bij een gelijkspel bovenaan winnen ze allebei.
