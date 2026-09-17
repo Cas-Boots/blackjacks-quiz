@@ -1233,3 +1233,72 @@ textarea:focus {
     transparent 3px 34px
   );
 }
+
+/* ===== Aanmelden: de QR-code naast de namen ======================= */
+.lobby {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto;
+  gap: clamp(1.5rem, 4vw, 5rem);
+  align-items: center;
+  width: 100%;
+}
+.lobby-tekst {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.6vh, 2.2rem);
+  min-width: 0;
+}
+.qr-kaart {
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: clamp(14px, 1.6vw, 26px);
+  border-radius: 18px;
+  background: linear-gradient(168deg, var(--kaart-papier), var(--kaart-papier-diep));
+  color: var(--kaart);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.5) inset,
+    0 40px 80px -30px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(201, 162, 39, 0.4);
+  max-width: min(42vh, 420px);
+}
+.qr-kaart .qr {
+  display: block;
+  width: min(36vh, 360px);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  image-rendering: pixelated;
+}
+.qr-adres {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: calc(var(--fs-lood) * 0.95);
+  letter-spacing: 0.02em;
+  text-align: center;
+  word-break: break-all;
+}
+.qr-let-op {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: rgba(19, 31, 26, 0.7);
+  text-align: center;
+  border-top: 1px solid rgba(19, 31, 26, 0.12);
+  padding-top: 0.6rem;
+}
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  .lobby {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .lobby-tekst {
+    align-items: center;
+  }
+  .qr-kaart {
+    justify-self: center;
+  }
+}

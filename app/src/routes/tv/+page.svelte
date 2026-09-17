@@ -28,6 +28,23 @@
     `${staat?.fase ?? 'leeg'}:${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}`,
   );
 
+  let aantalVerbonden = $derived((staat?.spelers ?? []).filter((s) => s.verbonden).length);
+
+  /* ---- Meedoen via QR --------------------------------------------------
+     De televisie kent het adres waarop hij zelf de quiz opende, en dat is
+     precies het adres dat telefoons in dezelfde kamer ook kunnen bereiken. */
+  let joinAdres = $state('');
+  let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(joinAdres)}`);
+  let lokaalAdres = $derived(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(joinHost(joinAdres)));
+
+  function joinHost(adres: string) {
+    try {
+      return new URL(adres).hostname;
+    } catch {
+      return '';
+    }
+  }
+
   let top3 = $derived((staat?.stand ?? []).slice(0, 3));
   /** Tweede, eerste, derde — zoals een echt podium staat. */
   let podiumVolgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i));
@@ -137,6 +154,7 @@
   let spanning = $derived(restSec <= 5 && live.staat?.klok?.loopt === true);
 
   onMount(() => {
+    joinAdres = `${location.origin}/`;
     live.start();
     void live.meld('tv').catch(() => {});
     const opGebaar = () => wekGeluid();
@@ -194,25 +212,48 @@
 
         <!-- ══ Aanmeldscherm ══════════════════════════════════════════ -->
       {:else if staat.fase === 'lobby'}
-        <div style="display:flex;flex-direction:column;gap:clamp(1rem,3vh,2.5rem);align-items:center;text-align:center">
-          <p class="etiket" in:fly={{ y: -14, duration: 500, easing: cubicOut }}>Oud &amp; Nieuw · Blackjacks</p>
-          <h1 class="mega" in:fly={{ y: 26, duration: 620, easing: cubicOut }}>Blackjack Quiz 26/27</h1>
-          <hr class="rule" style="width:min(620px,70vw)" />
-          <p class="lood" style="text-align:center">Pak je telefoon en kies je naam.</p>
+        <div class="lobby">
+          <div class="lobby-tekst">
+            <p class="etiket" in:fly={{ y: -14, duration: 500, easing: cubicOut }}>Oud &amp; Nieuw · Blackjacks</p>
+            <h1 class="mega" in:fly={{ y: 26, duration: 620, easing: cubicOut }}>Blackjack Quiz 26/27</h1>
+            <hr class="rule" style="width:min(620px,70vw)" />
+            <p class="lood">Scan de code met je telefoon, kies je naam, en je hebt je antwoordblad in handen.</p>
 
-          <div class="knoprij" style="justify-content:center;margin-top:1rem">
-            {#each staat.spelers as s, i (s.id)}
-              <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
-                <span class="stip" class:aan={s.verbonden}></span>
-                {#if s.foto}
-                  <img class="avatar" src={s.foto} alt="" />
-                {:else}
-                  <span class="avatar">{initialen(s.naam)}</span>
-                {/if}
-                <strong>{s.naam}</strong>
-              </span>
-            {/each}
+            <div class="knoprij" style="margin-top:.5rem">
+              {#each staat.spelers as s, i (s.id)}
+                <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
+                  <span class="stip" class:aan={s.verbonden}></span>
+                  {#if s.foto}
+                    <img class="avatar" src={s.foto} alt="" />
+                  {:else}
+                    <span class="avatar">{initialen(s.naam)}</span>
+                  {/if}
+                  <strong>{s.naam}</strong>
+                </span>
+              {/each}
+            </div>
+            <p class="fijn" style="font-size:var(--fs-etiket)">
+              {#if aantalVerbonden === staat.spelers.length && staat.spelers.length > 0}
+                Iedereen is erbij. We kunnen beginnen.
+              {:else}
+                {aantalVerbonden} van {staat.spelers.length} telefoons erbij
+              {/if}
+            </p>
           </div>
+
+          {#if joinAdres}
+            <div class="qr-kaart" in:fly={{ y: 24, duration: 560, delay: 200, easing: cubicOut }}>
+              <img class="qr" src={qrBron} alt="QR-code om mee te doen" />
+              <p class="qr-adres">{joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
+              {#if lokaalAdres}
+                <p class="qr-let-op">
+                  Dit is het adres van deze computer zelf. Open het televisiescherm via het
+                  netwerkadres van de laptop (bijvoorbeeld 192.168.1.10:3000), anders kunnen de
+                  telefoons de code niet gebruiken.
+                </p>
+              {/if}
+            </div>
+          {/if}
         </div>
 
         <!-- ══ Titelkaart van de ronde ════════════════════════════════ -->
