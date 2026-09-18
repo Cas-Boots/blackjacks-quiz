@@ -286,7 +286,7 @@ blackjacks-cup.
 | Instelling | Verplicht | Wat het doet |
 |---|---|---|
 | `HOST_PIN` | ja | De code waarmee de quizmaster het hostscherm opent. |
-| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://deblackjacks.nl`. |
+| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://quiz.deblackjacks.nl`. |
 | `DATABASE_PATH` | staat al goed | `/data/quiz.db`, op een volume dat een herstart overleeft. |
 | `MEDIA_DIR` | staat al goed | `/app/media`, de map met foto's, filmpjes en muziek. |
 | `PORT` | staat al goed | `3000`. |
@@ -304,12 +304,13 @@ De `docker-compose.yml` in de hoofdmap van de repository is hiervoor gemaakt.
 Hij bouwt de map `app/`, publiceert geen poort naar buiten en hangt aan het
 netwerk van Dokploy's Traefik.
 
-1. **Wijs het domein naar de server.** Zet bij je registrar een `A`-record
-   voor `deblackjacks.nl` naar het IP-adres van de server, en een tweede voor
-   `www` als je dat wilt. Controleer dat het staat voordat je verder gaat:
-   `getent hosts deblackjacks.nl` moet het IP van de server teruggeven. Zolang
-   dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft het
-   domein in Dokploy op een foutmelding staan.
+1. **Wijs het subdomein naar de server.** Zet bij je registrar een `A`-record
+   voor `quiz` onder `deblackjacks.nl`, wijzend naar het IP-adres van de
+   server. Het hoofddomein blijft zo vrij voor de andere projecten.
+   Controleer dat het staat voordat je verder gaat: het commando
+   `getent hosts quiz.deblackjacks.nl` moet het IP van de server teruggeven.
+   Zolang dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft
+   het domein in Dokploy op een foutmelding staan.
 2. Maak een **Compose**-applicatie die naar deze repository wijst, met
    `docker-compose.yml` als bestand.
 3. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
@@ -344,7 +345,7 @@ De app leest de map op het moment zelf, dus herstarten hoeft niet.
 ### Voordat de avond begint
 
 ```bash
-curl https://deblackjacks.nl/api/health
+curl https://quiz.deblackjacks.nl/api/health
 ```
 
 Je wilt `status: ok` zien, met het aantal tabellen en spelers, en een lege
@@ -354,7 +355,7 @@ werkt dan gewoon, maar de koekjes missen hun `Secure`-markering.
 Speel daarna de avond een keer na tegen de echte server:
 
 ```bash
-npx tsx scripts/simulate.ts --url https://deblackjacks.nl --pin <code> --auto-host --snelheid 20
+npx tsx scripts/simulate.ts --url https://quiz.deblackjacks.nl --pin <code> --auto-host --snelheid 20
 ```
 
 ### Eén ding om te weten

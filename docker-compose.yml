@@ -20,7 +20,7 @@ services:
       # Het adres waarop de quiz te bereiken is. Achter een omgekeerde proxy
       # ziet de app zijn eigen adres niet; hiermee weet hij het wel, en krijgen
       # koekjes de markering Secure.
-      ORIGIN: ${ORIGIN:?zet ORIGIN op het volledige adres, bijvoorbeeld https://deblackjacks.nl}
+      ORIGIN: ${ORIGIN:?zet ORIGIN op het volledige adres, bijvoorbeeld https://quiz.deblackjacks.nl}
       DATABASE_PATH: /data/quiz.db
       MEDIA_DIR: /app/media
       PORT: '3000'
