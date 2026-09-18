@@ -1,7 +1,8 @@
 /** De vorm van de quizinhoud. Gelijk aan die van de losse HTML-quiz, zodat
  *  beide varianten dezelfde vragen kunnen draaien. */
 
-export type VraagType = 'waarnietwaar' | 'meerkeuze' | 'open' | 'dichtstbij';
+/** 'stem': iedereen kiest een medespeler; wie met de meerderheid meestemt krijgt de punten. */
+export type VraagType = 'waarnietwaar' | 'meerkeuze' | 'open' | 'dichtstbij' | 'stem';
 export type TeamModus = 'individueel' | 'teams' | 'samen';
 export type MediaSoort = 'beeld' | 'video' | 'muziek';
 

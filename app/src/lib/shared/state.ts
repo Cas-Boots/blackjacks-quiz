@@ -40,6 +40,26 @@ export interface Onthulling {
   /** Bij dichtstbij: het doelgetal, voor de getallenlijn op de televisie. */
   getal?: number;
   eenheid?: string;
+  /** Bij stem: de telling per genoemde naam, meeste stemmen eerst. */
+  stemmen?: { naam: string; aantal: number; van: string[] }[];
+}
+
+/** Een por van de quizmaster: "schiet op", voor wie nog niet heeft ingeleverd. */
+export interface Por {
+  id: number;
+  spelerIds: number[];
+  tekst: string;
+}
+
+/** Een regel uit het logboek van de quizmaster. */
+export interface LogRegel {
+  id: number;
+  opdracht: string;
+  omschrijving: string;
+  /** Of deze handeling nog terug te draaien is. */
+  terugTeDraaien: boolean;
+  isOngedaan: boolean;
+  aangemaaktOp: number;
 }
 
 /** Een ingeleverd antwoord zoals de kamer het na de onthulling mag zien. */
@@ -57,6 +77,8 @@ export interface PubliekeInzending {
 export interface PubliekeStaat {
   /** Loopt op bij elke wijziging; de client negeert oudere pakketjes. */
   versie: number;
+  /** Het nummer van dit spel, voor de uitslagpagina. */
+  spelId: number;
   fase: Fase;
   quizNaam: string;
   rondeIndex: number;

@@ -3,6 +3,8 @@
   import { fade } from 'svelte/transition';
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
+  import { houdWakker } from '$lib/client/wakker';
+  import type { LogRegel } from '$lib/shared/state';
 
   type Voorstel = { automatisch: boolean; goed: boolean; reden: string };
   type Inzending = { inzender: string; tekst: string; ingediendOp: number; isGoed: boolean | null; voorstel: Voorstel | null };
@@ -27,10 +29,17 @@
   /** De samenstelling zoals hij op het scherm staat; pas na 'Bewaar' gaat hij naar de server. */
   let keuze = $state<Record<number, Set<number>>>({});
   let keuzeGewijzigd = $state(false);
+  let logboek = $state<LogRegel[]>([]);
+  let gastNaam = $state('');
+  let porMelding = $state('');
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
   let dichtstbij = $derived(vraag?.type === 'dichtstbij');
+  let stemvraag = $derived(vraag?.type === 'stem');
+  /** Wie er nog niets heeft ingeleverd bij de open vraag. */
+  let achterblijvers = $derived((staat?.teams ?? []).filter((t) => !(staat?.ingeleverd ?? []).includes(t.id)));
+  let laatsteTerug = $derived(logboek.find((r) => r.terugTeDraaien) ?? null);
   /** Zolang er niet gespeeld is, mag de samenstelling nog veranderen. */
   let samenstellingVrij = $derived(staat?.fase === 'lobby');
   let lijktGoed = $derived(inzendingen.filter((i) => i.voorstel?.automatisch && i.voorstel.goed).map((i) => i.inzender));
@@ -64,21 +73,54 @@
     } catch { /* volgende keer weer */ }
   }
 
-  // Bij elke wijziging van de stand de inzendingen en de rondes opnieuw ophalen.
+  async function haalLogboek() {
+    try {
+      const r = await fetch('/api/host/logboek', { cache: 'no-store' });
+      if (!r.ok) return;
+      logboek = (await r.json()).regels;
+    } catch { /* volgende keer weer */ }
+  }
+
+  // Bij elke wijziging van de stand de inzendingen, de rondes en het logboek opnieuw ophalen.
   $effect(() => {
     void staat?.versie;
     void haalInzendingen();
     void haalRondes();
+    void haalLogboek();
   });
 
   onMount(() => {
     live.start();
+    const laatSlapen = houdWakker();
     window.addEventListener('keydown', opToets);
     return () => {
       live.stop();
+      laatSlapen();
       window.removeEventListener('keydown', opToets);
     };
   });
+
+  /** Een por naar één speler, of naar iedereen die nog niets heeft ingeleverd. */
+  async function por(spelerId?: number) {
+    try {
+      const uit = await live.opdracht('por', spelerId !== undefined ? { spelerId } : {});
+      porMelding = uit.aantal ? `Por verstuurd naar ${uit.aantal} ${uit.aantal === 1 ? 'telefoon' : 'telefoons'}.` : 'Iedereen heeft al ingeleverd.';
+    } catch {
+      porMelding = 'Porren lukte niet.';
+    }
+    setTimeout(() => (porMelding = ''), 3000);
+  }
+
+  async function voegGastToe() {
+    const naam = gastNaam.trim();
+    if (!naam) return;
+    await doe('voeg-speler-toe', { naam });
+    if (!fout) gastNaam = '';
+  }
+
+  function tijdVan(ms: number) {
+    return new Date(ms).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
 
   async function doe(opdracht: string, extra: Record<string, unknown> = {}) {
     if (bezig) return;
@@ -138,6 +180,10 @@
       case 'a':
       case 'A':
         if (staat?.fase === 'antwoord' && lijktGoed.length) neemVoorstellenOver();
+        break;
+      case 'z':
+      case 'Z':
+        if (laatsteTerug) void doe('ongedaan');
         break;
     }
   }
@@ -237,6 +283,10 @@
             {#if s.stilSinds === null}<span class="fijn">nog niet gezien</span>{/if}
           </span>
         {/each}
+        <span class="knoprij" style="gap:.4rem">
+          <input type="text" bind:value={gastNaam} placeholder="Gast toevoegen" maxlength="24" style="max-width:11rem;padding:.35rem .7rem" onkeydown={(e) => e.key === 'Enter' && voegGastToe()} aria-label="Naam van de gast" />
+          <button class="knop stil" onclick={voegGastToe} disabled={bezig || !gastNaam.trim()}>+ Gast</button>
+        </span>
       </div>
     </div>
 
@@ -277,14 +327,19 @@
             {staat.mediaSpeelt ? '⏸ Fragment stoppen' : '▶ Fragment afspelen'}
           </button>
         {/if}
+        {#if achterblijvers.length}
+          <button class="knop" onclick={() => por()} disabled={bezig} title="Een trilling en een zin naar wie nog niets heeft ingeleverd">
+            👉 Por de achterblijvers ({achterblijvers.length})
+          </button>
+        {/if}
       {:else if staat?.fase === 'antwoord'}
         {#if vraag?.media && vraag.media.soort !== 'beeld'}
           <button class="knop" onclick={() => doe('media-wissel')} disabled={bezig}>
             {staat.mediaSpeelt ? '⏸ Fragment stoppen' : '▶ Nog eens afspelen'}
           </button>
         {/if}
-        {#if dichtstbij}
-          <button class="knop" onclick={() => doe('bereken-dichtstbij')} disabled={bezig}>Bereken dichtstbij</button>
+        {#if dichtstbij || stemvraag}
+          <button class="knop" onclick={() => doe('bereken')} disabled={bezig}>Opnieuw berekenen</button>
         {/if}
         <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
           {vraag && vraag.index + 1 < vraag.aantal ? 'Volgende vraag' : 'Naar de tussenstand'}
@@ -298,8 +353,12 @@
       {#if staat?.fase !== 'lobby'}
         <button class="knop stil" onclick={() => doe('vorige')} disabled={bezig}>← Terug</button>
       {/if}
+      {#if laatsteTerug}
+        <button class="knop stil" onclick={() => doe('ongedaan')} disabled={bezig} title={laatsteTerug.omschrijving}>↶ Ongedaan: {laatsteTerug.omschrijving}</button>
+      {/if}
     </div>
-    <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> pauze · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt</p>
+    {#if porMelding}<p class="fijn" in:fade={{ duration: 200 }}>{porMelding}</p>{/if}
+    <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> pauze · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt · <kbd>Z</kbd> ongedaan</p>
 
     <!-- Antwoorden beoordelen -->
     {#if staat?.fase === 'vraag' || staat?.fase === 'antwoord'}
@@ -310,7 +369,9 @@
         </p>
         {#if staat.fase === 'antwoord'}
           {#if dichtstbij}
-            <p class="fijn" style="margin:.5rem 0">Druk op <em>Bereken dichtstbij</em>; de winnaar krijgt dan vanzelf de punten. Tik aan om zelf te corrigeren.</p>
+            <p class="fijn" style="margin:.5rem 0">De machine heeft bij de onthulling uitgerekend wie het dichtst zat. Tik aan om zelf te corrigeren.</p>
+          {:else if stemvraag}
+            <p class="fijn" style="margin:.5rem 0">Wie met de meerderheid meestemde heeft de punten al. Tik aan om zelf te corrigeren.</p>
           {:else}
             <p class="fijn" style="margin:.5rem 0">Tik aan wie het goed had. De stand loopt meteen mee.</p>
           {/if}
@@ -347,11 +408,18 @@
         {:else}
           <div class="knoprij" style="margin-top:.5rem">
             {#each staat.teams as t (t.id)}
-              <span class="naamplaat" style="padding:.35rem .85rem">
-                <span class="stip" class:aan={staat.ingeleverd.includes(t.id)}></span>{t.naam}
-              </span>
+              {#if staat.ingeleverd.includes(t.id)}
+                <span class="naamplaat" style="padding:.35rem .85rem">
+                  <span class="stip aan"></span>{t.naam}
+                </span>
+              {:else}
+                <button class="naamplaat" style="padding:.35rem .85rem;cursor:pointer" onclick={() => t.leden.forEach((id) => por(id))} title="Por {t.naam}">
+                  <span class="stip"></span>{t.naam} 👉
+                </button>
+              {/if}
             {/each}
           </div>
+          <p class="fijn" style="margin-top:.4rem">Tik op een naam om die telefoon te porren.</p>
         {/if}
       </div>
     {/if}
@@ -374,6 +442,21 @@
         {/each}
       </div>
     </div>
+
+    <!-- Wat er tot nu toe gebeurde, met een terugweg -->
+    {#if logboek.length}
+      <details class="paneel">
+        <summary><span class="etiket stil">Logboek</span> <span class="fijn">{logboek[0].omschrijving}</span></summary>
+        <div class="logboek">
+          {#each logboek as r (r.id)}
+            <div class="logregel" class:ongedaan={r.isOngedaan}>
+              <span class="tijd">{tijdVan(r.aangemaaktOp)}</span>
+              <span>{r.omschrijving}</span>
+            </div>
+          {/each}
+        </div>
+      </details>
+    {/if}
 
     <!-- De rondes: wat er meedoet, en waar je heen kunt springen -->
     {#if rondesInfo}
@@ -440,6 +523,7 @@
 
     <div class="knoprij">
       <a class="knop stil" href="/tv" target="_blank" rel="noreferrer">Televisiescherm openen</a>
+      <a class="knop stil" href="/uitslag" target="_blank" rel="noreferrer">Uitslagen</a>
       {#if staat?.fase !== 'lobby'}
         <button class="knop stil" onclick={() => doe('naar-lobby')} disabled={bezig}>Terug naar de lobby</button>
       {/if}

@@ -116,6 +116,11 @@ export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel
     };
   }
 
+  if (ronde.type === 'stem') {
+    // Wie de meerderheid heeft blijkt pas als alles binnen is; hier alleen vastleggen.
+    return { automatisch: false, goed: false, reden: `stemt op ${tekst}` };
+  }
+
   if (ronde.type === 'dichtstbij') {
     const getal = leesGetal(tekst);
     if (getal === null) return { automatisch: false, goed: false, reden: 'geen getal' };

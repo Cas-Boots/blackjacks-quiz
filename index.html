@@ -601,7 +601,11 @@ input[type=file]{display:none}
 
 /* -----------------------------------------------------------------
    DE VRAGEN
-   Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij"
+   Pas ze aan in app/src/lib/content/packs.ts en draai daar
+   `npm run content:sync`; dit blok wordt dan overschreven.
+   Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij" | "stem"
+   Bij "stem" beslist de groep aan tafel; in de meespeelversie stemmen
+   de telefoons.
    Extra per vraag: emoji, lyric, toelichting, tijd, punten, media
    Media:  media:{soort:"beeld"|"video"|"muziek", bron:"bestand.jpg",
                   bijschrift:"optioneel"}
@@ -849,8 +853,8 @@ const PAKKETTEN = {
       {
         naam: "Wie van de Blackjacks?",
         suit: "♥", thema: "Slotronde", sfeer: "vilt",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit.",
+        type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [
           {v:"Wie van de vijf heeft 2026 het best gebruikt?", a:"De groep beslist"},
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},

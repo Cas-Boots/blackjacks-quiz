@@ -12,14 +12,19 @@ import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correctie
 import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
-import { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, gissingenUitAntwoorden, telStand } from './scoring';
+import {
+  vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, telStand,
+} from './scoring';
 import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
-import type { PubliekeStaat, PubliekeInzending, Fase, Rol } from '$lib/shared/state';
+import type { PubliekeStaat, PubliekeInzending, Fase, Rol, Onthulling } from '$lib/shared/state';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
+
+/** Een naam van een gast: kort genoeg voor een naamplaat op de televisie. */
+export const MAX_NAAM_TEKENS = 24;
 
 export function actiefSpel() {
   return db.select().from(spellen).where(eq(spellen.isActief, true)).orderBy(desc(spellen.id)).get();
@@ -90,6 +95,55 @@ export function deelnemersVan(spelId: number) {
     .all();
 }
 
+/**
+ * Een gast schuift aan, ook midden in de avond.
+ *
+ * Een bestaande naam wordt hergebruikt (zodat "Tom" van vorig jaar zijn
+ * portret terugkrijgt), een nieuwe naam wordt als gast aangemaakt: die doet
+ * niet vanzelf mee aan het volgende spel. Loopt er al een ronde, dan krijgt
+ * de gast meteen een plek in de teamindeling van die ronde, anders zou zijn
+ * telefoon niets kunnen inleveren.
+ */
+export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelling: string; rondeIndex: number }, naam: string) {
+  const schoon = naam.replace(/\s+/g, ' ').trim().slice(0, MAX_NAAM_TEKENS);
+  if (!schoon) throw new Error('geen naam');
+
+  let speler = db.select().from(spelers).where(eq(spelers.naam, schoon)).get();
+  if (!speler) {
+    speler = db.insert(spelers).values({ naam: schoon, isGast: true }).returning().get();
+  }
+  if (speler.isQuizmaster) throw new Error('de quizmaster speelt niet mee');
+
+  const alDeelnemer = db
+    .select()
+    .from(deelnemers)
+    .where(and(eq(deelnemers.spelId, spel.id), eq(deelnemers.spelerId, speler.id)))
+    .get();
+  if (alDeelnemer) return { speler, nieuw: false };
+  db.insert(deelnemers).values({ spelId: spel.id, spelerId: speler.id }).run();
+
+  // Zit er al een teamindeling voor de huidige ronde, dan hoort de gast daar bij.
+  const ronde = samengesteld(spel)[spel.rondeIndex];
+  if (ronde) {
+    const rijen = db.select().from(teams).where(and(eq(teams.spelId, spel.id), eq(teams.rondeIndex, spel.rondeIndex))).all();
+    if (rijen.length) {
+      const lijst: Team[] = rijen.map((r) => ({ id: r.teamKey, naam: r.naam, suit: r.suit, leden: JSON.parse(r.leden) as number[] }));
+      if (!lijst.some((t) => t.leden.includes(speler.id))) {
+        const modus = ronde.teamModus ?? 'individueel';
+        if (modus === 'individueel') {
+          lijst.push({ id: `s_${speler.id}`, naam: speler.naam, suit: ronde.suit, leden: [speler.id] });
+        } else {
+          // Bij 'samen' is er één team; bij 'teams' het kleinste.
+          const kleinste = lijst.reduce((a, b) => (b.leden.length < a.leden.length ? b : a));
+          kleinste.leden.push(speler.id);
+        }
+        schrijfTeams(spel.id, spel.rondeIndex, lijst);
+      }
+    }
+  }
+  return { speler, nieuw: true };
+}
+
 export function standVan(spelId: number) {
   const rijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spelId)).all();
   const cor = db.select().from(correcties).where(eq(correcties.spelId, spelId)).all();
@@ -106,7 +160,7 @@ export function standVan(spelId: number) {
 export function prijzenVan(spel: { id: number; pakket: string; samenstelling: string }, lijst: { id: number; naam: string }[]): Prijs[] {
   const rondes = samengesteld(spel);
   const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
-  const antwoordRijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.isGoed, true))).all();
+  const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
   const ledenVan = (rondeIndex: number, inzender: string): number[] => {
     const t = teamRijen.find((r) => r.rondeIndex === rondeIndex && r.teamKey === inzender);
@@ -116,20 +170,37 @@ export function prijzenVan(spel: { id: number; pakket: string; samenstelling: st
       return [];
     }
   };
+  const uitdelingLijst = uitdelingRijen.map((r) => {
+    try {
+      return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
+    } catch {
+      return { vraagSleutel: r.vraagSleutel, verdeling: {} };
+    }
+  });
+
+  // Alleen vragen die echt aan bod kwamen tellen mee voor reeksen en de
+  // moeilijkste vraag: een avond die vroeg stopt heeft geen "onbeantwoorde" rest.
+  const gespeeld = new Set([...uitdelingRijen.map((r) => r.vraagSleutel), ...antwoordRijen.map((r) => r.vraagSleutel)]);
+  const vragen: { sleutel: string; tekst: string; inzenders: number }[] = [];
+  rondes.forEach((r, ri) => {
+    r.vragen.forEach((v, vi) => {
+      const sleutel = sleutelVan(ri, vi);
+      if (!gespeeld.has(sleutel)) return;
+      vragen.push({ sleutel, tekst: v.v, inzenders: antwoordRijen.filter((a) => a.vraagSleutel === sleutel).length });
+    });
+  });
+
   return bepaalPrijzen({
     spelers: lijst,
-    uitdelingen: uitdelingRijen.map((r) => {
-      try {
-        return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
-      } catch {
-        return { vraagSleutel: r.vraagSleutel, verdeling: {} };
-      }
-    }),
-    goedeAntwoorden: antwoordRijen.map((r) => ({
-      spelerIds: ledenVan(Number(r.vraagSleutel.split(':')[0]), r.inzender),
-      naMs: r.naMs,
-    })),
+    uitdelingen: uitdelingLijst,
+    goedeAntwoorden: antwoordRijen
+      .filter((r) => r.isGoed === true)
+      .map((r) => ({
+        spelerIds: ledenVan(Number(r.vraagSleutel.split(':')[0]), r.inzender),
+        naMs: r.naMs,
+      })),
     rondeNamen: rondes.map((r) => r.naam),
+    vragen,
   });
 }
 
@@ -153,15 +224,38 @@ export function raakApparaatAan(token: string, rol: Rol, spelerId: number | null
   }
 }
 
+/** De tekst waarmee het juiste antwoord op het scherm komt. */
+export function antwoordTekst(ronde: Ronde, vraag: Vraag): string {
+  if (ronde.type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
+  if (ronde.type === 'meerkeuze' && vraag.opties && typeof vraag.goed === 'number') {
+    return `${String.fromCharCode(65 + vraag.goed)} — ${vraag.opties[vraag.goed]}`;
+  }
+  if (ronde.type === 'dichtstbij' && typeof vraag.getal === 'number') {
+    return `${vraag.getal.toLocaleString('nl-NL')}${vraag.eenheid ? ' ' + vraag.eenheid : ''}`;
+  }
+  return vraag.a ?? '';
+}
+
 /**
  * De momentopname die naar de clients gaat.
  *
  * In de fase 'vraag' zit er geen antwoord in het pakketje — ook niet voor de
  * quizmaster, want diens scherm hangt vaak aan dezelfde televisie.
+ *
+ * Bij elke wijziging vraagt elke open verbinding om deze momentopname. Die is
+ * per versie en rol steeds dezelfde, dus hij wordt heel even bewaard: met
+ * zeven schermen scheelt dat zeven keer dezelfde reeks databasevragen.
  */
+const GEHEUGEN_MS = 1000;
+let geheugen: { sleutel: string; op: number; staat: PubliekeStaat } | null = null;
+
 export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const spel = actiefSpel();
   if (!spel) return null;
+
+  const sleutelGeheugen = `${spel.id}:${spel.versie}:${rol}`;
+  const nu = Date.now();
+  if (geheugen && geheugen.sleutel === sleutelGeheugen && nu - geheugen.op < GEHEUGEN_MS) return geheugen.staat;
 
   const rondes = samengesteld(spel);
   const ronde: Ronde | undefined = rondes[spel.rondeIndex];
@@ -169,7 +263,6 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const lijst = deelnemersVan(spel.id);
   const teamLijst = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst) : [];
   const stand = standVan(spel.id);
-  const nu = Date.now();
 
   const apparaatRijen = db.select().from(apparaten).all();
   const laatsteVan = new Map<number, number>();
@@ -211,9 +304,12 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
 
   // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
   // sturen ziet de kamer op de televisie waar tussen gekozen wordt, in
-  // plaats van alleen de stelling.
+  // plaats van alleen de stelling. Bij een stemvraag zijn de opties de
+  // mensen aan tafel.
   const opties =
-    ronde?.type === 'waarnietwaar' ? ['Waar', 'Niet waar'] : vraag?.opties;
+    ronde?.type === 'waarnietwaar' ? ['Waar', 'Niet waar']
+      : ronde?.type === 'stem' ? lijst.map((s) => s.naam)
+        : vraag?.opties;
   const goedeOptieIndex = !ronde || !vraag
     ? undefined
     : ronde.type === 'waarnietwaar'
@@ -222,15 +318,16 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
         ? vraag.goed
         : undefined;
 
-  let onthulling = null;
+  let onthulling: Onthulling | null = null;
   if (spel.fase === 'antwoord' && ronde && vraag) {
-    let tekst = vraag.a ?? '';
-    if (ronde.type === 'waarnietwaar') tekst = vraag.goed === true ? 'Waar' : 'Niet waar';
-    if (ronde.type === 'meerkeuze' && vraag.opties && typeof vraag.goed === 'number') {
-      tekst = `${String.fromCharCode(65 + vraag.goed)} — ${vraag.opties[vraag.goed]}`;
-    }
-    if (ronde.type === 'dichtstbij' && typeof vraag.getal === 'number') {
-      tekst = `${vraag.getal.toLocaleString('nl-NL')}${vraag.eenheid ? ' ' + vraag.eenheid : ''}`;
+    let tekst = antwoordTekst(ronde, vraag);
+    let stemmen: Onthulling['stemmen'];
+    if (ronde.type === 'stem') {
+      const uitslag = bepaalStem(inzendingRijen);
+      stemmen = uitslag?.telling ?? [];
+      tekst = uitslag
+        ? uitslag.gekozen.join(' & ')
+        : 'Niemand heeft gestemd';
     }
     onthulling = {
       antwoord: tekst,
@@ -238,11 +335,13 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       goedeOptie: goedeOptieIndex,
       getal: ronde.type === 'dichtstbij' && typeof vraag.getal === 'number' ? vraag.getal : undefined,
       eenheid: ronde.type === 'dichtstbij' ? vraag.eenheid : undefined,
+      stemmen,
     };
   }
 
-  return {
+  const staat: PubliekeStaat = {
     versie: spel.versie,
+    spelId: spel.id,
     fase: spel.fase as Fase,
     quizNaam: pakketVan(spel).naam,
     rondeIndex: spel.rondeIndex,
@@ -294,6 +393,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     inzendingen,
     uitdeling,
   };
+  geheugen = { sleutel: sleutelGeheugen, op: nu, staat };
+  return staat;
 }
 
 /** De huidige ronde en vraag, of null als het spel daar niet staat. */
@@ -304,4 +405,69 @@ export function huidige(spel: { pakket: string; samenstelling: string; rondeInde
   return { rondes, ronde, vraag };
 }
 
-export { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, gissingenUitAntwoorden, beoordeel, verplaats };
+/** Vervangt de verdeling van één vraag in zijn geheel. Zie scoring.ts. */
+export function schrijfUitdeling(spelId: number, vraagSleutel: string, verdeling: Record<number, number>) {
+  const bestaand = db
+    .select()
+    .from(uitdelingen)
+    .where(and(eq(uitdelingen.spelId, spelId), eq(uitdelingen.vraagSleutel, vraagSleutel)))
+    .get();
+  const json = JSON.stringify(verdeling);
+  if (bestaand) {
+    db.update(uitdelingen).set({ verdeling: json }).where(eq(uitdelingen.id, bestaand.id)).run();
+  } else {
+    db.insert(uitdelingen).values({ spelId, vraagSleutel, verdeling: json }).run();
+  }
+}
+
+/** Zet de vinkjes op de antwoorden van één vraag: goed voor de winnaars, fout voor de rest. */
+export function markeerAntwoorden(spelId: number, vraagSleutel: string, winnaars: string[]) {
+  const rijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spelId), eq(antwoorden.vraagSleutel, vraagSleutel))).all();
+  for (const r of rijen) {
+    db.update(antwoorden).set({ isGoed: winnaars.includes(r.inzender) }).where(eq(antwoorden.id, r.id)).run();
+  }
+}
+
+/**
+ * Rekent de vragen uit waar de machine dat zeker kan: dichtstbij en stem.
+ * Draait vanzelf bij de onthulling en op verzoek van de quizmaster; die
+ * kan het resultaat daarna altijd nog met de hand bijsturen.
+ *
+ * Geeft terug of er iets te rekenen viel.
+ */
+export function scoorAutomatisch(
+  spel: { id: number; rondeIndex: number; vraagIndex: number },
+  ronde: Ronde,
+  vraag: Vraag,
+  lijst: { id: number; naam: string }[],
+): boolean {
+  const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
+  const rijen = db
+    .select({ inzender: antwoorden.inzender, tekst: antwoorden.tekst })
+    .from(antwoorden)
+    .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel)))
+    .all();
+  const punten = vraagPunten(ronde, vraag);
+
+  let winnaars: string[] = [];
+  let puntenPerTeam: Record<string, number> = {};
+  if (ronde.type === 'dichtstbij' && typeof vraag.getal === 'number') {
+    const uitslag = bepaalDichtstbij(gissingenUitAntwoorden(rijen), vraag.getal, punten);
+    if (uitslag) {
+      winnaars = uitslag.winnaars;
+      puntenPerTeam = uitslag.puntenPerTeam;
+    }
+  } else if (ronde.type === 'stem') {
+    const uitslag = bepaalStem(rijen);
+    if (uitslag) winnaars = uitslag.winnaars;
+  } else {
+    return false;
+  }
+
+  const teamLijst = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
+  schrijfUitdeling(spel.id, sleutel, verdeelOverTeams(teamLijst, winnaars, puntenPerTeam, punten));
+  markeerAntwoorden(spel.id, sleutel, winnaars);
+  return true;
+}
+
+export { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, beoordeel, verplaats };

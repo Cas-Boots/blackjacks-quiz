@@ -11,6 +11,8 @@
  * doorgegeven aan wie op dat moment kijkt).
  */
 
+import type { Por } from '$lib/shared/state';
+
 type Luisteraar = (versie: number) => void;
 export interface ReactieBericht {
   id: number;
@@ -20,9 +22,12 @@ export interface ReactieBericht {
   x: number;
 }
 type ReactieLuisteraar = (bericht: ReactieBericht) => void;
+type PorLuisteraar = (por: Por) => void;
 
 const luisteraars = new Set<Luisteraar>();
 const reactieLuisteraars = new Set<ReactieLuisteraar>();
+const porLuisteraars = new Set<PorLuisteraar>();
+let porTeller = 0;
 
 export function luister(fn: Luisteraar): () => void {
   luisteraars.add(fn);
@@ -53,6 +58,24 @@ export function meldReactie(bericht: ReactieBericht) {
       console.error('[bus] reactieluisteraar faalde:', err);
     }
   }
+}
+
+export function luisterPorren(fn: PorLuisteraar): () => void {
+  porLuisteraars.add(fn);
+  return () => porLuisteraars.delete(fn);
+}
+
+/** Een por van de quizmaster naar één of meer telefoons. Vluchtig, net als een reactie. */
+export function meldPor(spelerIds: number[], tekst: string): Por {
+  const por: Por = { id: ++porTeller, spelerIds, tekst };
+  for (const fn of [...porLuisteraars]) {
+    try {
+      fn(por);
+    } catch (err) {
+      console.error('[bus] porluisteraar faalde:', err);
+    }
+  }
+  return por;
 }
 
 export function aantalLuisteraars() {

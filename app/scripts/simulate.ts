@@ -92,6 +92,8 @@ function juistAntwoord(tekst: string): string | null {
   if (ronde.type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
   if (ronde.type === 'meerkeuze' && typeof vraag.goed === 'number') return String.fromCharCode(65 + vraag.goed);
   if (ronde.type === 'dichtstbij') return String(vraag.getal ?? 0);
+  // Bij een stemvraag is er geen juist antwoord; de meerderheid beslist.
+  if (ronde.type === 'stem') return null;
   return vraag.a ?? null;
 }
 
@@ -100,6 +102,7 @@ function fantasieAntwoord(tekst: string): string {
   if (hit?.ronde.type === 'waarnietwaar') return Math.random() < 0.5 ? 'Waar' : 'Niet waar';
   if (hit?.ronde.type === 'meerkeuze') return String.fromCharCode(65 + Math.floor(Math.random() * 4));
   if (hit?.ronde.type === 'dichtstbij') return String(Math.floor(Math.random() * 500));
+  if (hit?.ronde.type === 'stem') return ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva'][Math.floor(Math.random() * 5)];
   return ['geen idee', 'Amsterdam', 'Spanje', 'de bakker', '42'][Math.floor(Math.random() * 5)];
 }
 
@@ -190,9 +193,8 @@ async function main() {
       // De quizmaster kent punten toe op basis van wat er echt goed is.
       const r = await host.vraag('/api/host/antwoorden');
       const goed = r.inzendingen.filter((i: { voorstel?: { goed: boolean } }) => i.voorstel?.goed).map((i: { inzender: string }) => i.inzender);
-      if (staat.vraag?.type === 'dichtstbij') {
-        await host.post('/api/host', { opdracht: 'bereken-dichtstbij' });
-      } else if (goed.length) {
+      // Dichtstbij en stem heeft de server bij de onthulling al uitgerekend.
+      if (staat.vraag?.type !== 'dichtstbij' && staat.vraag?.type !== 'stem' && goed.length) {
         await host.post('/api/host', { opdracht: 'ken-toe', inzenders: goed });
       }
       await wacht(1200);

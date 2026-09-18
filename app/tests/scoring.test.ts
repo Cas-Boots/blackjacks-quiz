@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  verdeelOverTeams, bepaalDichtstbij, telStand, gissingenUitAntwoorden, vraagPunten, vraagTijd,
+  verdeelOverTeams, bepaalDichtstbij, telStand, gissingenUitAntwoorden, vraagPunten, vraagTijd, bepaalStem,
 } from '../src/lib/server/scoring';
 import type { Ronde, Vraag } from '../src/lib/content/types';
 
@@ -92,5 +92,32 @@ describe('telStand', () => {
     const hersteld = { 1: 2 };            // alleen speler 1 had het goed
     expect(telStand([hersteld])).toEqual({ 1: 2 });
     expect(telStand([eerste])).not.toEqual(telStand([hersteld]));
+  });
+});
+
+describe('bepaalStem', () => {
+  it('geeft null zonder stemmen', () => {
+    expect(bepaalStem([])).toBeNull();
+    expect(bepaalStem([{ inzender: 's_1', tekst: '  ' }])).toBeNull();
+  });
+
+  it('laat de meerderheid winnen en telt hoofdletters niet mee', () => {
+    const uitslag = bepaalStem([
+      { inzender: 's_1', tekst: 'Rik' },
+      { inzender: 's_2', tekst: 'rik' },
+      { inzender: 's_3', tekst: 'Eva' },
+    ]);
+    expect(uitslag?.gekozen).toEqual(['Rik']);
+    expect(uitslag?.winnaars).toEqual(['s_1', 's_2']);
+    expect(uitslag?.telling.map((t) => [t.naam, t.aantal])).toEqual([['Rik', 2], ['Eva', 1]]);
+  });
+
+  it('deelt bij een gelijke stand bovenaan', () => {
+    const uitslag = bepaalStem([
+      { inzender: 's_1', tekst: 'Rik' },
+      { inzender: 's_2', tekst: 'Eva' },
+    ]);
+    expect(uitslag?.gekozen).toEqual(['Eva', 'Rik']);
+    expect(uitslag?.winnaars.sort()).toEqual(['s_1', 's_2']);
   });
 });
