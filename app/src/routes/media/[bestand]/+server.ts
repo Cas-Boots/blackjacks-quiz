@@ -47,6 +47,12 @@ export const GET: RequestHandler = ({ params, request }) => {
     'content-type': type,
     'accept-ranges': 'bytes',
     'cache-control': 'private, max-age=3600',
+    'x-content-type-options': 'nosniff',
+    'content-disposition': `inline; filename="${naam.replace(/[^\w.-]/g, '_')}"`,
+    // Een bestand uit deze map is nooit een pagina: geen scripts, geen
+    // verwijzingen naar buiten. Dat telt vooral voor een svg die iemand
+    // rechtstreeks opent.
+    'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
   };
 
   const bereik = request.headers.get('range');

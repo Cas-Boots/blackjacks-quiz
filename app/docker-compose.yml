@@ -1,6 +1,18 @@
 services:
   quiz:
     build: .
+    # Een echte PID 1: signalen komen aan en de container stopt netjes.
+    init: true
+    # Niemand in de container kan meer rechten krijgen dan hij bij de start had.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Het bestandssysteem van de container is alleen-lezen; alleen het volume
+    # voor de database (en /tmp) is beschrijfbaar.
+    read_only: true
+    tmpfs:
+      - /tmp
     ports:
       - '3000:3000'
     environment:
@@ -9,11 +21,20 @@ services:
       HOST_PIN: ${HOST_PIN:?zet HOST_PIN op een eigen pincode voor de quizmaster}
       DATABASE_PATH: /data/quiz.db
       PORT: '3000'
+      # Achter een omgekeerde proxy met certificaat zet je deze erbij, zodat
+      # de app weet dat de verbinding https is en de rem op de pincode het
+      # adres van de telefoon ziet in plaats van dat van de proxy:
+      # ORIGIN: https://quiz.example.nl
+      # PROTOCOL_HEADER: x-forwarded-proto
+      # HOST_HEADER: x-forwarded-host
+      # ADDRESS_HEADER: x-forwarded-for
+      # XFF_DEPTH: '1'
     volumes:
       # De stand overleeft een herstart van de container.
       - quiz-data:/data
-      # Foto's, filmpjes en muziek bij vragen. Bestand erin zetten is genoeg.
-      - ./media:/app/media
+      # Foto's, filmpjes en muziek bij vragen. Bestand erin zetten is genoeg;
+      # de container hoeft er alleen in te lezen.
+      - ./media:/app/media:ro
     restart: unless-stopped
     healthcheck:
       test:

@@ -198,8 +198,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     case 'corrigeer': {
       const punten = Number(body.punten ?? 0);
       const spelerId = Number(body.spelerId);
+      if (!lijst.some((s) => s.id === spelerId)) error(400, 'onbekende speler');
+      if (!Number.isFinite(punten) || Math.abs(punten) > 1000) error(400, 'ongeldig aantal punten');
       const rij = db.insert(correcties)
-        .values({ spelId: spel.id, spelerId, punten, reden: body.reden ? String(body.reden) : 'handmatig via het hostscherm' })
+        .values({ spelId: spel.id, spelerId, punten, reden: body.reden ? String(body.reden).slice(0, 200) : 'handmatig via het hostscherm' })
         .returning()
         .get();
       correctieId = rij.id;

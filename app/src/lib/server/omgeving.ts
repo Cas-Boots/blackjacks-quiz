@@ -40,9 +40,10 @@ export function omgevingsFouten(): string[] {
  * Wat beter kan, maar de avond niet tegenhoudt.
  *
  * Zonder ORIGIN weet de app achter een omgekeerde proxy zijn eigen adres niet:
- * hij ziet het adres van de proxy en niet dat van de browser. De quiz werkt
- * dan gewoon — de televisie stuurt zijn eigen adres mee voor de QR-code — maar
- * koekjes krijgen niet de markering `Secure`.
+ * hij ziet het adres van de proxy en niet dat van de browser, en hij weet
+ * niet zeker of de verbinding https is. De quiz werkt dan gewoon — de
+ * televisie stuurt zijn eigen adres mee voor de QR-code — maar koekjes
+ * krijgen niet de markering `Secure` en HSTS blijft uit (zie hooks.server.ts).
  */
 export function omgevingsWaarschuwingen(): string[] {
   if (!inProductie()) return [];

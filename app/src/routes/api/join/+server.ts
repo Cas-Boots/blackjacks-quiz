@@ -7,6 +7,21 @@ import { raakApparaatAan, bumpVersie, actiefSpel, voegDeelnemerToe, MAX_NAAM_TEK
 import { schrijfLog } from '$lib/server/logboek';
 import { TOKEN_COOKIE } from '../../../hooks.server';
 import { hostPin, omgevingsFouten } from '$lib/server/omgeving';
+import { Rem } from '$lib/server/rem';
+import { timingSafeEqual } from 'node:crypto';
+
+/**
+ * Vijf missers per minuut, daarna vijf minuten op slot — per adres. Genoeg
+ * om een typefout te overleven en veel te weinig om een pincode te raden.
+ */
+const pinRem = new Rem({ maxMissers: 5, vensterMs: 60_000, blokkadeMs: 5 * 60_000 });
+
+/** Vergelijkt in vaste tijd, zodat de duur niets verraadt over hoeveel er al klopte. */
+function pinKlopt(gegeven: string, verwacht: string): boolean {
+  const a = Buffer.from(gegeven);
+  const b = Buffer.from(verwacht);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 /**
  * Een telefoon koppelt zich aan een naam, of het hostscherm meldt zich met de
@@ -19,7 +34,7 @@ import { hostPin, omgevingsFouten } from '$lib/server/omgeving';
  * Een gast die niet in de lijst staat tikt zijn naam in en schuift aan; ook
  * midden in een ronde.
  */
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
   const token = cookies.get(TOKEN_COOKIE);
   if (!token) error(400, 'geen apparaat-token');
 
@@ -33,8 +48,24 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       console.error('[join] hostscherm geweigerd:', fouten.join(' '));
       error(503, 'De server is niet ingesteld voor gebruik buiten de huiskamer. Zie de serverlog.');
     }
-    const pin = String(body.pin ?? '');
-    if (pin !== hostPin()) error(403, 'onjuiste pincode');
+    let adres = 'onbekend';
+    try {
+      adres = getClientAddress();
+    } catch {
+      // Geen adres bekend; dan delen alle pogingen één rem.
+    }
+    const tot = pinRem.geblokkeerdTot(adres);
+    if (tot != null) {
+      const seconden = Math.max(1, Math.ceil((tot - Date.now()) / 1000));
+      error(429, `te veel verkeerde pincodes; probeer het over ${seconden} seconden opnieuw`);
+    }
+    const pin = String(body.pin ?? '').slice(0, 64);
+    if (!pinKlopt(pin, hostPin())) {
+      const nuTot = pinRem.misser(adres);
+      console.warn(`[join] verkeerde pincode vanaf ${adres}${nuTot ? ' — adres tijdelijk op slot' : ''}`);
+      error(403, 'onjuiste pincode');
+    }
+    pinRem.gelukt(adres);
     raakApparaatAan(token, 'quizmaster', null, 'Quizmaster');
     const spel = actiefSpel();
     if (spel) bumpVersie(spel.id);

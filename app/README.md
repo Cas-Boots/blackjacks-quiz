@@ -290,6 +290,8 @@ blackjacks-cup.
 | `DATABASE_PATH` | staat al goed | `/data/quiz.db`, op een volume dat een herstart overleeft. |
 | `MEDIA_DIR` | staat al goed | `/app/media`, de map met foto's, filmpjes en muziek. |
 | `PORT` | staat al goed | `3000`. |
+| `ADDRESS_HEADER`, `XFF_DEPTH` | staat al goed | `x-forwarded-for` en `1`: achter Traefik ziet de rem op de pincode zo het adres van de telefoon. |
+| `BODY_SIZE_LIMIT` | staat al goed | `512K`, het grootste verzoek dat de server aanneemt; een portret is hooguit 200 kB. |
 
 `HOST_PIN` heeft met opzet geen standaardwaarde. Draait de app in productie
 zonder eigen code — of nog met de voorbeeldcode `2627` uit `.env.example` — dan geeft
@@ -389,6 +391,51 @@ Speel daarna de avond een keer na tegen de echte server:
 
 ```bash
 npx tsx scripts/simulate.ts --url https://quiz.deblackjacks.nl --pin <code> --auto-host --snelheid 20
+```
+
+### Wat er dicht staat
+
+Met een openbaar adres staat de server een avond lang open voor iedereen.
+Daarom, bovenop de verplichte pincode:
+
+- **Raden wordt afgeremd.** Vijf verkeerde pincodes binnen een minuut zetten
+  dat adres vijf minuten op slot, en de vergelijking gebeurt in vaste tijd.
+  Achter Traefik telt daarvoor het adres van de telefoon (`ADDRESS_HEADER`
+  staat in de compose). Een langere pincode blijft het beste middel; hij
+  hoeft maar één keer ingetikt.
+- **Opdrachten van een andere site worden geweigerd.** Elke schrijfopdracht
+  op `/api/` moet `application/json` zijn en mag niet van een andere site
+  komen (`Sec-Fetch-Site: cross-site`). Het sessiecookie is `HttpOnly` en
+  `SameSite=Lax`, en `Secure` zodra de app zeker weet dat de verbinding https
+  is (`ORIGIN` of `PROTOCOL_HEADER` gezet). Op het thuisnetwerk over gewoon
+  http blijft `Secure` uit — een browser weigert zo'n cookie over http en dan
+  zou geen telefoon zijn naam kunnen vasthouden.
+- **Strakke koppen op elke pagina.** Een Content-Security-Policy met nonces
+  (alleen eigen scripts; afbeeldingen, fragmenten en lettertypen van de
+  plekken die de app zelf gebruikt), `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, een
+  `Permissions-Policy` zonder camera, microfoon of locatie, en HSTS over
+  https. Bestanden uit `media/` gaan met een eigen policy die geen scripts
+  toelaat, ook niet in een svg. De stand (`/api/…`) krijgt
+  `Cache-Control: no-store`. De browsertest `e2e/koppen.spec.ts` opent de
+  vier schermen en controleert dat de policy niets tegenhoudt — precies de
+  fout die je anders pas op de avond ziet.
+- **De container draait als `node`, niet als root**, met een alleen-lezen
+  bestandssysteem, zonder capabilities en zonder de mogelijkheid er meer bij
+  te krijgen (`no-new-privileges`). Alleen de volumes en `/tmp` zijn
+  beschrijfbaar; in `app/docker-compose.yml` is `media/` alleen-lezen
+  gekoppeld. `python3` en de compiler gaan na het installeren weer weg.
+- **Alleen wat er echt in de database hoort.** Een correctie hoort bij een
+  speler die meedoet en blijft binnen ±1000 punten; een portret is altijd
+  een kleine JPEG, PNG of WebP, ook als de quizmaster hem zet.
+
+**Een bestaand volume.** Draaide de quiz eerder als root, dan is `/data` in
+het volume nog van root en kan de nieuwe container er niet in schrijven. De
+app zegt dat dan zo bij het opkomen (*Geen schrijfrechten in /data*). Eén
+keer, met de compose die je gebruikt:
+
+```bash
+docker compose run --rm --user root --entrypoint chown quiz -R node:node /data /app/media
 ```
 
 ### Eén ding om te weten

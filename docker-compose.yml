@@ -12,6 +12,18 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
+    # Een echte PID 1: signalen komen aan en de container stopt netjes.
+    init: true
+    # De container kan nergens meer rechten bij krijgen, heeft geen
+    # capabilities en een alleen-lezen bestandssysteem; alleen de volumes
+    # (en /tmp) zijn beschrijfbaar. De app draait bovendien als 'node'.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
       # Geen standaardwaarde, met opzet: zonder eigen pincode weigert
       # /api/health en komt de uitrol niet groen. Zet hem in Dokploy onder
@@ -21,6 +33,11 @@ services:
       # ziet de app zijn eigen adres niet; hiermee weet hij het wel, en krijgen
       # koekjes de markering Secure.
       ORIGIN: ${ORIGIN:?zet ORIGIN op het volledige adres, bijvoorbeeld https://quiz.deblackjacks.nl}
+      # Traefik zet het adres van de telefoon in X-Forwarded-For. Daarmee
+      # remt de app een gokreeks op de pincode per telefoon af, en niet voor
+      # iedereen tegelijk omdat elk verzoek van de proxy lijkt te komen.
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: '1'
       DATABASE_PATH: /data/quiz.db
       MEDIA_DIR: /app/media
       PORT: '3000'
