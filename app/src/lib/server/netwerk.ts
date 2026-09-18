@@ -9,7 +9,7 @@
  * gebruiken allemaal dezelfde lijst.
  */
 import { networkInterfaces } from 'node:os';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 export interface NetwerkAdres {
   /** Naam van de netwerkkaart, zoals 'Wi-Fi' of 'eth0'. */
@@ -64,6 +64,33 @@ export function lanAdressen(kaarten: Netwerkkaarten): NetwerkAdres[] {
 /** Draait dit in een container? Dan zijn de eigen adressen niet die van de pc. */
 export function inContainer(): boolean {
   return existsSync('/.dockerenv');
+}
+
+/**
+ * Draait dit in WSL (Linux binnen Windows)?
+ *
+ * WSL2 heeft standaard een eigen virtueel netwerk: het adres dat Node ziet
+ * (172.x.x.x) bestaat alleen binnen WSL, en een telefoon op de wifi komt er
+ * niet bij. Dat is precies de valkuil die je pas op de avond ontdekt, dus
+ * het startscript waarschuwt ervoor. Met `networkingMode=mirrored` in
+ * `.wslconfig` deelt WSL het adres van Windows en is er niets aan de hand.
+ */
+export function inWsl(): boolean {
+  if (process.platform !== 'linux') return false;
+  try {
+    return /microsoft|wsl/i.test(readFileSync('/proc/version', 'utf8'));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Of het bovenste adres er een is waar een telefoon waarschijnlijk niet bij
+ * kan: WSL zonder gespiegeld netwerk laat alleen een 172-adres zien.
+ */
+export function lijktAfgeschermd(adressen: NetwerkAdres[], wsl: boolean): boolean {
+  if (!wsl) return false;
+  return adressen.length === 0 || !adressen[0].adres.startsWith('192.168.');
 }
 
 /**

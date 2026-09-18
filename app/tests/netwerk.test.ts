@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { adresUrl, lanAdressen, type Netwerkkaarten } from '../src/lib/server/netwerk';
+import { adresUrl, lanAdressen, lijktAfgeschermd, type Netwerkkaarten } from '../src/lib/server/netwerk';
 
 /** Een laptop op de wifi, met een Docker-brug en een VirtualBox-kaart ernaast — zoals een echte pc eruitziet. */
 const kaarten: Netwerkkaarten = {
@@ -50,6 +50,21 @@ describe('lanAdressen', () => {
       'Wi-Fi': [{ family: 'IPv4', internal: false, address: '192.168.1.10' }],
     };
     expect(lanAdressen(twee).map((a) => a.naam)).toEqual(['Wi-Fi', 'Wi-Fi 2']);
+  });
+});
+
+describe('lijktAfgeschermd', () => {
+  it('waarschuwt in WSL zonder gespiegeld netwerk, waar alleen een 172-adres te zien is', () => {
+    expect(lijktAfgeschermd([{ naam: 'eth0', adres: '172.28.16.5' }], true)).toBe(true);
+    expect(lijktAfgeschermd([], true)).toBe(true);
+  });
+
+  it('zwijgt in WSL zodra het wifi-adres van Windows te zien is', () => {
+    expect(lijktAfgeschermd([{ naam: 'eth0', adres: '192.168.1.10' }], true)).toBe(false);
+  });
+
+  it('zwijgt buiten WSL, ook met een 172-adres', () => {
+    expect(lijktAfgeschermd([{ naam: 'eth0', adres: '172.28.16.5' }], false)).toBe(false);
   });
 });
 
