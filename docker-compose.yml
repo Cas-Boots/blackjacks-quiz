@@ -1,0 +1,60 @@
+# De uitrol op Dokploy.
+#
+# Dokploy kijkt naar de hoofdmap van de repository, daarom staat dit bestand
+# hier en niet in `app/`. Het bouwt de map `app/` en hangt de container aan het
+# netwerk waar de Traefik van Dokploy op luistert; het adres en het certificaat
+# regel je verder in Dokploy zelf, onder Domains (service `quiz`, poort 3000).
+#
+# Draai je op een gewone server met Docker en zonder Dokploy, gebruik dan
+# `app/docker-compose.yml`: die publiceert poort 3000 rechtstreeks.
+services:
+  quiz:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    environment:
+      # Geen standaardwaarde, met opzet: zonder eigen pincode weigert
+      # /api/health en komt de uitrol niet groen. Zet hem in Dokploy onder
+      # Environment, niet in dit bestand.
+      HOST_PIN: ${HOST_PIN:?zet HOST_PIN op een eigen pincode voor de quizmaster}
+      # Het adres waarop de quiz te bereiken is. Achter een omgekeerde proxy
+      # ziet de app zijn eigen adres niet; hiermee weet hij het wel, en krijgen
+      # koekjes de markering Secure.
+      ORIGIN: ${ORIGIN:?zet ORIGIN op het volledige adres, bijvoorbeeld https://kwis.example.nl}
+      DATABASE_PATH: /data/quiz.db
+      MEDIA_DIR: /app/media
+      PORT: '3000'
+      NODE_ENV: production
+    # Geen `ports`: Traefik komt binnen over het netwerk hieronder. Wat niet
+    # aan het internet hangt, hoeft niet dichtgezet te worden.
+    expose:
+      - '3000'
+    volumes:
+      # De stand overleeft een herstart en een nieuwe versie.
+      - quiz-data:/data
+      # Foto's, filmpjes en muziek bij vragen. Zie het README voor hoe je ze
+      # erin krijgt; ze horen niet in git.
+      - quiz-media:/app/media
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    networks:
+      - dokploy-network
+
+volumes:
+  quiz-data:
+  quiz-media:
+
+networks:
+  # Dit netwerk maakt Dokploy zelf aan; de Traefik ervan routeert het domein
+  # hierheen.
+  dokploy-network:
+    external: true

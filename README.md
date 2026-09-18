@@ -213,6 +213,13 @@ Beide versies draaien dezelfde vragen: ze staan in
 naar dit `index.html`. Dit losse bestand blijft de achtervang die zonder
 netwerk werkt.
 
+Wil je de meespeelversie op een echte server in plaats van op een laptop, dan
+staat de uitrol klaar: de `docker-compose.yml` in deze map is gemaakt voor
+Dokploy, en [`app/README.md`](app/README.md#naar-productie) beschrijft stap voor
+stap wat de server nodig heeft. Zet in elk geval je eigen `HOST_PIN` — zonder
+eigen pincode weigert de container gezond te worden, zodat er nooit een
+hostscherm online staat dat voor iedereen openstaat.
+
 ## Wat er nog aan komt
 
 - **Antwoordbriefjes zonder server.** Dezelfde quiz, op elke telefoon te openen

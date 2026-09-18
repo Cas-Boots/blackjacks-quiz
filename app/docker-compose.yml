@@ -4,8 +4,9 @@ services:
     ports:
       - '3000:3000'
     environment:
-      # Verander deze pincode vóór de avond.
-      HOST_PIN: ${HOST_PIN:-2627}
+      # Geen standaardwaarde, met opzet: de container draait met
+      # NODE_ENV=production en weigert gezond te worden zonder eigen pincode.
+      HOST_PIN: ${HOST_PIN:?zet HOST_PIN op een eigen pincode voor de quizmaster}
       DATABASE_PATH: /data/quiz.db
       PORT: '3000'
     volumes:

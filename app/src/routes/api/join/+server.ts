@@ -6,6 +6,7 @@ import { spelers } from '$lib/server/db/schema';
 import { raakApparaatAan, bumpVersie, actiefSpel, voegDeelnemerToe, MAX_NAAM_TEKENS } from '$lib/server/spel';
 import { schrijfLog } from '$lib/server/logboek';
 import { TOKEN_COOKIE } from '../../../hooks.server';
+import { hostPin, omgevingsFouten } from '$lib/server/omgeving';
 
 /**
  * Een telefoon koppelt zich aan een naam, of het hostscherm meldt zich met de
@@ -26,9 +27,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
   const rol = String(body.rol ?? '');
 
   if (rol === 'quizmaster') {
+    // Liever helemaal geen hostscherm dan een hostscherm zonder eigen code.
+    const fouten = omgevingsFouten();
+    if (fouten.length) {
+      console.error('[join] hostscherm geweigerd:', fouten.join(' '));
+      error(503, 'De server is niet ingesteld voor gebruik buiten de huiskamer. Zie de serverlog.');
+    }
     const pin = String(body.pin ?? '');
-    const verwacht = process.env.HOST_PIN ?? '2627';
-    if (pin !== verwacht) error(403, 'onjuiste pincode');
+    if (pin !== hostPin()) error(403, 'onjuiste pincode');
     raakApparaatAan(token, 'quizmaster', null, 'Quizmaster');
     const spel = actiefSpel();
     if (spel) bumpVersie(spel.id);

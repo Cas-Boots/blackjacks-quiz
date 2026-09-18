@@ -6,3 +6,6 @@ app/playwright-report
 app/*.db
 app/*.db-shm
 app/*.db-wal
+
+# Geheimen van de uitrol horen niet in git.
+.env

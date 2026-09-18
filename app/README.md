@@ -273,6 +273,85 @@ npm run content:check   # alleen controleren; dit draait ook in CI
 De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
 vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
 vraag.
+## Naar productie
+
+Op de avond zelf is een laptop met `npm run dev` genoeg. Wil je de quiz op een
+echte server hebben — zodat de telefoons erbij kunnen zonder dat iedereen op
+hetzelfde wifi zit, en zodat je van tevoren rustig kunt proefdraaien — dan
+draait hij als container. De uitrol is ingericht voor Dokploy, net als
+blackjacks-cup.
+
+### Wat de server nodig heeft
+
+| Instelling | Verplicht | Wat het doet |
+|---|---|---|
+| `HOST_PIN` | ja | De code waarmee de quizmaster het hostscherm opent. |
+| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://kwis.example.nl`. |
+| `DATABASE_PATH` | staat al goed | `/data/quiz.db`, op een volume dat een herstart overleeft. |
+| `MEDIA_DIR` | staat al goed | `/app/media`, de map met foto's, filmpjes en muziek. |
+| `PORT` | staat al goed | `3000`. |
+
+`HOST_PIN` heeft met opzet geen standaardwaarde. Draait de app in productie
+zonder eigen code — of nog met de voorbeeldcode `2627` uit `.env.example` — dan geeft
+`/api/health` een 503 en wordt de container nooit gezond. Dokploy laat de
+uitrol dan rood staan in plaats van een hostscherm online te zetten dat voor
+iedereen openstaat die het adres kent. Dezelfde reden als bij de migraties: een
+container die weigert te komen zie je meteen, een half werkende app niet.
+
+### In Dokploy
+
+De `docker-compose.yml` in de hoofdmap van de repository is hiervoor gemaakt.
+Hij bouwt de map `app/`, publiceert geen poort naar buiten en hangt aan het
+netwerk van Dokploy's Traefik.
+
+1. Maak een **Compose**-applicatie die naar deze repository wijst, met
+   `docker-compose.yml` als bestand.
+2. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
+   domein hoort. Schrijf ze niet in het bestand: dat staat in git.
+3. Koppel onder **Domains** het domein aan service `quiz`, poort `3000`, met
+   HTTPS aan.
+4. Uitrollen. De container komt pas groen als `/api/health` `status: ok`
+   teruggeeft — dus als de database tabellen heeft én de pincode klopt.
+
+Draai je op een gewone server met Docker en zonder Dokploy, gebruik dan
+`app/docker-compose.yml`. Die publiceert poort 3000 rechtstreeks; zet er zelf
+een proxy met een certificaat voor.
+
+### De bestanden bij de vragen
+
+De map `media/` zit in productie op een eigen volume, want foto's en filmpjes
+horen niet in git. Zet ze erin met:
+
+```bash
+docker cp ./media/. <container>:/app/media/
+```
+
+De app leest de map op het moment zelf, dus herstarten hoeft niet.
+
+### Voordat de avond begint
+
+```bash
+curl https://kwis.example.nl/api/health
+```
+
+Je wilt `status: ok` zien, met het aantal tabellen en spelers, en een lege
+`waarschuwingen`. Staat `ORIGIN` er niet in, dan meldt hij dat hier — de quiz
+werkt dan gewoon, maar de koekjes missen hun `Secure`-markering.
+
+Speel daarna de avond een keer na tegen de echte server:
+
+```bash
+npx tsx scripts/simulate.ts --url https://kwis.example.nl --pin <code> --auto-host --snelheid 20
+```
+
+### Eén ding om te weten
+
+Spelers hebben geen pincode — dat is een bewuste keuze voor een avond onder
+vrienden, en op een huisnetwerk verandert er niets. Staat de quiz op een
+openbaar adres, dan kan iedereen die de link heeft een naam kiezen. Het
+hostscherm laat zien wie er op welke naam zit, dus je ziet het meteen. Wil je
+dat helemaal dicht, zet er dan in Dokploy een basisbeveiliging voor, of haal
+het domein pas vlak voor de avond online.
 
 ## Wat er nog niet in zit
 
