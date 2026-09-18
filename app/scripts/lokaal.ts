@@ -25,7 +25,7 @@ import { hostname } from 'node:os';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import QRCode from 'qrcode';
-import { adresUrl, netwerkAdressen } from '../src/lib/server/netwerk';
+import { adresUrl, inWsl, lijktAfgeschermd, netwerkAdressen } from '../src/lib/server/netwerk';
 import { VOORBEELD_PIN } from '../src/lib/server/omgeving';
 
 const hier = dirname(fileURLToPath(import.meta.url));
@@ -153,6 +153,12 @@ async function toonAdressen() {
     console.log('\n  Scan met een telefoon op dezelfde wifi om meteen mee te doen:\n');
     const qr = await QRCode.toString(adresUrl(eerste.adres, POORT), { type: 'terminal', small: true });
     console.log(qr.replace(/^/gm, '  '));
+  }
+  if (lijktAfgeschermd(adressen, inWsl())) {
+    console.log('  LET OP: dit is WSL, en het adres hierboven bestaat alleen binnen WSL.');
+    console.log('  Een telefoon op de wifi komt er zo niet bij. Zet in Windows');
+    console.log('  networkingMode=mirrored in .wslconfig en open poort ' + POORT + ' in de');
+    console.log('  firewall; zie het README onder "WSL". Daarna staat hier 192.168.x.x.\n');
   }
   console.log('  Komt een telefoon er niet bij? Kijk in de README onder');
   console.log('  "Op je eigen pc" naar de firewall en het gastnetwerk.');

@@ -97,6 +97,37 @@ adressen van de pc, met de naam van de netwerkkaart erbij.
   HDMI-kabel, of de laptop naar de televisie casten, werkt altijd; dan open
   je het televisiescherm gewoon op de laptop via hetzelfde netwerkadres —
   niet via `localhost`, want dat adres komt in de QR-code.
+- **WSL (Ubuntu binnen Windows).** WSL2 heeft standaard een eigen virtueel
+  netwerk: het adres dat het script ziet (172.x.x.x) bestaat alleen binnen
+  WSL, en een telefoon komt er niet bij — het script waarschuwt daarvoor.
+  Zet WSL eenmalig op het netwerk van Windows: maak in Windows het bestand
+  `C:\Users\<naam>\.wslconfig` met
+
+  ```
+  [wsl2]
+  networkingMode=mirrored
+  ```
+
+  open in een PowerShell als beheerder de poort in de firewall en laat
+  verkeer naar WSL door:
+
+  ```
+  netsh advfirewall firewall add rule name="Blackjacks quiz" dir=in action=allow protocol=TCP localport=3000
+  Set-NetFirewallHyperVVMSetting -Name '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -DefaultInboundAction Allow
+  ```
+
+  en herstart WSL met `wsl --shutdown`. Daarna noemt het script het gewone
+  wifi-adres (192.168.x.x). Blijft het 172.x.x.x (Windows 10 kent geen
+  gespiegeld netwerk), stuur de poort dan door vanuit Windows, opnieuw na
+  elke herstart omdat het WSL-adres verandert:
+
+  ```
+  netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=<172-adres uit het script>
+  ```
+
+  De telefoons gebruiken dan het wifi-adres van Windows (`ipconfig`, bij de
+  Wi-Fi-adapter). Of sla WSL over: installeer Node op Windows zelf en
+  dubbelklik `lokaal.cmd`.
 - **Docker in plaats van Node.** Ook `docker compose up` in deze map zet de
   quiz op poort 3000 van de pc. De container kent het adres van de pc dan
   niet, dus het script en het beheerscherm kunnen het niet noemen; kijk het
