@@ -12,14 +12,97 @@ content:sync` haalt ze uit `../index.html`.
 ```bash
 npm install --legacy-peer-deps   # zie 'Bekende hobbels' onderaan
 npm run db:seed                  # spelers en een leeg spel klaarzetten
-npm run dev                      # http://localhost:5173
+npm run dev                      # http://localhost:5173, alleen op deze computer
 ```
+
+Wil je er met de televisie en de telefoons bij, dan start je hem zo:
+
+```bash
+npm run lokaal                   # bouwt en start op http://<adres van deze pc>:3000
+```
+
+Zie [Op je eigen pc](#op-je-eigen-pc-voor-de-televisie-en-de-telefoons) voor
+wat dat doet en wat er mis kan gaan.
 
 Of in Docker, zoals blackjacks-cup draait:
 
 ```bash
 HOST_PIN=1234 docker compose up --build
 ```
+
+## Op je eigen pc, voor de televisie en de telefoons
+
+`npm run dev` luistert alleen op de computer zelf (`localhost`): handig om aan
+de code te werken, maar een telefoon op dezelfde wifi komt er niet bij. Voor
+een proefavond thuis, met de echte televisie en de echte telefoons, is er een
+tweede manier:
+
+```bash
+npm run lokaal
+```
+
+Op Windows kun je ook dubbelklikken op `lokaal.cmd` in deze map; die
+installeert de eerste keer de afhankelijkheden en doet daarna hetzelfde.
+
+Wat er dan gebeurt:
+
+1. De app wordt gebouwd (een paar seconden) en gestart op **alle
+   netwerkkaarten** van de pc, standaard op poort 3000.
+2. De database staat in `data/lokaal.db` en overleeft een herstart; de
+   bestanden bij de vragen komen uit `media/`. Beide horen niet in git.
+3. Zodra `/api/health` groen is, staat er in het venster welk adres je op de
+   televisie tikt (`http://192.168.1.10:3000/tv`), waar het hostscherm en het
+   beheerscherm staan, en een **QR-code** die een telefoon zo kan scannen —
+   handig als de televisie nog niet aanstaat.
+4. `Ctrl`+`C` stopt de server weer.
+
+De pincode is de voorbeeldcode `2627`, tenzij je `HOST_PIN` in `.env` zet of
+`--pin` meegeeft. Dit is met opzet geen productie: de voorbeeldcode mag, het
+cookie blijft zonder `Secure` (de telefoons praten over gewoon http) en de
+server vertelt zijn netwerkadressen. Een `ORIGIN` uit `.env` wordt hier
+genegeerd, want die hoort bij de echte server.
+
+| Optie | Doet |
+|---|---|
+| `--dev` | de ontwikkelserver van Vite op het netwerk, zonder bouwen en met herladen bij elke wijziging |
+| `--poort 8080` | een andere poort, als 3000 bezet is |
+| `--pin 4711` | een eigen pincode voor het hostscherm |
+| `--zonder-bouw` | de vorige build hergebruiken |
+
+Op het televisiescherm zie je hetzelfde: open je hem per ongeluk via
+`localhost`, dan zegt de waarschuwing onder de QR-code welk adres je in
+plaats daarvan moet tikken. Het beheerscherm toont onder *Server* alle
+adressen van de pc, met de naam van de netwerkkaart erbij.
+
+### Als een telefoon er niet bij komt
+
+- **De firewall van Windows.** De eerste keer dat Node op een poort luistert
+  vraagt Windows of het mag; kies *Toegang toestaan* voor **particuliere
+  netwerken**. Klikte je het weg, zoek dan in de instellingen naar *Een app
+  toestaan via Windows Firewall* en vink Node.js aan voor privénetwerken.
+  Staat de wifi bij Windows als *openbaar netwerk*, zet hem dan op *privé*
+  (Instellingen › Netwerk en internet › de wifi › Netwerkprofiel), anders
+  blokkeert de firewall alles van buiten.
+- **Hetzelfde netwerk.** Pc, televisie en telefoons moeten op dezelfde wifi
+  zitten. Een gastnetwerk of een router met *AP-isolatie* of *client
+  isolation* laat apparaten elkaar niet zien, ook al hebben ze allebei
+  internet. Mobiele data op de telefoon uit, of in elk geval de wifi aan.
+- **Meer dan één adres.** Een pc met Docker, WSL, VirtualBox of een VPN
+  heeft meerdere adressen. Het script zet het waarschijnlijkste bovenaan
+  (192.168.x.x eerst) en noemt de rest; werkt het bovenste niet, probeer dan
+  de volgende. Een VPN die al het verkeer omleidt kun je tijdens de avond
+  beter uitzetten.
+- **De televisie zelf.** Een smart-tv opent `http://192.168.1.10:3000/tv` in
+  zijn eigen browser, maar die browsers zijn traag en oud. Een laptop aan de
+  HDMI-kabel, of de laptop naar de televisie casten, werkt altijd; dan open
+  je het televisiescherm gewoon op de laptop via hetzelfde netwerkadres —
+  niet via `localhost`, want dat adres komt in de QR-code.
+- **Docker in plaats van Node.** Ook `docker compose up` in deze map zet de
+  quiz op poort 3000 van de pc. De container kent het adres van de pc dan
+  niet, dus het script en het beheerscherm kunnen het niet noemen; kijk het
+  op met `ipconfig` (Windows) of `ip addr` (Linux, Mac: `ifconfig`). Zet
+  `HOST_PIN` in een `.env` naast `docker-compose.yml`, want de container
+  draait als productie en weigert de voorbeeldcode.
 
 ## De drie schermen
 
@@ -41,8 +124,9 @@ In de lobby toont de televisie een QR-code met het adres waarop hij zelf de
 quiz opende. Iedereen scant, kiest zijn naam en heeft zijn antwoordblad in
 handen. Open het televisiescherm daarom via het netwerkadres van de laptop
 (bijvoorbeeld `http://192.168.1.10:3000/tv`), niet via `localhost` — het
-scherm waarschuwt als je dat toch doet. Onder de namen staat hoeveel telefoons
-er al bij zijn.
+scherm waarschuwt als je dat toch doet en noemt het adres dat wél werkt.
+`npm run lokaal` zet dat adres ook in het terminalvenster. Onder de namen
+staat hoeveel telefoons er al bij zijn.
 
 Staat iemand niet in de lijst? Onder de namen tikt een gast zijn naam in en
 schuift aan, ook midden in een ronde: hij krijgt meteen een plek in de
@@ -376,7 +460,7 @@ vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
 vraag.
 ## Naar productie
 
-Op de avond zelf is een laptop met `npm run dev` genoeg. Wil je de quiz op een
+Op de avond zelf is een laptop met `npm run lokaal` genoeg. Wil je de quiz op een
 echte server hebben — zodat de telefoons erbij kunnen zonder dat iedereen op
 hetzelfde wifi zit, en zodat je van tevoren rustig kunt proefdraaien — dan
 draait hij als container. De uitrol is ingericht voor Dokploy, net als

@@ -10,6 +10,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "lokaal": "tsx scripts/lokaal.ts",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
