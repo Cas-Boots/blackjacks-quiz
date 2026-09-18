@@ -286,7 +286,7 @@ blackjacks-cup.
 | Instelling | Verplicht | Wat het doet |
 |---|---|---|
 | `HOST_PIN` | ja | De code waarmee de quizmaster het hostscherm opent. |
-| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://kwis.example.nl`. |
+| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://deblackjacks.nl`. |
 | `DATABASE_PATH` | staat al goed | `/data/quiz.db`, op een volume dat een herstart overleeft. |
 | `MEDIA_DIR` | staat al goed | `/app/media`, de map met foto's, filmpjes en muziek. |
 | `PORT` | staat al goed | `3000`. |
@@ -304,14 +304,27 @@ De `docker-compose.yml` in de hoofdmap van de repository is hiervoor gemaakt.
 Hij bouwt de map `app/`, publiceert geen poort naar buiten en hangt aan het
 netwerk van Dokploy's Traefik.
 
-1. Maak een **Compose**-applicatie die naar deze repository wijst, met
+1. **Wijs het domein naar de server.** Zet bij je registrar een `A`-record
+   voor `deblackjacks.nl` naar het IP-adres van de server, en een tweede voor
+   `www` als je dat wilt. Controleer dat het staat voordat je verder gaat:
+   `getent hosts deblackjacks.nl` moet het IP van de server teruggeven. Zolang
+   dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft het
+   domein in Dokploy op een foutmelding staan.
+2. Maak een **Compose**-applicatie die naar deze repository wijst, met
    `docker-compose.yml` als bestand.
-2. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
+3. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
    domein hoort. Schrijf ze niet in het bestand: dat staat in git.
-3. Koppel onder **Domains** het domein aan service `quiz`, poort `3000`, met
+4. Koppel onder **Domains** het domein aan service `quiz`, poort `3000`, met
    HTTPS aan.
-4. Uitrollen. De container komt pas groen als `/api/health` `status: ok`
+5. Uitrollen. De container komt pas groen als `/api/health` `status: ok`
    teruggeeft — dus als de database tabellen heeft én de pincode klopt.
+
+Een vers geregistreerd domein is niet meteen overal zichtbaar. Naast de tijd
+die het register nodig heeft, onthouden resolvers ook dat een naam *niet*
+bestond: dat heet negatieve caching en duurt bij `.nl` doorgaans tot een uur.
+Heb je het domein vlak na registratie al eens opgevraagd, dan kan het dus
+even duren voordat jouw resolver van gedachten verandert. Geduld, niet
+opnieuw registreren.
 
 Draai je op een gewone server met Docker en zonder Dokploy, gebruik dan
 `app/docker-compose.yml`. Die publiceert poort 3000 rechtstreeks; zet er zelf
@@ -331,7 +344,7 @@ De app leest de map op het moment zelf, dus herstarten hoeft niet.
 ### Voordat de avond begint
 
 ```bash
-curl https://kwis.example.nl/api/health
+curl https://deblackjacks.nl/api/health
 ```
 
 Je wilt `status: ok` zien, met het aantal tabellen en spelers, en een lege
@@ -341,7 +354,7 @@ werkt dan gewoon, maar de koekjes missen hun `Secure`-markering.
 Speel daarna de avond een keer na tegen de echte server:
 
 ```bash
-npx tsx scripts/simulate.ts --url https://kwis.example.nl --pin <code> --auto-host --snelheid 20
+npx tsx scripts/simulate.ts --url https://deblackjacks.nl --pin <code> --auto-host --snelheid 20
 ```
 
 ### Eén ding om te weten
