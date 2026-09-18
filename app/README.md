@@ -108,16 +108,19 @@ adressen van de pc, met de naam van de netwerkkaart erbij.
   networkingMode=mirrored
   ```
 
-  open in een PowerShell als beheerder de poort in de firewall en laat
-  verkeer naar WSL door:
+  open in een PowerShell als beheerder alleen poort 3000, alleen op
+  privénetwerken, en laat diezelfde poort door naar WSL:
 
   ```
-  netsh advfirewall firewall add rule name="Blackjacks quiz" dir=in action=allow protocol=TCP localport=3000
-  Set-NetFirewallHyperVVMSetting -Name '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -DefaultInboundAction Allow
+  netsh advfirewall firewall add rule name="Blackjacks quiz" dir=in action=allow protocol=TCP localport=3000 profile=private
+  New-NetFirewallHyperVRule -Name "BlackjacksQuiz" -DisplayName "Blackjacks quiz" -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts 3000
   ```
 
   en herstart WSL met `wsl --shutdown`. Daarna noemt het script het gewone
-  wifi-adres (192.168.x.x). Blijft het 172.x.x.x (Windows 10 kent geen
+  wifi-adres (192.168.x.x). Meer staat er niet open: alleen die poort, alleen
+  op het thuisnetwerk, en alleen zolang de quiz draait. Weghalen kan met
+  `netsh advfirewall firewall delete rule name="Blackjacks quiz"` en
+  `Remove-NetFirewallHyperVRule -Name "BlackjacksQuiz"`. Blijft het 172.x.x.x (Windows 10 kent geen
   gespiegeld netwerk), stuur de poort dan door vanuit Windows, opnieuw na
   elke herstart omdat het WSL-adres verandert:
 
