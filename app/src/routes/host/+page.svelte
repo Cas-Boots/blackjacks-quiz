@@ -597,6 +597,7 @@
     <div class="knoprij">
       <a class="knop stil" href="/tv" target="_blank" rel="noreferrer">Televisiescherm openen</a>
       <a class="knop stil" href="/uitslag" target="_blank" rel="noreferrer">Uitslagen</a>
+      <a class="knop stil" href="/beheer">Beheer</a>
       {#if staat?.fase !== 'lobby'}
         <button class="knop stil" onclick={() => doe('naar-lobby')} disabled={bezig}>Terug naar de lobby</button>
       {/if}
