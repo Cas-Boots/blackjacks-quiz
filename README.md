@@ -219,7 +219,10 @@ Thuis proefdraaien met de echte televisie en de echte telefoons: `npm run
 lokaal` in `app/` (op Windows: dubbelklik `app/lokaal.cmd`) start de quiz op
 het thuisnetwerk en zegt welk adres je op de televisie tikt, met een QR-code
 voor de telefoons erbij. Zie [Op je eigen
-pc](app/README.md#op-je-eigen-pc-voor-de-televisie-en-de-telefoons).
+pc](app/README.md#op-je-eigen-pc-voor-de-televisie-en-de-telefoons). Daarna
+loopt `npm run verify` elke vraag na op telefoon en televisie, zodat je weet
+dat ze goed doorkomen — zie [Komen de vragen goed
+door?](app/README.md#komen-de-vragen-goed-door).
 
 Beide versies draaien dezelfde vragen: ze staan in
 `app/src/lib/content/packs.ts`, en `npm run content:sync` in `app/` schrijft ze

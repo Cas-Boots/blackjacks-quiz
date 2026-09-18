@@ -138,6 +138,50 @@ adressen van de pc, met de naam van de netwerkkaart erbij.
   `HOST_PIN` in een `.env` naast `docker-compose.yml`, want de container
   draait als productie en weigert de voorbeeldcode.
 
+### Komen de vragen goed door?
+
+Als de telefoon erop komt, is de volgende vraag of hij ook het goede te zien
+krijgt. Daar is een controle voor die de hele quiz naloopt en precies zegt
+waar het misgaat:
+
+```bash
+npm run verify -- --url http://192.168.1.10:3000   # het adres uit npm run lokaal
+npm run verify                                     # via localhost
+npm run verify -- --zonder-server                  # alleen op papier
+```
+
+Eerst op papier: loopt `index.html` gelijk met `packs.ts`, heeft elke vraag
+wat zijn type nodig heeft (antwoord, opties, doelgetal), staan de foto's en
+fragmenten waar vragen naar verwijzen in `media/`, en hoeveel vragen staan
+nog op `teVullen`.
+
+Dan tegen de server. Hij meldt zich als quizmaster, als één telefoon en als
+de televisie, en speelt elke gekozen ronde en elke vraag door in een eigen
+**wegwerpspel** met dezelfde samenstelling, zodat het spel dat klaarstaat
+heel blijft. Per vraag vergelijkt hij wat de telefoon en de televisie te zien
+krijgen met `packs.ts`: vraagtekst, opties, emoji of songtekst, beeld, punten
+en klok. Hij let erop dat het antwoord tot de onthulling verborgen blijft en
+dat de onthulling daarna klopt met het spiekbriefje van de quizmaster
+(antwoord, toelichting, goede optie, doelgetal). Bij een levende vraag neemt
+hij de tekst die de server uit de cijfers van resolution-recap maakt; na een
+recap-ronde controleert hij dat de cijfers van het jaar er staan. Hij luistert
+mee op de live-stroom zoals een telefoon dat doet, zodat je ook ziet of de
+server de vragen echt *duwt* en niet alleen op verzoek geeft, en hij haalt elk
+mediabestand één keer op via `/media/`. Aan het eind zet hij het oude spel
+weer actief en gooit het wegwerpspel weg.
+
+Geef `--url` het netwerkadres, dan test je de weg die de telefoons nemen; via
+`localhost` zegt hij dat er zo niets over het netwerk bewezen is. Schermen
+die open staan zien de controle voorbijkomen; loopt er al een spel, dan stopt
+hij daarom, en met `--forceer` loopt hij toch door. Met `--alles` zie je elke
+vraag langskomen in plaats van alleen de problemen. De opdracht eindigt met
+een foutcode zodra er iets mis is, dus hij past ook in een script. De pincode
+komt uit `.env` of `--pin`, net als bij `npm run lokaal`.
+
+Een vraag die je in `packs.ts` aanpast zonder opnieuw te bouwen komt hier
+meteen boven: het spiekbriefje, de telefoon en de televisie tonen dan nog de
+oude tekst, en de controle zegt dat de server een oudere bouw draait.
+
 ## De drie schermen
 
 | Scherm | Adres | Voor wie |
@@ -396,7 +440,9 @@ de persoon, dus het klassement blijft eerlijk als de teams wisselen.
 ## Testen zonder vijf mensen
 
 Dit is het belangrijkste stuk gereedschap: je kunt de hele avond vooraf
-naspelen.
+naspelen. Draai eerst `npm run verify` (zie [Komen de vragen goed
+door?](#komen-de-vragen-goed-door)), dan weet je dat de vragen kloppen
+voordat je de bediening oefent.
 
 ### Nepspelers tegen een draaiende server
 
@@ -676,7 +722,8 @@ het domein pas vlak voor de avond online.
   als JSON. Zodra die er zijn, kan de ronde net als de voorspellingen worden
   uitgerekend.
 - *Oktober tot december* wacht op de gebeurtenissen van het najaar. Vul ze in
-  `src/lib/content/packs.ts` en draai `npm run content:sync`.
+  `src/lib/content/packs.ts` en draai `npm run content:sync`; `npm run
+  verify` telt per ronde hoeveel gekozen vragen nog een antwoord missen.
 - De uitkomsten van de voorspellingen die niemand kan uitrekenen (een nieuwe
   baan, de temperatuur in De Bilt, Spotify Wrapped) vul je met de hand in
   `src/lib/content/voorspellingen.ts`.

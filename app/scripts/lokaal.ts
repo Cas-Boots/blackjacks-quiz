@@ -162,6 +162,11 @@ async function toonAdressen() {
   }
   console.log('  Komt een telefoon er niet bij? Kijk in de README onder');
   console.log('  "Op je eigen pc" naar de firewall en het gastnetwerk.');
+  if (adressen.length) {
+    const basis = adresUrl(adressen[0].adres, POORT).replace(/\/$/, '');
+    console.log(`\n  Komen de vragen goed door?   npm run verify -- --url ${basis}`);
+    console.log(`  Nepspelers aan tafel:        npm run simulate -- --url ${basis} --auto-host --snelheid 8`);
+  }
   console.log(`${lijn}\n`);
 }
 

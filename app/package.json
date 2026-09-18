@@ -19,6 +19,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "verify": "tsx scripts/verify.ts",
     "e2e": "playwright test",
     "content:sync": "tsx scripts/sync-content.ts",
     "content:check": "tsx scripts/sync-content.ts --check"
