@@ -26,6 +26,7 @@ import { geldigeFoto } from './foto';
 import { aantalLuisteraars } from './bus';
 import { inProductie, omgevingsFouten, omgevingsWaarschuwingen } from './omgeving';
 import { recapStatus, type RecapStatus } from './recap/bron';
+import { netwerkAdressen, type NetwerkAdres } from './netwerk';
 
 /* ---- Wat het scherm te zien krijgt ------------------------------------- */
 
@@ -108,6 +109,9 @@ export interface Serverstatus {
   fouten: string[];
   waarschuwingen: string[];
   origin: string | null;
+  /** De adressen van deze computer op het thuisnetwerk; leeg in productie en in een container. */
+  adressen: NetwerkAdres[];
+  poort: string;
   databasePad: string;
   databaseBytes: number | null;
   tabellen: number;
@@ -213,6 +217,8 @@ export function serverstatus(): Serverstatus {
     fouten: omgevingsFouten(),
     waarschuwingen: omgevingsWaarschuwingen(),
     origin: process.env.ORIGIN ?? null,
+    adressen: inProductie() ? [] : netwerkAdressen(),
+    poort: process.env.PORT ?? '3000',
     databasePad,
     databaseBytes,
     tabellen,

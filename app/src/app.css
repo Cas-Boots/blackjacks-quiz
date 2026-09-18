@@ -1236,6 +1236,15 @@ textarea:focus {
   border-top: 1px solid rgba(19, 31, 26, 0.12);
   padding-top: 0.6rem;
 }
+/* Het adres dat je in plaats van localhost moet tikken: klikbaar op de laptop, leesbaar vanaf de bank. */
+.qr-adres-tip {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  word-break: break-all;
+}
 @media (max-width: 900px), (max-aspect-ratio: 1/1) {
   .lobby {
     grid-template-columns: 1fr;

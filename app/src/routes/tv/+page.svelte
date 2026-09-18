@@ -46,6 +46,17 @@
   let joinAdres = $state('');
   let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(joinAdres)}`);
   let lokaalAdres = $derived(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(joinHost(joinAdres)));
+  /* Staat de televisie op localhost, dan vraagt hij de server welk adres de
+     telefoons wél kunnen bereiken, zodat de waarschuwing meteen zegt wat je
+     in plaats daarvan moet tikken. */
+  let netwerkAdressen = $state<{ naam: string; url: string }[]>([]);
+  $effect(() => {
+    if (!lokaalAdres) return;
+    fetch('/api/adressen')
+      .then((r) => (r.ok ? r.json() : { adressen: [] }))
+      .then((d: { adressen: { naam: string; url: string }[] }) => (netwerkAdressen = d.adressen))
+      .catch(() => {});
+  });
 
   function joinHost(adres: string) {
     try {
@@ -364,9 +375,16 @@
               <p class="qr-adres">{joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               {#if lokaalAdres}
                 <p class="qr-let-op">
-                  Dit is het adres van deze computer zelf. Open het televisiescherm via het
-                  netwerkadres van de laptop (bijvoorbeeld 192.168.1.10:3000), anders kunnen de
-                  telefoons de code niet gebruiken.
+                  Dit is het adres van deze computer zelf; de telefoons kunnen de code zo niet
+                  gebruiken.
+                  {#if netwerkAdressen.length}
+                    Open het televisiescherm in plaats daarvan via
+                    <a href="{netwerkAdressen[0].url}tv" class="qr-adres-tip">{netwerkAdressen[0].url.replace(/^https?:\/\//, '')}tv</a>
+                    {#if netwerkAdressen.length > 1}(of een van de andere adressen van deze computer, zie het beheerscherm){/if}.
+                  {:else}
+                    Open het televisiescherm via het netwerkadres van de laptop (bijvoorbeeld
+                    192.168.1.10:3000).
+                  {/if}
                 </p>
               {/if}
             </div>

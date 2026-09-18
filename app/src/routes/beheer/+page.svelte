@@ -225,7 +225,20 @@
         {#each server.fouten as f (f)}<p class="let-op" style="border-color:var(--rood);margin-top:.6rem">{f}</p>{/each}
         {#each server.waarschuwingen as w (w)}<p class="let-op" style="margin-top:.6rem">{w}</p>{/each}
         <dl class="beheer-feiten">
-          <dt>Adres</dt><dd>{server.origin ?? 'niet ingesteld (ORIGIN)'}</dd>
+          <dt>Adres</dt>
+          <dd>
+            {#if server.origin}
+              {server.origin}
+            {:else if server.adressen.length}
+              {#each server.adressen as a, i (a.adres)}
+                {#if i > 0}<br />{/if}
+                <a href="http://{a.adres}:{server.poort}/tv" class="mono">http://{a.adres}:{server.poort}</a>
+                <span style="opacity:.7">({a.naam}{i === 0 ? ' — tik dit op de televisie' : ''})</span>
+              {/each}
+            {:else}
+              niet ingesteld (ORIGIN)
+            {/if}
+          </dd>
           <dt>Database</dt><dd><span class="mono">{server.databasePad}</span> · {bytes(server.databaseBytes)} · {server.tabellen} tabellen</dd>
           <dt>Schermen live</dt><dd>{server.schermenVerbonden} open {server.schermenVerbonden === 1 ? 'stroom' : 'stromen'}</dd>
           <dt>Proces</dt><dd>Node {server.nodeVersie} · draait {duur(server.draaitSinds)}</dd>

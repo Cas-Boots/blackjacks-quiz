@@ -215,6 +215,12 @@ er een beheerscherm voor de spelers, de oude spellen, de telefoons en de
 controle of de bestanden bij de vragen er echt staan. Zie
 [`app/README.md`](app/README.md) voor het starten en het draaiboek.
 
+Thuis proefdraaien met de echte televisie en de echte telefoons: `npm run
+lokaal` in `app/` (op Windows: dubbelklik `app/lokaal.cmd`) start de quiz op
+het thuisnetwerk en zegt welk adres je op de televisie tikt, met een QR-code
+voor de telefoons erbij. Zie [Op je eigen
+pc](app/README.md#op-je-eigen-pc-voor-de-televisie-en-de-telefoons).
+
 Beide versies draaien dezelfde vragen: ze staan in
 `app/src/lib/content/packs.ts`, en `npm run content:sync` in `app/` schrijft ze
 naar dit `index.html`. Dit losse bestand blijft de achtervang die zonder
