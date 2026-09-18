@@ -44,12 +44,14 @@
      De televisie kent het adres waarop hij zelf de quiz opende, en dat is
      precies het adres dat telefoons in dezelfde kamer ook kunnen bereiken. */
   let joinAdres = $state('');
-  let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(joinAdres)}`);
   let lokaalAdres = $derived(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(joinHost(joinAdres)));
   /* Staat de televisie op localhost, dan vraagt hij de server welk adres de
-     telefoons wél kunnen bereiken, zodat de waarschuwing meteen zegt wat je
-     in plaats daarvan moet tikken. */
+     telefoons wél kunnen bereiken. De QR-code wijst dan naar dát adres, zodat
+     een televisiescherm op de laptop zelf gewoon werkt; de waarschuwing zegt
+     erbij wat er gebeurd is. */
   let netwerkAdressen = $state<{ naam: string; url: string }[]>([]);
+  let qrDoel = $derived(lokaalAdres && netwerkAdressen.length ? netwerkAdressen[0].url : joinAdres);
+  let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(qrDoel)}`);
   $effect(() => {
     if (!lokaalAdres) return;
     fetch('/api/adressen')
@@ -372,18 +374,18 @@
           {#if joinAdres}
             <div class="qr-kaart" in:fly={{ y: 24, duration: 560, delay: 200, easing: cubicOut }}>
               <img class="qr" src={qrBron} alt="QR-code om mee te doen" />
-              <p class="qr-adres">{joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
+              <p class="qr-adres">{qrDoel.replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               {#if lokaalAdres}
                 <p class="qr-let-op">
-                  Dit is het adres van deze computer zelf; de telefoons kunnen de code zo niet
-                  gebruiken.
                   {#if netwerkAdressen.length}
-                    Open het televisiescherm in plaats daarvan via
-                    <a href="{netwerkAdressen[0].url}tv" class="qr-adres-tip">{netwerkAdressen[0].url.replace(/^https?:\/\//, '')}tv</a>
-                    {#if netwerkAdressen.length > 1}(of een van de andere adressen van deze computer, zie het beheerscherm){/if}.
+                    Dit scherm is geopend via localhost; de code wijst daarom naar het
+                    netwerkadres van deze computer ({netwerkAdressen[0].naam}).
+                    {#if netwerkAdressen.length > 1}Komt een telefoon er niet bij, dan staan de
+                    andere adressen van deze computer op het beheerscherm.{/if}
                   {:else}
-                    Open het televisiescherm via het netwerkadres van de laptop (bijvoorbeeld
-                    192.168.1.10:3000).
+                    Dit is het adres van deze computer zelf; de telefoons kunnen de code zo niet
+                    gebruiken. Open het televisiescherm via het netwerkadres van de laptop
+                    (bijvoorbeeld 192.168.1.10:3000).
                   {/if}
                 </p>
               {/if}
