@@ -95,6 +95,7 @@
       <button class="knop" onclick={alsQuizmaster}>Hostscherm</button>
       <a class="knop stil" href="/tv">Televisiescherm</a>
       <a class="knop stil" href="/uitslag">Eerdere uitslagen</a>
+      <a class="knop stil" href="/beheer">Beheer</a>
     </div>
   </div>
 </div>

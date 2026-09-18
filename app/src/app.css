@@ -2073,3 +2073,78 @@ a.uitslagrij:hover {
   font-weight: 700;
   color: var(--goud-licht);
 }
+
+/* ---- Beheerscherm ------------------------------------------------------- */
+.mono {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+.beheer-feiten {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.2rem;
+  margin: 0.8rem 0 0;
+  font-size: 0.92rem;
+  color: var(--ivoor-zacht);
+}
+.beheer-feiten dt {
+  color: var(--salie);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-top: 0.15rem;
+}
+.beheer-feiten dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.beheer-lijst {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.6rem;
+}
+.beheer-rij {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.6rem 0.2rem;
+  border-bottom: 1px solid var(--rand);
+}
+.beheer-rij.beheer-actief {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.14), transparent 70%);
+}
+.beheer-rij .plek {
+  color: var(--salie);
+  min-width: 2.4rem;
+}
+.beheer-rij .badge {
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+/* Op een telefoon is een tabel breder dan het scherm; dan schuift hij opzij
+   in plaats van de hele pagina uit te rekken. */
+.beheer-tabel {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.uitslagtabel tr.beheer-ontbreekt td {
+  color: var(--rood-licht);
+}
+@media (max-width: 640px) {
+  .beheer-rij {
+    grid-template-columns: auto 1fr;
+  }
+  .beheer-rij > .knoprij {
+    grid-column: 1 / -1;
+    justify-content: flex-start !important;
+  }
+  .beheer-feiten {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+  .beheer-feiten dd {
+    margin-bottom: 0.5rem;
+  }
+}

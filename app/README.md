@@ -29,6 +29,7 @@ HOST_PIN=1234 docker compose up --build
 | Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 | Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
+| Beheer | `/beheer` | de quizmaster, buiten de avond om; spelers, oude spellen, telefoons, bestanden bij de vragen, back-up |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
@@ -156,6 +157,44 @@ ligt de samenstelling vast (anders zouden de rondenummers en daarmee de stand
 verschuiven) en spring je er naar een andere ronde. *Nieuw spel* begint
 opnieuw met een pakket; de oude stand blijft in de database bewaard.
 
+### Het beheerscherm
+
+Het hostscherm bedient de avond; `/beheer` regelt de rest, vóór of ná de
+avond. Dezelfde pincode. Wat er staat:
+
+- **Server.** Of de instellingen kloppen (dezelfde controle als
+  `/api/health`), het adres, de database met haar grootte, hoeveel schermen
+  er live meekijken, en waar de cijfers van resolution-recap vandaan komen.
+  Met **Download een back-up** krijg je de hele database als JSON — voor op
+  de usb-stick, vóór de avond. De tokens van de telefoons zitten er niet in.
+- **Inhoud.** Per pakket het aantal rondes en vragen, hoeveel er live worden
+  uitgerekend en hoeveel er nog een antwoord missen. Daaronder de
+  **bestanden bij de vragen**: elk bestand waar een vraag naar verwijst, met
+  een groene of rode stip voor of het echt in `media/` staat, en welke
+  bestanden in de map door geen vraag gebruikt worden. Zo zie je een vergeten
+  filmpje vóór de avond in plaats van erop.
+- **Spelers.** De vaste groep en de gasten van eerdere avonden. Hernoemen,
+  een portret kiezen of weghalen, een gast vast maken (dan doet hij vanzelf
+  mee aan het volgende spel) of andersom, en een nieuwe vaste speler
+  toevoegen — die schuift meteen aan als het spel nog in de lobby staat.
+  Weghalen kan alleen als er nooit een avond aan hing; anders zou een oude
+  uitslag zijn naam kwijtraken. Maak hem dan gast.
+- **Spellen.** Elke avond, met fase, aantal spelers, antwoorden en wie er
+  voorop staat. Een proefrit gooi je hier weg, met alles wat erbij hoort; was
+  het het actieve spel, dan wordt het jongste overgebleven spel actief, en
+  als er geen is komt er een leeg spel, zodat de schermen nooit zonder
+  zitten. Een eerder spel kun je ook weer **actief maken**: de televisie en
+  de telefoons springen er meteen naar.
+- **Apparaten.** Elke telefoon, televisie en elk hostscherm dat zich meldde,
+  met wanneer het zich voor het laatst liet zien. Zit iemand op de verkeerde
+  naam, dan **koppel je die telefoon los**: hij wordt weer kijker en kiest
+  opnieuw. Je eigen scherm kun je niet loskoppelen. Apparaten die zich een
+  dag niet meldden ruim je met één knop op.
+
+Alles hier wijzigt de database meteen en laat de schermen die open staan
+meebewegen. Vragen zelf pas je niet hier aan maar in
+`src/lib/content/packs.ts`, zodat de losse HTML-quiz gelijk blijft lopen.
+
 ### De cijfers van het jaar, live
 
 Twee rondes gaan over onszelf: *Onze Sportcompetitie* en *Taart & Verre
@@ -275,7 +314,9 @@ koekjespotten, en speelt de avond na: de QR-code, een vraag op alle schermen
 tegelijk, inleveren, de onthulling en de stand (`live.spec.ts`); dichtstbij
 met de automatische berekening, een teamronde, een beeldvraag, de stemronde
 met een gast, een por, ongedaan maken, het podium met de prijzen, de
-uitslagpagina en een telefoon zonder live stroom (`avond.spec.ts`).
+uitslagpagina en een telefoon zonder live stroom (`avond.spec.ts`); het
+beheerscherm met en zonder pincode, spelers toevoegen en hernoemen, een
+proefrit weggooien, de back-up en een telefoon loskoppelen (`beheer.spec.ts`).
 `CHROMIUM_PAD` mag
 weg als Playwright zijn eigen browsers heeft; staat er al een Chromium op de
 machine (bijvoorbeeld `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`),
@@ -478,7 +519,7 @@ Daarom, bovenop de verplichte pincode:
   https. Bestanden uit `media/` gaan met een eigen policy die geen scripts
   toelaat, ook niet in een svg. De stand (`/api/…`) krijgt
   `Cache-Control: no-store`. De browsertest `e2e/koppen.spec.ts` opent de
-  vier schermen en controleert dat de policy niets tegenhoudt — precies de
+  vijf schermen en controleert dat de policy niets tegenhoudt — precies de
   fout die je anders pas op de avond ziet.
 - **De container draait als `node`, niet als root**, met een alleen-lezen
   bestandssysteem, zonder capabilities en zonder de mogelijkheid er meer bij

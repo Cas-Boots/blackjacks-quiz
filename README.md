@@ -210,7 +210,9 @@ de quizmaster. De televisie toont een QR-code om mee te doen, een gast schuift
 aan met alleen zijn naam, bij de onthulling zie je wat iedereen had ingetikt,
 je telefoon zegt of je het goed had, de slotronde is een echte stemronde, en
 aan het eind staan er portretten op het podium met prijzen eronder. Elke avond
-blijft bewaard op een uitslagpagina die je kunt delen. Zie
+blijft bewaard op een uitslagpagina die je kunt delen. Buiten de avond om is
+er een beheerscherm voor de spelers, de oude spellen, de telefoons en de
+controle of de bestanden bij de vragen er echt staan. Zie
 [`app/README.md`](app/README.md) voor het starten en het draaiboek.
 
 Beide versies draaien dezelfde vragen: ze staan in
