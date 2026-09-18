@@ -298,6 +298,25 @@ uitrol dan rood staan in plaats van een hostscherm online te zetten dat voor
 iedereen openstaat die het adres kent. Dezelfde reden als bij de migraties: een
 container die weigert te komen zie je meteen, een half werkende app niet.
 
+### Eerst een server
+
+Dokploy draait op je eigen server; er is geen gehoste versie. Je hebt nodig:
+
+- een VPS met **Ubuntu 22.04+ of Debian 12+**, minimaal **2 GB geheugen** en
+  **30 GB schijf**;
+- **poort 80 en 443 open** in de firewall — die heeft Traefik nodig om een
+  Let's Encrypt-certificaat op te halen;
+- een schone machine. Draait er al iets op 80 of 443, dan botst dat.
+
+Installeren gaat met één regel als root, over te nemen van
+[de installatiepagina van Dokploy](https://docs.dokploy.com/docs/core/installation).
+Haal hem daar op en niet uit dit bestand: het is een script dat je als root
+draait, en dan wil je de bron zien. Docker wordt onderweg meegeïnstalleerd.
+
+Daarna bereik je het paneel op `http://<ip-van-de-server>:3000` en maak je het
+beheerdersaccount aan. Doe dat meteen — tot die tijd kan iedereen die het
+adres kent het aanmaken.
+
 ### In Dokploy
 
 De `docker-compose.yml` in de hoofdmap van de repository is hiervoor gemaakt.
@@ -311,14 +330,28 @@ netwerk van Dokploy's Traefik.
    `getent hosts quiz.deblackjacks.nl` moet het IP van de server teruggeven.
    Zolang dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft
    het domein in Dokploy op een foutmelding staan.
-2. Maak een **Compose**-applicatie die naar deze repository wijst, met
-   `docker-compose.yml` als bestand.
+2. Maak een project aan en daarin een service van het type **Compose**, met
+   Compose Type **Docker Compose**. Vul in:
+
+   | Veld | Waarde |
+   |---|---|
+   | Provider | GitHub (koppel eenmalig je account) |
+   | Repository | `Cas-Boots/blackjacks-quiz` |
+   | Branch | `main` |
+   | Compose Path | `./docker-compose.yml` |
+
 3. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
    domein hoort. Schrijf ze niet in het bestand: dat staat in git.
-4. Koppel onder **Domains** het domein aan service `quiz`, poort `3000`, met
-   HTTPS aan.
+4. Voeg onder **Domains** een domein toe. Service Name is `quiz` — dat is de
+   naam uit de compose — en Container Port is `3000`. Zet HTTPS met Let's
+   Encrypt aan. Dokploy zet de Traefik-labels er zelf bij; je hoeft niets aan
+   het bestand te veranderen.
 5. Uitrollen. De container komt pas groen als `/api/health` `status: ok`
    teruggeeft — dus als de database tabellen heeft én de pincode klopt.
+
+Wil je dat een `git push` naar `main` vanzelf uitrolt, zet dan **Autodeploy**
+aan. Handig tijdens het vullen van de vragen, maar zet hem uit op de dag zelf:
+een uitrol herstart de container en dat wil je niet halverwege een ronde.
 
 Een vers geregistreerd domein is niet meteen overal zichtbaar. Naast de tijd
 die het register nodig heeft, onthouden resolvers ook dat een naam *niet*
