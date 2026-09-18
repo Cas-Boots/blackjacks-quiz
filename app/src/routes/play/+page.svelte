@@ -5,6 +5,7 @@
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
   import Media from '$lib/client/Media.svelte';
+  import Cijfers from '$lib/client/Cijfers.svelte';
   import Podium from '$lib/client/Podium.svelte';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
@@ -22,6 +23,13 @@
   let ronde = $derived(staat?.ronde ?? null);
   let sleutel = $derived(`${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}`);
   let mijnTeam = $derived(staat?.teams.find((t) => t.leden.includes(live.spelerId ?? -1)) ?? null);
+  let mijnNaam = $derived(staat?.spelers.find((s) => s.id === live.spelerId)?.naam ?? null);
+  /** Wie er bij de cijfers op de televisie staat, om dat op de telefoon te kunnen zeggen. */
+  let opTv = $derived(
+    staat?.cijfers && staat.cijfers.soort !== 'voorspellingen' && staat.cijfers.stap > 0
+      ? staat.cijfers.personen[staat.cijfers.stap - 1]?.naam ?? null
+      : null,
+  );
   let alGestuurd = $derived(mijnTeam ? (staat?.ingeleverd ?? []).includes(mijnTeam.id) : false);
   let teamRonde = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
   /* Dezelfde sfeer als op de televisie, zodat de telefoon meekleurt. */
@@ -360,6 +368,20 @@
           {/each}
         </div>
       {/if}
+    {:else if staat.fase === 'cijfers' && staat.cijfers}
+      {#key staat.cijfers.stap}
+        <div class="paneel" in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
+          <p class="etiket">{ronde?.suit} {ronde?.naam} · de cijfers</p>
+          {#if staat.cijfers.soort !== 'voorspellingen' && !staat.cijfers.personen.some((p) => p.naam === mijnNaam)}
+            <p class="fijn" style="margin-top:.5rem">Van jou zijn er geen cijfers bijgehouden. Kijk mee op de televisie.</p>
+          {:else}
+            {#if opTv && opTv !== mijnNaam}<p class="fijn" style="margin:.3rem 0 .6rem">Op de televisie: {opTv}. Dit is jouw jaar.</p>{/if}
+            <div style="margin-top:.6rem">
+              <Cijfers cijfers={staat.cijfers} spelers={staat.spelers} compact alleen={mijnNaam} />
+            </div>
+          {/if}
+        </div>
+      {/key}
     {:else if staat.fase === 'stand' || staat.fase === 'einde'}
       {#if staat.fase === 'einde'}
         <div class="paneel" style="text-align:center" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>

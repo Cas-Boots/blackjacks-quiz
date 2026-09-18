@@ -19,6 +19,11 @@ import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
 import type { PubliekeStaat, PubliekeInzending, Fase, Rol, Onthulling } from '$lib/shared/state';
+import { recapAnalyse } from './recap/bron';
+import { verlevendig } from './recap/vragen';
+import { cijfersVoor } from './recap/cijfers';
+import { beoordeelVoorspellingen, type Omgeving } from './recap/voorspellingen';
+import type { Analyse } from './recap/analyse';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -30,10 +35,39 @@ export function actiefSpel() {
   return db.select().from(spellen).where(eq(spellen.isActief, true)).orderBy(desc(spellen.id)).get();
 }
 
-export function pakketVan(spel: { pakket: string }): Pakket {
+/* De levende vragen krijgen hun tekst en antwoord uit de cijfers van
+   resolution-recap. Dat gebeurt één keer per set cijfers; daarna geeft
+   pakketVan steeds dezelfde objecten terug, zodat een vraag overal in de
+   server hetzelfde object is. */
+const levend = new Map<string, { analyse: Analyse; aantalSpelers: number | null; pakket: Pakket }>();
+
+/** Wat de voorspellingen nodig hebben buiten de recap om: wie er vanavond meespeelt. */
+export function omgevingVan(spelId: number): Omgeving {
+  // De quizmaster speelt niet mee, maar is er wel: 'met hoeveel mensen spelen
+  // we de quiz' telt hem gewoon mee.
+  const n = db.select({ id: deelnemers.spelerId }).from(deelnemers).where(eq(deelnemers.spelId, spelId)).all().length;
+  const quizmaster = db.select({ id: spelers.id }).from(spelers).where(eq(spelers.isQuizmaster, true)).all().length;
+  return { analyse: recapAnalyse(), aantalSpelers: n > 0 ? n + quizmaster : null };
+}
+
+export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
   const p = PAKKETTEN[spel.pakket];
   if (!p) throw new Error(`onbekend pakket: ${spel.pakket}`);
-  return p;
+  const analyse = recapAnalyse();
+  const omgeving = spel.id !== undefined ? omgevingVan(spel.id) : { analyse, aantalSpelers: null };
+  const bekend = levend.get(spel.pakket);
+  if (bekend && bekend.analyse === analyse && bekend.aantalSpelers === omgeving.aantalSpelers) return bekend.pakket;
+  const uitslag = beoordeelVoorspellingen(omgeving);
+  const pakket: Pakket = {
+    ...p,
+    rondes: p.rondes.map((r) => {
+      const vragen = r.vragen.map((v) => verlevendig(v, analyse, uitslag));
+      // Een ronde die op cijfers wacht, is klaar zodra al zijn vragen leven.
+      return { ...r, vragen, teVullen: r.teVullen && vragen.some((v) => v.teVullen) };
+    }),
+  };
+  levend.set(spel.pakket, { analyse, aantalSpelers: omgeving.aantalSpelers, pakket });
+  return pakket;
 }
 
 /** De rondes die daadwerkelijk meedoen, met alleen de gekozen vragen. */
@@ -351,6 +385,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
           naam: ronde.naam, suit: ronde.suit, thema: ronde.thema,
           sfeer: ronde.sfeer ?? 'vilt', uitleg: ronde.uitleg,
           teamModus: ronde.teamModus, vragenAantal: ronde.vragen.length,
+          cijfers: ronde.cijfers ?? null,
         }
       : null,
     vraag:
@@ -389,6 +424,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     },
     mediaSpeelt: spel.mediaSpeelt,
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
+    cijfers: spel.fase === 'cijfers' && ronde?.cijfers ? cijfersVoor(ronde.cijfers, recapAnalyse(), spel.vraagIndex, omgevingVan(spel.id)) : null,
     ingeleverd,
     inzendingen,
     uitdeling,

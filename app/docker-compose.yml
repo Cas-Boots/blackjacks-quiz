@@ -29,6 +29,10 @@ services:
       # HOST_HEADER: x-forwarded-host
       # ADDRESS_HEADER: x-forwarded-for
       # XFF_DEPTH: '1'
+      # De cijfers van het jaar, live uit resolution-recap. Zonder deze twee
+      # draait de quiz op de ingebouwde momentopname. Zie README.md.
+      RECAP_URL: ${RECAP_URL:-}
+      RECAP_TOKEN: ${RECAP_TOKEN:-}
     volumes:
       # De stand overleeft een herstart van de container.
       - quiz-data:/data

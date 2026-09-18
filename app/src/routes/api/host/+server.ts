@@ -13,6 +13,9 @@ import { meldPor } from '$lib/server/bus';
 import { geldigeFoto } from '$lib/server/foto';
 import { maakSpel } from '$lib/server/seed';
 import { PAKKETTEN } from '$lib/content/packs';
+import { ververs } from '$lib/server/recap/bron';
+import { aantalStappen } from '$lib/server/recap/cijfers';
+import { recapAnalyse } from '$lib/server/recap/bron';
 
 /**
  * Alle opdrachten van de quizmaster lopen hier langs.
@@ -57,14 +60,35 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const voor: Momentopname = momentopname(spel);
   let correctieId: number | undefined;
 
+  /** Hoeveel dia's met cijfers deze ronde heeft (overzicht plus één per persoon of voorspelling). */
+  const cijfersStappen = () => (ronde?.cijfers ? aantalStappen(ronde.cijfers, recapAnalyse()) : 0);
+
   switch (opdracht) {
     case 'naar-ronde': {
       const doel = Math.max(0, Math.min(Number(body.ronde ?? 0), rondes.length - 1));
+      const r = rondes[doel];
+      // Een recap-ronde begint met verse cijfers. We wachten er even op, maar
+      // niet eindeloos: een trage verbinding mag de avond niet ophouden.
+      if (r?.cijfers && r.cijfers !== 'voorspellingen') {
+        await Promise.race([ververs(), new Promise((klaar) => setTimeout(klaar, 6000))]);
+      }
       stopKlok();
       zet({ fase: 'ronde', rondeIndex: doel, vraagIndex: 0 });
-      const r = rondes[doel];
       if (r) teamsVoorRonde(spel.id, doel, r, lijst);
       log = { omschrijving: `Naar ronde ${doel + 1}: ${r?.naam ?? ''}`, terug: true };
+      break;
+    }
+    case 'ververs-cijfers': {
+      const veranderd = await ververs();
+      const versie = bumpVersie(spel.id);
+      return json({ ok: true, versie, veranderd });
+    }
+    case 'toon-cijfers': {
+      if (!ronde?.cijfers) error(409, 'deze ronde heeft geen cijfers');
+      stopKlok();
+      const stap = Math.max(0, Math.min(Number(body.stap ?? 0), cijfersStappen() - 1));
+      zet({ fase: 'cijfers', vraagIndex: stap });
+      log = { omschrijving: 'De cijfers van het jaar getoond', terug: true };
       break;
     }
     case 'herverdeel': {
@@ -128,11 +152,24 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     case 'volgende': {
       if (!ronde) error(409, 'geen ronde');
       stopKlok();
-      if (spel.vraagIndex + 1 < ronde.vragen.length) {
+      if (spel.fase === 'cijfers') {
+        // Door de cijfers heen, en daarna de tussenstand.
+        if (spel.vraagIndex + 1 < cijfersStappen()) {
+          zet({ vraagIndex: spel.vraagIndex + 1 });
+          log = { omschrijving: `Cijfers: dia ${spel.vraagIndex + 2}`, terug: true };
+        } else {
+          zet({ fase: 'stand', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
+          log = { omschrijving: `Tussenstand na ${ronde.naam}`, terug: true };
+        }
+      } else if (spel.vraagIndex + 1 < ronde.vragen.length) {
         const volgendeIndex = spel.vraagIndex + 1;
         zet({ fase: 'vraag', vraagIndex: volgendeIndex });
         startKlok(vraagTijd(ronde, ronde.vragen[volgendeIndex]));
         log = { omschrijving: `Door naar vraag ${volgendeIndex + 1}`, terug: true };
+      } else if (ronde.cijfers && cijfersStappen() > 0) {
+        // Na de laatste vraag van een recap-ronde: eerst de cijfers van het jaar.
+        zet({ fase: 'cijfers', vraagIndex: 0 });
+        log = { omschrijving: `De cijfers van het jaar na ${ronde.naam}`, terug: true };
       } else {
         zet({ fase: 'stand' });
         log = { omschrijving: `Tussenstand na ${ronde.naam}`, terug: true };
@@ -144,6 +181,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       if (spel.fase === 'antwoord') zet({ fase: 'vraag' });
       else if (spel.fase === 'vraag' && spel.vraagIndex > 0) zet({ fase: 'antwoord', vraagIndex: spel.vraagIndex - 1 });
       else if (spel.fase === 'vraag') zet({ fase: 'ronde' });
+      else if (spel.fase === 'cijfers' && spel.vraagIndex > 0) zet({ vraagIndex: spel.vraagIndex - 1 });
+      else if (spel.fase === 'cijfers' && ronde) zet({ fase: 'antwoord', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
+      else if (spel.fase === 'stand' && ronde?.cijfers && cijfersStappen() > 0) zet({ fase: 'cijfers', vraagIndex: cijfersStappen() - 1 });
       else if (spel.fase === 'stand' && ronde) zet({ fase: 'antwoord', vraagIndex: ronde.vragen.length - 1 });
       // Vanaf de titelkaart terug naar de tussenstand van de vorige ronde,
       // en vanaf de eerste ronde terug naar de lobby.

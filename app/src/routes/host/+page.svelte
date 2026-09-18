@@ -10,14 +10,25 @@
   type Inzending = { inzender: string; tekst: string; ingediendOp: number; isGoed: boolean | null; voorstel: Voorstel | null };
   type RondeInfo = {
     pakketIndex: number; speelIndex: number | null; naam: string; suit: string; thema: string; type: string;
-    teamModus: string; tijd: number; punten: number; optioneel: boolean; teVullen: boolean; gekozen: number[];
-    vragen: { index: number; tekst: string; antwoord: string; teVullen: boolean; media: string | null; gekozen: boolean }[];
+    teamModus: string; tijd: number; punten: number; optioneel: boolean; teVullen: boolean; cijfers: string | null; gekozen: number[];
+    vragen: { index: number; tekst: string; antwoord: string; teVullen: boolean; live: boolean; media: string | null; gekozen: boolean }[];
+  };
+  type RecapStatus = {
+    bron: 'live' | 'bestand' | 'ingebouwd';
+    exportedAt: string | null;
+    geladenOp: string | null;
+    aantalEntries: number;
+    personen: string[];
+    liveAdres: string | null;
+    bezig: boolean;
+    fout: string | null;
   };
   type RondesAntwoord = {
     pakket: string;
     pakketten: { id: string; naam: string; beschrijving: string }[];
     fase: string;
     rondes: RondeInfo[];
+    recap: RecapStatus;
     huidige: { tekst: string; antwoord: string; toelichting: string | null } | null;
   };
 
@@ -42,6 +53,25 @@
   let laatsteTerug = $derived(logboek.find((r) => r.terugTeDraaien) ?? null);
   /** Zolang er niet gespeeld is, mag de samenstelling nog veranderen. */
   let samenstellingVrij = $derived(staat?.fase === 'lobby');
+  /** Deze ronde eindigt met de cijfers van het jaar. */
+  let metCijfers = $derived(!!staat?.ronde?.cijfers);
+  let laatsteVraag = $derived(!!vraag && vraag.index + 1 >= vraag.aantal);
+  let cijfersBezig = $state(false);
+
+  async function verversCijfers() {
+    cijfersBezig = true;
+    try {
+      await doe('ververs-cijfers');
+      await haalRondes();
+    } finally {
+      cijfersBezig = false;
+    }
+  }
+  function tijdstip(iso: string | null) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+  const bronNaam: Record<string, string> = { live: 'live uit resolution-recap', bestand: 'uit een bestand', ingebouwd: 'ingebouwde momentopname' };
   let lijktGoed = $derived(inzendingen.filter((i) => i.voorstel?.automatisch && i.voorstel.goed).map((i) => i.inzender));
   let nogTeVullen = $derived(
     (rondesInfo?.rondes ?? []).reduce((n, r) => n + r.vragen.filter((v) => v.teVullen && (keuze[r.pakketIndex]?.has(v.index) ?? false)).length, 0),
@@ -144,7 +174,7 @@
     const f = staat?.fase;
     if (f === 'lobby' || f === 'ronde') return doe('start-ronde');
     if (f === 'vraag') return doe('toon-antwoord');
-    if (f === 'antwoord') return doe('volgende');
+    if (f === 'antwoord' || f === 'cijfers') return doe('volgende');
     if (f === 'stand') return doe('naar-ronde', { ronde: (staat?.rondeIndex ?? 0) + 1 });
   }
 
@@ -290,6 +320,28 @@
       </div>
     </div>
 
+    <!-- Waar de cijfers van resolution-recap vandaan komen -->
+    {#if rondesInfo?.recap}
+      {@const r = rondesInfo.recap}
+      <div class="paneel" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div style="flex:1 1 260px;min-width:0">
+          <p class="etiket stil">Cijfers van het jaar</p>
+          <p style="margin:.3rem 0 0">
+            <strong>{bronNaam[r.bron] ?? r.bron}</strong>
+            <span class="fijn"> · export van {tijdstip(r.exportedAt)} · {r.aantalEntries} regels · {r.personen.join(', ')}</span>
+          </p>
+          {#if r.fout}
+            <p class="fijn" style="color:var(--rood-licht);margin:.3rem 0 0">Verversen mislukte: {r.fout}. De vorige cijfers staan nog.</p>
+          {:else if !r.liveAdres}
+            <p class="fijn" style="margin:.3rem 0 0">Geen live bron ingesteld (RECAP_URL en RECAP_TOKEN). Zie app/README.md.</p>
+          {/if}
+        </div>
+        <button class="knop" onclick={verversCijfers} disabled={bezig || cijfersBezig || r.bezig}>
+          {cijfersBezig || r.bezig ? 'Bezig…' : r.liveAdres ? 'Ververs de cijfers' : 'Herlaad de cijfers'}
+        </button>
+      </div>
+    {/if}
+
     <!-- De vraag die nu open staat, met een spiekbriefje dat je zelf openklapt -->
     {#if vraag && (staat?.fase === 'vraag' || staat?.fase === 'antwoord')}
       <div class="paneel host-vraag">
@@ -342,8 +394,22 @@
           <button class="knop" onclick={() => doe('bereken')} disabled={bezig}>Opnieuw berekenen</button>
         {/if}
         <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
-          {vraag && vraag.index + 1 < vraag.aantal ? 'Volgende vraag' : 'Naar de tussenstand'}
+          {!laatsteVraag ? 'Volgende vraag' : metCijfers ? 'Naar de cijfers' : 'Naar de tussenstand'}
         </button>
+        {#if metCijfers && laatsteVraag}
+          <button class="knop stil" onclick={() => doe('naar-stand')} disabled={bezig}>Cijfers overslaan</button>
+        {/if}
+      {:else if staat?.fase === 'cijfers' && staat.cijfers}
+        <span class="fijn">
+          {staat.cijfers.stap === 0 ? 'Overzicht' : staat.cijfers.soort === 'voorspellingen' ? `Voorspelling ${staat.cijfers.stap}` : staat.cijfers.personen[staat.cijfers.stap - 1]?.naam}
+          · {staat.cijfers.stap + 1} van {staat.cijfers.stappen}
+        </span>
+        <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
+          {staat.cijfers.stap + 1 < staat.cijfers.stappen ? 'Volgende' : 'Naar de tussenstand'}
+        </button>
+        {#if staat.cijfers.stap + 1 < staat.cijfers.stappen}
+          <button class="knop stil" onclick={() => doe('naar-stand')} disabled={bezig}>Naar de tussenstand</button>
+        {/if}
       {:else if staat?.fase === 'stand'}
         {#if (staat.rondeIndex ?? 0) + 1 < staat.rondeAantal}
           <button class="knop hoofd" onclick={() => doe('naar-ronde', { ronde: (staat?.rondeIndex ?? 0) + 1 })} disabled={bezig}>Volgende ronde</button>
@@ -355,6 +421,11 @@
       {/if}
       {#if laatsteTerug}
         <button class="knop stil" onclick={() => doe('ongedaan')} disabled={bezig} title={laatsteTerug.omschrijving}>↶ Ongedaan: {laatsteTerug.omschrijving}</button>
+      {/if}
+      {#if metCijfers && staat?.fase !== 'cijfers' && staat?.fase !== 'lobby'}
+        <button class="knop stil" onclick={() => doe('toon-cijfers', { stap: 0 })} disabled={bezig}>
+          {staat?.ronde?.cijfers === 'voorspellingen' ? 'Toon de voorspellingen' : 'Toon de cijfers van het jaar'}
+        </button>
       {/if}
     </div>
     {#if porMelding}<p class="fijn" in:fade={{ duration: 200 }}>{porMelding}</p>{/if}
@@ -489,6 +560,7 @@
                   <strong>{r.naam}</strong>
                   <span class="fijn">{r.thema} · {typeNaam[r.type] ?? r.type} · {r.teamModus} · {aantal}/{r.vragen.length} vragen</span>
                   {#if r.teVullen || r.vragen.some((v) => v.teVullen)}<span class="badge rood">te vullen</span>{/if}
+                  {#if r.cijfers}<span class="badge">{r.cijfers === 'voorspellingen' ? 'met de voorspellingen' : 'met de cijfers van het jaar'}</span>{/if}
                   {#if r.optioneel}<span class="badge">optioneel</span>{/if}
                 </summary>
                 <ol class="vragenlijst">
@@ -499,6 +571,7 @@
                       {/if}
                       <span>
                         {v.tekst}
+                        {#if v.live}<span class="fijn" style="color:var(--groen-licht)"> · live</span>{/if}
                         {#if v.media}<span class="fijn"> [{v.media}]</span>{/if}
                         <br /><span class="fijn" style="color:{v.teVullen ? 'var(--rood-licht)' : 'var(--groen-licht)'}">{v.antwoord || '—'}</span>
                       </span>

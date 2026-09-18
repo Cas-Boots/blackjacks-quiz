@@ -5,6 +5,7 @@
 export type VraagType = 'waarnietwaar' | 'meerkeuze' | 'open' | 'dichtstbij' | 'stem';
 export type TeamModus = 'individueel' | 'teams' | 'samen';
 export type MediaSoort = 'beeld' | 'video' | 'muziek';
+export type CijfersSoort = 'sport' | 'taart' | 'voorspellingen';
 
 export interface Media {
   soort: MediaSoort;
@@ -32,6 +33,13 @@ export interface Vraag {
   punten?: number;
   /** Het antwoord moet nog worden ingevuld. */
   teVullen?: boolean;
+  /**
+   * Sleutel van een levende vraag: de meespeelversie rekent vraag, antwoord
+   * en toelichting uit op de cijfers uit resolution-recap. Zie
+   * server/recap/vragen.ts voor de sleutels. De tekst hier is de achtervang
+   * voor de losse HTML-quiz.
+   */
+  live?: string;
 }
 
 export interface Ronde {
@@ -49,6 +57,8 @@ export interface Ronde {
   /** Standaard uitgevinkt bij het samenstellen. */
   optioneel?: boolean;
   teVullen?: boolean;
+  /** Na de laatste vraag laat de televisie de cijfers van het jaar zien. */
+  cijfers?: CijfersSoort;
   vragen: Vraag[];
 }
 

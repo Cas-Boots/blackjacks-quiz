@@ -203,6 +203,10 @@ async function main() {
       console.log(`\n— Ronde ${staat.rondeIndex + 1}: ${staat.ronde?.naam} —`);
       await wacht(800);
       await host.post('/api/host', { opdracht: 'start-ronde' });
+    } else if (staat.fase === 'cijfers' && host) {
+      // De cijfers van het jaar: even laten staan, dan door.
+      await wacht(600);
+      await host.post('/api/host', { opdracht: 'volgende' });
     } else if (staat.fase === 'stand' && host) {
       await wacht(1200);
       if (staat.rondeIndex + 1 < staat.rondeAantal) {

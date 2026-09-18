@@ -2,7 +2,7 @@
  *  bij de huidige fase hoort: in de fase 'vraag' zit er geen antwoord in. */
 
 export type Rol = 'gast' | 'speler' | 'quizmaster';
-export type Fase = 'lobby' | 'ronde' | 'vraag' | 'antwoord' | 'stand' | 'einde';
+export type Fase = 'lobby' | 'ronde' | 'vraag' | 'antwoord' | 'cijfers' | 'stand' | 'einde';
 
 export interface PubliekeSpeler {
   id: number;
@@ -91,6 +91,8 @@ export interface PubliekeStaat {
     uitleg: string;
     teamModus: string;
     vragenAantal: number;
+    /** Na de laatste vraag volgen de cijfers van het jaar. */
+    cijfers: 'sport' | 'taart' | 'voorspellingen' | null;
   } | null;
   vraag: PubliekeVraag | null;
   onthulling: Onthulling | null;
@@ -110,6 +112,92 @@ export interface PubliekeStaat {
   inzendingen: PubliekeInzending[];
   /** Punten die bij de huidige vraag zijn uitgedeeld, per speler. Alleen in de fase 'antwoord'. */
   uitdeling: Record<number, number>;
+  /** De cijfers van het jaar. Alleen gevuld in de fase 'cijfers'. */
+  cijfers: Cijfers | null;
+}
+
+/* ---- De cijfers van het jaar ------------------------------------------
+   Wat de televisie na een recap-ronde laat zien: per persoon de tijdlijn
+   van het jaar, de sporten en de landen. Komt uit resolution-recap. */
+
+export interface CijfersSport {
+  totaal: number;
+  doel: number | null;
+  /** Aantal keer per dag, 'JJJJ-MM-DD' → aantal. Alleen dagen met iets erop. */
+  dagen: Record<string, number>;
+  soorten: { naam: string; emoji: string; aantal: number }[];
+  langsteReeks: number;
+}
+
+export interface CijfersTaart {
+  totaal: number;
+  dagen: Record<string, number>;
+}
+
+export interface CijfersLand {
+  code: string;
+  naam: string;
+  vlag: string;
+  datum: string;
+}
+
+export interface CijfersPersoon {
+  naam: string;
+  emoji: string;
+  sport: CijfersSport;
+  taart: CijfersTaart;
+  landen: CijfersLand[];
+}
+
+/* ---- De voorspellingen van januari ------------------------------------ */
+
+export interface VoorspellingUitslag {
+  nr: number;
+  vraag: string;
+  soort: 'janee' | 'getal' | 'naam' | 'open';
+  /** Wat er echt gebeurde; null zolang dat nog niet bekend is. */
+  uitkomst: string | null;
+  open: boolean;
+  /** De uitkomst komt uit cijfers die nog kunnen veranderen tot het jaar om is. */
+  voorlopig: boolean;
+  toelichting?: string;
+  antwoorden: {
+    naam: string;
+    antwoord: string;
+    inzet: number;
+    /** null: nog niet te zeggen. */
+    goed: boolean | null;
+    /** Wat er voor deze persoon echt uitkwam, als dat per persoon verschilt. */
+    werkelijk?: string;
+  }[];
+}
+
+export interface VoorspellerStand {
+  naam: string;
+  goed: number;
+  fout: number;
+  open: number;
+  punten: number;
+}
+
+export interface VoorspellingenUitslag {
+  vragen: VoorspellingUitslag[];
+  stand: VoorspellerStand[];
+  /** Hoeveel voorspellingen nog geen uitkomst hebben. */
+  open: number;
+}
+
+export interface Cijfers {
+  soort: 'sport' | 'taart' | 'voorspellingen';
+  /** 0 is het overzicht, daarna één persoon per stap. */
+  stap: number;
+  stappen: number;
+  jaar: number;
+  /** Tot welke dag de cijfers lopen, 'JJJJ-MM-DD'. */
+  peildatum: string;
+  personen: CijfersPersoon[];
+  /** Alleen bij soort 'voorspellingen'. */
+  voorspellingen?: VoorspellingenUitslag;
 }
 
 export interface AntwoordInzending {

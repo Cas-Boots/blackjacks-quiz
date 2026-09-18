@@ -156,6 +156,66 @@ ligt de samenstelling vast (anders zouden de rondenummers en daarmee de stand
 verschuiven) en spring je er naar een andere ronde. *Nieuw spel* begint
 opnieuw met een pakket; de oude stand blijft in de database bewaard.
 
+### De cijfers van het jaar, live
+
+Twee rondes gaan over onszelf: *Onze Sportcompetitie* en *Taart & Verre
+Landen*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
+de avond zelf uitgerekend uit de export van
+[`resolution-recap`](https://github.com/Cas-Boots/resolution-recap). Sport
+iemand op oudejaarsdag nog, dan telt dat mee. Ook de tekst van een vraag past
+zich aan: staan er twee mensen zonder sportschool in de cijfers, dan vraagt de
+vraag naar allebei.
+
+Waar de cijfers vandaan komen, in deze volgorde:
+
+| Instelling | Doet |
+|---|---|
+| `RECAP_URL` + `RECAP_TOKEN` | live: haalt `/api/export` van resolution-recap op met het `BACKUP_TOKEN` van dat project |
+| `RECAP_BESTAND` | een export-JSON op schijf, bijvoorbeeld de nieuwste uit `resolution-recap/backups/` |
+| niets | de ingebouwde momentopname in `src/lib/content/recap-snapshot.json` |
+
+De cijfers worden ververst bij het opstarten, zodra je naar een van die rondes
+springt (met een wachttijd van hooguit zes seconden, zodat een trage
+verbinding de avond niet ophoudt), en met de knop **Ververs de cijfers** op het
+hostscherm. Mislukt het, dan blijven de vorige cijfers staan en zegt het
+hostscherm dat erbij. Zolang een ronde loopt, veranderen vraag en antwoord
+niet vanzelf.
+
+In de vragenlijst op het hostscherm staat *live* achter elke vraag die zo
+wordt uitgerekend. De sleutels (`live: "sport.meeste"` in
+`src/lib/content/packs.ts`) staan in `src/lib/server/recap/vragen.ts`; daar voeg je ook een nieuwe aan toe. De
+momentopname ververs je met een kopie van de nieuwste back-up:
+
+```bash
+python3 -c "import json;d=json.load(open('../../resolution-recap/backups/backup-2026-12-31.json'));json.dump({k:d[k] for k in ['exportSchemaVersion','seasons','people','metrics','goals','countries_visited','exportedAt','entries']},open('src/lib/content/recap-snapshot.json','w'),ensure_ascii=False,separators=(',',':'))"
+```
+
+**Na de laatste vraag** van zo'n ronde laat de televisie de cijfers zelf zien,
+vóór de tussenstand: eerst iedereen naast elkaar, dan per persoon een
+jaarkaart (één hokje per dag, de weken als kolommen), het aantal per maand en
+de sporten met hoe vaak — of bij de taartronde de taartdagen en de bezochte
+landen met vlaggen, in volgorde van bezoek. Elke telefoon toont intussen het
+eigen jaar. De quizmaster loopt erdoorheen met *Volgende* (of de spatiebalk)
+en kan ze overslaan met *Naar de tussenstand*; met *Toon de cijfers van het
+jaar* haal je ze op elk moment in de ronde terug.
+
+### De voorspellingen van januari
+
+De ronde *De Voorspellingen* werkt net zo, met als bron
+`src/lib/content/voorspellingen.ts`: de veertien voorspellingen uit
+`Voorspellingen_2026.xlsx`, wat iedereen antwoordde en de inzet uit de
+puntenmatrix. Vul daar vóór de avond de uitkomsten in (`uitkomst`, en bij open
+voorspellingen `goed: ['Eva']`). Een paar rekent de app zelf uit: het aantal
+landen van de grootste reiziger en of iedereen zijn eigen sportgetal haalde
+(uit resolution-recap), met hoeveel mensen de quiz gespeeld wordt (uit de quiz
+zelf) en wie de meeste voorspellingen goed had (uit de rest van de lijst).
+Voorspellingen zonder uitkomst staan als *nog open* op de televisie en tellen
+niet mee; de vragen van de ronde zeggen erbij hoeveel er nog open staan.
+
+Na de laatste vraag komt de afrekening op de televisie: de stand (goed, mis,
+open, punten) en dan één voorspelling per dia, met wat iedereen zei, de
+uitkomst en wie er scoorde. Op je telefoon licht je eigen regel op.
+
 ### Foto's, video's en muziek bij vragen
 
 Zet de bestanden in de map `media/` naast de app; een vraag verwijst ernaar
@@ -449,12 +509,20 @@ het domein pas vlak voor de avond online.
 
 ## Wat er nog niet in zit
 
-- De rondes *De Voorspellingen*, *De WK-poule* en *Oktober tot december* wachten
-  nog op hun antwoorden; het hostscherm telt hoeveel gekozen vragen er nog een
-  antwoord missen.
+- De ronde *De WK-poule* wacht op de cijfers uit
+  [`blackjacks-cup`](https://github.com/Cas-Boots/blackjacks-cup). Dat project
+  heeft nog geen export en bewaart geen back-ups in de repository; de poule
+  staat alleen in zijn productiedatabase. Nodig zijn de tabellen `users`,
+  `predictions`, `matches`, `outright_questions` en `outright_predictions`
+  als JSON. Zodra die er zijn, kan de ronde net als de voorspellingen worden
+  uitgerekend.
+- *Oktober tot december* wacht op de gebeurtenissen van het najaar. Vul ze in
+  `src/lib/content/packs.ts` en draai `npm run content:sync`.
+- De uitkomsten van de voorspellingen die niemand kan uitrekenen (een nieuwe
+  baan, de temperatuur in De Bilt, Spotify Wrapped) vul je met de hand in
+  `src/lib/content/voorspellingen.ts`.
 - Een por komt alleen aan op een telefoon met een open live stroom; een
   telefoon die op navragen is teruggevallen mist hem.
-- Er is geen editor in de app; vragen pas je aan in `src/lib/content/packs.ts`.
 
 ## Bekende hobbels
 

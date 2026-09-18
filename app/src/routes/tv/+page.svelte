@@ -9,6 +9,7 @@
   import Getallenlijn from '$lib/client/Getallenlijn.svelte';
   import Podium, { WINNAAR_NA_MS } from '$lib/client/Podium.svelte';
   import Media from '$lib/client/Media.svelte';
+  import Cijfers from '$lib/client/Cijfers.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -34,7 +35,7 @@
 
   /** Eén sleutel per dia, zodat Svelte de overgang echt opnieuw speelt. */
   let diaSleutel = $derived(
-    `${staat?.fase ?? 'leeg'}:${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}`,
+    `${staat?.fase ?? 'leeg'}:${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}:${staat?.cijfers?.stap ?? ''}`,
   );
 
   let aantalVerbonden = $derived((staat?.spelers ?? []).filter((s) => s.verbonden).length);
@@ -559,6 +560,10 @@
             {/if}
           {/if}
         </div>
+
+        <!-- ══ De cijfers van het jaar ════════════════════════════════ -->
+      {:else if staat.fase === 'cijfers' && staat.cijfers}
+        <Cijfers cijfers={staat.cijfers} spelers={staat.spelers} />
 
         <!-- ══ Tussenstand ════════════════════════════════════════════ -->
       {:else if staat.fase === 'stand'}

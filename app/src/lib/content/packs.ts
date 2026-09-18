@@ -118,51 +118,58 @@ export const PAKKETTEN: Pakketten = {
         naam: "Onze Sportcompetitie",
         suit: "♥", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        cijfers: "sport",
         uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Ieder voor zich.",
+        // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
+        // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
+        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
         vragen: [
-          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 104 keer",
-           toelichting:"Daarna Liz met 90, Eva met 83, Bastiaan met 76, Joris met 58 en Rik met 45."},
-          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik"},
-          {v:"Welke sport deed Rik dan wel, vaker dan wie ook?", a:"Padel — 27 keer"},
-          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen"},
-          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz"},
-          {v:"Wie noteerde er twaalf keer fysio?", a:"Eva"},
-          {v:"Wie legde zichzelf in januari het hoogste doel op?", a:"Cas — 162 keer sporten"},
-          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan",
-           toelichting:"Eva 83 van 60, Liz 90 van 80, Bastiaan 76 van 70. Cas, Joris en Rik zaten er nog onder."}
+          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
+           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
+          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
+          {v:"Welke sport deed Rik dan wel, vaker dan wie ook?", a:"Padel — 27 keer", live:"sport.favorietVan"},
+          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
+          {v:"Wie noteerde er twaalf keer fysio?", a:"Eva", live:"sport.aantal:physio"},
+          {v:"Wie legde zichzelf in januari het hoogste doel op?", a:"Cas — 162 keer sporten", live:"sport.hoogsteDoel"},
+          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen",
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
         ]
       },
       {
         naam: "Taart & Verre Landen",
         suit: "♦", thema: "Resolution Recap — de rest", sfeer: "suiker",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
+        cijfers: "taart",
         uitleg: "Dezelfde telling, andere categorieën. Ieder voor zich.",
         vragen: [
-          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46"},
-          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten"},
-          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan"},
-          {v:"Op welke dag gingen er vijf taarten doorheen — de drukste taartdag van het jaar?", a:"30 januari"},
-          {v:"Wie bezocht de meeste landen?", a:"Cas — twaalf stuks"},
-          {v:"Hoeveel verschillende landen bezochten we samen?", a:"Dertien"},
-          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië"},
-          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan"}
+          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
+          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
+          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
+          {v:"Op welke dag gingen er vijf taarten doorheen — de drukste taartdag van het jaar?", a:"30 januari", live:"taart.drukste"},
+          {v:"Wie bezocht de meeste landen?", a:"Cas — twaalf stuks", live:"landen.meeste"},
+          {v:"Hoeveel verschillende landen bezochten we samen?", a:"Dertien", live:"landen.samen"},
+          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag"},
+          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers"}
         ]
       },
       {
         naam: "De Voorspellingen",
         suit: "♣", thema: "Wat jullie in januari dachten", sfeer: "violet",
         type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        teVullen: true,
-        uitleg: "Aan het begin van 2026 deed iedereen elf à twaalf voorspellingen — Cas incluis. Nu de afrekening.",
+        teVullen: true, cijfers: "voorspellingen",
+        uitleg: "Aan het begin van 2026 deed iedereen veertien voorspellingen — Cas incluis. Nu de afrekening.",
+        // In de meespeelversie komen vraag en antwoord uit voorspellingen.ts;
+        // vul daar de uitkomsten in. De losse HTML-quiz wacht op handwerk.
         vragen: [
-          {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true},
-          {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true},
-          {v:"Hoeveel van alle voorspellingen zijn er samen uitgekomen?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true},
-          {v:"Wiens voorspelling verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling kan nog net uitkomen in de laatste dagen van het jaar?", a:"— nog invullen —", teVullen:true}
+          {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.meesteGoed"},
+          {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.meesteFout"},
+          {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.tegenDeStroom"},
+          {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.bijnaIedereen"},
+          {v:"Hoeveel van alle voorspellingen zijn er samen uitgekomen?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.totaalGoed"},
+          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.pijnlijkst"},
+          {v:"Wiens voorspelling verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.vooruitziend"},
+          {v:"Welke voorspelling kan nog net uitkomen in de laatste dagen van het jaar?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.nogOpen"}
         ]
       },
       {

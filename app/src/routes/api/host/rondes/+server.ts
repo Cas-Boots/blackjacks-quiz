@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { actiefSpel, pakketVan, samengesteld, huidige } from '$lib/server/spel';
 import { PAKKETTEN } from '$lib/content/packs';
+import { recapStatus } from '$lib/server/recap/bron';
 
 /**
  * De rondes van het pakket, met wat er van meedoet.
@@ -12,7 +13,7 @@ import { PAKKETTEN } from '$lib/content/packs';
 export const GET: RequestHandler = ({ locals }) => {
   if (locals.rol !== 'quizmaster') error(403, 'alleen de quizmaster');
   const spel = actiefSpel();
-  if (!spel) return json({ rondes: [], pakketten: [] });
+  if (!spel) return json({ rondes: [], pakketten: [], recap: recapStatus() });
 
   const pakket = pakketVan(spel);
   let keuze: Record<string, number[]> = {};
@@ -41,12 +42,14 @@ export const GET: RequestHandler = ({ locals }) => {
       punten: r.punten,
       optioneel: !!r.optioneel,
       teVullen: !!r.teVullen,
+      cijfers: r.cijfers ?? null,
       gekozen,
       vragen: r.vragen.map((v, i) => ({
         index: i,
         tekst: v.v,
         antwoord: antwoordVan(r.type, v),
         teVullen: !!v.teVullen,
+        live: !!v.live,
         media: v.media ? `${v.media.soort}: ${v.media.bron.startsWith('data:') ? 'ingebouwd' : v.media.bron}` : null,
         gekozen: gekozenSet.has(i),
       })),
@@ -58,6 +61,8 @@ export const GET: RequestHandler = ({ locals }) => {
     pakketten: Object.entries(PAKKETTEN).map(([id, p]) => ({ id, naam: p.naam, beschrijving: p.beschrijving })),
     fase: spel.fase,
     rondes,
+    /** Waar de cijfers van resolution-recap vandaan komen en hoe vers ze zijn. */
+    recap: recapStatus(),
     /** De vraag die nu open staat, mét antwoord — voor het spiekbriefje van de quizmaster. */
     huidige: vraag && (spel.fase === 'vraag' || spel.fase === 'antwoord')
       ? { tekst: vraag.v, antwoord: antwoordVan(pakket.rondes.find((r) => r.vragen.includes(vraag))?.type ?? 'open', vraag), toelichting: vraag.toelichting ?? null }

@@ -30,17 +30,22 @@ Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
 
 Twee rondes zijn **al gevuld** met de echte cijfers uit
 [`resolution-recap`](https://github.com/Cas-Boots/resolution-recap), overgenomen
-uit de dagelijkse back-up van 16 september:
+uit de dagelijkse back-up van 18 september. In de meespeelversie in `app/`
+worden deze vragen op de avond zelf live uitgerekend (zie
+[`app/README.md`](app/README.md)); in dit losse bestand staan ze als
+momentopname:
 
 - **Onze Sportcompetitie** — wie het vaakst sportte, wie nooit in de sportschool
   kwam, welke sport iedereen precies één keer deed, wie zijn jaardoel al haalde.
 - **Taart & Verre Landen** — de taartteller, de landenteller, de drukste
   taartdag van het jaar.
 
-Twee rondes wachten nog op gegevens:
+Nog twee rondes over de groep:
 
-- **De Voorspellingen** — de elf à twaalf voorspellingen van januari.
-- **De WK-poule** — te vullen met de export uit `blackjacks-cup` (`/api/quiz-export`).
+- **De Voorspellingen** — de veertien voorspellingen van januari. In de
+  meespeelversie leven ze in `app/src/lib/content/voorspellingen.ts`, met de
+  uitkomsten; hier wachten ze op handwerk.
+- **De WK-poule** — wacht op een export uit `blackjacks-cup`; die bestaat nog niet.
 
 Daarnaast is er een lege ronde **Oktober tot december**, want die maanden hadden
 bij het schrijven nog niet plaatsgevonden.
