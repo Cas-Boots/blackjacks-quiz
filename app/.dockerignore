@@ -1,0 +1,26 @@
+# Wat niet mee hoeft in de bouwcontext.
+#
+# De Dockerfile doet `COPY . .` na `npm ci`. Zonder dit bestand overschrijft
+# een node_modules van je eigen laptop de versie die in het image net netjes
+# is geïnstalleerd — inclusief de better-sqlite3 die voor jouw besturings-
+# systeem is gebouwd en niet voor de container. In Dokploy valt dat niet op,
+# want daar wordt vers uitgecheckt, maar `docker compose up --build` op je
+# eigen machine liep er wel tegenaan.
+node_modules
+.svelte-kit
+build
+
+# Geheimen en gegevens horen niet in een laag van het image.
+.env
+data
+*.db
+*.db-shm
+*.db-wal
+
+# Foto's, filmpjes en muziek komen van een volume, niet uit het image.
+media
+
+# Testrommel en geschiedenis.
+test-results
+playwright-report
+.git
