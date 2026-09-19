@@ -712,6 +712,25 @@ keer, met de compose die je gebruikt:
 docker compose run --rm --user root --entrypoint chown quiz -R node:node /data /app/media
 ```
 
+Onder Dokploy heb je die compose niet bij de hand; daar werk je op de naam van
+het volume. In de terminal van de server:
+
+```bash
+docker volume ls | grep quiz          # zoek de naam op
+docker run --rm -v <volumenaam>:/data alpine chown -R 1000:1000 /data
+```
+
+`1000` is de gebruiker `node` uit het image. Is er nog geen avond gespeeld,
+dan is weggooien korter dan repareren — een nieuw volume krijgt de eigenaar
+wel goed mee, want de Dockerfile zet hem:
+
+```bash
+docker volume rm <volumenaam>
+```
+
+Daarna opnieuw uitrollen. Let op dat dit de stand van een gespeelde avond
+wist; met een volle database gebruik je de `chown` hierboven.
+
 ### Eén ding om te weten
 
 Spelers hebben geen pincode — dat is een bewuste keuze voor een avond onder
