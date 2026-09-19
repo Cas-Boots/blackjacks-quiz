@@ -444,6 +444,53 @@ naspelen. Draai eerst `npm run verify` (zie [Komen de vragen goed
 door?](#komen-de-vragen-goed-door)), dan weet je dat de vragen kloppen
 voordat je de bediening oefent.
 
+### De televisie alleen: `/tv?test`
+
+Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
+telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**:
+
+```
+http://localhost:5173/tv?test        # bij npm run dev
+http://192.168.1.10:3000/tv?test     # het adres uit npm run lokaal, op de echte televisie
+```
+
+Het is hetzelfde scherm als op de avond, alleen komen de momentopnamen niet
+van de server maar uit een verzonnen spel met zes spelers. Links staat een
+paneel met alle dia's van de avond, in volgorde: de lobby, de titelkaart van
+een ronde, een vraag van elk type (waar/niet waar, meerkeuze in teams, open
+met songtekst, dichtstbij, stem, met foto, met muziekfragment, de
+bliksemronde), de onthulling in al zijn smaken (gemengd, nog te beoordelen,
+iedereen goed, iedereen fout, niemand ingeleverd, de getallenlijn, de
+stemtelling), de cijfers van het jaar, de tussenstand, het podium met de
+prijzen, en een paar randgevallen: een veel te lange vraag, een filmpje dat
+ontbreekt en het scherm vóór de eerste verbinding.
+
+| Toets | Doet |
+|---|---|
+| `→`, `spatie` | volgende dia |
+| `←` | vorige dia |
+| `R` | dezelfde dia opnieuw, met alle overgangen en geluiden |
+| `T` | paneel tonen of verbergen, om het scherm kaal te zien |
+| `B` | in de lobby: een telefoon komt binnen (begroeting en boing) |
+| `I` | bij een vraag: iemand levert in; bij de onthulling: beoordeel de volgende inzending |
+| `K` | de klok op de laatste acht seconden zetten (het tikken, de trilling, de stempel TIJD!) |
+| `P` | de klok pauzeren of hervatten |
+| `M` | het fragment afspelen of stoppen |
+| `N` | bij de cijfers van het jaar: een stap verder |
+| `E` | een reactie van een telefoon laat zweven |
+
+Bij elke dia staat waar je op let. Klik één keer in het scherm voor het
+geluid, net als op de avond. De URL onthoudt de dia (`/tv?test=stand`), dus
+na een herlading of een aanpassing in de code sta je weer op dezelfde plek —
+handig als je aan de opmaak van één dia werkt met `npm run dev`.
+
+De testmodus stuurt niets naar de server: de televisie meldt zich niet aan,
+de database blijft zoals hij is, en de vragen zijn verzonnen — de echte
+antwoorden horen niet in de browser van de televisie. Het rode etiket
+rechtsboven blijft altijd staan, zodat niemand dit scherm voor de echte
+avond aanziet. Wil je de echte avond met echte vragen naspelen, dan zijn de
+nepspelers hieronder het gereedschap.
+
 ### Nepspelers tegen een draaiende server
 
 ```bash

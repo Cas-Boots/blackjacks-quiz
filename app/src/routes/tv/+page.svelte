@@ -2,7 +2,10 @@
   import { onMount } from 'svelte';
   import { fly, fade, scale } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
+  import { page } from '$app/state';
   import { live } from '$lib/client/live.svelte';
+  import { testmodus } from '$lib/client/testmodus.svelte';
+  import Testpaneel from '$lib/client/Testpaneel.svelte';
   import Klok from '$lib/client/Klok.svelte';
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
@@ -18,6 +21,12 @@
     kies, kanteling, metNaam, BEGROETINGEN, WACHTZINNEN, RONDEZINNEN, NIEMAND,
     IEDEREEN_FOUT, IEDEREEN_GOED, LANTAARN, POEDEL, VER_ERNAAST,
   } from '$lib/shared/kwinkslagen';
+
+  /* ---- Testmodus: /tv?test ---------------------------------------------
+     Hetzelfde scherm, maar de momentopnamen komen uit testmodus.svelte.ts in
+     plaats van van de server. De televisie meldt zich dan niet aan en er
+     verandert niets aan het spel dat klaarstaat. */
+  let inTest = $derived(page.url.searchParams.has('test'));
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
@@ -265,8 +274,12 @@
   onMount(() => {
     joinAdres = `${location.origin}/`;
     const wacht = setInterval(() => (wachtTeller += 1), 7000);
-    live.start();
-    void live.meld('tv').catch(() => {});
+    if (inTest) {
+      testmodus.start(page.url.searchParams.get('test'));
+    } else {
+      live.start();
+      void live.meld('tv').catch(() => {});
+    }
     // De laptop aan de televisie mag niet halverwege in de schermbeveiliging schieten.
     const laatSlapen = houdWakker();
     const opGebaar = () => wekGeluid();
@@ -275,14 +288,19 @@
     return () => {
       clearInterval(wacht);
       laatSlapen();
-      live.stop();
+      if (inTest) testmodus.stop();
+      else live.stop();
       window.removeEventListener('pointerdown', opGebaar);
       window.removeEventListener('keydown', opGebaar);
     };
   });
 </script>
 
-<svelte:head><title>Blackjack Quiz 26/27</title></svelte:head>
+<svelte:head><title>{inTest ? 'Testmodus · ' : ''}Blackjack Quiz 26/27</title></svelte:head>
+
+{#if inTest}
+  <Testpaneel />
+{/if}
 
 <div class="scherm" class:spanning data-sfeer={sfeer}>
   <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
@@ -309,7 +327,7 @@
   </button>
 
   <!-- De rondekop hoort bij het spel, niet bij het aanmelden of de uitslag. -->
-  {#if staat && staat.fase !== 'lobby' && staat.fase !== 'einde'}
+  {#if staat && ronde && staat.fase !== 'lobby' && staat.fase !== 'einde'}
     <header class="rail">
       <span class="suit" class:rood>{ronde?.suit}</span>
       <span class="titel">

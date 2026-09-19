@@ -145,6 +145,7 @@ async function toonAdressen() {
     console.log(`  Hostscherm     ${adresUrl(eerste.adres, POORT, '/host')}     pincode ${PIN}`);
     console.log(`  Telefoons      ${adresUrl(eerste.adres, POORT)}`);
     console.log(`  Beheer         ${adresUrl(eerste.adres, POORT, '/beheer')}`);
+    console.log(`  Oefenen        ${adresUrl(eerste.adres, POORT, '/tv?test')}     de televisie zonder spel`);
     console.log(`\n  Dat is het adres van '${eerste.naam}' op ${hostname()}.`);
     if (adressen.length > 1) {
       console.log('  Deze computer heeft meer adressen; werkt het bovenste niet, probeer dan:');
