@@ -597,6 +597,15 @@ netwerk van Dokploy's Traefik.
    `getent hosts quiz.deblackjacks.nl` moet het IP van de server teruggeven.
    Zolang dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft
    het domein in Dokploy op een foutmelding staan.
+
+   **Kijk ook naar het `AAAA`-record.** Veel registrars zetten er standaard
+   een IPv6-adres bij dat naar hun eigen parkeerpagina wijst. Let's Encrypt en
+   de meeste browsers geven voorrang aan IPv6, dus dan komt het verzoek daar
+   uit in plaats van bij jouw server — terwijl het `A`-record er perfect
+   uitziet. Haal het weg, of zet het op het IPv6-adres van de server. Bij
+   Strato staat het record op het subdomein zelf, niet op het hoofddomein;
+   je stelt het in via het tandwieltje naast het subdomein. Controleren kan
+   met `getent ahostsv4` en `getent ahostsv6` naast elkaar.
 2. Maak een project aan en daarin een service van het type **Compose**, met
    Compose Type **Docker Compose**. Vul in:
 
