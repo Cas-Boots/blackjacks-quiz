@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * De testmodus van de televisie: `/tv?test`.
@@ -7,6 +7,31 @@ import { test, expect } from '@playwright/test';
  * ze zeggen, en de televisie mag ondertussen niets naar de server sturen —
  * anders zou een proefrondje het spel dat klaarstaat kunnen raken.
  */
+
+/**
+ * Wat er buiten het scherm van de televisie valt.
+ *
+ * Aan de televisie zit geen scrollbalk: wat onder de onderrand ligt, bestaat
+ * niet voor de kamer. Alleen de buitenste laag wordt gemeld, anders staat bij
+ * een dia die niet past meteen de halve boom in de lijst.
+ */
+async function buitenBeeld(page: Page) {
+  return page.evaluate(() => {
+    const hoog = window.innerHeight;
+    const uit: Element[] = [];
+    for (const el of document.querySelectorAll('.romp *')) {
+      const vak = el.getBoundingClientRect();
+      if (!vak.height && !vak.width) continue;
+      if (vak.bottom > hoog + 1 || vak.top < -1) {
+        if (!uit.some((eerder) => eerder.contains(el))) uit.push(el);
+      }
+    }
+    return uit.map((el) => {
+      const klasse = typeof el.className === 'string' ? el.className.trim().split(/\s+/)[0] : '';
+      return el.tagName.toLowerCase() + (klasse ? `.${klasse}` : '');
+    });
+  });
+}
 
 test('de testmodus loopt alle dia’s door zonder spel en zonder de server te raken', async ({ page }) => {
   const fouten: string[] = [];
@@ -41,6 +66,9 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
     // De knip tussen twee dia's met dezelfde fase duurt een tiende seconde.
     await page.waitForTimeout(150);
     await expect(page.locator('.scherm')).toBeVisible();
+    // En de hele dia hoort op het scherm te staan: een lange vraag of een
+    // podium vol prijzen krimpt mee, maar valt er niet vanaf.
+    expect(await buitenBeeld(page), `dia ${i + 1} van ${aantal} valt buiten het scherm`).toEqual([]);
   }
 
   // Een paar dia's op inhoud.
@@ -85,6 +113,18 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
   await expect(page.locator('.podium .trede')).toHaveCount(3);
   await expect(page.locator('.romp').getByRole('heading', { name: /wint/ })).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('.prijs')).toHaveCount(7);
+
+  // De twee randgevallen waar het om begonnen was, nu met alle tijd voor de
+  // opkomst van het podium en met de inleverrij erbij.
+  await ga('vraag-lang');
+  await expect(page.locator('.keuze')).toHaveCount(4);
+  await expect(page.locator('.inleverrij')).toBeVisible();
+  expect(await buitenBeeld(page), 'een veel te lange vraag hoort op het scherm te passen').toEqual([]);
+
+  await ga('einde');
+  await page.waitForTimeout(4000);
+  await expect(page.locator('.prijs')).toHaveCount(7);
+  expect(await buitenBeeld(page), 'het podium met zeven prijzen hoort op het scherm te passen').toEqual([]);
 
   await ga('vraag-video-ontbreekt');
   await expect(page.locator('.media-ontbreekt')).toContainText('ontbreekt', { timeout: 10_000 });

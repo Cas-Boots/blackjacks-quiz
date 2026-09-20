@@ -149,6 +149,28 @@ button {
   justify-content: center;
 }
 
+/* ---- De televisie: één beeld, nooit een scrollbalk ---------------
+   Aan de televisie draait niemand aan een balk: wat onder de onderrand
+   valt, bestaat niet voor de kamer. Het scherm is daarom precies zo hoog
+   als de televisie, en het vlak met de dia krimpt mee tot alles past —
+   zie `passend.ts`, dat `--pas` bijhoudt. */
+.scherm.televisie {
+  height: 100%;
+}
+.televisie .romp {
+  /* Zonder dit weigert de romp onder zijn inhoud te krimpen en duwt een
+     lange dia het scherm alsnog langer dan de televisie. */
+  min-height: 0;
+}
+.televisie .vlak {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  width: 100%;
+  transform: scale(var(--pas, 1));
+  transform-origin: center center;
+}
+
 /* ===== Typografie ================================================= */
 .etiket {
   font-size: var(--fs-etiket);
@@ -246,9 +268,12 @@ button {
   }
 }
 
+/* Een lange vraag hoort niet in dezelfde letter als een korte: acht regels
+   koeienletters duwen de keuzes en de inleverrij van het scherm af. Hoe langer
+   de tekst, hoe rustiger de maat — `--vraagmaat` komt uit het scherm zelf. */
 .vraagtekst {
   font-family: var(--display);
-  font-size: var(--fs-vraag);
+  font-size: calc(var(--fs-vraag) * var(--vraagmaat, 1));
   font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.012em;
@@ -257,7 +282,7 @@ button {
   text-wrap: balance;
 }
 .vraagtekst.klein {
-  font-size: calc(var(--fs-vraag) * 0.62);
+  font-size: calc(var(--fs-vraag) * 0.62 * var(--vraagmaat, 1));
 }
 .emoji {
   font-size: calc(var(--schaal) * clamp(2.6rem, 8vw, 7rem));
@@ -272,14 +297,14 @@ button {
 .lyric {
   font-family: var(--display);
   font-style: italic;
-  font-size: calc(var(--fs-vraag) * 0.82);
+  font-size: calc(var(--fs-vraag) * 0.82 * var(--vraagmaat, 1));
   line-height: 1.22;
   margin: 0;
   color: var(--kaart);
   text-wrap: balance;
 }
 .lyric.klein {
-  font-size: calc(var(--fs-vraag) * 0.44);
+  font-size: calc(var(--fs-vraag) * 0.44 * var(--vraagmaat, 1));
 }
 
 /* ===== Antwoordopties ============================================= */
