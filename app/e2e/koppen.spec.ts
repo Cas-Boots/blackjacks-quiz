@@ -40,7 +40,7 @@ test('een opdracht van een andere site wordt geweigerd', async ({ request }) => 
   expect(r.status()).toBe(403);
 });
 
-for (const pad of ['/', '/tv', '/play', '/host', '/beheer']) {
+for (const pad of ['/', '/tv', '/tv?test=vraag-beeld', '/play', '/host', '/beheer']) {
   test(`de browser houdt niets tegen op ${pad}`, async ({ page }) => {
     const { geblokkeerd } = await metConsole(page, pad);
     await expect(page.locator('body')).toBeVisible();
