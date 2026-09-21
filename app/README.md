@@ -585,6 +585,14 @@ npm run content:check   # alleen controleren; dit draait ook in CI
 De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
 vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
 vraag.
+
+Over de lengte hoef je niet te piekeren: een vraag van meer dan honderd tekens
+zet de televisie een maat kleiner, en past een dia dan nog niet op het scherm —
+een lange vraag met vier lange keuzes, of een podium met zes prijzen én een
+poedelprijs — dan krimpt hij in zijn geheel mee tot alles in beeld staat. Aan
+de televisie zit immers geen scrollbalk. Wil je zien hoe jouw langste vraag
+uitpakt: `/tv?test=vraag-lang` staat er voor klaar.
+
 ## Naar productie
 
 Op de avond zelf is een laptop met `npm run lokaal` genoeg. Wil je de quiz op een

@@ -55,8 +55,13 @@
           {r.punten === 1 ? 'punt' : 'punten'}
         </span>
       </div>
-      <div class="blok">
-        <span class="cijfer">{idx + 1}</span>
+      <!-- De vloer houdt de hoogte van de trede al bezet voordat de trede
+           er is: zo staat de opmaak van de dia meteen vast en hoeft het
+           scherm niet mee te schuiven terwijl het podium opkomt. -->
+      <div class="vloer">
+        <div class="blok">
+          <span class="cijfer">{idx + 1}</span>
+        </div>
       </div>
     </div>
   {/each}
@@ -134,10 +139,16 @@
   }
 
   /* ---- De treden ------------------------------------------------- */
+  .vloer {
+    width: 100%;
+    height: var(--hoogte);
+    display: flex;
+    align-items: flex-end;
+  }
   .blok {
     position: relative;
     width: 100%;
-    height: var(--hoogte);
+    height: 100%;
     border-radius: 10px 10px 0 0;
     display: grid;
     place-items: center;
@@ -149,16 +160,22 @@
       inset 0 -10px 24px rgba(0, 0, 0, 0.35),
       0 30px 50px -30px rgba(0, 0, 0, 0.9);
   }
-  .trede[data-plek="1"] .blok {
+  .trede[data-plek="1"] {
     --hoogte: var(--trede-1);
+  }
+  .trede[data-plek="1"] .blok {
     background: linear-gradient(180deg, #f6e3a1 0%, #c9a227 14%, #a3821a 60%, #7d6312 100%);
   }
-  .trede[data-plek="2"] .blok {
+  .trede[data-plek="2"] {
     --hoogte: calc(var(--trede-1) * 0.68);
+  }
+  .trede[data-plek="2"] .blok {
     background: linear-gradient(180deg, #f4f5f7 0%, #c3c8d0 14%, #98a0ab 60%, #6b727e 100%);
   }
-  .trede[data-plek="3"] .blok {
+  .trede[data-plek="3"] {
     --hoogte: calc(var(--trede-1) * 0.46);
+  }
+  .trede[data-plek="3"] .blok {
     background: linear-gradient(180deg, #f3c9a2 0%, #c8803f 14%, #a5642c 60%, #74451d 100%);
   }
   .cijfer {
