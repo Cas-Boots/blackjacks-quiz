@@ -10,6 +10,8 @@
  *   · heeft elke vraag wat zijn type nodig heeft (antwoord, opties, getal)?
  *   · staan de foto's, filmpjes en muziek waar vragen naar verwijzen in media/?
  *   · hoeveel vragen staan nog op 'teVullen'?
+ *   · draait het jaaroverzicht rond: welke maanden doen mee, welke wachten
+ *     nog op invulling, en ligt er een balk over elk antwoord?
  *
  * Tegen de server (standaard http://localhost:3000, of --url voor het
  * netwerkadres, zodat je écht de weg test die de telefoons nemen):
@@ -39,12 +41,15 @@
  *   --forceer         ook doorlopen als er al een spel bezig is
  *   --alles           toon elke gecontroleerde vraag, niet alleen de problemen
  */
-import { existsSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leesArgs } from './lib/args';
 import { vergelijkInhoud, HTML_PAD } from './lib/inhoud';
 import { PAKKETTEN } from '../src/lib/content/packs';
+import { JAAROVERZICHT } from '../src/lib/content/jaaroverzicht';
+import { analyseer, type RecapExport } from '../src/lib/server/recap/analyse';
+import { aantalBalken, maandenInDeFilm, maandNaam, maandenTeVullen } from '../src/lib/server/jaaroverzicht';
 import type { Vraag, Ronde, Pakket } from '../src/lib/content/types';
 import type { PubliekeStaat } from '../src/lib/shared/state';
 import { VOORBEELD_PIN } from '../src/lib/server/omgeving';
@@ -168,6 +173,71 @@ function controleerInhoud() {
       let_op(`${ontbreekt.length} van ${mediaBronnen.size} mediabestanden staan nog niet in ${MEDIA_MAP}:`);
       for (const o of ontbreekt) console.log(`      ${dim('·')} ${o}`);
     }
+  }
+}
+
+/**
+ * Het jaaroverzicht: draait de film, valt er een maand uit, en ligt er
+ * overal een balk waar een antwoord staat? Een maand zonder balken is geen
+ * fout — hij kan bewust een tussenmaand zijn — maar je wilt het weten.
+ */
+function controleerJaaroverzicht() {
+  kop('Het jaaroverzicht');
+
+  let analyse;
+  try {
+    const snapshot = JSON.parse(readFileSync(resolve(APP_MAP, 'src/lib/content/recap-snapshot.json'), 'utf8')) as RecapExport;
+    analyse = analyseer(snapshot);
+  } catch (e) {
+    fout(`kan de ingebouwde cijfers niet lezen: ${(e as Error).message}`);
+    return;
+  }
+
+  const inDeFilm = maandenInDeFilm(analyse);
+  ok(`${inDeFilm.length} van de 12 maanden draaien mee, plus een titel- en een slotkaart`);
+
+  const weg = JAAROVERZICHT.maanden.filter((m) => !inDeFilm.includes(m.nr));
+  if (weg.length) {
+    let_op(`${weg.length} ${weg.length === 1 ? 'maand blijft' : 'maanden blijven'} leeg en worden overgeslagen: ${weg.map((m) => maandNaam(m.nr)).join(', ')}`);
+  }
+
+  const teVullen = maandenTeVullen();
+  if (teVullen.length) {
+    const totaal = teVullen.reduce((n, m) => n + m.aantal, 0);
+    let_op(`${totaal} ${totaal === 1 ? 'regel wacht' : 'regels wachten'} nog op invulling: ${teVullen.map((m) => `${m.naam} (${m.aantal})`).join(', ')}`);
+  }
+
+  let balken = 0;
+  for (const m of JAAROVERZICHT.maanden) {
+    const n = aantalBalken(m);
+    balken += n;
+    const geschreven = m.momenten.filter((x) => !x.teVullen);
+    if (!geschreven.length) continue;
+    if (n === 0 && ALLES) console.log(`      ${dim('·')} ${maandNaam(m.nr)}: geen balken — een maand zonder vraag van vanavond`);
+    // Een kop die een antwoord uit diezelfde maand bevat, verraadt de balk eronder.
+    for (const stuk of m.momenten.flatMap((x) => [...`${x.tekst} ${x.bij ?? ''}`.matchAll(/\[\[(.+?)\]\]/g)])) {
+      if (m.kop.toLowerCase().includes(stuk[1].toLowerCase())) {
+        fout(`${maandNaam(m.nr)}: de kop "${m.kop}" verklapt wat eronder zwart staat ("${stuk[1]}")`);
+      }
+    }
+  }
+  ok(`${balken} balken over antwoorden van vanavond`);
+
+  // Elk antwoord onder een balk hoort ergens in de vragen terug te komen.
+  const quiz = JSON.stringify(PAKKETTEN).toLowerCase();
+  const los: string[] = [];
+  for (const m of JAAROVERZICHT.maanden) {
+    for (const x of m.momenten) {
+      for (const stuk of `${x.tekst} ${x.bij ?? ''}`.matchAll(/\[\[(.+?)\]\]/g)) {
+        if (!quiz.includes(stuk[1].toLowerCase())) los.push(`${maandNaam(m.nr)}: "${stuk[1]}"`);
+      }
+    }
+  }
+  if (los.length) {
+    let_op(`${los.length} balk(en) staan boven iets wat geen enkele vraag vraagt:`);
+    for (const l of los) console.log(`      ${dim('·')} ${l}`);
+  } else {
+    ok('elke balk hoort bij een vraag die vanavond gesteld wordt');
   }
 }
 
@@ -701,6 +771,7 @@ async function loopDoor(host: Apparaat, telefoon: Apparaat, tv: Apparaat, stroom
 async function main() {
   console.log(vet('Blackjack Quiz — controle vooraf'));
   controleerInhoud();
+  controleerJaaroverzicht();
   if (ZONDER_SERVER) {
     console.log(`\n${dim('(server overgeslagen: --zonder-server)')}`);
   } else {

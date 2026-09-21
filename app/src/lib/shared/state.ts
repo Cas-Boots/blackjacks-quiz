@@ -2,7 +2,7 @@
  *  bij de huidige fase hoort: in de fase 'vraag' zit er geen antwoord in. */
 
 export type Rol = 'gast' | 'speler' | 'quizmaster';
-export type Fase = 'lobby' | 'ronde' | 'vraag' | 'antwoord' | 'cijfers' | 'stand' | 'einde';
+export type Fase = 'lobby' | 'jaaroverzicht' | 'ronde' | 'vraag' | 'antwoord' | 'cijfers' | 'stand' | 'einde';
 
 export interface PubliekeSpeler {
   id: number;
@@ -114,6 +114,8 @@ export interface PubliekeStaat {
   uitdeling: Record<number, number>;
   /** De cijfers van het jaar. Alleen gevuld in de fase 'cijfers'. */
   cijfers: Cijfers | null;
+  /** De dia van het jaaroverzicht. Alleen gevuld in de fase 'jaaroverzicht'. */
+  jaaroverzicht: JaarDia | null;
 }
 
 /* ---- De cijfers van het jaar ------------------------------------------
@@ -205,4 +207,68 @@ export interface AntwoordInzending {
   tekst: string;
   /** Lokale tijd van de client; de server gebruikt zijn eigen klok voor de beoordeling. */
   ingediendOp: number;
+}
+
+/* ---- Het jaaroverzicht -------------------------------------------------
+   De film waarmee de avond opent: het jaar maand voor maand, met een
+   zwarte balk over alles wat de quiz nog gaat vragen. Zolang die balken
+   liggen, staat het woord er niet in — ook niet verborgen in het pakketje,
+   precies zoals een antwoord ook pas bij de onthulling meekomt. */
+
+/** Een stukje regel: gewone tekst, of een balk waar een antwoord onder zit. */
+export interface JaarDeel {
+  /** Leeg zolang de balk ligt. */
+  tekst: string;
+  balk: boolean;
+  /** Hoe breed de balk moet zijn: het aantal tekens dat eronder zit. */
+  lengte: number;
+}
+
+export interface JaarRegel {
+  emoji: string | null;
+  delen: JaarDeel[];
+  /** Het bijschrift, of null als de regel er geen heeft. */
+  bij: JaarDeel[] | null;
+}
+
+/** Wat wij die maand zelf deden. Komt uit resolution-recap. */
+export interface JaarEigen {
+  sport: number;
+  taart: number;
+  /** Landen die deze maand voor het eerst op de lijst kwamen. */
+  landen: { vlag: string; naam: string; wie: string; datum: string }[];
+  /** Landen die al op de lijst stonden toen het jaar begon; geen uitje. */
+  bijStart: number;
+  /** Wie er deze maand het vaakst sportte; null als niemand iets noteerde. */
+  koploper: { naam: string; aantal: number } | null;
+  /** Per persoon, zodat je op je eigen telefoon je eigen maand ziet. */
+  perPersoon: { naam: string; sport: number; taart: number; landen: string[] }[];
+  /** De stand van het jaar tot en met deze maand. */
+  totaal: { sport: number; taart: number; landen: number };
+}
+
+export interface JaarDia {
+  soort: 'titel' | 'maand' | 'slot';
+  /** 0 is de titelkaart, daarna één maand per stap, en tot slot de slotkaart. */
+  stap: number;
+  stappen: number;
+  jaar: number;
+  /** De grote regel: de naam van de maand, of de titel van de film. */
+  titel: string;
+  /** De regel eronder. */
+  kop: string;
+  /** Het nummer van de maand (1-12), of null op de titel- en slotkaart. */
+  maand: number | null;
+  regels: JaarRegel[];
+  eigen: JaarEigen | null;
+  /** De maandnummers die in deze film zitten, voor de filmstrook. */
+  strook: number[];
+  /** Of de balken eraf zijn. Dat gebeurt vanzelf na de uitslag. */
+  onthuld: boolean;
+  /** Hoelang deze dia in beeld blijft als de film vanzelf doorloopt. */
+  seconden: number;
+  /** Het jaar in getallen. Alleen op de slotkaart. */
+  jaartotaal: { sport: number; taart: number; landen: number; dagen: number } | null;
+  /** Tot welke dag de eigen cijfers lopen, 'JJJJ-MM-DD'. */
+  peildatum: string;
 }

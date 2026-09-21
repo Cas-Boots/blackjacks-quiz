@@ -4,7 +4,9 @@ Een complete quizavond in één HTML-bestand. Geen server, geen internet, geen
 installatie, geen PowerPoint. Je opent `index.html` in een browser en je kunt
 beginnen.
 
-Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
+Alle vragen gaan over 2026 of over wat 2027 gaat brengen. De avond opent met
+een jaaroverzicht: het jaar maand voor maand, met een zwarte balk over elk
+antwoord dat nog gevraagd wordt.
 
 ## Snel starten
 
@@ -12,6 +14,7 @@ Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
 2. Dubbelklik het bestand — het opent in je browser.
 3. Vul je naam als quizmaster in, pas de spelersnamen aan, kies de vragen.
 4. Zet je scherm op volledig scherm (`F11`, of `ctrl`+`cmd`+`F` op een Mac).
+5. Begin met het jaaroverzicht, of ga met *Meteen naar ronde 1* de quiz in.
 
 Sluit je laptop met een HDMI-kabel op de tv aan, of cast het tabblad. Oogt de
 tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
@@ -57,6 +60,31 @@ De openstaande vragen dragen de markering `teVullen`. Je ziet ze terug als een r
 label in de vragenkiezer, en de controle vooraf telt hoeveel gekozen vragen
 nog een antwoord missen — zodat je niet per ongeluk met een onbeantwoordbare
 vraag de avond in gaat.
+
+## De avond begint met het jaaroverzicht
+
+Voor de eerste vraag draait er een film: **het jaar in twee minuten**, maand
+voor maand, met over alles wat de quiz later vraagt een **zwarte balk**. Je
+ziet dus wel dát er een finale werd gewonnen en dat er iemand inviel, maar niet
+door wie. De kamer roept er vanzelf doorheen en niemand krijgt een antwoord
+cadeau.
+
+Per maand staan er twee dingen: de momenten uit de wereld (dezelfde nagezochte
+feiten als de vragen) en wat wij dat jaar zelf deden — sporten, taarten,
+landen, en wie er die maand het vaakst ging. Onderaan loopt de stand van het
+jaar mee, zodat de slotkaart op de totalen uitkomt.
+
+De film loopt vanzelf door; met **Pauze** (`P`) zet je hem stil, met `spatie`
+ga je sneller, met `←` een stap terug, en *De film overslaan* brengt je meteen
+naar ronde 1.
+
+**Na de uitslag kun je dezelfde film nog eens draaien, nu zonder balken.** De
+knop staat bij de eindstand. De woorden die de hele avond zwart waren, krijgen
+dan een messing streep: je ziet in één oogopslag waar de quiz over ging.
+
+Oktober, november en december staan nog leeg; die schrijf je in december bij,
+net als de ronde *Oktober tot december*. Een maand waar niets van te vertellen
+valt, slaat de film over.
 
 ## Hoe de avond verloopt
 
@@ -125,7 +153,7 @@ Neem het bestand mee op een usb-stick als extra back-up.
 
 | Toets | Doet |
 |---|---|
-| `spatie` | volgende stap |
+| `spatie` | volgende stap (in het jaaroverzicht: volgende dia) |
 | `←` | een stap terug |
 | `P` | klok pauzeren of hervatten |
 | `T` | 30 seconden erbij |
@@ -190,6 +218,37 @@ En per vraagtype:
 ```
 
 Optioneel per vraag: `tijd` en `punten` overschrijven die van de ronde.
+
+## Het jaaroverzicht bijschrijven
+
+De tijdlijn van de film staat bij de vragen, in
+`app/src/lib/content/jaaroverzicht.ts`, en gaat met dezelfde `npm run
+content:sync` mee naar dit bestand (zonder Node kun je hier rechtstreeks bij
+`const JAAROVERZICHT` werken). Een maand ziet er zo uit:
+
+```js
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale, pas in de verlenging.",
+     bij:"Invaller [[Ferran Torres]] maakt de enige goal."},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+Wat tussen dubbele haken staat is een antwoord van vanavond en krijgt de zwarte
+balk. Drie afspraken bij het schrijven: elke bewering staat ook ergens in de
+vragen (de film voegt geen feiten toe, hij zet ze op volgorde), de kop van een
+maand verraadt niets — ook niet het antwoord van een andere vraag — en een
+regel die nog op invulling wacht krijgt `teVullen: true`, waarna de film hem
+overslaat. In de meespeelversie controleert `npm run verify` deze drie punten.
+
+Onze eigen cijfers per maand hoef je niet bij te houden: `npm run content:sync`
+schrijft ze in `const ONS_JAAR`, uitgerekend op dezelfde momentopname uit
+`resolution-recap` als de rondes over onszelf. De meespeelversie rekent ze op
+de avond zelf uit, dus daar kloppen ze tot op de dag.
 
 ## Bronnen voor de vragen over 2026
 

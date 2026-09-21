@@ -69,3 +69,42 @@ export interface Pakket {
 }
 
 export type Pakketten = Record<string, Pakket>;
+
+/* ---- Het jaaroverzicht -------------------------------------------------
+   De film waarmee de avond begint: het jaar maand voor maand langs, met
+   een zwarte balk over alles wat de quiz later vraagt. Zie
+   content/jaaroverzicht.ts voor de tijdlijn zelf. */
+
+export interface JaarMoment {
+  /**
+   * De regel zoals hij op het scherm komt. Wat tussen dubbele haken staat
+   * is een antwoord van vanavond: vóór de quiz een zwarte balk, na afloop
+   * gewoon te lezen. Bijvoorbeeld: "[[Bulgarije]] wint het Songfestival."
+   */
+  tekst: string;
+  /** Een klein bijschrift eronder. Hier nooit iets wat een antwoord verraadt. */
+  bij?: string;
+  emoji?: string;
+  /** Deze regel wacht nog op invulling; de televisie slaat hem over. */
+  teVullen?: boolean;
+}
+
+export interface JaarMaand {
+  /** 1 tot en met 12. */
+  nr: number;
+  /** De kop boven de maand. */
+  kop: string;
+  momenten: JaarMoment[];
+}
+
+export interface Jaaroverzicht {
+  jaar: number;
+  titel: string;
+  /** Wat er op de titelkaart staat, vóór de eerste maand. */
+  inleiding: string;
+  /** Wat er op de slotkaart staat, vlak voor de eerste ronde. */
+  slot: string;
+  /** Dezelfde slotkaart, maar bij de herhaling aan het eind van de avond. */
+  slotNaAfloop: string;
+  maanden: JaarMaand[];
+}

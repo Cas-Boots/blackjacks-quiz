@@ -20,8 +20,8 @@ import { replaceState } from '$app/navigation';
 import { live } from './live.svelte';
 import { REACTIES, hash } from '$lib/shared/kwinkslagen';
 import type {
-  Cijfers, CijfersPersoon, Fase, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat, PubliekTeam,
-  PubliekeVraag, VoorspellingUitslag, VoorspellerStand,
+  Cijfers, CijfersPersoon, Fase, JaarDia, JaarRegel, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat,
+  PubliekTeam, PubliekeVraag, VoorspellingUitslag, VoorspellerStand,
 } from '$lib/shared/state';
 
 /* ---- De tafel ------------------------------------------------------- */
@@ -202,6 +202,7 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     inzendingen: [],
     uitdeling: {},
     cijfers: null,
+    jaaroverzicht: null,
     ...over,
   };
 }
@@ -412,6 +413,73 @@ function voorspellingen(stap: number): Cijfers {
   };
 }
 
+/* ---- Het jaaroverzicht ----------------------------------------------
+   Verzonnen maanden, net als de vragen hierboven: de echte tijdlijn en de
+   echte antwoorden horen niet in de browser van de televisie. Het gaat hier
+   om de vorm — de zwarte balken, de strook, de meelopende cijfers. */
+
+function jaarRegel(tekst: string, onthuld: boolean, emoji: string | null = null, bij: string | null = null): JaarRegel {
+  const knip = (regel: string) => {
+    const delen = [];
+    const patroon = /\[\[(.+?)\]\]/g;
+    let laatste = 0;
+    for (let m = patroon.exec(regel); m; m = patroon.exec(regel)) {
+      if (m.index > laatste) delen.push({ tekst: regel.slice(laatste, m.index), balk: false, lengte: 0 });
+      delen.push({ tekst: onthuld ? m[1] : '', balk: true, lengte: m[1].length });
+      laatste = m.index + m[0].length;
+    }
+    if (laatste < regel.length) delen.push({ tekst: regel.slice(laatste), balk: false, lengte: 0 });
+    return delen;
+  };
+  return { emoji, delen: knip(tekst), bij: bij ? knip(bij) : null };
+}
+
+const FILM_STROOK = [1, 2, 3, 5, 6, 7, 9, 11, 12];
+const MAANDEN_VOL = [
+  'januari', 'februari', 'maart', 'april', 'mei', 'juni',
+  'juli', 'augustus', 'september', 'oktober', 'november', 'december',
+];
+
+function jaaroverzicht(stap: number, onthuld = false): JaarDia {
+  const stappen = FILM_STROOK.length + 2;
+  const basisDia = {
+    stap, stappen, jaar: JAAR, strook: FILM_STROOK, onthuld, peildatum: PEILDATUM,
+  };
+  if (stap === 0) {
+    return {
+      ...basisDia, soort: 'titel', titel: String(JAAR), kop: 'Het jaar in twee minuten', maand: null,
+      regels: [jaarRegel('Twaalf maanden, zo snel als ze voorbijgingen. Alles wat zwart blijft, is een vraag van vanavond.', onthuld)],
+      eigen: null, seconden: 7, jaartotaal: null,
+    };
+  }
+  if (stap >= stappen - 1) {
+    return {
+      ...basisDia, soort: 'slot', titel: `Dat was ${JAAR}`, maand: null,
+      kop: onthuld ? 'Zelfde film, zelfde jaar. Nu zonder balken.' : 'En dat was het jaar. Nu de balken eraf.',
+      regels: [], eigen: null, seconden: 12,
+      jaartotaal: { sport: 421, taart: 43, landen: 12, dagen: 188 },
+    };
+  }
+  const nr = FILM_STROOK[Math.min(stap, FILM_STROOK.length) - 1];
+  return {
+    ...basisDia, soort: 'maand', titel: MAANDEN_VOL[nr - 1], kop: 'Een maand met van alles erin', maand: nr,
+    regels: [
+      jaarRegel('Een ploeg uit [[een land hier]] wint iets groots.', onthuld, '🏆', 'Met een invaller die [[een naam]] heet.'),
+      jaarRegel('Er verschijnt een film die iedereen gezien moet hebben.', onthuld, '🎬'),
+      jaarRegel('En er gebeurt iets in [[Den Haag]] waar nog lang over gepraat wordt.', onthuld, '🏛️'),
+    ],
+    eigen: {
+      sport: 37, taart: 4,
+      landen: [{ vlag: '🇫🇷', naam: 'Frankrijk', wie: 'Eva', datum: `${JAAR}-0${Math.min(9, nr)}-12` }],
+      bijStart: nr === 1 ? 4 : 0,
+      koploper: { naam: 'Joris', aantal: 12 },
+      perPersoon: NAMEN.map((naam, i) => ({ naam, sport: 12 - i, taart: (i % 3) + 1, landen: i === 4 ? ['🇫🇷'] : [] })),
+      totaal: { sport: 37 * stap, taart: 4 * stap, landen: Math.min(12, 2 + stap) },
+    },
+    seconden: 12, jaartotaal: null,
+  };
+}
+
 /* ---- De dia's ------------------------------------------------------- */
 
 export interface Dia {
@@ -448,6 +516,28 @@ export const DIAS: Dia[] = [
     id: 'lobby-vol', hoofdstuk: 'Aanmelden', titel: 'Iedereen is erbij',
     let: '“Iedereen is erbij. We kunnen beginnen.”',
     maak: () => basis({ fase: 'lobby', stand: stand({}) }),
+  },
+
+  /* ── Jaaroverzicht ── */
+  {
+    id: 'film-titel', hoofdstuk: 'Jaaroverzicht', titel: 'De titelkaart',
+    let: 'Het jaartal groot in beeld, de strook onderaan met de maanden die meedoen, en de lijn die de dia uittelt.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(0), klok: { eindigtOp: Date.now() + 7000, duurMs: 7000, loopt: true } }),
+  },
+  {
+    id: 'film-maand', hoofdstuk: 'Jaaroverzicht', titel: 'Een maand, met balken',
+    let: 'Over elk antwoord van vanavond ligt een zwarte balk — het woord eronder zit niet eens in het pakketje. Onder de streep wat wij die maand deden, met de stand van het jaar die meeloopt.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(3), klok: { eindigtOp: Date.now() + 12000, duurMs: 12000, loopt: true } }),
+  },
+  {
+    id: 'film-slot', hoofdstuk: 'Jaaroverzicht', titel: 'De slotkaart',
+    let: 'Het jaar in vier getallen; de tellers lopen van nul omhoog. Hierna begint ronde 1.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(FILM_STROOK.length + 1) }),
+  },
+  {
+    id: 'film-onthuld', hoofdstuk: 'Jaaroverzicht', titel: 'De herhaling, zonder balken',
+    let: 'Dezelfde maand na de uitslag: de balken schuiven open en laten een messing streep achter, zodat je ziet welke woorden de hele avond zwart waren.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(3, true) }),
   },
 
   /* ── Ronde ── */

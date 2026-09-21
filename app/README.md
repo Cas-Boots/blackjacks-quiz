@@ -153,7 +153,9 @@ npm run verify -- --zonder-server                  # alleen op papier
 Eerst op papier: loopt `index.html` gelijk met `packs.ts`, heeft elke vraag
 wat zijn type nodig heeft (antwoord, opties, doelgetal), staan de foto's en
 fragmenten waar vragen naar verwijzen in `media/`, en hoeveel vragen staan
-nog op `teVullen`.
+nog op `teVullen`. Daarna het jaaroverzicht: welke maanden meedraaien, welke
+er leeg blijven, hoeveel regels er nog op invulling wachten, en of elke zwarte
+balk hoort bij iets wat vanavond ook echt gevraagd wordt.
 
 Dan tegen de server. Hij meldt zich als quizmaster, als één telefoon en als
 de televisie, en speelt elke gekozen ronde en elke vraag door in een eigen
@@ -186,7 +188,7 @@ oude tekst, en de controle zegt dat de server een oudere bouw draait.
 
 | Scherm | Adres | Voor wie |
 |---|---|---|
-| Televisie | `/tv` | het grote scherm; QR-code, vraag, klok, onthulling, tussenstand, podium |
+| Televisie | `/tv` | het grote scherm; QR-code, het jaaroverzicht, vraag, klok, onthulling, tussenstand, podium |
 | Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 | Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
@@ -219,6 +221,50 @@ Op de telefoon kun je in de lobby een selfie kiezen. Die wordt op de telefoon
 zelf bijgesneden en verkleind (256 bij 256) en staat daarna bij je naam op de
 televisie, in de stand en op het podium. Tik later op je portret in de kop om
 hem te vervangen.
+
+### Het jaaroverzicht: waarmee de avond opent
+
+De avond begint niet met een vraag maar met een film: **het jaaroverzicht**.
+Het jaar loopt maand voor maand over de televisie, en over alles wat de quiz
+later vraagt ligt een **zwarte balk**. Je ziet dus wel dát Oranje eruit ging
+en dat er iemand de finale besliste, maar niet tegen wie of door wie. De kamer
+roept er vanzelf doorheen, en niemand krijgt een antwoord cadeau.
+
+Wat er per maand staat:
+
+- **De wereld** — de momenten van die maand, uit dezelfde nagezochte feiten
+  als de vragen. Ze staan in `src/lib/content/jaaroverzicht.ts`.
+- **Wij** — wat wij die maand zelf deden: hoe vaak er gesport is, hoeveel
+  taart erdoorheen ging, welke landen erbij kwamen en wie er die maand het
+  vaakst ging. Die cijfers komen rechtstreeks uit resolution-recap en worden
+  op de avond zelf uitgerekend, net als de recap-rondes.
+- **De stand van het jaar**, die van maand tot maand meeloopt, zodat de
+  slotkaart met de totalen van het jaar landt.
+
+Op je telefoon staat dezelfde dia, maar dan met **jouw** maand eronder: hoe
+vaak jij sportte, hoeveel taart jij at, waar jij was.
+
+De film loopt vanzelf door: elke dia staat acht tot achttien seconden in beeld,
+en het hostscherm tikt hem door zodra de klok afloopt. Met **Pauze** (of `P`)
+zet je hem stil als er iets te vertellen valt, met **Volgende dia** ga je
+sneller, met `←` een stap terug en met **De film overslaan** ga je meteen naar
+ronde 1. Na de laatste dia begint ronde 1 vanzelf.
+
+Een maand waar niets van te vertellen valt — geen geschreven moment en niets
+uit onze eigen cijfers — slaat de film over. Zo staat er in oktober geen lege
+kaart zolang die maand nog niet bijgeschreven is.
+
+**Na de uitslag draait dezelfde film nog een keer, nu zonder balken.** Op het
+hostscherm staat daar bij de uitslag een knop voor. Alles is dan gevraagd, dus
+alles mag gelezen worden; de woorden die de hele avond zwart waren, krijgen een
+messing streep, zodat je in één oogopslag ziet waar de quiz over ging. Dat
+gebeurt vanzelf zodra de avond voorbij is — je hoeft nergens een schakelaar om
+te zetten. Ga je vanaf de uitslag terug, of terug naar de lobby, dan liggen de
+balken er weer.
+
+Schrijf je de maanden bij? Zie [De vragen aanpassen](#de-vragen-aanpassen);
+`npm run verify` telt hoeveel regels er nog op invulling wachten en of er
+nergens een antwoord onder de balk uit komt.
 
 ### Zo verloopt een vraag
 
@@ -299,6 +345,11 @@ sneltoetsen zoals in de losse quiz:
 | `M` | fragment afspelen of stoppen |
 | `A` | vink aan wat goed lijkt |
 | `Z` | de laatste handeling ongedaan maken |
+
+In de lobby staat **Start het jaaroverzicht** als hoofdknop; bij de uitslag
+staat er *Het jaaroverzicht nog eens — nu zonder balken*. Tijdens de film zegt
+het hostscherm bij welke dia je bent, en bedien je hem met *Volgende dia*,
+*Pauze* (`P`), `←` en *De film overslaan*.
 
 Bij een open vraag staat er een knop **Por de achterblijvers**; tik op een naam
 in de inleverrij om één telefoon te porren.
@@ -447,7 +498,9 @@ voordat je de bediening oefent.
 ### De televisie alleen: `/tv?test`
 
 Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
-telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**:
+telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**. Het
+jaaroverzicht heeft daar een eigen hoofdstuk: de titelkaart, een maand met
+balken, de slotkaart met het jaar in getallen en de herhaling zonder balken.
 
 ```
 http://localhost:5173/tv?test        # bij npm run dev
@@ -585,6 +638,48 @@ npm run content:check   # alleen controleren; dit draait ook in CI
 De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
 vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
 vraag.
+
+### Het jaaroverzicht bijschrijven
+
+De tijdlijn van de film staat in `src/lib/content/jaaroverzicht.ts`, naast de
+vragen, en gaat met dezelfde `npm run content:sync` mee naar de losse quiz.
+Eén maand ziet er zo uit:
+
+```ts
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale, pas in de verlenging.",
+     bij:"Invaller [[Ferran Torres]] maakt de enige goal."},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+Drie afspraken:
+
+1. **Wat tussen dubbele haken staat, is een antwoord van vanavond.** Daar komt
+   de zwarte balk overheen. Zolang die ligt, gaat het woord niet mee in het
+   pakketje naar de televisie — alleen hoeveel tekens eronder zitten, voor de
+   breedte van de balk. Net als bij een vraag: wat nog gevraagd wordt, staat
+   niet in de browser van de televisie.
+2. **Elke bewering hoort ook in `packs.ts` te staan.** De vragen zijn
+   nagezocht; de film zet ze op volgorde en voegt er niets aan toe. `npm run
+   verify` meldt het als er een balk boven iets staat wat geen enkele vraag
+   vraagt.
+3. **De kop van een maand verraadt niets** — ook niet het antwoord van een
+   andere vraag. "Het WK begint, in drie landen tegelijk" is precies wat er
+   niet moet staan: het aantal is een vraag van vanavond. `npm run verify`
+   slaat alarm als een kop een antwoord uit diezelfde maand bevat.
+
+Een regel met `teVullen: true` slaat de film over; oktober, november en
+december staan zo klaar om in december bijgeschreven te worden, net als de
+ronde *Oktober tot december*. Onze eigen cijfers per maand hoef je nergens in
+te vullen: die komen uit resolution-recap.
+
+Zien hoe het eruitziet zonder een avond te draaien: `/tv?test=film-maand`,
+`/tv?test=film-slot` en `/tv?test=film-onthuld`.
 
 Over de lengte hoef je niet te piekeren: een vraag van meer dan honderd tekens
 zet de televisie een maat kleiner, en past een dia dan nog niet op het scherm —
