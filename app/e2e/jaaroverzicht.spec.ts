@@ -2,14 +2,14 @@ import { test, expect, type Browser } from '@playwright/test';
 import { JAAROVERZICHT } from '../src/lib/content/jaaroverzicht';
 
 /**
- * Het jaaroverzicht: de film waarmee de avond opent.
+ * Het jaaroverzicht: een trailer vóór de quiz, de film erna.
  *
- * Waar het hier om gaat is de belofte van de film: je ziet het hele jaar
+ * Waar het hier om gaat is de belofte van de trailer: je ziet het jaar
  * langskomen zonder dat er één antwoord van vanavond uitlekt. Daarom kijkt
- * deze proef niet alleen of de dia's op het scherm komen, maar ook of het
- * woord onder een balk écht nergens in de pagina staat, of onze eigen
- * taarten, landen en koplopers dicht zitten, of regels die pas in de
- * herhaling horen wegblijven — en of het er na de uitslag allemaal wél staat.
+ * deze proef niet alleen of de dia's op het scherm komen, maar ook of er
+ * geen regel met een antwoord in de pagina staat, geen maandkop, en niets
+ * van onze taarten, landen en koplopers — en of het na de uitslag in de
+ * film allemaal wél staat.
  */
 
 async function quizmaster(browser: Browser) {
@@ -28,7 +28,7 @@ async function quizmaster(browser: Browser) {
   return { ctx, pagina, doe, staat };
 }
 
-test('de film draait het jaar af zonder één antwoord te verklappen', async ({ browser }) => {
+test('de trailer draait zonder één antwoord te verklappen, en gaat dan de quiz in', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await qm.doe('nieuw-spel', { pakket: 'jaar2026' });
 
@@ -42,65 +42,70 @@ test('de film draait het jaar af zonder één antwoord te verklappen', async ({ 
   const eerste = await qm.staat();
   expect(eerste.fase).toBe('jaaroverzicht');
   expect(eerste.jaaroverzicht.soort).toBe('titel');
-  // De film loopt op de klok van de server, zodat elk scherm gelijk loopt.
+  expect(eerste.jaaroverzicht.onthuld).toBe(false);
+  // De trailer loopt op de klok van de server, zodat elk scherm gelijk loopt.
   expect(eerste.klok.loopt).toBe(true);
 
   const stappen: number = eerste.jaaroverzicht.stappen;
-  expect(stappen).toBeGreaterThan(4);
+  expect(stappen).toBeGreaterThanOrEqual(3);
 
-  // Wat er per maand onder een balk zit, rechtstreeks uit de tijdlijn: dan
-  // groeit deze proef vanzelf mee met wat er bijgeschreven wordt.
-  const verborgenIn = (maand: number | null) => {
+  // Wat er per maand tussen haken staat, en de open tekst van elke regel
+  // die alleen in de film hoort — rechtstreeks uit de tijdlijn, zodat deze
+  // proef vanzelf meegroeit met wat er bijgeschreven wordt.
+  const antwoordenIn = (maand: number | null) => {
     const m = JAAROVERZICHT.maanden.find((x) => x.nr === maand);
     if (!m) return [];
     const tekst = m.momenten.map((x) => `${x.tekst} ${x.bij ?? ''}`).join(' ');
     return [...tekst.matchAll(/\[\[(.+?)\]\]/g)].map((x) => x[1]);
   };
-  // En de open tekst van regels die pas na de uitslag in beeld horen.
-  const pasLaterIn = (maand: number | null) =>
-    (JAAROVERZICHT.maanden.find((x) => x.nr === maand)?.momenten ?? [])
-      .filter((x) => x.pasNaAfloop)
-      .flatMap((x) => x.tekst.split(/\[\[.+?\]\]/))
+  const alleenInDeFilm = JAAROVERZICHT.maanden.flatMap((m) =>
+    m.momenten
+      .filter((x) => !x.teVullen && (x.pasNaAfloop || /\[\[/.test(`${x.tekst} ${x.bij ?? ''}`)))
+      .flatMap((x) => `${x.tekst} ${x.bij ?? ''}`.split(/\[\[.+?\]\]/))
       .map((stuk) => stuk.trim())
-      .filter((stuk) => stuk.length >= 10);
+      .filter((stuk) => stuk.length >= 10),
+  );
 
   for (let stap = 0; stap < stappen; stap++) {
     const uit = await qm.doe('jaaroverzicht', { stap });
     expect(uit.ok).toBe(true);
     const st = await qm.staat();
-    expect(st.jaaroverzicht.stap).toBe(stap);
-    expect(st.jaaroverzicht.onthuld).toBe(false);
+    const dia = st.jaaroverzicht;
+    expect(dia.stap).toBe(stap);
+    expect(dia.onthuld).toBe(false);
 
-    // Het pakketje naar de clients draagt het woord niet, en ook niet hoe lang het is.
-    const pakketje = JSON.stringify(st.jaaroverzicht);
-    for (const woord of verborgenIn(st.jaaroverzicht.maand)) {
+    // In het pakketje naar de clients: geen regel met een antwoord.
+    const pakketje = JSON.stringify(dia);
+    expect(pakketje).not.toContain('"balk":true');
+    for (const woord of antwoordenIn(dia.maand)) {
       expect(pakketje, `dia ${stap} lekt "${woord}"`).not.toContain(woord);
     }
-    expect(pakketje).not.toContain('lengte');
-    for (const stuk of pasLaterIn(st.jaaroverzicht.maand)) {
+    for (const stuk of alleenInDeFilm) {
       expect(pakketje, `dia ${stap} laat al zien: "${stuk}"`).not.toContain(stuk);
     }
 
-    // Onze eigen cijfers: wat de recap-rondes vragen, zit er nog niet in.
-    const eigen = st.jaaroverzicht.eigen;
-    if (eigen) {
-      expect(eigen.taart).toBeNull();
-      expect(eigen.landen).toEqual([]);
-      expect(eigen.perPersoon).toEqual([]);
-      expect(eigen.totaal).toBeNull();
-      if (eigen.koploper) expect(eigen.koploper.naam).toBeNull();
+    // Geen maandkop, en van onze eigen cijfers alleen het sporten.
+    if (dia.soort === 'maand') expect(dia.kop).toBe('');
+    if (dia.eigen) {
+      expect(dia.eigen.taart).toBeNull();
+      expect(dia.eigen.landen).toEqual([]);
+      expect(dia.eigen.perPersoon).toEqual([]);
+      expect(dia.eigen.totaal).toBeNull();
+      expect(dia.eigen.koploper).toBeNull();
     }
-    if (st.jaaroverzicht.soort === 'slot') expect(st.jaaroverzicht.jaartotaal).toBeNull();
+    if (dia.soort === 'slot') expect(dia.jaartotaal).toBeNull();
 
-    // En op de televisie zelf staat het ook niet: de balken zijn leeg.
-    if (st.jaaroverzicht.maand !== null) {
+    // En op de televisie zelf staat het ook niet.
+    if (dia.maand !== null) {
       await expect(tv.locator('.film')).toBeVisible({ timeout: 10_000 });
       await tv.waitForTimeout(150);
       const opScherm = await tv.locator('.romp').innerText();
-      for (const woord of verborgenIn(st.jaaroverzicht.maand)) {
+      for (const woord of antwoordenIn(dia.maand)) {
         expect(opScherm, `de televisie toont "${woord}" bij dia ${stap}`).not.toContain(woord);
       }
       await expect(tv.locator('.vlagchip')).toHaveCount(0);
+      await expect(tv.locator('.maandhoed')).toHaveCount(0);
+      await expect(tv.locator('.zwart')).toHaveCount(0);
     }
   }
 
@@ -114,36 +119,41 @@ test('de film draait het jaar af zonder één antwoord te verklappen', async ({ 
   await qm.ctx.close();
 });
 
-test('na de uitslag draait dezelfde film zonder balken', async ({ browser }) => {
+test('na de uitslag draait de hele film, met de antwoorden erin', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await qm.doe('nieuw-spel', { pakket: 'jaar2026' });
 
-  // Voor de uitslag: balken.
+  // Vóór de uitslag: de trailer.
   await qm.doe('jaaroverzicht', { stap: 1 });
   expect((await qm.staat()).jaaroverzicht.onthuld).toBe(false);
 
-  // Na de uitslag: dezelfde dia, nu te lezen.
+  // Na de uitslag: de film, met juli en alles erin.
   await qm.doe('naar-einde');
-  await qm.doe('jaaroverzicht', { stap: 1 });
-  const open = await qm.staat();
-  expect(open.jaaroverzicht.onthuld).toBe(true);
-  const delen = open.jaaroverzicht.regels.flatMap((r: { delen: { tekst: string; balk: boolean }[] }) => r.delen);
-  expect(delen.some((d: { balk: boolean; tekst: string }) => d.balk && d.tekst.length > 0)).toBe(true);
-  // Nu staan ook onze eigen cijfers erbij.
-  expect(typeof open.jaaroverzicht.eigen.taart).toBe('number');
-  expect(open.jaaroverzicht.eigen.totaal).not.toBeNull();
+  await qm.doe('jaaroverzicht', { stap: 0 });
+  const begin = (await qm.staat()).jaaroverzicht;
+  expect(begin.onthuld).toBe(true);
+  expect(begin.stappen).toBeGreaterThan(5);
+
+  await qm.doe('jaaroverzicht', { stap: begin.strook.indexOf(7) + 1 });
+  const juli = (await qm.staat()).jaaroverzicht;
+  expect(juli.maand).toBe(7);
+  expect(juli.kop).not.toBe('');
+  const tekst = juli.regels.map((r: { delen: { tekst: string }[] }) => r.delen.map((d) => d.tekst).join('')).join(' ');
+  expect(tekst).toContain('Marokko');
+  expect(typeof juli.eigen.taart).toBe('number');
+  expect(juli.eigen.totaal).not.toBeNull();
 
   // De slotkaart heeft nu het jaar in getallen.
-  await qm.doe('jaaroverzicht', { stap: open.jaaroverzicht.stappen - 1 });
-  const slot = await qm.staat();
-  expect(slot.jaaroverzicht.soort).toBe('slot');
-  expect(slot.jaaroverzicht.jaartotaal.taart).toBeGreaterThan(0);
+  await qm.doe('jaaroverzicht', { stap: begin.stappen - 1 });
+  const slot = (await qm.staat()).jaaroverzicht;
+  expect(slot.soort).toBe('slot');
+  expect(slot.jaartotaal.taart).toBeGreaterThan(0);
 
-  // Aan het eind van de herhaling staat het podium er weer.
+  // Aan het eind van de film staat het podium er weer.
   await qm.doe('volgende');
   expect((await qm.staat()).fase).toBe('einde');
 
-  // En terug naar de lobby betekent: de avond begint opnieuw, balken erop.
+  // En terug naar de lobby betekent: de avond begint opnieuw, met de trailer.
   await qm.doe('naar-lobby');
   await qm.doe('jaaroverzicht', { stap: 1 });
   expect((await qm.staat()).jaaroverzicht.onthuld).toBe(false);

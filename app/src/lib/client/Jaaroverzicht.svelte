@@ -1,15 +1,15 @@
 <script lang="ts">
   /**
-   * Het jaaroverzicht: de film waarmee de avond opent.
+   * Het jaaroverzicht: de trailer waarmee de avond opent, en na de uitslag
+   * de hele film.
    *
-   * Eén dia per keer — een titelkaart, twaalf maanden, een slotkaart — en
-   * onder in beeld een strook die laat zien waar we in het jaar zijn. Over
-   * alles wat de quiz nog gaat vragen ligt een zwarte balk; het woord
-   * eronder zit niet eens in het pakketje, en elke balk is even breed. Dat
-   * geldt ook voor onze eigen taarten, landen en wie het vaakst ging. Na de
-   * uitslag draait dezelfde film zonder balken, en dan schuiven ze open.
+   * Eén dia per keer — een titelkaart, de maanden, een slotkaart — en
+   * onder in beeld een strook die laat zien waar we in het jaar zijn. In de
+   * trailer staat alleen wat de quiz niet vraagt; wat hier niet binnenkomt,
+   * kan ook niet uitlekken. In de film staan de antwoorden van vanavond erin,
+   * met een streep eronder die openschuift als een balk.
    *
-   * Op de telefoon (compact) staat dezelfde dia. Na de uitslag staat daar
+   * Op de telefoon (compact) staat dezelfde dia. In de film staat daar
    * onderaan niet de hele groep maar jouw eigen maand.
    */
   import { fly, fade } from 'svelte/transition';
@@ -37,8 +37,7 @@
   let eigen = $derived(dia.eigen);
   /** Wat jíj die maand deed — voor op je eigen telefoon. */
   let mijn = $derived(alleen ? (eigen?.perPersoon.find((p) => p.naam === alleen) ?? null) : null);
-  /** Een taart onder een balk telt als 'misschien': dan staat het blok er gewoon. */
-  let ietsGedaan = $derived(!!eigen && (eigen.sport > 0 || eigen.taart !== 0 || eigen.nieuweLanden));
+  let ietsGedaan = $derived(!!eigen && (eigen.sport > 0 || (eigen.taart ?? 0) > 0 || eigen.landen.length > 0));
 
   function fotoVan(naam: string) {
     return spelers.find((s) => s.naam === naam)?.foto ?? null;
@@ -71,7 +70,7 @@
     <!-- ══ De slotkaart ══════════════════════════════════════════════ -->
   {:else if dia.soort === 'slot'}
     <div class="kaart titelkaart">
-      <p class="etiket" in:fly={{ y: -12, duration: 480, easing: cubicOut }}>Aftiteling</p>
+      <p class="etiket" in:fly={{ y: -12, duration: 480, easing: cubicOut }}>{dia.onthuld ? 'Aftiteling' : 'Na de uitslag'}</p>
       <h1 class="jaartal klein" in:fly={{ y: 22, duration: 640, easing: cubicOut }}>{dia.titel}</h1>
       <hr class="rule" style="width:min(520px,60vw)" />
       <p class="filmtitel" in:fly={{ y: 16, duration: 520, delay: 200, easing: cubicOut }}>{dia.kop}</p>
@@ -91,8 +90,6 @@
           {/each}
         </div>
         <p class="fijn peildatum">Onze cijfers lopen tot {datumKort(dia.peildatum)}.</p>
-      {:else}
-        <p class="fijn peildatum" in:fade={{ duration: 500, delay: 520 }}>Ons jaar in getallen volgt na de uitslag.</p>
       {/if}
     </div>
 
@@ -103,7 +100,9 @@
         <h1 class="maandnaam" in:fly={{ x: -26, duration: 560, easing: cubicOut }}>{dia.titel}</h1>
         <span class="jaarschaduw" aria-hidden="true">{dia.jaar}</span>
       </div>
-      <p class="maandhoed" in:fly={{ y: 14, duration: 480, delay: 120, easing: cubicOut }}>{dia.kop}</p>
+      {#if dia.kop}
+        <p class="maandhoed" in:fly={{ y: 14, duration: 480, delay: 120, easing: cubicOut }}>{dia.kop}</p>
+      {/if}
 
       {#if dia.regels.length}
         <div class="regels">
@@ -140,9 +139,8 @@
               {/each}
             {:else}
               <span class="chip"><span class="chipemoji">🏃</span><b>{eigen.sport}</b> keer gesport</span>
-              {#if eigen.taart === null}
-                <span class="chip"><span class="chipemoji">🍰</span><span class="zwart"></span> taarten</span>
-              {:else}
+              <!-- In de trailer is de taart null: hoeveel het er waren is een vraag. -->
+              {#if eigen.taart !== null}
                 <span class="chip"><span class="chipemoji">🍰</span><b>{eigen.taart}</b> {eigen.taart === 1 ? 'taart' : 'taarten'}</span>
               {/if}
               {#each eigen.landen as land (land.naam)}
@@ -150,25 +148,18 @@
                   <span class="vlag">{land.vlag}</span>{land.naam}
                   <span class="fijn">{land.wie} · {datumKort(land.datum)}</span>
                 </span>
-              {:else}
-                {#if eigen.nieuweLanden}
-                  <span class="chip"><span class="chipemoji">🌍</span><span class="zwart"></span> erbij</span>
-                {/if}
               {/each}
               {#if eigen.bijStart}
                 <span class="chip stil">De lijst begon met {eigen.bijStart} {eigen.bijStart === 1 ? 'land' : 'landen'}</span>
               {/if}
               {#if eigen.koploper}
-                {@const naam = eigen.koploper.naam}
                 <span class="chip koploper">
-                  {#if naam === null}
-                    <span class="avatar">?</span><span class="zwart"></span>
-                  {:else if fotoVan(naam)}
-                    <img class="avatar" src={fotoVan(naam)} alt="" />{naam}
+                  {#if fotoVan(eigen.koploper.naam)}
+                    <img class="avatar" src={fotoVan(eigen.koploper.naam)} alt="" />
                   {:else}
-                    <span class="avatar">{initialen(naam)}</span>{naam}
+                    <span class="avatar">{initialen(eigen.koploper.naam)}</span>
                   {/if}
-                  het vaakst — <b>{eigen.koploper.aantal}×</b>
+                  {eigen.koploper.naam} het vaakst — <b>{eigen.koploper.aantal}×</b>
                 </span>
               {/if}
             {/if}
@@ -371,12 +362,12 @@
     color: var(--salie);
   }
 
-  /* ---- de zwarte balk ----------------------------------------------
-     Zolang hij ligt is hij leeg: het woord zit niet in de pagina. Elke
-     balk is even breed, of er nu '19' onder zit of een heel stadion — de
-     lengte zou anders zelf een hint zijn. Na de uitslag staat de tekst er
-     wel, en blijft alleen het streepje eronder staan: je ziet dan precies
-     welke woorden de hele avond zwart waren. */
+  /* ---- de balk -------------------------------------------------------
+     In de film staat onder elk antwoord van vanavond een messing streep, en
+     bij binnenkomst schuift er een zwarte balk vanaf: je ziet precies welke
+     woorden de vragen waren. Een lege balk zonder tekst hoort nooit in beeld
+     te komen — de trailer stuurt geen regels met antwoorden — maar mocht het
+     toch gebeuren, dan is hij zwart en even breed als elke andere. */
   .zwart {
     display: inline-block;
     vertical-align: baseline;

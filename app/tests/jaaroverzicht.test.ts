@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import snapshot from '../src/lib/content/recap-snapshot.json';
 import { analyseer, type RecapExport } from '../src/lib/server/recap/analyse';
 import {
-  splits, aantalBalken, eigenMaand, achterBalken, maandenInDeFilm, aantalDias, maandenTeVullen, jaaroverzichtVoor,
+  splits, aantalBalken, eigenMaand, voorDeTrailer, inDeTrailer, maandenInDeFilm, aantalDias, maandenTeVullen,
+  jaaroverzichtVoor,
 } from '../src/lib/server/jaaroverzicht';
 import { JAAROVERZICHT } from '../src/lib/content/jaaroverzicht';
 import { PAKKETTEN } from '../src/lib/content/packs';
@@ -95,17 +96,15 @@ describe('de tijdlijn', () => {
     }
     expect(missers).toEqual([]);
   });
-  it('zegt in de open tekst geen antwoord van de quiz hardop', () => {
-    // Wat vóór de uitslag zonder balk op het scherm staat: de koppen, de
-    // titel- en slotkaart en alle tekst naast de balken. Daarin mag geen
-    // antwoord van de quiz letterlijk voorkomen.
+  it('zegt in de trailer geen antwoord van de quiz hardop', () => {
+    // Alles wat de trailer laat zien: de titel- en slotkaart en de regels
+    // zonder haken. Daarin mag geen antwoord van de quiz letterlijk staan.
     const open = [
       JAAROVERZICHT.titel, JAAROVERZICHT.inleiding, JAAROVERZICHT.slot,
-      ...JAAROVERZICHT.maanden.flatMap((m) => [
-        m.kop,
-        ...m.momenten.filter((x) => !x.teVullen && !x.pasNaAfloop).flatMap((x) => [x.tekst, x.bij ?? '', x.emoji ?? '']),
-      ]),
-    ].map((t) => t.replace(/\[\[.+?\]\]/g, ' ■ ').toLowerCase());
+      ...JAAROVERZICHT.maanden.flatMap((m) =>
+        m.momenten.filter(inDeTrailer).flatMap((x) => [x.tekst, x.bij ?? '', x.emoji ?? '']),
+      ),
+    ].map((t) => t.toLowerCase());
 
     const antwoorden = new Set<string>();
     for (const pakket of Object.values(PAKKETTEN)) {
@@ -126,17 +125,10 @@ describe('de tijdlijn', () => {
       }
     }
 
-    // Toeval dat blijft staan, met de reden erbij. Voeg hier alleen iets aan
-    // toe als het echt niets met de vraag te maken heeft.
-    const toeval = new Map([['twee', 'het jaar in twee minuten']]); // vs. "Hoeveel wereldtitels heeft Spanje nu?"
-
     const woordgrens = (w: string) => new RegExp(`(^|[^\\p{L}\\d])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\d])`, 'u');
     const gevonden: string[] = [];
     for (const antwoord of antwoorden) {
-      for (const tekst of open) {
-        if (toeval.get(antwoord) === tekst) continue;
-        if (woordgrens(antwoord).test(tekst)) gevonden.push(`"${antwoord}" in "${tekst}"`);
-      }
+      for (const tekst of open) if (woordgrens(antwoord).test(tekst)) gevonden.push(`"${antwoord}" in "${tekst}"`);
     }
     expect(gevonden).toEqual([]);
   });
@@ -162,9 +154,7 @@ describe('onze eigen maand', () => {
   it('noemt een land alleen de maand waarin het voor het eerst op de lijst kwam', () => {
     expect(eigenMaand(a, 8).landen.map((l) => l.naam)).toEqual(['Kroatië']);
     expect(eigenMaand(a, 8).landen[0].wie).toBe('An');
-    expect(eigenMaand(a, 8).nieuweLanden).toBe(true);
     expect(eigenMaand(a, 9).landen).toEqual([]);
-    expect(eigenMaand(a, 9).nieuweLanden).toBe(false);
   });
   it('houdt de landen van de eerste dagen apart — die zijn in één keer ingevoerd', () => {
     // Nederland staat op 1 januari bij allebei: dat is de lijst die het jaar
@@ -199,64 +189,76 @@ describe('onze eigen maand', () => {
   });
 });
 
-describe('onze eigen cijfers vóór de uitslag', () => {
+describe('de trailer', () => {
   const a = analyseer(klein());
+  const trailer = () =>
+    Array.from({ length: aantalDias(analyse) }, (_, stap) => jaaroverzichtVoor(analyse, stap, false));
 
-  it('laat staan hoe vaak er gesport is, maar niet wat de recap-rondes vragen', () => {
-    const dicht = achterBalken(eigenMaand(a, 8));
-    expect(dicht).toEqual({
-      sport: 0,
-      taart: null,
-      landen: [],
-      nieuweLanden: true,
-      bijStart: null,
-      koploper: null,
-      perPersoon: [],
-      totaal: null,
-    });
-    // De koploper blijft staan met zijn aantal, maar zonder naam.
-    expect(achterBalken(eigenMaand(a, 1)).koploper).toEqual({ naam: null, aantal: 2 });
+  it('neemt alleen regels zonder haken, en niets wat voor de film bewaard is', () => {
+    expect(inDeTrailer({ tekst: 'We gaan met z’n allen naar zee.' })).toBe(true);
+    expect(inDeTrailer({ tekst: '[[Bulgarije]] wint.' })).toBe(false);
+    expect(inDeTrailer({ tekst: 'Er wint iemand.', bij: 'Het was [[Bulgarije]].' })).toBe(false);
+    expect(inDeTrailer({ tekst: 'Daarmee evenaart hij het record.', pasNaAfloop: true })).toBe(false);
+    expect(inDeTrailer({ tekst: 'Nog in te vullen.', teVullen: true })).toBe(false);
   });
-  it('stuurt vóór de uitslag geen land, geen taart en geen naam mee', () => {
-    // Op de echte cijfers: geen enkel land, geen vlag en geen naam van de
-    // koploper in het pakketje van welke maand dan ook.
+  it('stuurt geen enkele regel met een antwoord mee, ook niet de tekst eromheen', () => {
+    // Van elke regel die alleen in de film hoort, de open stukken tekst.
+    const alleenFilm = JAAROVERZICHT.maanden.flatMap((m) =>
+      m.momenten
+        .filter((x) => !x.teVullen && !inDeTrailer(x))
+        .flatMap((x) => `${x.tekst} ${x.bij ?? ''}`.split(/\[\[.+?\]\]/))
+        .map((stuk) => stuk.trim())
+        .filter((stuk) => stuk.length >= 10),
+    );
+    for (const dia of trailer()) {
+      const pakketje = JSON.stringify(dia);
+      expect(dia.regels.flatMap((r) => [...r.delen, ...(r.bij ?? [])]).some((d) => d.balk)).toBe(false);
+      for (const stuk of alleenFilm) expect(pakketje, `${dia.titel} bevat "${stuk}"`).not.toContain(stuk);
+    }
+  });
+  it('laat de maandkop weg: die noemt het onderwerp', () => {
+    for (const dia of trailer()) if (dia.soort === 'maand') expect(dia.kop).toBe('');
+    const film = jaaroverzichtVoor(analyse, 1, true);
+    expect(film.kop).toBe(JAAROVERZICHT.maanden.find((m) => m.nr === film.maand)?.kop);
+  });
+  it('slaat een maand over waar alleen regels voor de film staan', () => {
+    const metTrailerregel = JAAROVERZICHT.maanden.filter((m) => m.momenten.some(inDeTrailer)).map((m) => m.nr);
+    expect(maandenInDeFilm(analyse)).toEqual(metTrailerregel);
+    // De film heeft alles waar iets van te vertellen valt.
+    expect(maandenInDeFilm(analyse, true).length).toBeGreaterThan(metTrailerregel.length);
+  });
+  it('laat van onze eigen maand alleen staan hoe vaak er gesport is', () => {
+    expect(voorDeTrailer(eigenMaand(a, 1))).toEqual({
+      sport: 3, taart: null, landen: [], bijStart: null, koploper: null, perPersoon: [], totaal: null,
+    });
+    // Op de echte cijfers: geen land, geen vlag en geen naam in het pakketje.
     const landen = analyse.personen.flatMap((p) => p.landen.flatMap((l) => [l.naam, l.vlag]));
-    for (let stap = 0; stap < aantalDias(analyse); stap++) {
-      const dia = jaaroverzichtVoor(analyse, stap, false);
+    for (const dia of trailer()) {
       expect(dia.jaartotaal).toBeNull();
       if (!dia.eigen) continue;
       const pakketje = JSON.stringify(dia.eigen);
       for (const land of landen) expect(pakketje, `${dia.titel} lekt ${land}`).not.toContain(land);
       for (const p of analyse.personen) expect(pakketje, `${dia.titel} lekt ${p.naam}`).not.toContain(p.naam);
-      expect(dia.eigen.taart).toBeNull();
-      expect(dia.eigen.totaal).toBeNull();
     }
   });
-  it('geeft na de uitslag alles terug', () => {
+});
+
+describe('de film na de uitslag', () => {
+  it('geeft alles: de kop, elke regel, onze cijfers en het jaar in getallen', () => {
     const juli = jaaroverzichtVoor(analyse, maandenInDeFilm(analyse, true).indexOf(7) + 1, true);
     expect(juli.maand).toBe(7);
+    expect(juli.kop).not.toBe('');
+    const tekst = juli.regels.map((r) => r.delen.map((d) => d.tekst).join('')).join(' ');
+    expect(tekst).toContain('Marokko');
     expect(typeof juli.eigen?.taart).toBe('number');
     expect(juli.eigen?.totaal).not.toBeNull();
     expect(juli.eigen?.perPersoon.length).toBe(analyse.personen.length);
     const slot = jaaroverzichtVoor(analyse, aantalDias(analyse, true) - 1, true);
     expect(slot.jaartotaal?.taart).toBeGreaterThan(0);
   });
-});
-
-describe('regels die pas in de herhaling horen', () => {
-  const februari = (onthuld: boolean) =>
-    jaaroverzichtVoor(analyse, maandenInDeFilm(analyse, onthuld).indexOf(2) + 1, onthuld);
-  const tekstVan = (onthuld: boolean) =>
-    februari(onthuld).regels.map((r) => r.delen.map((d) => d.tekst).join('')).join(' ');
-
-  it('laat de Winterspelen vóór de uitslag uit februari weg — de maand is zelf een vraag', () => {
-    expect(februari(false).maand).toBe(2);
-    expect(tekstVan(false)).not.toContain('Winterspelen');
-    expect(JSON.stringify(februari(false))).not.toContain('Winterspelen');
-  });
-  it('zet ze in de herhaling er gewoon bij', () => {
-    expect(tekstVan(true)).toContain('Winterspelen');
-    expect(februari(true).regels.length).toBeGreaterThan(februari(false).regels.length);
+  it('heeft een eigen titel en inleiding', () => {
+    expect(jaaroverzichtVoor(analyse, 0, false).kop).toBe(JAAROVERZICHT.titel);
+    expect(jaaroverzichtVoor(analyse, 0, true).kop).toBe(JAAROVERZICHT.titelNaAfloop);
   });
 });
 
@@ -270,14 +272,14 @@ describe('de dia’s', () => {
     // December heeft zijn eigen slotregel en blijft dus staan.
     expect(maanden).toContain(12);
   });
-  it('neemt een maand wél mee zodra onze eigen cijfers er staan', () => {
+  it('neemt in de film een maand wél mee zodra onze eigen cijfers er staan', () => {
     const metOktober = klein({
       entries: [
         ...klein().entries,
         { id: 99, season_id: 1, person_id: 1, metric_id: 1, entry_date: '2026-10-08', deleted_at: null, tags: 'gym' },
       ],
     });
-    expect(maandenInDeFilm(analyseer(metOktober))).toContain(10);
+    expect(maandenInDeFilm(analyseer(metOktober), true)).toContain(10);
   });
   it('telt een titelkaart en een slotkaart bij de maanden op', () => {
     const a = analyseer(klein());
@@ -320,7 +322,7 @@ describe('de dia’s', () => {
     expect(jaaroverzichtVoor(a, -5, false).stap).toBe(0);
     expect(jaaroverzichtVoor(a, 99, false).stap).toBe(aantalDias(a) - 1);
   });
-  it('houdt alle antwoorden buiten het pakketje zolang de balken liggen', () => {
+  it('houdt alle antwoorden buiten het pakketje zolang de avond loopt', () => {
     const a = analyseer(klein());
     // Alles wat in de tijdlijn onder een balk staat, per maand.
     const verborgen = new Map<number, string[]>(
@@ -338,13 +340,13 @@ describe('de dia’s', () => {
       // En ook niet hoe lang het woord is.
       expect(pakketje).not.toContain('lengte');
     }
-    const open = JSON.stringify(jaaroverzichtVoor(a, aantalDias(a) - 1, true));
-    expect(open).toContain('zonder balken');
+    const open = JSON.stringify(jaaroverzichtVoor(a, aantalDias(a, true) - 1, true));
+    expect(open).toContain(JAAROVERZICHT.slotNaAfloop);
   });
   it('draait op de echte momentopname van resolution-recap', () => {
     const dia = jaaroverzichtVoor(analyse, 1, false);
     expect(dia.maand).toBe(1);
     expect(dia.eigen?.sport).toBeGreaterThan(0);
-    expect(dia.strook.length).toBeGreaterThanOrEqual(9);
+    expect(jaaroverzichtVoor(analyse, 1, true).strook.length).toBeGreaterThanOrEqual(9);
   });
 });

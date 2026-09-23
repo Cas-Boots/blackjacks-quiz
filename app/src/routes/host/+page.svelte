@@ -389,7 +389,7 @@
         <span class="fijn">
           {film.soort === 'titel' ? 'Titelkaart' : film.soort === 'slot' ? 'Slotkaart' : film.titel}
           · dia {film.stap + 1} van {film.stappen}
-          {#if film.onthuld}· zonder balken{/if}
+          · {film.onthuld ? 'de film' : 'de trailer'}
         </span>
         <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
           {film.stap + 1 < film.stappen ? 'Volgende dia' : film.onthuld ? 'Terug naar de uitslag' : 'Naar ronde 1'}
@@ -398,12 +398,12 @@
           {staat.klok?.loopt ? '⏸ Pauze' : '▶ Laat lopen'}
         </button>
         {#if !film.onthuld}
-          <button class="knop stil" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>De film overslaan</button>
+          <button class="knop stil" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>De trailer overslaan</button>
         {/if}
       {:else if staat?.fase === 'lobby' || staat?.fase === 'ronde'}
         {#if staat?.fase === 'lobby'}
           <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig || keuzeGewijzigd}>
-            🎞 Start het jaaroverzicht
+            🎞 Start de trailer
           </button>
         {/if}
         <button class="knop" class:hoofd={staat?.fase === 'ronde'} onclick={() => doe('start-ronde')} disabled={bezig || keuzeGewijzigd}>Start de ronde</button>
@@ -453,7 +453,7 @@
         {/if}
       {:else if staat?.fase === 'einde'}
         <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig}>
-          🎞 Het jaaroverzicht nog eens — nu zonder balken
+          🎞 De film: het hele jaar
         </button>
       {:else if staat?.fase === 'stand'}
         {#if (staat.rondeIndex ?? 0) + 1 < staat.rondeAantal}

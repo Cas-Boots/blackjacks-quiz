@@ -1,23 +1,23 @@
 /**
- * De film van het jaar, dia voor dia.
+ * Het jaaroverzicht, dia voor dia: een trailer vóór de quiz, de film erna.
  *
  * Neemt de geschreven tijdlijn uit `content/jaaroverzicht.ts` en de cijfers
  * uit resolution-recap, en maakt daar de dia's van die de televisie laat
- * zien: een titelkaart, één kaart per maand, en een slotkaart met het jaar
- * in getallen.
+ * zien: een titelkaart, één kaart per maand, en een slotkaart.
  *
  * Twee dingen gebeuren hier en nergens anders:
  *
- * 1. **De balken.** Wat in de tijdlijn tussen dubbele haken staat is een
- *    antwoord van vanavond. Zolang de avond loopt gaat dat woord niet mee
- *    in het pakketje naar de clients, en ook niet hoe lang het is: elke
- *    balk is even breed. Net als bij een vraag: wat nog gevraagd wordt,
- *    staat niet in de browser van de televisie. Hetzelfde geldt voor onze
- *    eigen cijfers die de recap-rondes vragen — taarten, landen, wie het
- *    vaakst ging — en voor regels die alleen in de herhaling horen.
- * 2. **Welke maanden meedoen.** Een maand komt in beeld als er iets van te
- *    vertellen valt: een geschreven moment dat niet meer op invulling wacht,
- *    of iets uit onze eigen cijfers. Zo staat er in oktober geen lege kaart
+ * 1. **Wat de trailer weglaat.** Wat in de tijdlijn tussen dubbele haken
+ *    staat is een antwoord van vanavond. Zolang de avond loopt gaat een
+ *    regel met haken helemaal niet mee in het pakketje naar de clients —
+ *    net als een vraag, die tot de onthulling ook niet in de browser van de
+ *    televisie staat. Ook de maandkop blijft weg, en van onze eigen cijfers
+ *    alleen hoe vaak er gesport is: de taarten, de landen en wie het vaakst
+ *    ging vragen de recap-rondes. Na de uitslag komt alles, met de
+ *    antwoorden onderstreept.
+ * 2. **Welke maanden meedoen.** In de trailer: een maand met minstens één
+ *    regel die erin mag. In de film: een maand met een geschreven moment of
+ *    iets uit onze eigen cijfers. Zo staat er in oktober geen lege kaart
  *    zolang die maand nog niet is bijgeschreven.
  */
 import { JAAROVERZICHT } from '$lib/content/jaaroverzicht';
@@ -38,7 +38,9 @@ export function maandNaam(nr: number): string {
 
 /**
  * Knipt een regel in stukken op de dubbele haken. Zolang `onthuld` uit
- * staat, gaat de tekst onder een balk niet mee — ook de lengte niet.
+ * staat, gaat de tekst onder een balk niet mee — ook de lengte niet. Dat
+ * komt in de trailer niet voor, want daar staan geen regels met haken; het
+ * is het vangnet voor als er ooit toch een doorheen glipt.
  */
 export function splits(tekst: string, onthuld: boolean): JaarDeel[] {
   const delen: JaarDeel[] = [];
@@ -53,9 +55,19 @@ export function splits(tekst: string, onthuld: boolean): JaarDeel[] {
   return delen;
 }
 
-/** Of een moment in beeld komt: niet als hij op invulling wacht, en sommige pas na de uitslag. */
+/** Of er een antwoord van vanavond in een regel staat. */
+function heeftHaken(moment: JaarMoment): boolean {
+  return /\[\[/.test(`${moment.tekst} ${moment.bij ?? ''}`);
+}
+
+/** Of een regel in de trailer mag: geen haken, en niet uitdrukkelijk bewaard voor de film. */
+export function inDeTrailer(moment: JaarMoment): boolean {
+  return !moment.teVullen && !moment.pasNaAfloop && !heeftHaken(moment);
+}
+
+/** Of een moment in beeld komt: in de film alles wat geschreven is, in de trailer alleen wat mag. */
 function zichtbaar(moment: JaarMoment, onthuld: boolean): boolean {
-  return !moment.teVullen && (onthuld || !moment.pasNaAfloop);
+  return onthuld ? !moment.teVullen : inDeTrailer(moment);
 }
 
 /** Hoeveel balken er in deze maand liggen. Voor het hostscherm en de controle vooraf. */
@@ -156,7 +168,6 @@ export function eigenMaand(analyse: Analyse, maand: number): VolleMaand {
     sport,
     taart,
     landen,
-    nieuweLanden: landen.length > 0,
     bijStart: bijStart.length,
     koploper: beste && beste.sport > 0 ? { naam: beste.naam, aantal: beste.sport } : null,
     perPersoon,
@@ -165,24 +176,14 @@ export function eigenMaand(analyse: Analyse, maand: number): VolleMaand {
 }
 
 /**
- * Dezelfde maand, maar met balken over wat de recap-rondes vragen. Hoe vaak
- * er gesport is blijft staan — de quiz vraagt wíé het vaakst ging, niet
- * hoe vaak we samen gingen — maar de naam van de koploper, de taarten, de
- * landen en de stand van het jaar gaan eruit. Per persoon gaat er niets mee:
- * dat pakketje gaat naar iedereen, en opgeteld is het precies de vraag wie
- * het vaakst sportte.
+ * Dezelfde maand, zoals hij in de trailer staat: alleen hoe vaak er gesport
+ * is. De quiz vraagt wíé het vaakst ging, niet hoe vaak we samen gingen.
+ * De taarten, de landen, de koploper en de stand van het jaar gaan eruit,
+ * en per persoon gaat er niets mee: dat pakketje gaat naar iedereen, en
+ * opgeteld is het precies de vraag wie het vaakst sportte.
  */
-export function achterBalken(eigen: JaarEigen): JaarEigen {
-  return {
-    sport: eigen.sport,
-    taart: null,
-    landen: [],
-    nieuweLanden: eigen.nieuweLanden,
-    bijStart: null,
-    koploper: eigen.koploper ? { naam: null, aantal: eigen.koploper.aantal } : null,
-    perPersoon: [],
-    totaal: null,
-  };
+export function voorDeTrailer(eigen: JaarEigen): JaarEigen {
+  return { sport: eigen.sport, taart: null, landen: [], bijStart: null, koploper: null, perPersoon: [], totaal: null };
 }
 
 /** De stand van het jaar tot en met deze maand: sporten, taarten, landen. */
@@ -209,18 +210,23 @@ export function jaarTotaal(analyse: Analyse): { sport: number; taart: number; la
 }
 
 function heeftEigenNieuws(eigen: JaarEigen): boolean {
-  return eigen.sport > 0 || (eigen.taart ?? 0) > 0 || eigen.nieuweLanden;
+  return eigen.sport > 0 || (eigen.taart ?? 0) > 0 || eigen.landen.length > 0;
 }
 
 /* ---- De dia's --------------------------------------------------------- */
 
 /**
- * De maanden die in de film zitten: alles waar iets van te vertellen valt.
- * Vóór de uitslag tellen regels die pas in de herhaling horen niet mee.
+ * De maanden die meedoen. In de trailer een maand met minstens één regel
+ * die erin mag — alleen een sportgetal is geen dia waard. In de film alles
+ * waar iets van te vertellen valt, ook als het alleen onze eigen cijfers zijn.
  */
 export function maandenInDeFilm(analyse: Analyse, onthuld = false): number[] {
   return JAAROVERZICHT.maanden
-    .filter((m) => m.momenten.some((x) => zichtbaar(x, onthuld)) || heeftEigenNieuws(eigenMaand(analyse, m.nr)))
+    .filter((m) =>
+      onthuld
+        ? m.momenten.some((x) => zichtbaar(x, true)) || heeftEigenNieuws(eigenMaand(analyse, m.nr))
+        : m.momenten.some(inDeTrailer),
+    )
     .map((m) => m.nr);
 }
 
@@ -243,9 +249,8 @@ function seconden(soort: JaarDia['soort'], regels: number, metEigen: boolean): n
 }
 
 /**
- * De dia bij deze stap. `onthuld` haalt de balken eraf; dat doet de
- * spelmotor pas als de avond voorbij is, zodat de herhaling na de uitslag
- * het hele jaar laat lezen.
+ * De dia bij deze stap. Zonder `onthuld` is het de trailer; met `onthuld`
+ * de film. Dat zet de spelmotor zelf om zodra de avond voorbij is.
  */
 export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boolean): JaarDia {
   const strook = maandenInDeFilm(analyse, onthuld);
@@ -265,9 +270,11 @@ export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boole
       ...basis,
       soort: 'titel',
       titel: String(JAAROVERZICHT.jaar),
-      kop: JAAROVERZICHT.titel,
+      kop: onthuld ? JAAROVERZICHT.titelNaAfloop : JAAROVERZICHT.titel,
       maand: null,
-      regels: [{ emoji: null, delen: splits(JAAROVERZICHT.inleiding, onthuld), bij: null }],
+      regels: [
+        { emoji: null, delen: splits(onthuld ? JAAROVERZICHT.inleidingNaAfloop : JAAROVERZICHT.inleiding, onthuld), bij: null },
+      ],
       eigen: null,
       seconden: seconden('titel', 1, false),
       jaartotaal: null,
@@ -278,7 +285,7 @@ export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boole
     return {
       ...basis,
       soort: 'slot',
-      titel: `Dat was ${JAAROVERZICHT.jaar}`,
+      titel: onthuld ? `Dat was ${JAAROVERZICHT.jaar}` : 'Straks het hele jaar',
       kop: onthuld ? JAAROVERZICHT.slotNaAfloop : JAAROVERZICHT.slot,
       maand: null,
       regels: [],
@@ -296,11 +303,11 @@ export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boole
     ...basis,
     soort: 'maand',
     titel: maandNaam(nr),
-    kop: maand.kop,
+    kop: onthuld ? maand.kop : '',
     maand: nr,
     regels,
-    eigen: onthuld ? eigen : achterBalken(eigen),
-    seconden: seconden('maand', regels.length, heeftEigenNieuws(eigen)),
+    eigen: onthuld ? eigen : voorDeTrailer(eigen),
+    seconden: seconden('maand', regels.length, onthuld ? heeftEigenNieuws(eigen) : eigen.sport > 0),
     jaartotaal: null,
   };
 }

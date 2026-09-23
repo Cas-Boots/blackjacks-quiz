@@ -584,9 +584,9 @@ input[type=file]{display:none}
 .film-regel .emoji{font-size:calc(var(--fs-lood) * 1.25);line-height:1.35}
 .film-regel .tekst{font-size:calc(var(--fs-lood) * 1.06);line-height:1.45;color:var(--ivoor)}
 .film-regel .bij{display:block;margin-top:.2rem;font-size:.82em;color:var(--salie)}
-/* De zwarte balk over een antwoord van vanavond. (De klokbalk in de rail
-   heet .balk; deze heeft daarom een eigen naam.) Elke balk is even breed:
-   de lengte van het woord zou anders zelf een hint zijn. */
+/* Een antwoord van vanavond in de film: een messing streep eronder, en er
+   schuift een zwarte balk vanaf. (De klokbalk in de rail heet .balk; deze
+   heeft daarom een eigen naam.) In de trailer komt hij niet voor. */
 .film-balk{
   display:inline-block;min-width:4.4em;height:1em;margin:0 .12em;
   transform:translateY(.14em);border-radius:3px;background:#050806;
@@ -1068,10 +1068,14 @@ const PAKKETTEN = {
 
 const JAAROVERZICHT = {
   jaar: 2026,
-  titel: "Het jaar in twee minuten",
-  inleiding: "Het hele jaar, zo snel als het voorbijging. Alles wat zwart blijft, is een vraag van vanavond.",
-  slot: "En dat was het jaar. Nu de balken eraf — één voor één, en jullie doen het werk.",
-  slotNaAfloop: "Zelfde film, zelfde jaar. Nu zonder balken: alles is gevraagd, alles is gezegd.",
+  // De trailer, vóór de quiz.
+  titel: "De trailer",
+  inleiding: "Alvast een voorproefje van ons jaar. Wat er in de wereld gebeurde, laten we nog even weg: dat vragen we jullie zo.",
+  slot: "De rest is een vraag van vanavond. Na de uitslag draait de hele film.",
+  // De film, na de uitslag.
+  titelNaAfloop: "Het jaar in twee minuten",
+  inleidingNaAfloop: "Het hele jaar, zo snel als het voorbijging. Wat onderstreept staat, werd vanavond gevraagd.",
+  slotNaAfloop: "Dat was het jaar, en dat was de quiz. Alles is gevraagd, alles is gezegd.",
 
   maanden: [
     {
@@ -1090,19 +1094,19 @@ const JAAROVERZICHT = {
       nr: 2,
       kop: "Op het bordes",
       momenten: [
-        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]].", pasNaAfloop:true},
+        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]]."},
         {emoji:"🥇", tekst:"Nederland wint [[tien]] keer goud; [[Noorwegen]] gaat met [[41]] medailles aan kop.",
-         bij:"Schaatsen, en nog eens schaatsen.", pasNaAfloop:true},
-        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels.", pasNaAfloop:true},
+         bij:"Schaatsen, en nog eens schaatsen."},
+        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels."},
         {emoji:"🏛️", tekst:"Het kabinet-[[Jetten]] wordt beëdigd."},
-        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels.", pasNaAfloop:true}
+        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels."}
       ]
     },
     {
       nr: 3,
       kop: "De motoren slaan aan",
       momenten: [
-        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels.", pasNaAfloop:true},
+        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels."},
         {emoji:"🔋", tekst:"Coureurs moeten opeens hun accu-inzet over de hele ronde verdelen.",
          bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true}
       ]
@@ -1111,7 +1115,7 @@ const JAAROVERZICHT = {
       nr: 4,
       kop: "Terug op aarde",
       momenten: [
-        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig.", pasNaAfloop:true},
+        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig."},
         {emoji:"🌊", tekst:"Een capsule plonst in zee, na [[tien]] dagen onderweg."}
       ]
     },
@@ -1139,7 +1143,7 @@ const JAAROVERZICHT = {
         {emoji:"💶", tekst:"De AOW gaat [[omhoog]]."},
         {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
         {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale in het [[MetLife Stadium]], [[pas in de verlenging]].",
-         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]].", pasNaAfloop:true},
+         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]]."},
         {emoji:"🚴", tekst:"In Parijs wint [[Pogačar]] zijn [[vijfde]] Tour."},
         {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx, Hinault, Anquetil en Indurain.", pasNaAfloop:true},
         {emoji:"⛰️", tekst:"[[Carapaz]] grijpt de bolletjestrui op [[Alpe d’Huez]], in etappe 20."}
@@ -1202,7 +1206,6 @@ const ONS_JAAR = {
       "sport": 58,
       "taart": 12,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 4,
       "koploper": {
         "naam": "Cas",
@@ -1225,7 +1228,6 @@ const ONS_JAAR = {
           "datum": "2026-02-02"
         }
       ],
-      "nieuweLanden": true,
       "bijStart": 0,
       "koploper": {
         "naam": "Cas",
@@ -1266,7 +1268,6 @@ const ONS_JAAR = {
           "datum": "2026-03-16"
         }
       ],
-      "nieuweLanden": true,
       "bijStart": 0,
       "koploper": {
         "naam": "Cas",
@@ -1282,7 +1283,6 @@ const ONS_JAAR = {
       "sport": 68,
       "taart": 2,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": {
         "naam": "Cas",
@@ -1298,7 +1298,6 @@ const ONS_JAAR = {
       "sport": 45,
       "taart": 7,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": {
         "naam": "Cas",
@@ -1314,7 +1313,6 @@ const ONS_JAAR = {
       "sport": 40,
       "taart": 3,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": {
         "naam": "Cas",
@@ -1337,7 +1335,6 @@ const ONS_JAAR = {
           "datum": "2026-07-12"
         }
       ],
-      "nieuweLanden": true,
       "bijStart": 0,
       "koploper": {
         "naam": "Eva",
@@ -1372,7 +1369,6 @@ const ONS_JAAR = {
           "datum": "2026-08-27"
         }
       ],
-      "nieuweLanden": true,
       "bijStart": 0,
       "koploper": {
         "naam": "Eva",
@@ -1388,7 +1384,6 @@ const ONS_JAAR = {
       "sport": 36,
       "taart": 0,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": {
         "naam": "Eva",
@@ -1404,7 +1399,6 @@ const ONS_JAAR = {
       "sport": 0,
       "taart": 0,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": null,
       "totaal": {
@@ -1417,7 +1411,6 @@ const ONS_JAAR = {
       "sport": 0,
       "taart": 0,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": null,
       "totaal": {
@@ -1430,7 +1423,6 @@ const ONS_JAAR = {
       "sport": 0,
       "taart": 0,
       "landen": [],
-      "nieuweLanden": false,
       "bijStart": 0,
       "koploper": null,
       "totaal": {
@@ -1466,7 +1458,7 @@ const LEEG = () => ({
   punten: {}, teams: {}, toegekend: {}, uitgedeeld: {},
   gissingen: {}, standVoorRonde: {},
   /* Bij welke dia het jaaroverzicht staat, en of de uitslag geweest is —
-     daarna draait dezelfde film zonder de zwarte balken. */
+     daarvoor draait de trailer, daarna de hele film. */
   film: 0, geeindigd: false,
   geluid: true, schaal: 1, gestartOp: null
 });
@@ -2214,7 +2206,7 @@ function schermStart(){
     </div>
 
     <div class="knoprij">
-      <button class="knop is-hoofd is-groot" data-actie="start-film"${telling.vragen ? "" : " disabled"}>&#127902; Begin met het jaaroverzicht</button>
+      <button class="knop is-hoofd is-groot" data-actie="start-film"${telling.vragen ? "" : " disabled"}>&#127902; Begin met de trailer</button>
       <button class="knop is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Meteen naar ronde 1</button>
       <button class="knop is-stil" data-actie="menu">Menu &amp; sneltoetsen</button>
       ${telling.vragen ? "" : `<span class="fijn" style="color:var(--rood-licht)">Kies eerst minstens één vraag.</span>`}
@@ -2445,21 +2437,21 @@ function schermEinde(){
 
     <div class="knoprij" style="justify-content:center">
       <button class="knop is-hoofd" data-actie="exporteer">Uitslag opslaan</button>
-      <button class="knop" data-actie="film-herhaling">&#127902; Het jaaroverzicht nog eens — zonder balken</button>
+      <button class="knop" data-actie="film-herhaling">&#127902; De film: het hele jaar</button>
       <button class="knop" data-actie="opnieuw">Nieuwe quiz</button>
     </div>
   </div>`;
 }
 
 /* -----------------------------------------------------------------
-   HET JAAROVERZICHT — de film waarmee de avond opent
+   HET JAAROVERZICHT — een trailer vóór de quiz, de film erna
 
-   Het jaar maand voor maand, met een zwarte balk over alles wat de quiz
-   later vraagt — ook over onze eigen taarten, landen en wie het vaakst
-   ging, want dat vragen de recap-rondes. Na de uitslag draait dezelfde
-   film nog een keer, dan zonder balken. De tijdlijn staat in
-   JAAROVERZICHT, onze eigen cijfers per maand in ONS_JAAR; allebei
-   geschreven door npm run content:sync.
+   De trailer laat alleen zien wat de quiz niet vraagt: regels zonder
+   dubbele haken, geen maandkoppen, en van onze eigen cijfers alleen hoe
+   vaak er gesport is. Na de uitslag draait de hele film, met de antwoorden
+   van vanavond onderstreept. De tijdlijn staat in JAAROVERZICHT, onze eigen
+   cijfers per maand in ONS_JAAR; allebei geschreven door npm run
+   content:sync.
    ----------------------------------------------------------------- */
 const MAANDEN_KORT = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
 const MAANDEN_VOL = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
@@ -2468,12 +2460,15 @@ const onsVan = (nr) => (ONS_JAAR.maanden || {})[String(nr)] || null;
 function filmIetsGedaan(o){
   return !!o && (o.sport > 0 || o.taart > 0 || (o.landen || []).length > 0);
 }
-/** Of een regel in beeld komt: niet als hij op invulling wacht, en sommige pas na de uitslag. */
-const filmZichtbaar = (x) => !x.teVullen && (filmOnthuld() || !x.pasNaAfloop);
-/** De maanden waar iets van te vertellen valt; de rest slaat de film over. */
+/** In de trailer alleen regels zonder haken (en niet bewaard voor de film); in de film alles. */
+const filmInTrailer = (x) => !x.teVullen && !x.pasNaAfloop && !/\[\[/.test(x.tekst + " " + (x.bij || ""));
+const filmZichtbaar = (x) => filmOnthuld() ? !x.teVullen : filmInTrailer(x);
+/** De maanden die meedoen. In de trailer: met een regel die erin mag. In de film: ook met alleen onze cijfers. */
 function filmMaanden(){
   return JAAROVERZICHT.maanden
-    .filter(m => m.momenten.some(filmZichtbaar) || filmIetsGedaan(onsVan(m.nr)))
+    .filter(m => filmOnthuld()
+      ? m.momenten.some(filmZichtbaar) || filmIetsGedaan(onsVan(m.nr))
+      : m.momenten.some(filmInTrailer))
     .map(m => m.nr);
 }
 const filmStappen = () => filmMaanden().length + 2;
@@ -2483,7 +2478,9 @@ function filmSeconden(){
   if(nr === null) return S.film === 0 ? 7 : 12;
   const m = JAAROVERZICHT.maanden.find(x => x.nr === nr);
   const regels = m.momenten.filter(filmZichtbaar).length;
-  return Math.min(18, Math.max(8, Math.round(5 + regels * 1.8 + (filmIetsGedaan(onsVan(nr)) ? 2 : 0))));
+  const o = onsVan(nr);
+  const eigen = filmOnthuld() ? filmIetsGedaan(o) : !!o && o.sport > 0;
+  return Math.min(18, Math.max(8, Math.round(5 + regels * 1.8 + (eigen ? 2 : 0))));
 }
 /** Het maandnummer bij de huidige dia, of null op de titel- en slotkaart. */
 function filmMaandNr(){
@@ -2520,19 +2517,15 @@ function filmStrook(){
 function filmEigen(nr){
   const o = onsVan(nr);
   if(!filmIetsGedaan(o) && !(o && o.bijStart)) return "";
-  const balk = `<span class="film-balk"></span>`;
   if(!filmOnthuld()){
-    // Vóór de uitslag: hoe vaak er gesport is mag er staan, maar de taarten,
-    // de landen, de koploper en de stand van het jaar vragen de recap-rondes.
-    if(!filmIetsGedaan(o)) return "";
+    // De trailer: alleen hoe vaak er gesport is. De taarten, de landen, de
+    // koploper en de stand van het jaar vragen de recap-rondes.
+    if(!o.sport) return "";
     return `
     <div class="film-onsjaar">
       <p class="opschrift">Wij in ${esc(MAANDEN_VOL[nr-1])}</p>
       <div class="film-chips">
         <span class="film-chip">&#127939; <b>${o.sport}</b> keer gesport</span>
-        <span class="film-chip">&#127856; ${balk} taarten</span>
-        ${(o.landen || []).length ? `<span class="film-chip">&#127757; ${balk} erbij</span>` : ""}
-        ${o.koploper ? `<span class="film-chip is-top">${balk} het vaakst — <b>${o.koploper.aantal}&times;</b></span>` : ""}
       </div>
     </div>`;
   }
@@ -2573,12 +2566,12 @@ function schermJaaroverzicht(){
         <p class="opschrift">Het jaaroverzicht</p>
         <h1 class="film-jaartal">${JAAROVERZICHT.jaar}</h1>
         <hr class="scheiding" style="max-width:520px">
-        <p class="film-ondertitel">${esc(JAAROVERZICHT.titel)}</p>
-        <p class="film-inleiding">${filmTekst(JAAROVERZICHT.inleiding, onthuld)}</p>
+        <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.titelNaAfloop : JAAROVERZICHT.titel)}</p>
+        <p class="film-inleiding">${filmTekst(onthuld ? JAAROVERZICHT.inleidingNaAfloop : JAAROVERZICHT.inleiding, onthuld)}</p>
       </div>`;
   } else if(slot){
     const t = ONS_JAAR.jaartotaal;
-    // Het jaar in getallen komt pas in de herhaling: de totalen zijn vragen.
+    // Het jaar in getallen komt pas in de film: de totalen zijn vragen.
     const getallen = onthuld ? `
         <div class="telkaarten" style="max-width:720px;width:100%">
           <div class="telkaart"><span class="waarde">${t.sport}</span><span class="etiket">keer gesport</span></div>
@@ -2586,12 +2579,11 @@ function schermJaaroverzicht(){
           <div class="telkaart"><span class="waarde">${t.landen}</span><span class="etiket">landen</span></div>
           <div class="telkaart"><span class="waarde">${t.dagen}</span><span class="etiket">dagen met iets erop</span></div>
         </div>
-        <p class="fijn">Onze cijfers lopen tot ${esc(datumKort(ONS_JAAR.peildatum))}.</p>` : `
-        <p class="fijn">Ons jaar in getallen volgt na de uitslag.</p>`;
+        <p class="fijn">Onze cijfers lopen tot ${esc(datumKort(ONS_JAAR.peildatum))}.</p>` : "";
     binnen = `
       <div class="film-kaart is-titel">
-        <p class="opschrift">Aftiteling</p>
-        <h1 class="film-jaartal is-klein">Dat was ${JAAROVERZICHT.jaar}</h1>
+        <p class="opschrift">${onthuld ? "Aftiteling" : "Na de uitslag"}</p>
+        <h1 class="film-jaartal is-klein">${onthuld ? "Dat was " + JAAROVERZICHT.jaar : "Straks het hele jaar"}</h1>
         <hr class="scheiding" style="max-width:520px">
         <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.slotNaAfloop : JAAROVERZICHT.slot)}</p>${getallen}
       </div>`;
@@ -2608,7 +2600,7 @@ function schermJaaroverzicht(){
           <h1 class="film-maand">${esc(MAANDEN_VOL[nr-1])}</h1>
           <span class="film-jaarschaduw">${JAAROVERZICHT.jaar}</span>
         </div>
-        <p class="film-hoed">${esc(m.kop)}</p>
+        ${onthuld ? `<p class="film-hoed">${esc(m.kop)}</p>` : ""}
         ${regels ? `<div class="film-regels">${regels}</div>` : ""}
         ${filmEigen(nr)}
       </div>`;
@@ -2654,7 +2646,7 @@ function tekenBesturing(){
     const laatste = S.film + 1 >= filmStappen();
     h += knop("film-terug","&larr; Terug","is-stil");
     h += knop("pauze", K.loopt ? "&#10073;&#10073; Pauze" : "&#9654; Laat lopen");
-    if(!laatste && !filmOnthuld()) h += knop("film-over","De film overslaan","is-stil");
+    if(!laatste && !filmOnthuld()) h += knop("film-over","De trailer overslaan","is-stil");
     h += `<span class="rek"></span>`;
     h += knop("film-verder", laatste ? (filmOnthuld() ? "Terug naar de uitslag &rarr;" : "Naar ronde 1 &rarr;") : "Volgende dia &rarr;","is-hoofd");
   }

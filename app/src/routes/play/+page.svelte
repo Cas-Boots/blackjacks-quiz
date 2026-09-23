@@ -262,11 +262,13 @@
               alleen={mijnNaam}
             />
           </div>
-          {#if !staat.jaaroverzicht.onthuld}
-            <p class="fijn" style="margin-top:.8rem">
-              De zwarte balken zijn de antwoorden van vanavond. Roepen mag, opschrijven heeft geen zin.
-            </p>
-          {/if}
+          <p class="fijn" style="margin-top:.8rem">
+            {#if staat.jaaroverzicht.onthuld}
+              Onderstreept: wat er vanavond gevraagd werd.
+            {:else}
+              Wat er in de wereld gebeurde, vragen we zo. Het hele jaar zie je na de uitslag.
+            {/if}
+          </p>
         </div>
       {/key}
     {:else if staat.fase === 'ronde'}

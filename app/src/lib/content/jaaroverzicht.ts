@@ -1,58 +1,53 @@
 /**
- * HET JAAROVERZICHT — de film waarmee de avond begint.
+ * HET JAAROVERZICHT — een trailer vóór de quiz, de film erna.
  *
  * Een paar jaar geleden was het een gemonteerd filmpje van de hoogtepunten.
- * Dit is dezelfde gedachte, maar dan zo dat hij de quiz niet verklapt: het
- * jaar loopt maand voor maand langs, en over elk antwoord dat vanavond nog
- * gevraagd wordt ligt een zwarte balk. Je ziet dus precies dát het gebeurde,
- * niet wie of wat. De kamer roept er vanzelf doorheen.
+ * Dit is dezelfde gedachte, maar zo dat het de quiz niet verklapt:
  *
- * Aan het eind van de avond draait dezelfde film nog een keer — dan zonder
- * balken, want dan is alles gevraagd. Dat gebeurt vanzelf zodra de uitslag
- * geweest is; je hoeft hier niets voor om te zetten.
+ * - **De trailer** opent de avond. Daarin staat alleen wat de quiz níet
+ *   vraagt: de regels hieronder zonder dubbele haken, en van onze eigen
+ *   cijfers alleen hoe vaak er gesport is. Geen maandkoppen, want die
+ *   noemen de onderwerpen van vanavond.
+ * - **De film** draait na de uitslag: alles, maand voor maand, met de
+ *   antwoorden van vanavond onderstreept. Dat gebeurt vanzelf zodra de
+ *   uitslag geweest is; je hoeft hier niets voor om te zetten.
  *
  * Regels bij het schrijven:
  *
- * 1. **Elke bewering hier staat ook in `packs.ts`.** De vragen zijn
- *    nagezocht (zie de bronnen in de README); deze tijdlijn voegt er geen
- *    nieuwe feiten aan toe, hij zet ze op volgorde.
- * 2. **Wat de quiz vraagt, gaat in dubbele haken.** Vergeet je dat, dan
- *    geeft de film het antwoord weg. `npm run verify` telt mee hoeveel
- *    balken er per maand liggen, zodat een maand zonder balken opvalt.
- *    Alle balken zijn even breed: de lengte van het woord zegt niets.
- * 3. **De kop van een maand verraadt niets.** Hij staat pal boven de balken
- *    en mag er dus niet onder door praten — ook niet over het antwoord van
- *    een andere vraag. "Het WK begint, in drie landen tegelijk" is precies
- *    wat er niet moet staan: het aantal is een vraag van vanavond.
- * 4. **Ook de open tekst verraadt niets.** De zin rond een balk mag hem niet
- *    invullen ("bij 1-1, ■■■" is strafschoppen), en mag geen waar-of-niet-
- *    waar beantwoorden: "pas in de verlenging" staat onder een balk omdat
- *    de quiz vraagt óf de finale in de verlenging beslist werd. Pas op met
- *    het emoji ervoor, dat praat ook (❄️ voor sneeuw).
- * 5. **Soms is de plek zelf het antwoord.** De Winterspelen horen in
- *    februari, maar "In welke maand waren de Winterspelen?" is een vraag.
- *    Zo'n regel krijgt `pasNaAfloop`: hij komt alleen in de herhaling.
- *    Dat geldt ook voor een zin die in z'n geheel een waar-of-niet-waar
- *    beantwoordt, zoals dat er weer mensen om de maan vlogen.
+ * 1. **Wat de quiz vraagt, gaat in dubbele haken.** Zo'n regel komt nooit in
+ *    de trailer, alleen in de film. En elke bewering met haken staat ook in
+ *    `packs.ts`: die feiten zijn nagezocht, de film zet ze op volgorde.
+ * 2. **Een regel zonder haken is voor de trailer.** Iets wat de quiz niet
+ *    vraagt — vaak iets van onszelf. Die feiten sta je zelf voor. Zo'n regel
+ *    mag geen antwoord van de quiz bevatten, ook niet via het emoji (❄️
+ *    zegt sneeuw); `tests/jaaroverzicht.test.ts` vangt een antwoord dat er
+ *    letterlijk in staat.
+ * 3. **Raakt een regel zonder haken toch de quiz, zet er `pasNaAfloop` bij.**
+ *    "Daarmee evenaart hij het record" heeft geen haken, maar beantwoordt
+ *    een waar-of-niet-waar. Met `pasNaAfloop` blijft hij uit de trailer.
+ * 4. **De kop van een maand staat alleen in de film.** Daar mag hij dus
+ *    alles zeggen.
  *
- * De test in `tests/jaaroverzicht.test.ts` vangt een kop of open tekst
- * waarin een antwoord van de quiz letterlijk staat; de rest is mensenwerk.
+ * `npm run verify` telt hoeveel regels de trailer heeft; staat er bij een
+ * maand niets zonder haken, dan slaat de trailer die maand over.
  *
  * De eigen cijfers — sport, taart en landen per maand — staan hier niet in.
  * Die rekent de meespeelversie op de avond zelf uit op de cijfers van
  * resolution-recap, zodat ze tot op de dag kloppen; de losse HTML-quiz
- * krijgt ze als momentopname mee via `npm run content:sync`. Wat de
- * recap-rondes daarvan vragen — taarten, landen, wie het vaakst ging —
- * ligt vanzelf onder een balk tot na de uitslag.
+ * krijgt ze als momentopname mee via `npm run content:sync`.
  */
 import type { Jaaroverzicht } from './types';
 
 export const JAAROVERZICHT: Jaaroverzicht = {
   jaar: 2026,
-  titel: "Het jaar in twee minuten",
-  inleiding: "Het hele jaar, zo snel als het voorbijging. Alles wat zwart blijft, is een vraag van vanavond.",
-  slot: "En dat was het jaar. Nu de balken eraf — één voor één, en jullie doen het werk.",
-  slotNaAfloop: "Zelfde film, zelfde jaar. Nu zonder balken: alles is gevraagd, alles is gezegd.",
+  // De trailer, vóór de quiz.
+  titel: "De trailer",
+  inleiding: "Alvast een voorproefje van ons jaar. Wat er in de wereld gebeurde, laten we nog even weg: dat vragen we jullie zo.",
+  slot: "De rest is een vraag van vanavond. Na de uitslag draait de hele film.",
+  // De film, na de uitslag.
+  titelNaAfloop: "Het jaar in twee minuten",
+  inleidingNaAfloop: "Het hele jaar, zo snel als het voorbijging. Wat onderstreept staat, werd vanavond gevraagd.",
+  slotNaAfloop: "Dat was het jaar, en dat was de quiz. Alles is gevraagd, alles is gezegd.",
 
   maanden: [
     {
@@ -71,19 +66,19 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       nr: 2,
       kop: "Op het bordes",
       momenten: [
-        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]].", pasNaAfloop:true},
+        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]]."},
         {emoji:"🥇", tekst:"Nederland wint [[tien]] keer goud; [[Noorwegen]] gaat met [[41]] medailles aan kop.",
-         bij:"Schaatsen, en nog eens schaatsen.", pasNaAfloop:true},
-        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels.", pasNaAfloop:true},
+         bij:"Schaatsen, en nog eens schaatsen."},
+        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels."},
         {emoji:"🏛️", tekst:"Het kabinet-[[Jetten]] wordt beëdigd."},
-        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels.", pasNaAfloop:true}
+        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels."}
       ]
     },
     {
       nr: 3,
       kop: "De motoren slaan aan",
       momenten: [
-        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels.", pasNaAfloop:true},
+        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels."},
         {emoji:"🔋", tekst:"Coureurs moeten opeens hun accu-inzet over de hele ronde verdelen.",
          bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true}
       ]
@@ -92,7 +87,7 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       nr: 4,
       kop: "Terug op aarde",
       momenten: [
-        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig.", pasNaAfloop:true},
+        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig."},
         {emoji:"🌊", tekst:"Een capsule plonst in zee, na [[tien]] dagen onderweg."}
       ]
     },
@@ -120,7 +115,7 @@ export const JAAROVERZICHT: Jaaroverzicht = {
         {emoji:"💶", tekst:"De AOW gaat [[omhoog]]."},
         {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
         {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale in het [[MetLife Stadium]], [[pas in de verlenging]].",
-         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]].", pasNaAfloop:true},
+         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]]."},
         {emoji:"🚴", tekst:"In Parijs wint [[Pogačar]] zijn [[vijfde]] Tour."},
         {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx, Hinault, Anquetil en Indurain.", pasNaAfloop:true},
         {emoji:"⛰️", tekst:"[[Carapaz]] grijpt de bolletjestrui op [[Alpe d’Huez]], in etappe 20."}

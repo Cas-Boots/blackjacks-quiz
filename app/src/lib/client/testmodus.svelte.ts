@@ -416,7 +416,8 @@ function voorspellingen(stap: number): Cijfers {
 /* ---- Het jaaroverzicht ----------------------------------------------
    Verzonnen maanden, net als de vragen hierboven: de echte tijdlijn en de
    echte antwoorden horen niet in de browser van de televisie. Het gaat hier
-   om de vorm — de zwarte balken, de strook, de meelopende cijfers. */
+   om de vorm — de trailer zonder quizfeiten, en de film met de antwoorden
+   onderstreept. */
 
 function jaarRegel(tekst: string, onthuld: boolean, emoji: string | null = null, bij: string | null = null): JaarRegel {
   const knip = (regel: string) => {
@@ -434,6 +435,8 @@ function jaarRegel(tekst: string, onthuld: boolean, emoji: string | null = null,
   return { emoji, delen: knip(tekst), bij: bij ? knip(bij) : null };
 }
 
+/** De trailer heeft alleen de maanden met iets wat de quiz niet vraagt; de film alles. */
+const TRAILER_STROOK = [1, 5, 9, 12];
 const FILM_STROOK = [1, 2, 3, 5, 6, 7, 9, 11, 12];
 const MAANDEN_VOL = [
   'januari', 'februari', 'maart', 'april', 'mei', 'juni',
@@ -441,50 +444,63 @@ const MAANDEN_VOL = [
 ];
 
 function jaaroverzicht(stap: number, onthuld = false): JaarDia {
-  const stappen = FILM_STROOK.length + 2;
+  const strook = onthuld ? FILM_STROOK : TRAILER_STROOK;
+  const stappen = strook.length + 2;
   const basisDia = {
-    stap, stappen, jaar: JAAR, strook: FILM_STROOK, onthuld, peildatum: PEILDATUM,
+    stap, stappen, jaar: JAAR, strook, onthuld, peildatum: PEILDATUM,
   };
   if (stap === 0) {
     return {
-      ...basisDia, soort: 'titel', titel: String(JAAR), kop: 'Het jaar in twee minuten', maand: null,
-      regels: [jaarRegel('Twaalf maanden, zo snel als ze voorbijgingen. Alles wat zwart blijft, is een vraag van vanavond.', onthuld)],
+      ...basisDia, soort: 'titel', titel: String(JAAR), maand: null,
+      kop: onthuld ? 'Het jaar in twee minuten' : 'De trailer',
+      regels: [
+        jaarRegel(
+          onthuld
+            ? 'Het hele jaar, zo snel als het voorbijging. Wat onderstreept staat, werd vanavond gevraagd.'
+            : 'Alvast een voorproefje van ons jaar. Wat er in de wereld gebeurde, laten we nog even weg.',
+          onthuld,
+        ),
+      ],
       eigen: null, seconden: 7, jaartotaal: null,
     };
   }
   if (stap >= stappen - 1) {
     return {
-      ...basisDia, soort: 'slot', titel: `Dat was ${JAAR}`, maand: null,
-      kop: onthuld ? 'Zelfde film, zelfde jaar. Nu zonder balken.' : 'En dat was het jaar. Nu de balken eraf.',
+      ...basisDia, soort: 'slot', maand: null,
+      titel: onthuld ? `Dat was ${JAAR}` : 'Straks het hele jaar',
+      kop: onthuld ? 'Dat was het jaar, en dat was de quiz.' : 'De rest is een vraag van vanavond. Na de uitslag draait de hele film.',
       regels: [], eigen: null, seconden: 12,
-      // Het jaar in getallen komt pas in de herhaling; daarvoor ligt het onder een balk.
       jaartotaal: onthuld ? { sport: 421, taart: 43, landen: 12, dagen: 188 } : null,
     };
   }
-  const nr = FILM_STROOK[Math.min(stap, FILM_STROOK.length) - 1];
+  const nr = strook[Math.min(stap, strook.length) - 1];
+  if (!onthuld) {
+    // De trailer: geen kop, geen regel met een antwoord, en van ons alleen het sporten.
+    return {
+      ...basisDia, soort: 'maand', titel: MAANDEN_VOL[nr - 1], kop: '', maand: nr,
+      regels: [
+        jaarRegel('We vieren een verjaardag die niemand meer vergeet.', false, '🎂', 'Met taart, uiteraard.'),
+        jaarRegel('En iemand begint aan een nieuwe hobby.', false, '🎸'),
+      ],
+      eigen: { sport: 37, taart: null, landen: [], bijStart: null, koploper: null, perPersoon: [], totaal: null },
+      seconden: 10, jaartotaal: null,
+    };
+  }
   return {
     ...basisDia, soort: 'maand', titel: MAANDEN_VOL[nr - 1], kop: 'Een maand met van alles erin', maand: nr,
     regels: [
-      jaarRegel('Een ploeg uit [[een land hier]] wint iets groots.', onthuld, '🏆', 'Met een invaller die [[een naam]] heet.'),
-      jaarRegel('Er verschijnt een film die iedereen gezien moet hebben.', onthuld, '🎬'),
-      jaarRegel('En er gebeurt iets in [[Den Haag]] waar nog lang over gepraat wordt.', onthuld, '🏛️'),
+      jaarRegel('Een ploeg uit [[een land hier]] wint iets groots.', true, '🏆', 'Met een invaller die [[een naam]] heet.'),
+      jaarRegel('We vieren een verjaardag die niemand meer vergeet.', true, '🎂'),
+      jaarRegel('En er gebeurt iets in [[Den Haag]] waar nog lang over gepraat wordt.', true, '🏛️'),
     ],
-    // Vóór de uitslag liggen de taarten, de landen en de naam van de
-    // koploper onder een balk, net als op de avond zelf.
-    eigen: onthuld
-      ? {
-          sport: 37, taart: 4,
-          landen: [{ vlag: '🇫🇷', naam: 'Frankrijk', wie: 'Eva', datum: `${JAAR}-0${Math.min(9, nr)}-12` }],
-          nieuweLanden: true,
-          bijStart: nr === 1 ? 4 : 0,
-          koploper: { naam: 'Joris', aantal: 12 },
-          perPersoon: NAMEN.map((naam, i) => ({ naam, sport: 12 - i, taart: (i % 3) + 1, landen: i === 4 ? ['🇫🇷'] : [] })),
-          totaal: { sport: 37 * stap, taart: 4 * stap, landen: Math.min(12, 2 + stap) },
-        }
-      : {
-          sport: 37, taart: null, landen: [], nieuweLanden: true, bijStart: null,
-          koploper: { naam: null, aantal: 12 }, perPersoon: [], totaal: null,
-        },
+    eigen: {
+      sport: 37, taart: 4,
+      landen: [{ vlag: '🇫🇷', naam: 'Frankrijk', wie: 'Eva', datum: `${JAAR}-0${Math.min(9, nr)}-12` }],
+      bijStart: nr === 1 ? 4 : 0,
+      koploper: { naam: 'Joris', aantal: 12 },
+      perPersoon: NAMEN.map((naam, i) => ({ naam, sport: 12 - i, taart: (i % 3) + 1, landen: i === 4 ? ['🇫🇷'] : [] })),
+      totaal: { sport: 37 * stap, taart: 4 * stap, landen: Math.min(12, 2 + stap) },
+    },
     seconden: 12, jaartotaal: null,
   };
 }
@@ -529,29 +545,29 @@ export const DIAS: Dia[] = [
 
   /* ── Jaaroverzicht ── */
   {
-    id: 'film-titel', hoofdstuk: 'Jaaroverzicht', titel: 'De titelkaart',
-    let: 'Het jaartal groot in beeld, de strook onderaan met de maanden die meedoen, en de lijn die de dia uittelt.',
+    id: 'film-titel', hoofdstuk: 'Jaaroverzicht', titel: 'De trailer: titelkaart',
+    let: 'Het jaartal groot in beeld, de strook onderaan met de maanden die in de trailer zitten, en de lijn die de dia uittelt.',
     maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(0), klok: { eindigtOp: Date.now() + 7000, duurMs: 7000, loopt: true } }),
   },
   {
-    id: 'film-maand', hoofdstuk: 'Jaaroverzicht', titel: 'Een maand, met balken',
-    let: 'Over elk antwoord van vanavond ligt een zwarte balk, en elke balk is even breed — het woord eronder zit niet eens in het pakketje. Onder de streep wat wij die maand deden: hoe vaak er gesport is staat er, maar de taarten, de nieuwe landen en de naam van de koploper liggen ook onder een balk.',
-    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(3), klok: { eindigtOp: Date.now() + 12000, duurMs: 12000, loopt: true } }),
+    id: 'film-maand', hoofdstuk: 'Jaaroverzicht', titel: 'De trailer: een maand',
+    let: 'Alleen wat de quiz niet vraagt: geen kop, geen regel met een antwoord, en van ons alleen hoe vaak er gesport is.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(2), klok: { eindigtOp: Date.now() + 10000, duurMs: 10000, loopt: true } }),
   },
   {
-    id: 'film-slot', hoofdstuk: 'Jaaroverzicht', titel: 'De slotkaart',
-    let: 'Vóór de uitslag nog geen getallen: die vragen de recap-rondes. Alleen de belofte dat ons jaar na de uitslag volgt. Hierna begint ronde 1.',
-    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(FILM_STROOK.length + 1) }),
+    id: 'film-slot', hoofdstuk: 'Jaaroverzicht', titel: 'De trailer: slotkaart',
+    let: 'Geen getallen: die vragen de recap-rondes. Alleen de belofte van de hele film na de uitslag. Hierna begint ronde 1.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(TRAILER_STROOK.length + 1) }),
   },
   {
-    id: 'film-slot-onthuld', hoofdstuk: 'Jaaroverzicht', titel: 'De slotkaart, na de uitslag',
+    id: 'film-onthuld', hoofdstuk: 'Jaaroverzicht', titel: 'De film: een maand',
+    let: 'Na de uitslag: de kop, alle regels, en onder elk antwoord van vanavond een messing streep waar een zwarte balk vanaf schuift. Onder de streep onze landen, taarten, de koploper en de stand van het jaar.',
+    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(3, true) }),
+  },
+  {
+    id: 'film-slot-onthuld', hoofdstuk: 'Jaaroverzicht', titel: 'De film: slotkaart',
     let: 'Het jaar in vier getallen; de tellers lopen van nul omhoog.',
     maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(FILM_STROOK.length + 1, true) }),
-  },
-  {
-    id: 'film-onthuld', hoofdstuk: 'Jaaroverzicht', titel: 'De herhaling, zonder balken',
-    let: 'Dezelfde maand na de uitslag: de balken schuiven open en laten een messing streep achter, zodat je ziet welke woorden de hele avond zwart waren. Onder de streep staan nu de landen, de taarten, de koploper en de stand van het jaar.',
-    maak: () => basis({ fase: 'jaaroverzicht', jaaroverzicht: jaaroverzicht(3, true) }),
   },
 
   /* ── Ronde ── */
