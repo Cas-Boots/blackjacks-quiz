@@ -153,7 +153,10 @@ npm run verify -- --zonder-server                  # alleen op papier
 Eerst op papier: loopt `index.html` gelijk met `packs.ts`, heeft elke vraag
 wat zijn type nodig heeft (antwoord, opties, doelgetal), staan de foto's en
 fragmenten waar vragen naar verwijzen in `media/`, en hoeveel vragen staan
-nog op `teVullen`.
+nog op `teVullen`. Daarna het jaaroverzicht: hoeveel regels de trailer heeft
+(en een waarschuwing als dat er nog weinig zijn), welke maanden in de film
+meedraaien, welke er leeg blijven, hoeveel regels er nog op invulling wachten,
+en of alles tussen haken hoort bij iets wat vanavond ook echt gevraagd wordt.
 
 Dan tegen de server. Hij meldt zich als quizmaster, als één telefoon en als
 de televisie, en speelt elke gekozen ronde en elke vraag door in een eigen
@@ -186,7 +189,7 @@ oude tekst, en de controle zegt dat de server een oudere bouw draait.
 
 | Scherm | Adres | Voor wie |
 |---|---|---|
-| Televisie | `/tv` | het grote scherm; QR-code, vraag, klok, onthulling, tussenstand, podium |
+| Televisie | `/tv` | het grote scherm; QR-code, het jaaroverzicht, vraag, klok, onthulling, tussenstand, podium |
 | Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 | Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
@@ -219,6 +222,47 @@ Op de telefoon kun je in de lobby een selfie kiezen. Die wordt op de telefoon
 zelf bijgesneden en verkleind (256 bij 256) en staat daarna bij je naam op de
 televisie, in de stand en op het podium. Tik later op je portret in de kop om
 hem te vervangen.
+
+### Het jaaroverzicht: een trailer vooraf, de film na afloop
+
+De quiz gaat over het jaar, dus een overzicht van het jaar vóór de eerste
+vraag verklapt al snel de antwoorden. Daarom zijn het er twee.
+
+**De trailer** opent de avond. Daarin staat alleen wat de quiz *niet* vraagt:
+de regels uit de tijdlijn zonder dubbele haken (vaak iets van onszelf), en
+per maand hoe vaak er gesport is. Geen wereldnieuws, geen maandkoppen — die
+noemen de onderwerpen van vanavond — en geen taarten, landen of wie het
+vaakst ging, want dat vragen de recap-rondes. Wat de trailer niet laat zien,
+gaat ook niet mee in het pakketje naar de televisie en de telefoons, net
+zoals een vraag daar pas bij de onthulling in staat.
+
+**De film** draait na de uitslag: het hele jaar maand voor maand.
+
+- **De wereld**: de momenten van die maand, uit dezelfde nagezochte feiten
+  als de vragen. Wat er die avond gevraagd werd, staat onderstreept, en er
+  schuift een zwarte balk vanaf als de dia binnenkomt.
+- **Wij**: hoe vaak er gesport is, hoeveel taart erdoorheen ging, welke
+  landen erbij kwamen en wie er het vaakst ging, met de stand van het jaar
+  die meeloopt tot de slotkaart met het jaar in getallen. Rechtstreeks uit
+  resolution-recap, op de avond zelf uitgerekend.
+- Op je **telefoon** staat dezelfde dia, met **jouw** maand eronder: hoe
+  vaak jij sportte, hoeveel taart jij at, waar jij was.
+
+Beide lopen vanzelf door: elke dia staat acht tot achttien seconden in beeld,
+en het hostscherm tikt hem door zodra de klok afloopt. Met **Pauze** (of `P`)
+zet je hem stil, met **Volgende dia** ga je sneller, met `←` een stap terug,
+en met **De trailer overslaan** ga je meteen naar ronde 1. Na de laatste dia
+van de trailer begint ronde 1 vanzelf; na de film staat het podium er weer.
+Welke van de twee draait, beslist de server zelf: vóór de uitslag de trailer,
+daarna de film. Terug naar de lobby, en het is weer de trailer.
+
+De trailer neemt alleen maanden mee met een regel die erin mag; de film elke
+maand waar iets van te vertellen valt. Zo staat er in oktober geen lege kaart
+zolang die maand nog niet bijgeschreven is.
+
+Schrijf je de maanden bij? Zie [Het jaaroverzicht bijschrijven](#het-jaaroverzicht-bijschrijven);
+`npm run verify` zegt hoe lang de trailer is en hoeveel regels er nog op
+invulling wachten.
 
 ### Zo verloopt een vraag
 
@@ -299,6 +343,11 @@ sneltoetsen zoals in de losse quiz:
 | `M` | fragment afspelen of stoppen |
 | `A` | vink aan wat goed lijkt |
 | `Z` | de laatste handeling ongedaan maken |
+
+In de lobby staat **Start de trailer** als hoofdknop; bij de uitslag staat
+er *De film: het hele jaar*. Tijdens de trailer of de film zegt het
+hostscherm bij welke dia je bent, en bedien je hem met *Volgende dia*,
+*Pauze* (`P`), `←` en, in de trailer, *De trailer overslaan*.
 
 Bij een open vraag staat er een knop **Por de achterblijvers**; tik op een naam
 in de inleverrij om één telefoon te porren.
@@ -447,7 +496,9 @@ voordat je de bediening oefent.
 ### De televisie alleen: `/tv?test`
 
 Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
-telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**:
+telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**. Het
+jaaroverzicht heeft daar een eigen hoofdstuk: de trailer (titelkaart, een
+maand, slotkaart) en de film (een maand, slotkaart).
 
 ```
 http://localhost:5173/tv?test        # bij npm run dev
@@ -585,6 +636,52 @@ npm run content:check   # alleen controleren; dit draait ook in CI
 De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
 vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
 vraag.
+
+### Het jaaroverzicht bijschrijven
+
+De tijdlijn staat in `src/lib/content/jaaroverzicht.ts`, naast de vragen, en
+gaat met dezelfde `npm run content:sync` mee naar de losse quiz. Eén maand
+ziet er zo uit:
+
+```ts
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"🎂", tekst:"Een regel over onszelf, zonder haken: die komt ook in de trailer."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+De afspraken:
+
+1. **Wat de quiz vraagt, gaat tussen dubbele haken.** Zo'n regel komt nooit in
+   de trailer, alleen in de film, met het antwoord onderstreept. Elke
+   bewering met haken hoort ook in `packs.ts` te staan: de vragen zijn
+   nagezocht, de film zet ze op volgorde. `npm run verify` meldt het als er
+   iets tussen haken staat wat geen enkele vraag vraagt.
+2. **Een regel zonder haken is ook voor de trailer.** Iets wat de quiz niet
+   vraagt, vaak iets van onszelf: een verjaardag, een weekend weg, iemand die
+   ging verhuizen. Die feiten sta je zelf voor. Er mag geen antwoord van de
+   quiz in staan, ook niet via het emoji (❄️ zegt sneeuw);
+   `tests/jaaroverzicht.test.ts` vangt een antwoord dat er letterlijk in staat.
+3. **Raakt een regel zonder haken toch de quiz, zet er `pasNaAfloop: true`
+   bij.** "Daarmee evenaart hij het record" heeft geen haken, maar
+   beantwoordt een waar-of-niet-waar. Zo blijft hij uit de trailer.
+4. **De kop van een maand staat alleen in de film.** Daar mag hij alles zeggen.
+
+Een regel met `teVullen: true` slaat alles over; oktober, november en
+december staan zo klaar om in december bijgeschreven te worden, net als de
+ronde *Oktober tot december*. Onze eigen cijfers per maand hoef je nergens in
+te vullen: die komen uit resolution-recap, en wat de recap-rondes daarvan
+vragen komt vanzelf pas in de film.
+
+Zien hoe het eruitziet zonder een avond te draaien: `/tv?test=film-titel`,
+`/tv?test=film-maand` en `/tv?test=film-slot` voor de trailer,
+`/tv?test=film-onthuld` en `/tv?test=film-slot-onthuld` voor de film.
 
 Over de lengte hoef je niet te piekeren: een vraag van meer dan honderd tekens
 zet de televisie een maat kleiner, en past een dia dan nog niet op het scherm —

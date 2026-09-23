@@ -6,6 +6,7 @@
   import Klok from '$lib/client/Klok.svelte';
   import Media from '$lib/client/Media.svelte';
   import Cijfers from '$lib/client/Cijfers.svelte';
+  import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Podium from '$lib/client/Podium.svelte';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
@@ -34,7 +35,9 @@
   let teamRonde = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
   /* Dezelfde sfeer als op de televisie, zodat de telefoon meekleurt. */
   let sfeer = $derived(
-    staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt') : 'vilt',
+    staat?.fase === 'jaaroverzicht' ? 'bioscoop'
+      : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
+        : 'vilt',
   );
 
   // Bij een nieuwe vraag het veld leegmaken.
@@ -194,16 +197,24 @@
         </button>
       {/if}
       <span style="flex:1 1 auto;min-width:0">
-        <p class="etiket">{ronde?.naam ?? 'Blackjack Quiz 26/27'}</p>
+        <!-- Tijdens de film staat er geen ronde open; dan hoort de kop bij
+             het jaar, niet bij een ronde die nog moet beginnen. -->
+        <p class="etiket">
+          {staat?.fase === 'jaaroverzicht' ? `Het jaar ${staat.jaaroverzicht?.jaar ?? ''}` : (ronde?.naam ?? 'Blackjack Quiz 26/27')}
+        </p>
         <p class="fijn" style="margin-top:.15rem">
-          {#if mijnTeam && teamRonde}
+          {#if staat?.fase === 'jaaroverzicht'}
+            Leun achterover
+          {:else if mijnTeam && teamRonde}
             Team {mijnTeam.suit} {mijnTeam.naam} — samen op één telefoon
           {:else}
             Ieder voor zich
           {/if}
         </p>
       </span>
-      <Klok vorm="compact" />
+      {#if staat?.fase !== 'jaaroverzicht'}
+        <Klok vorm="compact" />
+      {/if}
     </div>
 
     <p class="verbinding">
@@ -238,6 +249,28 @@
           {#if fotoMelding}<p class="fijn" style="margin-top:.4rem">{fotoMelding}</p>{/if}
         </span>
       </div>
+    {:else if staat.fase === 'jaaroverzicht' && staat.jaaroverzicht}
+      {#key staat.jaaroverzicht.stap}
+        <div class="paneel" in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
+          <p class="etiket">Kijk mee op de televisie</p>
+          <div style="margin-top:.7rem">
+            <Jaaroverzicht
+              dia={staat.jaaroverzicht}
+              spelers={staat.spelers}
+              loopt={staat.klok?.loopt === true}
+              compact
+              alleen={mijnNaam}
+            />
+          </div>
+          <p class="fijn" style="margin-top:.8rem">
+            {#if staat.jaaroverzicht.onthuld}
+              Onderstreept: wat er vanavond gevraagd werd.
+            {:else}
+              Wat er in de wereld gebeurde, vragen we zo. Het hele jaar zie je na de uitslag.
+            {/if}
+          </p>
+        </div>
+      {/key}
     {:else if staat.fase === 'ronde'}
       <div class="paneel" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>
         <p class="etiket">{ronde?.suit} Ronde {staat.rondeIndex + 1}</p>

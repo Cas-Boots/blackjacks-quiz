@@ -4,7 +4,9 @@ Een complete quizavond in één HTML-bestand. Geen server, geen internet, geen
 installatie, geen PowerPoint. Je opent `index.html` in een browser en je kunt
 beginnen.
 
-Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
+Alle vragen gaan over 2026 of over wat 2027 gaat brengen. De avond opent met
+een trailer van het jaar, zonder één antwoord van vanavond; na de uitslag
+draait de hele film.
 
 ## Snel starten
 
@@ -12,6 +14,7 @@ Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
 2. Dubbelklik het bestand — het opent in je browser.
 3. Vul je naam als quizmaster in, pas de spelersnamen aan, kies de vragen.
 4. Zet je scherm op volledig scherm (`F11`, of `ctrl`+`cmd`+`F` op een Mac).
+5. Begin met de trailer, of ga met *Meteen naar ronde 1* de quiz in.
 
 Sluit je laptop met een HDMI-kabel op de tv aan, of cast het tabblad. Oogt de
 tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
@@ -57,6 +60,28 @@ De openstaande vragen dragen de markering `teVullen`. Je ziet ze terug als een r
 label in de vragenkiezer, en de controle vooraf telt hoeveel gekozen vragen
 nog een antwoord missen — zodat je niet per ongeluk met een onbeantwoordbare
 vraag de avond in gaat.
+
+## De avond begint met een trailer, en eindigt met de film
+
+De quiz gaat over het jaar, dus een overzicht van het jaar vóór de eerste
+vraag verklapt al snel de antwoorden. Daarom zijn het er twee:
+
+- **De trailer**, vóór ronde 1. Alleen wat de quiz *niet* vraagt: momenten
+  van onszelf, en per maand hoe vaak er gesport is. Geen wereldnieuws, geen
+  maandkoppen (die noemen de onderwerpen), geen taarten of landen (die
+  vragen de rondes over onszelf).
+- **De film**, na de uitslag. Het hele jaar maand voor maand: wat er in de
+  wereld gebeurde, onze sporten, taarten, landen en wie er het vaakst ging,
+  en de stand van het jaar. Wat er die avond gevraagd werd, staat
+  onderstreept, zodat je in één oogopslag ziet waar de quiz over ging.
+
+Beide lopen vanzelf door; met **Pauze** (`P`) zet je ze stil, met `spatie`
+ga je sneller, met `←` een stap terug, en *De trailer overslaan* brengt je
+meteen naar ronde 1. De knop voor de film staat bij de eindstand.
+
+De trailer is zo lang als wat erin mag staan. Nu zijn dat nog maar een paar
+regels; die schrijf je zelf bij, zie hieronder. Een maand zonder regel voor
+de trailer slaat hij over.
 
 ## Hoe de avond verloopt
 
@@ -125,7 +150,7 @@ Neem het bestand mee op een usb-stick als extra back-up.
 
 | Toets | Doet |
 |---|---|
-| `spatie` | volgende stap |
+| `spatie` | volgende stap (in het jaaroverzicht: volgende dia) |
 | `←` | een stap terug |
 | `P` | klok pauzeren of hervatten |
 | `T` | 30 seconden erbij |
@@ -190,6 +215,50 @@ En per vraagtype:
 ```
 
 Optioneel per vraag: `tijd` en `punten` overschrijven die van de ronde.
+
+## Het jaaroverzicht bijschrijven
+
+De tijdlijn staat bij de vragen, in `app/src/lib/content/jaaroverzicht.ts`,
+en gaat met dezelfde `npm run content:sync` mee naar dit bestand (zonder Node
+kun je hier rechtstreeks bij `const JAAROVERZICHT` werken). Een maand ziet er
+zo uit:
+
+```js
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"🎂", tekst:"Een regel over onszelf, zonder haken: die komt ook in de trailer."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+De afspraken:
+
+- **Wat de quiz vraagt, gaat tussen dubbele haken.** Zo'n regel komt alleen
+  in de film, met het antwoord onderstreept. Elke bewering met haken staat
+  ook ergens in de vragen: de film voegt geen feiten toe.
+- **Een regel zonder haken is ook voor de trailer.** Iets wat de quiz niet
+  vraagt, vaak iets van onszelf. Er mag geen antwoord van de quiz in staan,
+  ook niet via het emoji: ❄️ zegt sneeuw.
+- **Raakt een regel zonder haken toch de quiz**, zoals een zin die in z'n
+  geheel een waar-of-niet-waar beantwoordt, zet er dan `pasNaAfloop: true`
+  bij. Dan blijft hij uit de trailer.
+- **De kop van een maand** staat alleen in de film.
+- Een regel die nog op invulling wacht krijgt `teVullen: true`; die slaat
+  alles over.
+
+In de meespeelversie tellen `npm run verify` en de tests hoeveel regels de
+trailer heeft, en of er een antwoord van de quiz letterlijk in staat. Of een
+zin iets *verraadt*, blijft mensenwerk.
+
+Onze eigen cijfers per maand hoef je niet bij te houden: `npm run content:sync`
+schrijft ze in `const ONS_JAAR`, uitgerekend op dezelfde momentopname uit
+`resolution-recap` als de rondes over onszelf. De meespeelversie rekent ze op
+de avond zelf uit, dus daar kloppen ze tot op de dag.
 
 ## Bronnen voor de vragen over 2026
 

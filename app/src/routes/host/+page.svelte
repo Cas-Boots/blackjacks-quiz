@@ -58,6 +58,26 @@
   let laatsteVraag = $derived(!!vraag && vraag.index + 1 >= vraag.aantal);
   let cijfersBezig = $state(false);
 
+  /* ---- Het jaaroverzicht ----------------------------------------------
+     De film loopt op de klok van de server. Dit scherm kijkt mee en tikt
+     hem door zodra een dia afgelopen is; pauzeren is gewoon de klok
+     pauzeren. Staat er geen hostscherm open, dan blijft de dia staan en
+     kun je hem met de hand doorzetten — er gaat niets stuk. */
+  let film = $derived(staat?.fase === 'jaaroverzicht' ? staat.jaaroverzicht : null);
+  /** De laatste dia die dit scherm heeft doorgetikt, zodat het dat niet twee keer doet. */
+  let doorgetikt = -1;
+  onMount(() => {
+    const t = setInterval(() => {
+      const st = live.staat;
+      const dia = st?.fase === 'jaaroverzicht' ? st.jaaroverzicht : null;
+      if (!dia || !st?.klok?.loopt || bezig) return;
+      if (live.resterendMs() > 0 || doorgetikt === dia.stap) return;
+      doorgetikt = dia.stap;
+      void doe('volgende', { stap: dia.stap });
+    }, 250);
+    return () => clearInterval(t);
+  });
+
   async function verversCijfers() {
     cijfersBezig = true;
     try {
@@ -172,6 +192,7 @@
   /** De hoofdknop van dit moment — dezelfde die de spatiebalk indrukt. */
   function hoofdactie() {
     const f = staat?.fase;
+    if (f === 'jaaroverzicht') return doe('volgende');
     if (f === 'lobby' || f === 'ronde') return doe('start-ronde');
     if (f === 'vraag') return doe('toon-antwoord');
     if (f === 'antwoord' || f === 'cijfers') return doe('volgende');
@@ -197,7 +218,7 @@
         break;
       case 'p':
       case 'P':
-        if (staat?.fase === 'vraag') void doe('klok-pauze');
+        if (staat?.fase === 'vraag' || staat?.fase === 'jaaroverzicht') void doe('klok-pauze');
         break;
       case 't':
       case 'T':
@@ -290,7 +311,7 @@
     <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
       <div style="flex:1 1 220px;min-width:0">
         <p class="etiket">Quizmaster · {staat?.fase ?? '…'}</p>
-        <h2>{staat?.ronde?.naam ?? 'Blackjack Quiz 26/27'}</h2>
+        <h2>{film ? `Het jaaroverzicht — ${film.soort === 'maand' ? film.titel : film.kop}` : (staat?.ronde?.naam ?? 'Blackjack Quiz 26/27')}</h2>
       </div>
       <Klok vorm="compact" />
       <p class="verbinding">
@@ -364,8 +385,28 @@
 
     <!-- Bediening -->
     <div class="knoprij">
-      {#if staat?.fase === 'lobby' || staat?.fase === 'ronde'}
-        <button class="knop hoofd" onclick={() => doe('start-ronde')} disabled={bezig || keuzeGewijzigd}>Start de ronde</button>
+      {#if staat?.fase === 'jaaroverzicht' && film}
+        <span class="fijn">
+          {film.soort === 'titel' ? 'Titelkaart' : film.soort === 'slot' ? 'Slotkaart' : film.titel}
+          · dia {film.stap + 1} van {film.stappen}
+          · {film.onthuld ? 'de film' : 'de trailer'}
+        </span>
+        <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
+          {film.stap + 1 < film.stappen ? 'Volgende dia' : film.onthuld ? 'Terug naar de uitslag' : 'Naar ronde 1'}
+        </button>
+        <button class="knop" onclick={() => doe('klok-pauze')} disabled={bezig}>
+          {staat.klok?.loopt ? '⏸ Pauze' : '▶ Laat lopen'}
+        </button>
+        {#if !film.onthuld}
+          <button class="knop stil" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>De trailer overslaan</button>
+        {/if}
+      {:else if staat?.fase === 'lobby' || staat?.fase === 'ronde'}
+        {#if staat?.fase === 'lobby'}
+          <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig || keuzeGewijzigd}>
+            🎞 Start de trailer
+          </button>
+        {/if}
+        <button class="knop" class:hoofd={staat?.fase === 'ronde'} onclick={() => doe('start-ronde')} disabled={bezig || keuzeGewijzigd}>Start de ronde</button>
         <button class="knop" onclick={() => doe('herverdeel')} disabled={bezig}>Herverdeel teams</button>
         {#if staat?.fase === 'lobby'}
           <button class="knop" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>Toon ronde 1</button>
@@ -410,6 +451,10 @@
         {#if staat.cijfers.stap + 1 < staat.cijfers.stappen}
           <button class="knop stil" onclick={() => doe('naar-stand')} disabled={bezig}>Naar de tussenstand</button>
         {/if}
+      {:else if staat?.fase === 'einde'}
+        <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig}>
+          🎞 De film: het hele jaar
+        </button>
       {:else if staat?.fase === 'stand'}
         {#if (staat.rondeIndex ?? 0) + 1 < staat.rondeAantal}
           <button class="knop hoofd" onclick={() => doe('naar-ronde', { ronde: (staat?.rondeIndex ?? 0) + 1 })} disabled={bezig}>Volgende ronde</button>

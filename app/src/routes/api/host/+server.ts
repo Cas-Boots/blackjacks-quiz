@@ -15,6 +15,7 @@ import { maakSpel } from '$lib/server/seed';
 import { PAKKETTEN } from '$lib/content/packs';
 import { ververs } from '$lib/server/recap/bron';
 import { aantalStappen } from '$lib/server/recap/cijfers';
+import { aantalDias, jaaroverzichtVoor } from '$lib/server/jaaroverzicht';
 import { recapAnalyse } from '$lib/server/recap/bron';
 
 /**
@@ -63,6 +64,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   /** Hoeveel dia's met cijfers deze ronde heeft (overzicht plus één per persoon of voorspelling). */
   const cijfersStappen = () => (ronde?.cijfers ? aantalStappen(ronde.cijfers, recapAnalyse()) : 0);
 
+  /* ---- Het jaaroverzicht ---------------------------------------------
+     De film loopt op de klok: elke dia zet hem op zijn eigen lengte, en
+     het hostscherm tikt door zodra hij afloopt. Pauzeren is dus gewoon de
+     klok pauzeren, en een stap terug zet hem weer vol. */
+  const jaarDias = () => aantalDias(recapAnalyse(), spel.geeindigdOp !== null);
+  const jaarDia = (stap: number) => jaaroverzichtVoor(recapAnalyse(), stap, spel.geeindigdOp !== null);
+  const zetJaarDia = (stap: number) => {
+    const doel = Math.max(0, Math.min(stap, jaarDias() - 1));
+    zet({ fase: 'jaaroverzicht', vraagIndex: doel });
+    startKlok(jaarDia(doel).seconden);
+    return doel;
+  };
+
   switch (opdracht) {
     case 'naar-ronde': {
       const doel = Math.max(0, Math.min(Number(body.ronde ?? 0), rondes.length - 1));
@@ -89,6 +103,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       const stap = Math.max(0, Math.min(Number(body.stap ?? 0), cijfersStappen() - 1));
       zet({ fase: 'cijfers', vraagIndex: stap });
       log = { omschrijving: 'De cijfers van het jaar getoond', terug: true };
+      break;
+    }
+    case 'jaaroverzicht': {
+      // De film van het jaar. Voor de quiz met balken over de antwoorden,
+      // na de uitslag nog een keer zonder.
+      await Promise.race([ververs(), new Promise((klaar) => setTimeout(klaar, 6000))]);
+      const stap = zetJaarDia(Number(body.stap ?? 0));
+      log = { omschrijving: stap === 0 ? 'Het jaaroverzicht gestart' : `Jaaroverzicht: dia ${stap + 1}`, terug: true };
       break;
     }
     case 'herverdeel': {
@@ -150,6 +172,30 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       break;
     }
     case 'volgende': {
+      if (spel.fase === 'jaaroverzicht') {
+        // Het hostscherm tikt de film vanzelf door zodra de klok afloopt.
+        // Het zegt erbij op welke dia het dacht te staan, zodat twee open
+        // hostschermen samen geen twee stappen maken.
+        if (body.stap !== undefined && Number(body.stap) !== spel.vraagIndex) {
+          return json({ ok: true, versie: spel.versie, overgeslagen: true });
+        }
+        if (spel.vraagIndex + 1 < jaarDias()) {
+          const stap = zetJaarDia(spel.vraagIndex + 1);
+          log = { omschrijving: `Jaaroverzicht: dia ${stap + 1}`, terug: true };
+        } else if (spel.geeindigdOp) {
+          // De herhaling na de uitslag loopt terug naar het podium.
+          stopKlok();
+          zet({ fase: 'einde' });
+          log = { omschrijving: 'Terug naar de uitslag', terug: true };
+        } else {
+          stopKlok();
+          zet({ fase: 'ronde', rondeIndex: 0, vraagIndex: 0 });
+          const eerste = rondes[0];
+          if (eerste) teamsVoorRonde(spel.id, 0, eerste, lijst);
+          log = { omschrijving: `Van de film naar ronde 1: ${eerste?.naam ?? ''}`, terug: true };
+        }
+        break;
+      }
       if (!ronde) error(409, 'geen ronde');
       stopKlok();
       if (spel.fase === 'cijfers') {
@@ -177,6 +223,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       break;
     }
     case 'vorige': {
+      if (spel.fase === 'jaaroverzicht') {
+        if (spel.vraagIndex > 0) {
+          const stap = zetJaarDia(spel.vraagIndex - 1);
+          log = { omschrijving: `Jaaroverzicht: dia ${stap + 1}`, terug: true };
+        } else {
+          stopKlok();
+          zet({ fase: spel.geeindigdOp ? 'einde' : 'lobby' });
+          log = { omschrijving: 'Terug uit het jaaroverzicht', terug: true };
+        }
+        break;
+      }
       stopKlok();
       if (spel.fase === 'antwoord') zet({ fase: 'vraag' });
       else if (spel.fase === 'vraag' && spel.vraagIndex > 0) zet({ fase: 'antwoord', vraagIndex: spel.vraagIndex - 1 });
@@ -315,7 +372,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
     case 'naar-lobby': {
       stopKlok();
-      zet({ fase: 'lobby', rondeIndex: 0, vraagIndex: 0 });
+      // Terug naar de lobby betekent: de avond begint opnieuw. Daar hoort
+      // ook bij dat het jaaroverzicht zijn balken terugkrijgt; die gaan er
+      // pas af als de uitslag geweest is.
+      zet({ fase: 'lobby', rondeIndex: 0, vraagIndex: 0, geeindigdOp: null });
       log = { omschrijving: 'Terug naar de lobby', terug: true };
       break;
     }
