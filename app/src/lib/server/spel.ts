@@ -19,6 +19,7 @@ import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
 import type { PubliekeStaat, PubliekeInzending, Fase, Rol, Onthulling } from '$lib/shared/state';
+import { nieuwjaarRond, leesNieuwjaarOp, type Nieuwjaar } from '$lib/shared/nieuwjaar';
 import { recapAnalyse } from './recap/bron';
 import { verlevendig } from './recap/vragen';
 import { cijfersVoor } from './recap/cijfers';
@@ -423,6 +424,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       loopt: spel.klokLoopt,
     },
     mediaSpeelt: spel.mediaSpeelt,
+    pauze: spel.pauze === 'pauze' || spel.pauze === 'nieuwjaar' ? spel.pauze : null,
+    nieuwjaar: nieuwjaarVoor(nu),
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
     cijfers: spel.fase === 'cijfers' && ronde?.cijfers ? cijfersVoor(ronde.cijfers, recapAnalyse(), spel.vraagIndex, omgevingVan(spel.id)) : null,
     ingeleverd,
@@ -431,6 +434,18 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   };
   geheugen = { sleutel: sleutelGeheugen, op: nu, staat };
   return staat;
+}
+
+/* Voor een generale repetitie kan middernacht verzet worden met NIEUWJAAR_OP
+   (zie nieuwjaar.ts). '+10' telt vanaf de eerste keer dat de server het leest,
+   niet bij elke momentopname opnieuw — anders schuift middernacht mee. */
+let repetitie: { waarde: string; op: number | null } | null = null;
+
+export function nieuwjaarVoor(nu: number): Nieuwjaar {
+  const waarde = process.env.NIEUWJAAR_OP ?? '';
+  if (!repetitie || repetitie.waarde !== waarde) repetitie = { waarde, op: leesNieuwjaarOp(waarde, nu) };
+  if (repetitie.op === null) return nieuwjaarRond(nu);
+  return { op: repetitie.op, jaar: nieuwjaarRond(nu).jaar };
 }
 
 /** De huidige ronde en vraag, of null als het spel daar niet staat. */

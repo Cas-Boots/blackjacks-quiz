@@ -1,0 +1,797 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "fe3d1b14-8975-4194-b052-7e19212b5424",
+  "prevId": "5c76c3e3-da79-4c34-a6e3-2e91b25693ca",
+  "tables": {
+    "antwoorden": {
+      "name": "antwoorden",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vraag_sleutel": {
+          "name": "vraag_sleutel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "inzender": {
+          "name": "inzender",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "speler_id": {
+          "name": "speler_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tekst": {
+          "name": "tekst",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ingediend_op": {
+          "name": "ingediend_op",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "na_ms": {
+          "name": "na_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_goed": {
+          "name": "is_goed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "antwoorden_spel_vraag_inzender": {
+          "name": "antwoorden_spel_vraag_inzender",
+          "columns": [
+            "spel_id",
+            "vraag_sleutel",
+            "inzender"
+          ],
+          "isUnique": true
+        },
+        "antwoorden_spel_vraag": {
+          "name": "antwoorden_spel_vraag",
+          "columns": [
+            "spel_id",
+            "vraag_sleutel"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "antwoorden_spel_id_spellen_id_fk": {
+          "name": "antwoorden_spel_id_spellen_id_fk",
+          "tableFrom": "antwoorden",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "antwoorden_speler_id_spelers_id_fk": {
+          "name": "antwoorden_speler_id_spelers_id_fk",
+          "tableFrom": "antwoorden",
+          "tableTo": "spelers",
+          "columnsFrom": [
+            "speler_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "apparaten": {
+      "name": "apparaten",
+      "columns": {
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rol": {
+          "name": "rol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "speler_id": {
+          "name": "speler_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "naam": {
+          "name": "naam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "laatst_gezien": {
+          "name": "laatst_gezien",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "apparaten_speler": {
+          "name": "apparaten_speler",
+          "columns": [
+            "speler_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "apparaten_speler_id_spelers_id_fk": {
+          "name": "apparaten_speler_id_spelers_id_fk",
+          "tableFrom": "apparaten",
+          "tableTo": "spelers",
+          "columnsFrom": [
+            "speler_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "correcties": {
+      "name": "correcties",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "speler_id": {
+          "name": "speler_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "punten": {
+          "name": "punten",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reden": {
+          "name": "reden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "aangemaakt_op": {
+          "name": "aangemaakt_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "correcties_spel_id_spellen_id_fk": {
+          "name": "correcties_spel_id_spellen_id_fk",
+          "tableFrom": "correcties",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "correcties_speler_id_spelers_id_fk": {
+          "name": "correcties_speler_id_spelers_id_fk",
+          "tableFrom": "correcties",
+          "tableTo": "spelers",
+          "columnsFrom": [
+            "speler_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "deelnemers": {
+      "name": "deelnemers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "speler_id": {
+          "name": "speler_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "deelnemers_spel_speler": {
+          "name": "deelnemers_spel_speler",
+          "columns": [
+            "spel_id",
+            "speler_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "deelnemers_spel_id_spellen_id_fk": {
+          "name": "deelnemers_spel_id_spellen_id_fk",
+          "tableFrom": "deelnemers",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "deelnemers_speler_id_spelers_id_fk": {
+          "name": "deelnemers_speler_id_spelers_id_fk",
+          "tableFrom": "deelnemers",
+          "tableTo": "spelers",
+          "columnsFrom": [
+            "speler_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "logboek": {
+      "name": "logboek",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "opdracht": {
+          "name": "opdracht",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "omschrijving": {
+          "name": "omschrijving",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vorige": {
+          "name": "vorige",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_ongedaan": {
+          "name": "is_ongedaan",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "aangemaakt_op": {
+          "name": "aangemaakt_op",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "logboek_spel": {
+          "name": "logboek_spel",
+          "columns": [
+            "spel_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "logboek_spel_id_spellen_id_fk": {
+          "name": "logboek_spel_id_spellen_id_fk",
+          "tableFrom": "logboek",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "spelers": {
+      "name": "spelers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "naam": {
+          "name": "naam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "foto": {
+          "name": "foto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_quizmaster": {
+          "name": "is_quizmaster",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_gast": {
+          "name": "is_gast",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "aangemaakt_op": {
+          "name": "aangemaakt_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "spelers_naam_unique": {
+          "name": "spelers_naam_unique",
+          "columns": [
+            "naam"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "spellen": {
+      "name": "spellen",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "pakket": {
+          "name": "pakket",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "naam": {
+          "name": "naam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fase": {
+          "name": "fase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'lobby'"
+        },
+        "ronde_index": {
+          "name": "ronde_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "vraag_index": {
+          "name": "vraag_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "samenstelling": {
+          "name": "samenstelling",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'{}'"
+        },
+        "klok_eindigt_op": {
+          "name": "klok_eindigt_op",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "klok_duur_ms": {
+          "name": "klok_duur_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "klok_loopt": {
+          "name": "klok_loopt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "klok_rest_ms": {
+          "name": "klok_rest_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "media_speelt": {
+          "name": "media_speelt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "pauze": {
+          "name": "pauze",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pauze_klok_liep": {
+          "name": "pauze_klok_liep",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "versie": {
+          "name": "versie",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_actief": {
+          "name": "is_actief",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "gestart_op": {
+          "name": "gestart_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        },
+        "geeindigd_op": {
+          "name": "geeindigd_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "teams": {
+      "name": "teams",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ronde_index": {
+          "name": "ronde_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "team_key": {
+          "name": "team_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "naam": {
+          "name": "naam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "suit": {
+          "name": "suit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "leden": {
+          "name": "leden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        }
+      },
+      "indexes": {
+        "teams_spel_ronde_key": {
+          "name": "teams_spel_ronde_key",
+          "columns": [
+            "spel_id",
+            "ronde_index",
+            "team_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "teams_spel_id_spellen_id_fk": {
+          "name": "teams_spel_id_spellen_id_fk",
+          "tableFrom": "teams",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "uitdelingen": {
+      "name": "uitdelingen",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "spel_id": {
+          "name": "spel_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vraag_sleutel": {
+          "name": "vraag_sleutel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "verdeling": {
+          "name": "verdeling",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'{}'"
+        },
+        "bijgewerkt_op": {
+          "name": "bijgewerkt_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "uitdelingen_spel_vraag": {
+          "name": "uitdelingen_spel_vraag",
+          "columns": [
+            "spel_id",
+            "vraag_sleutel"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "uitdelingen_spel_id_spellen_id_fk": {
+          "name": "uitdelingen_spel_id_spellen_id_fk",
+          "tableFrom": "uitdelingen",
+          "tableTo": "spellen",
+          "columnsFrom": [
+            "spel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

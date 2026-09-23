@@ -7,6 +7,7 @@
   import Media from '$lib/client/Media.svelte';
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Podium from '$lib/client/Podium.svelte';
+  import Pauzescherm from '$lib/client/Pauzescherm.svelte';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
@@ -185,6 +186,10 @@
 
 <div class="scherm" data-sfeer={sfeer}>
   <div class="motief" aria-hidden="true"></div>
+  <!-- Over de rest heen, zodat een half getikt antwoord eronder blijft staan. -->
+  {#if staat?.pauze}
+    <Pauzescherm soort={staat.pauze} vorm="telefoon" />
+  {/if}
   <div class="romp" style="max-width:560px">
     <!-- Kop: waar zijn we, en hoeveel tijd is er nog -->
     <div style="display:flex;align-items:center;gap:.9rem">

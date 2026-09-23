@@ -294,7 +294,7 @@ sneltoetsen zoals in de losse quiz:
 |---|---|
 | `spatie`, `Enter`, `→` | verder: ronde starten, antwoord tonen, volgende vraag |
 | `←` | een stap terug |
-| `P` | klok pauzeren of hervatten |
+| `P` | klok stilzetten of laten doorlopen |
 | `T` | 30 seconden erbij |
 | `M` | fragment afspelen of stoppen |
 | `A` | vink aan wat goed lijkt |
@@ -308,6 +308,37 @@ punten voor wie, correcties. Elke handeling die de stand of de plek in de quiz
 verandert draagt een momentopname van ervoor, dus *Ongedaan* (of `Z`) zet hem
 in zijn geheel terug — ook na een verkeerd vinkje of een per ongeluk overgeslagen
 vraag. Meerdere keren achter elkaar mag.
+
+### Pauze, en middernacht
+
+**☕ Pauze** zet de hele quiz even stil, in elke fase: de klok staat stil, een
+fragment stopt, en de televisie en de telefoons tonen een pauzescherm. Wat
+eronder staat blijft staan — een half getikt antwoord op een telefoon ook.
+Tijdens de pauze kan niemand inleveren en doen de knoppen die de klok of de
+dia veranderen niets (punten bijstellen en een gast toevoegen mogen wel).
+**▶ Hervat de quiz** zet alles terug zoals het was; liep de klok, dan loopt hij
+verder met de seconden die er nog op stonden.
+
+De avond loopt over middernacht heen, dus het hostscherm let op de klok
+(Nederlandse tijd, 1 januari 00:00):
+
+- Vanaf **een half uur** voor twaalf staat bovenaan hoe lang het nog is.
+- De **laatste tien minuten** wordt dat dringend, en ziet de kamer het ook:
+  linksonder op de televisie staat *nog 8 minuten tot middernacht*.
+- **Pauzeer en tel af** pauzeert de quiz en laat de televisie aftellen. De
+  laatste tien seconden staan in het groot, met een tik per seconde; om twaalf
+  uur komen de fanfare, de confetti en *Gelukkig nieuwjaar 2027*. De
+  telefoons tellen mee en trillen om twaalf uur.
+- Dat blijft staan tot jij de quiz hervat. Klaar met proosten? Hervat, en de
+  vraag van vóór het vuurwerk staat er weer.
+
+Een gewone pauze kun je met één knop omzetten in het aftellen en terug.
+
+Oefenen zonder op oudejaarsavond te wachten: zet `NIEUWJAAR_OP` bij het
+starten. `NIEUWJAAR_OP=+10 npm run lokaal` legt middernacht tien minuten na
+het starten van de server; een tijdstip mag ook
+(`NIEUWJAAR_OP=2026-12-28T21:00:00+01:00`). Op de televisie alleen kan het in
+de testmodus: `/tv?test=nieuwjaar-aftellen`.
 
 *← Terug* werkt overal: vanaf de titelkaart van een ronde ga je naar de
 tussenstand van de vorige ronde, vanaf de uitslag naar de laatste tussenstand.
@@ -473,7 +504,7 @@ ontbreekt en het scherm vóór de eerste verbinding.
 | `T` | paneel tonen of verbergen, om het scherm kaal te zien |
 | `B` | in de lobby: een telefoon komt binnen (begroeting en boing) |
 | `I` | bij een vraag: iemand levert in; bij de onthulling: beoordeel de volgende inzending |
-| `K` | de klok op de laatste acht seconden zetten (het tikken, de trilling, de stempel TIJD!) |
+| `K` | de klok op de laatste acht seconden zetten (het tikken, de trilling, de stempel TIJD!); bij het aftellen naar middernacht: nog twaalf seconden |
 | `P` | de klok pauzeren of hervatten |
 | `M` | het fragment afspelen of stoppen |
 | `N` | bij de cijfers van het jaar: een stap verder |
@@ -612,6 +643,7 @@ blackjacks-cup.
 | `PORT` | staat al goed | `3000`. |
 | `ADDRESS_HEADER`, `XFF_DEPTH` | staat al goed | `x-forwarded-for` en `1`: achter Traefik ziet de rem op de pincode zo het adres van de telefoon. |
 | `BODY_SIZE_LIMIT` | staat al goed | `512K`, het grootste verzoek dat de server aanneemt; een portret is hooguit 200 kB. |
+| `NIEUWJAAR_OP` | nee | Alleen voor een generale repetitie: een verzonnen middernacht, `+10` (minuten na de start) of een tijdstip. Leeg laten op de avond zelf. |
 
 `HOST_PIN` heeft met opzet geen standaardwaarde. Draait de app in productie
 zonder eigen code — of nog met de voorbeeldcode `2627` uit `.env.example` — dan geeft

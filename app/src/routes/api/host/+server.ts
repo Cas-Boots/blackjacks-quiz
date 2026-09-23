@@ -17,6 +17,12 @@ import { ververs } from '$lib/server/recap/bron';
 import { aantalStappen } from '$lib/server/recap/cijfers';
 import { recapAnalyse } from '$lib/server/recap/bron';
 
+/** Opdrachten die de klok of de plek in de quiz veranderen, en dus wachten tot na de pauze. */
+const GEBLOKKEERD_IN_PAUZE = new Set([
+  'naar-ronde', 'toon-cijfers', 'start-ronde', 'klok-pauze', 'klok-start', 'klok-verleng', 'toon-antwoord',
+  'media-wissel', 'volgende', 'vorige', 'naar-stand', 'naar-einde', 'por', 'ongedaan', 'zet-samenstelling', 'naar-lobby',
+]);
+
 /**
  * Alle opdrachten van de quizmaster lopen hier langs.
  *
@@ -63,7 +69,37 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   /** Hoeveel dia's met cijfers deze ronde heeft (overzicht plus één per persoon of voorspelling). */
   const cijfersStappen = () => (ronde?.cijfers ? aantalStappen(ronde.cijfers, recapAnalyse()) : 0);
 
+  // Tijdens een pauze staat de quiz stil: niets dat de klok start of naar een
+  // andere dia gaat, anders loopt er achter het pauzescherm een vraag af. Wat
+  // de plek in de quiz niet raakt (punten bijstellen, een gast erbij) mag wel.
+  if (spel.pauze && GEBLOKKEERD_IN_PAUZE.has(opdracht)) {
+    error(409, 'De quiz staat op pauze. Hervat hem eerst.');
+  }
+
   switch (opdracht) {
+    case 'pauzeer': {
+      const soort = body.soort === 'nieuwjaar' ? 'nieuwjaar' : 'pauze';
+      if (spel.pauze) {
+        // Al gepauzeerd: alleen wisselen tussen gewone pauze en aftellen.
+        zet({ pauze: soort });
+      } else {
+        const rest = spel.klokLoopt ? Math.max(0, (spel.klokEindigtOp ?? Date.now()) - Date.now()) : spel.klokRestMs;
+        zet({ pauze: soort, pauzeKlokLiep: spel.klokLoopt, klokLoopt: false, klokRestMs: rest, mediaSpeelt: false });
+      }
+      log = { omschrijving: soort === 'nieuwjaar' ? 'Pauze voor middernacht' : 'Pauze', terug: false };
+      break;
+    }
+    case 'hervat': {
+      if (!spel.pauze) error(409, 'de quiz staat niet op pauze');
+      const klokWeer = spel.pauzeKlokLiep && spel.klokRestMs > 0;
+      zet({
+        pauze: null,
+        pauzeKlokLiep: false,
+        ...(klokWeer ? { klokLoopt: true, klokEindigtOp: Date.now() + spel.klokRestMs } : {}),
+      });
+      log = { omschrijving: 'De quiz gaat verder', terug: false };
+      break;
+    }
     case 'naar-ronde': {
       const doel = Math.max(0, Math.min(Number(body.ronde ?? 0), rondes.length - 1));
       const r = rondes[doel];

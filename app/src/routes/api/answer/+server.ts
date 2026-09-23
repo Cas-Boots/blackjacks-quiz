@@ -20,6 +20,9 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const spel = actiefSpel();
   if (!spel) error(409, 'geen actief spel');
   if (spel.fase !== 'vraag') error(409, 'er staat nu geen vraag open');
+  // Tijdens de pauze ligt de vraag onder het pauzescherm en staat de klok stil;
+  // inleveren kan weer zodra de quiz verdergaat.
+  if (spel.pauze) error(409, 'de quiz staat even op pauze');
 
   const { ronde } = huidige(spel);
   if (!ronde) error(409, 'geen ronde');

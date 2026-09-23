@@ -13,6 +13,8 @@
   import Podium, { WINNAAR_NA_MS } from '$lib/client/Podium.svelte';
   import Media from '$lib/client/Media.svelte';
   import Cijfers from '$lib/client/Cijfers.svelte';
+  import Pauzescherm from '$lib/client/Pauzescherm.svelte';
+  import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -264,8 +266,11 @@
 
   /* ---- Aftikken in de laatste seconden -------------------------------- */
   let restSec = $state(99);
+  /** Hoe lang het nog is tot middernacht; null zolang er geen staat is. */
+  let middernachtMs = $state<number | null>(null);
   onMount(() => {
     const t = setInterval(() => {
+      middernachtMs = live.totMiddernachtMs();
       const st = live.staat;
       if (!st?.klok?.loopt) {
         restSec = 99;
@@ -279,6 +284,12 @@
     }, 120);
     return () => clearInterval(t);
   });
+
+  /* De laatste tien minuten voor middernacht ziet de kamer het ook, zolang de
+     quizmaster nog niet voor het aftellen heeft gepauzeerd. */
+  let middernachtNadert = $derived(
+    !staat?.pauze && middernachtMs !== null && middernachtMs > 0 && middernachtMs <= DRINGEND_VANAF_MS,
+  );
 
   let spanning = $derived(restSec <= 5 && restSec > 0 && live.staat?.klok?.loopt === true);
   /** De klok staat op nul en de quizmaster heeft nog niet onthuld. */
@@ -338,6 +349,14 @@
   >
     {#if !gewekt}🔇 klik voor geluid{:else if geluidAan}🔊{:else}🔈{/if}
   </button>
+
+  {#if staat?.pauze}
+    <Pauzescherm soort={staat.pauze} />
+  {/if}
+
+  {#if middernachtNadert && middernachtMs !== null}
+    <p class="middernacht-melding" transition:fade={{ duration: 400 }}>🎆 {nogTekst(middernachtMs)} tot middernacht</p>
+  {/if}
 
   <!-- De rondekop hoort bij het spel, niet bij het aanmelden of de uitslag. -->
   {#if staat && ronde && staat.fase !== 'lobby' && staat.fase !== 'einde'}

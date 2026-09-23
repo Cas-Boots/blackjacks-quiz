@@ -32,6 +32,10 @@ export const spellen = sqliteTable('spellen', {
   klokRestMs: integer('klok_rest_ms').notNull().default(0),
   /** Of het fragment bij de huidige vraag speelt. De quizmaster zet dit aan en uit. */
   mediaSpeelt: integer('media_speelt', { mode: 'boolean' }).notNull().default(false),
+  /** De quiz staat even stil: 'pauze', of 'nieuwjaar' voor het aftellen naar middernacht. null als hij loopt. */
+  pauze: text('pauze'),
+  /** Of de klok liep toen de pauze begon; dan loopt hij bij het hervatten weer door. */
+  pauzeKlokLiep: integer('pauze_klok_liep', { mode: 'boolean' }).notNull().default(false),
   /** Loopt op bij elke wijziging. Clients negeren pakketjes met een lagere versie. */
   versie: integer('versie').notNull().default(0),
   isActief: integer('is_actief', { mode: 'boolean' }).notNull().default(true),

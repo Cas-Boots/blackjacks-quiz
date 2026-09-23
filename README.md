@@ -113,7 +113,13 @@ gewoon door.
 - **Eén plek waar punten veranderen.** Elke toekenning wordt per vraag
   vastgelegd en is omkeerbaar, dus de stand kan niet stilletjes scheef lopen.
 - **Ongedaan maken.** Elke scoringsactie is terug te draaien (`Z`).
-- **Noodknoppen.** Klok pauzeren, 30 seconden erbij, terug naar een vorige
+- **Pauze voor middernacht.** Het laatste uur voor twaalf staat onderin hoe
+  lang het nog is (Nederlandse tijd), de laatste tien minuten in het rood.
+  Eén klik pauzeert de quiz en telt in het groot af naar het nieuwe jaar;
+  daarna hervat je waar je was, met de klok op dezelfde seconde. **☕ Pauze**
+  doet hetzelfde zonder aftellen. Oefenen: open het bestand met
+  `?nieuwjaar=+5` voor een middernacht over vijf minuten.
+- **Noodknoppen.** Klok stilzetten, 30 seconden erbij, terug naar een vorige
   vraag, naar een willekeurige ronde springen, punten handmatig bijstellen.
 - **Geen afhankelijkheden.** Geen accounts, geen externe diensten. Alleen de
   lettertypes komen van Google Fonts; vallen die weg, dan kiest de browser een
@@ -127,7 +133,7 @@ Neem het bestand mee op een usb-stick als extra back-up.
 |---|---|
 | `spatie` | volgende stap |
 | `←` | een stap terug |
-| `P` | klok pauzeren of hervatten |
+| `P` | klok stilzetten of laten doorlopen |
 | `T` | 30 seconden erbij |
 | `M` | muziek of video afspelen of pauzeren |
 | `Z` | laatste actie ongedaan |
