@@ -217,11 +217,12 @@ export interface AntwoordInzending {
 
 /** Een stukje regel: gewone tekst, of een balk waar een antwoord onder zit. */
 export interface JaarDeel {
-  /** Leeg zolang de balk ligt. */
+  /**
+   * Leeg zolang de balk ligt. Ook de lengte gaat niet mee: elke balk is even
+   * breed, anders telt de kamer de letters.
+   */
   tekst: string;
   balk: boolean;
-  /** Hoe breed de balk moet zijn: het aantal tekens dat eronder zit. */
-  lengte: number;
 }
 
 export interface JaarRegel {
@@ -231,20 +232,29 @@ export interface JaarRegel {
   bij: JaarDeel[] | null;
 }
 
-/** Wat wij die maand zelf deden. Komt uit resolution-recap. */
+/**
+ * Wat wij die maand zelf deden. Komt uit resolution-recap.
+ *
+ * De recap-rondes vragen naar taarten, landen en wie het vaakst sportte.
+ * Zolang de balken liggen gaat dat dus niet mee: dan is een getal `null`,
+ * een lijst leeg en een naam `null`, en tekent het scherm een balk.
+ */
 export interface JaarEigen {
   sport: number;
-  taart: number;
-  /** Landen die deze maand voor het eerst op de lijst kwamen. */
+  /** null zolang de balken liggen. */
+  taart: number | null;
+  /** Landen die deze maand voor het eerst op de lijst kwamen. Leeg zolang de balken liggen. */
   landen: { vlag: string; naam: string; wie: string; datum: string }[];
-  /** Landen die al op de lijst stonden toen het jaar begon; geen uitje. */
-  bijStart: number;
-  /** Wie er deze maand het vaakst sportte; null als niemand iets noteerde. */
-  koploper: { naam: string; aantal: number } | null;
-  /** Per persoon, zodat je op je eigen telefoon je eigen maand ziet. */
+  /** Of er deze maand landen bijkwamen, ook als ze nog onder een balk liggen. */
+  nieuweLanden: boolean;
+  /** Landen die al op de lijst stonden toen het jaar begon; geen uitje. null zolang de balken liggen. */
+  bijStart: number | null;
+  /** Wie er deze maand het vaakst sportte; null als niemand iets noteerde. De naam ligt onder een balk. */
+  koploper: { naam: string | null; aantal: number } | null;
+  /** Per persoon, zodat je op je eigen telefoon je eigen maand ziet. Leeg zolang de balken liggen. */
   perPersoon: { naam: string; sport: number; taart: number; landen: string[] }[];
-  /** De stand van het jaar tot en met deze maand. */
-  totaal: { sport: number; taart: number; landen: number };
+  /** De stand van het jaar tot en met deze maand. null zolang de balken liggen. */
+  totaal: { sport: number; taart: number; landen: number } | null;
 }
 
 export interface JaarDia {
@@ -267,7 +277,7 @@ export interface JaarDia {
   onthuld: boolean;
   /** Hoelang deze dia in beeld blijft als de film vanzelf doorloopt. */
   seconden: number;
-  /** Het jaar in getallen. Alleen op de slotkaart. */
+  /** Het jaar in getallen. Alleen op de slotkaart, en pas als de balken eraf zijn. */
   jaartotaal: { sport: number; taart: number; landen: number; dagen: number } | null;
   /** Tot welke dag de eigen cijfers lopen, 'JJJJ-MM-DD'. */
   peildatum: string;

@@ -196,6 +196,10 @@ function controleerJaaroverzicht() {
   const inDeFilm = maandenInDeFilm(analyse);
   ok(`${inDeFilm.length} van de 12 maanden draaien mee, plus een titel- en een slotkaart`);
 
+  // Regels die met balken en al een antwoord geven, komen pas na de uitslag.
+  const later = JAAROVERZICHT.maanden.flatMap((m) => m.momenten.filter((x) => x.pasNaAfloop && !x.teVullen));
+  if (later.length) ok(`${later.length} ${later.length === 1 ? 'regel komt' : 'regels komen'} pas in de herhaling na de uitslag`);
+
   const weg = JAAROVERZICHT.maanden.filter((m) => !inDeFilm.includes(m.nr));
   if (weg.length) {
     let_op(`${weg.length} ${weg.length === 1 ? 'maand blijft' : 'maanden blijven'} leeg en worden overgeslagen: ${weg.map((m) => maandNaam(m.nr)).join(', ')}`);

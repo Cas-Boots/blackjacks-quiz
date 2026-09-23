@@ -10,9 +10,11 @@
  *
  * 1. **De balken.** Wat in de tijdlijn tussen dubbele haken staat is een
  *    antwoord van vanavond. Zolang de avond loopt gaat dat woord niet mee
- *    in het pakketje naar de clients — alleen hoeveel tekens eronder zitten,
- *    zodat de balk de goede breedte krijgt. Net als bij een vraag: wat nog
- *    gevraagd wordt, staat niet in de browser van de televisie.
+ *    in het pakketje naar de clients, en ook niet hoe lang het is: elke
+ *    balk is even breed. Net als bij een vraag: wat nog gevraagd wordt,
+ *    staat niet in de browser van de televisie. Hetzelfde geldt voor onze
+ *    eigen cijfers die de recap-rondes vragen — taarten, landen, wie het
+ *    vaakst ging — en voor regels die alleen in de herhaling horen.
  * 2. **Welke maanden meedoen.** Een maand komt in beeld als er iets van te
  *    vertellen valt: een geschreven moment dat niet meer op invulling wacht,
  *    of iets uit onze eigen cijfers. Zo staat er in oktober geen lege kaart
@@ -36,19 +38,24 @@ export function maandNaam(nr: number): string {
 
 /**
  * Knipt een regel in stukken op de dubbele haken. Zolang `onthuld` uit
- * staat, gaat de tekst onder een balk niet mee — alleen de lengte.
+ * staat, gaat de tekst onder een balk niet mee — ook de lengte niet.
  */
 export function splits(tekst: string, onthuld: boolean): JaarDeel[] {
   const delen: JaarDeel[] = [];
   const patroon = /\[\[(.+?)\]\]/g;
   let laatste = 0;
   for (let m = patroon.exec(tekst); m; m = patroon.exec(tekst)) {
-    if (m.index > laatste) delen.push({ tekst: tekst.slice(laatste, m.index), balk: false, lengte: 0 });
-    delen.push({ tekst: onthuld ? m[1] : '', balk: true, lengte: m[1].length });
+    if (m.index > laatste) delen.push({ tekst: tekst.slice(laatste, m.index), balk: false });
+    delen.push({ tekst: onthuld ? m[1] : '', balk: true });
     laatste = m.index + m[0].length;
   }
-  if (laatste < tekst.length) delen.push({ tekst: tekst.slice(laatste), balk: false, lengte: 0 });
+  if (laatste < tekst.length) delen.push({ tekst: tekst.slice(laatste), balk: false });
   return delen;
+}
+
+/** Of een moment in beeld komt: niet als hij op invulling wacht, en sommige pas na de uitslag. */
+function zichtbaar(moment: JaarMoment, onthuld: boolean): boolean {
+  return !moment.teVullen && (onthuld || !moment.pasNaAfloop);
 }
 
 /** Hoeveel balken er in deze maand liggen. Voor het hostscherm en de controle vooraf. */
@@ -102,8 +109,16 @@ function eersteKeerPerLand(personen: Persoon[]) {
   return eerste;
 }
 
+/** Onze maand zoals hij na de uitslag op het scherm komt: alles ingevuld. */
+export interface VolleMaand extends JaarEigen {
+  taart: number;
+  bijStart: number;
+  koploper: { naam: string; aantal: number } | null;
+  totaal: { sport: number; taart: number; landen: number };
+}
+
 /** Wat wij in deze maand deden, met de stand van het jaar tot en met die maand erbij. */
-export function eigenMaand(analyse: Analyse, maand: number): JaarEigen {
+export function eigenMaand(analyse: Analyse, maand: number): VolleMaand {
   const jaar = analyse.jaar;
   const perPersoon = analyse.personen.map((p) => ({
     naam: p.naam,
@@ -141,10 +156,32 @@ export function eigenMaand(analyse: Analyse, maand: number): JaarEigen {
     sport,
     taart,
     landen,
+    nieuweLanden: landen.length > 0,
     bijStart: bijStart.length,
     koploper: beste && beste.sport > 0 ? { naam: beste.naam, aantal: beste.sport } : null,
     perPersoon,
     totaal: totaalTot(analyse, maand),
+  };
+}
+
+/**
+ * Dezelfde maand, maar met balken over wat de recap-rondes vragen. Hoe vaak
+ * er gesport is blijft staan — de quiz vraagt wíé het vaakst ging, niet
+ * hoe vaak we samen gingen — maar de naam van de koploper, de taarten, de
+ * landen en de stand van het jaar gaan eruit. Per persoon gaat er niets mee:
+ * dat pakketje gaat naar iedereen, en opgeteld is het precies de vraag wie
+ * het vaakst sportte.
+ */
+export function achterBalken(eigen: JaarEigen): JaarEigen {
+  return {
+    sport: eigen.sport,
+    taart: null,
+    landen: [],
+    nieuweLanden: eigen.nieuweLanden,
+    bijStart: null,
+    koploper: eigen.koploper ? { naam: null, aantal: eigen.koploper.aantal } : null,
+    perPersoon: [],
+    totaal: null,
   };
 }
 
@@ -172,21 +209,24 @@ export function jaarTotaal(analyse: Analyse): { sport: number; taart: number; la
 }
 
 function heeftEigenNieuws(eigen: JaarEigen): boolean {
-  return eigen.sport > 0 || eigen.taart > 0 || eigen.landen.length > 0;
+  return eigen.sport > 0 || (eigen.taart ?? 0) > 0 || eigen.nieuweLanden;
 }
 
 /* ---- De dia's --------------------------------------------------------- */
 
-/** De maanden die in de film zitten: alles waar iets van te vertellen valt. */
-export function maandenInDeFilm(analyse: Analyse): number[] {
+/**
+ * De maanden die in de film zitten: alles waar iets van te vertellen valt.
+ * Vóór de uitslag tellen regels die pas in de herhaling horen niet mee.
+ */
+export function maandenInDeFilm(analyse: Analyse, onthuld = false): number[] {
   return JAAROVERZICHT.maanden
-    .filter((m) => m.momenten.some((x) => !x.teVullen) || heeftEigenNieuws(eigenMaand(analyse, m.nr)))
+    .filter((m) => m.momenten.some((x) => zichtbaar(x, onthuld)) || heeftEigenNieuws(eigenMaand(analyse, m.nr)))
     .map((m) => m.nr);
 }
 
 /** Titelkaart, één kaart per maand, slotkaart. */
-export function aantalDias(analyse: Analyse): number {
-  return maandenInDeFilm(analyse).length + 2;
+export function aantalDias(analyse: Analyse, onthuld = false): number {
+  return maandenInDeFilm(analyse, onthuld).length + 2;
 }
 
 /** Maanden die nog op invulling wachten. Voor het hostscherm en `npm run verify`. */
@@ -208,7 +248,7 @@ function seconden(soort: JaarDia['soort'], regels: number, metEigen: boolean): n
  * het hele jaar laat lezen.
  */
 export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boolean): JaarDia {
-  const strook = maandenInDeFilm(analyse);
+  const strook = maandenInDeFilm(analyse, onthuld);
   const stappen = strook.length + 2;
   const nu = Math.max(0, Math.min(stap, stappen - 1));
   const basis = {
@@ -244,13 +284,13 @@ export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boole
       regels: [],
       eigen: null,
       seconden: seconden('slot', 0, false),
-      jaartotaal: jaarTotaal(analyse),
+      jaartotaal: onthuld ? jaarTotaal(analyse) : null,
     };
   }
 
   const nr = strook[nu - 1];
   const maand = JAAROVERZICHT.maanden.find((m) => m.nr === nr) as JaarMaand;
-  const regels = maand.momenten.filter((m) => !m.teVullen).map((m) => regelVan(m, onthuld));
+  const regels = maand.momenten.filter((m) => zichtbaar(m, onthuld)).map((m) => regelVan(m, onthuld));
   const eigen = eigenMaand(analyse, nr);
   return {
     ...basis,
@@ -259,7 +299,7 @@ export function jaaroverzichtVoor(analyse: Analyse, stap: number, onthuld: boole
     kop: maand.kop,
     maand: nr,
     regels,
-    eigen,
+    eigen: onthuld ? eigen : achterBalken(eigen),
     seconden: seconden('maand', regels.length, heeftEigenNieuws(eigen)),
     jaartotaal: null,
   };

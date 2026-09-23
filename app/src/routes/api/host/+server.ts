@@ -68,7 +68,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
      De film loopt op de klok: elke dia zet hem op zijn eigen lengte, en
      het hostscherm tikt door zodra hij afloopt. Pauzeren is dus gewoon de
      klok pauzeren, en een stap terug zet hem weer vol. */
-  const jaarDias = () => aantalDias(recapAnalyse());
+  const jaarDias = () => aantalDias(recapAnalyse(), spel.geeindigdOp !== null);
   const jaarDia = (stap: number) => jaaroverzichtVoor(recapAnalyse(), stap, spel.geeindigdOp !== null);
   const zetJaarDia = (stap: number) => {
     const doel = Math.max(0, Math.min(stap, jaarDias() - 1));

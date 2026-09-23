@@ -7,8 +7,9 @@ import { JAAROVERZICHT } from '../src/lib/content/jaaroverzicht';
  * Waar het hier om gaat is de belofte van de film: je ziet het hele jaar
  * langskomen zonder dat er één antwoord van vanavond uitlekt. Daarom kijkt
  * deze proef niet alleen of de dia's op het scherm komen, maar ook of het
- * woord onder een balk écht nergens in de pagina staat — en of het er na de
- * uitslag wél staat.
+ * woord onder een balk écht nergens in de pagina staat, of onze eigen
+ * taarten, landen en koplopers dicht zitten, of regels die pas in de
+ * herhaling horen wegblijven — en of het er na de uitslag allemaal wél staat.
  */
 
 async function quizmaster(browser: Browser) {
@@ -55,6 +56,13 @@ test('de film draait het jaar af zonder één antwoord te verklappen', async ({ 
     const tekst = m.momenten.map((x) => `${x.tekst} ${x.bij ?? ''}`).join(' ');
     return [...tekst.matchAll(/\[\[(.+?)\]\]/g)].map((x) => x[1]);
   };
+  // En de open tekst van regels die pas na de uitslag in beeld horen.
+  const pasLaterIn = (maand: number | null) =>
+    (JAAROVERZICHT.maanden.find((x) => x.nr === maand)?.momenten ?? [])
+      .filter((x) => x.pasNaAfloop)
+      .flatMap((x) => x.tekst.split(/\[\[.+?\]\]/))
+      .map((stuk) => stuk.trim())
+      .filter((stuk) => stuk.length >= 10);
 
   for (let stap = 0; stap < stappen; stap++) {
     const uit = await qm.doe('jaaroverzicht', { stap });
@@ -63,11 +71,26 @@ test('de film draait het jaar af zonder één antwoord te verklappen', async ({ 
     expect(st.jaaroverzicht.stap).toBe(stap);
     expect(st.jaaroverzicht.onthuld).toBe(false);
 
-    // Het pakketje naar de clients draagt het woord niet, alleen de breedte.
+    // Het pakketje naar de clients draagt het woord niet, en ook niet hoe lang het is.
     const pakketje = JSON.stringify(st.jaaroverzicht);
     for (const woord of verborgenIn(st.jaaroverzicht.maand)) {
       expect(pakketje, `dia ${stap} lekt "${woord}"`).not.toContain(woord);
     }
+    expect(pakketje).not.toContain('lengte');
+    for (const stuk of pasLaterIn(st.jaaroverzicht.maand)) {
+      expect(pakketje, `dia ${stap} laat al zien: "${stuk}"`).not.toContain(stuk);
+    }
+
+    // Onze eigen cijfers: wat de recap-rondes vragen, zit er nog niet in.
+    const eigen = st.jaaroverzicht.eigen;
+    if (eigen) {
+      expect(eigen.taart).toBeNull();
+      expect(eigen.landen).toEqual([]);
+      expect(eigen.perPersoon).toEqual([]);
+      expect(eigen.totaal).toBeNull();
+      if (eigen.koploper) expect(eigen.koploper.naam).toBeNull();
+    }
+    if (st.jaaroverzicht.soort === 'slot') expect(st.jaaroverzicht.jaartotaal).toBeNull();
 
     // En op de televisie zelf staat het ook niet: de balken zijn leeg.
     if (st.jaaroverzicht.maand !== null) {
@@ -77,6 +100,7 @@ test('de film draait het jaar af zonder één antwoord te verklappen', async ({ 
       for (const woord of verborgenIn(st.jaaroverzicht.maand)) {
         expect(opScherm, `de televisie toont "${woord}" bij dia ${stap}`).not.toContain(woord);
       }
+      await expect(tv.locator('.vlagchip')).toHaveCount(0);
     }
   }
 
@@ -105,9 +129,17 @@ test('na de uitslag draait dezelfde film zonder balken', async ({ browser }) => 
   expect(open.jaaroverzicht.onthuld).toBe(true);
   const delen = open.jaaroverzicht.regels.flatMap((r: { delen: { tekst: string; balk: boolean }[] }) => r.delen);
   expect(delen.some((d: { balk: boolean; tekst: string }) => d.balk && d.tekst.length > 0)).toBe(true);
+  // Nu staan ook onze eigen cijfers erbij.
+  expect(typeof open.jaaroverzicht.eigen.taart).toBe('number');
+  expect(open.jaaroverzicht.eigen.totaal).not.toBeNull();
+
+  // De slotkaart heeft nu het jaar in getallen.
+  await qm.doe('jaaroverzicht', { stap: open.jaaroverzicht.stappen - 1 });
+  const slot = await qm.staat();
+  expect(slot.jaaroverzicht.soort).toBe('slot');
+  expect(slot.jaaroverzicht.jaartotaal.taart).toBeGreaterThan(0);
 
   // Aan het eind van de herhaling staat het podium er weer.
-  await qm.doe('jaaroverzicht', { stap: open.jaaroverzicht.stappen - 1 });
   await qm.doe('volgende');
   expect((await qm.staat()).fase).toBe('einde');
 

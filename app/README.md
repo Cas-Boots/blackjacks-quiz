@@ -154,8 +154,9 @@ Eerst op papier: loopt `index.html` gelijk met `packs.ts`, heeft elke vraag
 wat zijn type nodig heeft (antwoord, opties, doelgetal), staan de foto's en
 fragmenten waar vragen naar verwijzen in `media/`, en hoeveel vragen staan
 nog op `teVullen`. Daarna het jaaroverzicht: welke maanden meedraaien, welke
-er leeg blijven, hoeveel regels er nog op invulling wachten, en of elke zwarte
-balk hoort bij iets wat vanavond ook echt gevraagd wordt.
+er leeg blijven, hoeveel regels pas in de herhaling komen, hoeveel er nog op
+invulling wachten, en of elke zwarte balk hoort bij iets wat vanavond ook echt
+gevraagd wordt.
 
 Dan tegen de server. Hij meldt zich als quizmaster, als één telefoon en als
 de televisie, en speelt elke gekozen ronde en elke vraag door in een eigen
@@ -234,15 +235,18 @@ Wat er per maand staat:
 
 - **De wereld** — de momenten van die maand, uit dezelfde nagezochte feiten
   als de vragen. Ze staan in `src/lib/content/jaaroverzicht.ts`.
-- **Wij** — wat wij die maand zelf deden: hoe vaak er gesport is, hoeveel
-  taart erdoorheen ging, welke landen erbij kwamen en wie er die maand het
-  vaakst ging. Die cijfers komen rechtstreeks uit resolution-recap en worden
-  op de avond zelf uitgerekend, net als de recap-rondes.
-- **De stand van het jaar**, die van maand tot maand meeloopt, zodat de
-  slotkaart met de totalen van het jaar landt.
+- **Wij** — wat wij die maand zelf deden. Hoe vaak er gesport is staat er
+  gewoon; hoeveel taart erdoorheen ging, welke landen erbij kwamen en wie er
+  het vaakst ging liggen ook onder een balk, want dat vragen de recap-rondes.
+  De cijfers komen rechtstreeks uit resolution-recap en worden op de avond
+  zelf uitgerekend.
 
-Op je telefoon staat dezelfde dia, maar dan met **jouw** maand eronder: hoe
-vaak jij sportte, hoeveel taart jij at, waar jij was.
+Op je telefoon staat dezelfde dia.
+
+De balken zijn allemaal even breed: ook de lengte van het woord gaat niet mee
+naar de televisie, anders telt de kamer de letters. En een regel die met
+balken en al nog iets weggeeft, komt pas in de herhaling — de Winterspelen
+horen in februari, maar *in welke maand* is een vraag.
 
 De film loopt vanzelf door: elke dia staat acht tot achttien seconden in beeld,
 en het hostscherm tikt hem door zodra de klok afloopt. Met **Pauze** (of `P`)
@@ -257,7 +261,11 @@ kaart zolang die maand nog niet bijgeschreven is.
 **Na de uitslag draait dezelfde film nog een keer, nu zonder balken.** Op het
 hostscherm staat daar bij de uitslag een knop voor. Alles is dan gevraagd, dus
 alles mag gelezen worden; de woorden die de hele avond zwart waren, krijgen een
-messing streep, zodat je in één oogopslag ziet waar de quiz over ging. Dat
+messing streep, zodat je in één oogopslag ziet waar de quiz over ging. Nu
+komen ook de achtergehouden regels, onze landen en taarten met wie ze
+bezocht of at, de stand van het jaar die van maand tot maand meeloopt, de
+slotkaart met het jaar in getallen, en op je telefoon **jouw** maand: hoe
+vaak jij sportte, hoeveel taart jij at, waar jij was. Dat
 gebeurt vanzelf zodra de avond voorbij is — je hoeft nergens een schakelaar om
 te zetten. Ga je vanaf de uitslag terug, of terug naar de lobby, dan liggen de
 balken er weer.
@@ -500,7 +508,7 @@ voordat je de bediening oefent.
 Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
 telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**. Het
 jaaroverzicht heeft daar een eigen hoofdstuk: de titelkaart, een maand met
-balken, de slotkaart met het jaar in getallen en de herhaling zonder balken.
+balken, de slotkaart vóór en na de uitslag en de herhaling zonder balken.
 
 ```
 http://localhost:5173/tv?test        # bij npm run dev
@@ -650,20 +658,20 @@ Eén maand ziet er zo uit:
   nr: 7,
   kop: "De maand waarin alles tegelijk gebeurt",
   momenten: [
-    {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale, pas in de verlenging.",
-     bij:"Invaller [[Ferran Torres]] maakt de enige goal."},
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
     {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
   ]
 }
 ```
 
-Drie afspraken:
+De afspraken:
 
 1. **Wat tussen dubbele haken staat, is een antwoord van vanavond.** Daar komt
    de zwarte balk overheen. Zolang die ligt, gaat het woord niet mee in het
-   pakketje naar de televisie — alleen hoeveel tekens eronder zitten, voor de
-   breedte van de balk. Net als bij een vraag: wat nog gevraagd wordt, staat
-   niet in de browser van de televisie.
+   pakketje naar de televisie, en ook niet hoe lang het is: elke balk is even
+   breed. Net als bij een vraag: wat nog gevraagd wordt, staat niet in de
+   browser van de televisie.
 2. **Elke bewering hoort ook in `packs.ts` te staan.** De vragen zijn
    nagezocht; de film zet ze op volgorde en voegt er niets aan toe. `npm run
    verify` meldt het als er een balk boven iets staat wat geen enkele vraag
@@ -672,14 +680,25 @@ Drie afspraken:
    andere vraag. "Het WK begint, in drie landen tegelijk" is precies wat er
    niet moet staan: het aantal is een vraag van vanavond. `npm run verify`
    slaat alarm als een kop een antwoord uit diezelfde maand bevat.
+4. **Ook de open tekst verraadt niets.** De zin rond een balk vult hem niet in
+   ("bij 1-1, ■■■" is strafschoppen) en beantwoordt geen waar-of-niet-waar:
+   "pas in de verlenging" ligt zelf onder een balk, want de quiz vraagt óf de
+   finale in de verlenging beslist werd. Let ook op het emoji; ❄️ zegt sneeuw.
+   `tests/jaaroverzicht.test.ts` vangt een antwoord dat letterlijk in de open
+   tekst staat.
+5. **Soms is de plek zelf het antwoord.** Een regel die met balken en al nog
+   iets weggeeft — omdat de hele zin een waar-of-niet-waar beantwoordt, of
+   omdat de maand waarin hij staat de vraag is — krijgt `pasNaAfloop: true`.
+   Dan komt hij alleen in de herhaling.
 
 Een regel met `teVullen: true` slaat de film over; oktober, november en
 december staan zo klaar om in december bijgeschreven te worden, net als de
 ronde *Oktober tot december*. Onze eigen cijfers per maand hoef je nergens in
-te vullen: die komen uit resolution-recap.
+te vullen: die komen uit resolution-recap, en wat de recap-rondes daarvan
+vragen ligt vanzelf onder een balk.
 
 Zien hoe het eruitziet zonder een avond te draaien: `/tv?test=film-maand`,
-`/tv?test=film-slot` en `/tv?test=film-onthuld`.
+`/tv?test=film-slot`, `/tv?test=film-slot-onthuld` en `/tv?test=film-onthuld`.
 
 Over de lengte hoef je niet te piekeren: een vraag van meer dan honderd tekens
 zet de televisie een maat kleiner, en past een dia dan nog niet op het scherm —

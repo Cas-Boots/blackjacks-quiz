@@ -87,6 +87,12 @@ export interface JaarMoment {
   emoji?: string;
   /** Deze regel wacht nog op invulling; de televisie slaat hem over. */
   teVullen?: boolean;
+  /**
+   * Alleen in de herhaling na de uitslag. Voor een regel die met balken en
+   * al nog een antwoord weggeeft: omdat de hele zin een waar-of-niet-waar
+   * beantwoordt, of omdat de maand waarin hij staat zelf de vraag is.
+   */
+  pasNaAfloop?: boolean;
 }
 
 export interface JaarMaand {

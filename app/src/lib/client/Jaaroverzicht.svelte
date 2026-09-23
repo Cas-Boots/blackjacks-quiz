@@ -5,16 +5,17 @@
    * Eén dia per keer — een titelkaart, twaalf maanden, een slotkaart — en
    * onder in beeld een strook die laat zien waar we in het jaar zijn. Over
    * alles wat de quiz nog gaat vragen ligt een zwarte balk; het woord
-   * eronder zit niet eens in het pakketje, alleen de breedte. Na de uitslag
-   * draait dezelfde film zonder balken, en dan schuiven ze open.
+   * eronder zit niet eens in het pakketje, en elke balk is even breed. Dat
+   * geldt ook voor onze eigen taarten, landen en wie het vaakst ging. Na de
+   * uitslag draait dezelfde film zonder balken, en dan schuiven ze open.
    *
-   * Op de telefoon (compact) staat dezelfde dia, met onderaan niet de hele
-   * groep maar jouw eigen maand.
+   * Op de telefoon (compact) staat dezelfde dia. Na de uitslag staat daar
+   * onderaan niet de hele groep maar jouw eigen maand.
    */
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import Teller from './Teller.svelte';
-  import type { JaarDia, JaarDeel, PubliekeSpeler } from '$lib/shared/state';
+  import type { JaarDia, PubliekeSpeler } from '$lib/shared/state';
 
   let {
     dia,
@@ -36,12 +37,8 @@
   let eigen = $derived(dia.eigen);
   /** Wat jíj die maand deed — voor op je eigen telefoon. */
   let mijn = $derived(alleen ? (eigen?.perPersoon.find((p) => p.naam === alleen) ?? null) : null);
-  let ietsGedaan = $derived(!!eigen && (eigen.sport > 0 || eigen.taart > 0 || eigen.landen.length > 0));
-
-  /** De breedte van een balk: ruwweg het aantal tekens, maar nooit buiten beeld. */
-  function breedte(deel: JaarDeel): number {
-    return Math.max(1.6, Math.min(13, deel.lengte * 0.62));
-  }
+  /** Een taart onder een balk telt als 'misschien': dan staat het blok er gewoon. */
+  let ietsGedaan = $derived(!!eigen && (eigen.sport > 0 || eigen.taart !== 0 || eigen.nieuweLanden));
 
   function fotoVan(naam: string) {
     return spelers.find((s) => s.naam === naam)?.foto ?? null;
@@ -65,7 +62,7 @@
       {#each dia.regels as regel, i (i)}
         <p class="inleiding" in:fade={{ duration: 500, delay: 480 }}>
           {#each regel.delen as deel, n (n)}
-            {#if deel.balk}<span class="zwart" style="--tekens:{breedte(deel)}">{deel.tekst}</span>{:else}{deel.tekst}{/if}
+            {#if deel.balk}<span class="zwart">{deel.tekst}</span>{:else}{deel.tekst}{/if}
           {/each}
         </p>
       {/each}
@@ -94,6 +91,8 @@
           {/each}
         </div>
         <p class="fijn peildatum">Onze cijfers lopen tot {datumKort(dia.peildatum)}.</p>
+      {:else}
+        <p class="fijn peildatum" in:fade={{ duration: 500, delay: 520 }}>Ons jaar in getallen volgt na de uitslag.</p>
       {/if}
     </div>
 
@@ -113,12 +112,12 @@
               {#if regel.emoji}<span class="regelemoji" aria-hidden="true">{regel.emoji}</span>{/if}
               <span class="regeltekst">
                 {#each regel.delen as deel, n (n)}
-                  {#if deel.balk}<span class="zwart" style="--tekens:{breedte(deel)}">{deel.tekst}</span>{:else}{deel.tekst}{/if}
+                  {#if deel.balk}<span class="zwart">{deel.tekst}</span>{:else}{deel.tekst}{/if}
                 {/each}
                 {#if regel.bij}
                   <span class="bij">
                     {#each regel.bij as deel, n (n)}
-                      {#if deel.balk}<span class="zwart" style="--tekens:{breedte(deel)}">{deel.tekst}</span>{:else}{deel.tekst}{/if}
+                      {#if deel.balk}<span class="zwart">{deel.tekst}</span>{:else}{deel.tekst}{/if}
                     {/each}
                   </span>
                 {/if}
@@ -141,34 +140,47 @@
               {/each}
             {:else}
               <span class="chip"><span class="chipemoji">🏃</span><b>{eigen.sport}</b> keer gesport</span>
-              <span class="chip"><span class="chipemoji">🍰</span><b>{eigen.taart}</b> {eigen.taart === 1 ? 'taart' : 'taarten'}</span>
+              {#if eigen.taart === null}
+                <span class="chip"><span class="chipemoji">🍰</span><span class="zwart"></span> taarten</span>
+              {:else}
+                <span class="chip"><span class="chipemoji">🍰</span><b>{eigen.taart}</b> {eigen.taart === 1 ? 'taart' : 'taarten'}</span>
+              {/if}
               {#each eigen.landen as land (land.naam)}
                 <span class="chip vlagchip">
                   <span class="vlag">{land.vlag}</span>{land.naam}
                   <span class="fijn">{land.wie} · {datumKort(land.datum)}</span>
                 </span>
+              {:else}
+                {#if eigen.nieuweLanden}
+                  <span class="chip"><span class="chipemoji">🌍</span><span class="zwart"></span> erbij</span>
+                {/if}
               {/each}
-              {#if eigen.bijStart > 0}
+              {#if eigen.bijStart}
                 <span class="chip stil">De lijst begon met {eigen.bijStart} {eigen.bijStart === 1 ? 'land' : 'landen'}</span>
               {/if}
               {#if eigen.koploper}
+                {@const naam = eigen.koploper.naam}
                 <span class="chip koploper">
-                  {#if fotoVan(eigen.koploper.naam)}
-                    <img class="avatar" src={fotoVan(eigen.koploper.naam)} alt="" />
+                  {#if naam === null}
+                    <span class="avatar">?</span><span class="zwart"></span>
+                  {:else if fotoVan(naam)}
+                    <img class="avatar" src={fotoVan(naam)} alt="" />{naam}
                   {:else}
-                    <span class="avatar">{initialen(eigen.koploper.naam)}</span>
+                    <span class="avatar">{initialen(naam)}</span>{naam}
                   {/if}
-                  {eigen.koploper.naam} het vaakst — <b>{eigen.koploper.aantal}×</b>
+                  het vaakst — <b>{eigen.koploper.aantal}×</b>
                 </span>
               {/if}
             {/if}
           </div>
-          <div class="meeloop" aria-label="De stand van het jaar tot en met deze maand">
-            <span>{eigen.totaal.sport} keer gesport</span>
-            <span>{eigen.totaal.taart} taarten</span>
-            <span>{eigen.totaal.landen} landen</span>
-            <span class="fijn">dit jaar tot hier</span>
-          </div>
+          {#if eigen.totaal}
+            <div class="meeloop" aria-label="De stand van het jaar tot en met deze maand">
+              <span>{eigen.totaal.sport} keer gesport</span>
+              <span>{eigen.totaal.taart} taarten</span>
+              <span>{eigen.totaal.landen} landen</span>
+              <span class="fijn">dit jaar tot hier</span>
+            </div>
+          {/if}
         </div>
       {/if}
     </div>
@@ -360,13 +372,15 @@
   }
 
   /* ---- de zwarte balk ----------------------------------------------
-     Zolang hij ligt is hij leeg: het woord zit niet in de pagina. Na de
-     uitslag staat de tekst er wel, en blijft alleen het streepje eronder
-     staan — je ziet dan precies welke woorden de hele avond zwart waren. */
+     Zolang hij ligt is hij leeg: het woord zit niet in de pagina. Elke
+     balk is even breed, of er nu '19' onder zit of een heel stadion — de
+     lengte zou anders zelf een hint zijn. Na de uitslag staat de tekst er
+     wel, en blijft alleen het streepje eronder staan: je ziet dan precies
+     welke woorden de hele avond zwart waren. */
   .zwart {
     display: inline-block;
     vertical-align: baseline;
-    min-width: calc(var(--tekens, 4) * 1ch);
+    min-width: 4.4em;
     height: 1em;
     margin: 0 0.12em;
     transform: translateY(0.14em);
@@ -380,6 +394,9 @@
       rgba(255, 255, 255, 0.05) 0 2px,
       transparent 2px 7px
     );
+  }
+  .compact .zwart {
+    min-width: 3.4em;
   }
   .onthuld .zwart {
     min-width: 0;

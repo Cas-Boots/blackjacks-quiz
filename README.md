@@ -70,9 +70,16 @@ door wie. De kamer roept er vanzelf doorheen en niemand krijgt een antwoord
 cadeau.
 
 Per maand staan er twee dingen: de momenten uit de wereld (dezelfde nagezochte
-feiten als de vragen) en wat wij dat jaar zelf deden — sporten, taarten,
-landen, en wie er die maand het vaakst ging. Onderaan loopt de stand van het
-jaar mee, zodat de slotkaart op de totalen uitkomt.
+feiten als de vragen) en wat wij die maand zelf deden. Hoe vaak er gesport is
+staat er gewoon; de taarten, de nieuwe landen en wie er het vaakst ging liggen
+ook onder een balk, want dat vragen de rondes over onszelf.
+
+De balken zijn allemaal even breed, zodat niemand letters telt. En een regel
+die met balken en al nog iets weggeeft, komt pas in de herhaling: de
+Winterspelen horen in februari, maar *in welke maand* is een vraag, en "de
+finale werd pas in de verlenging beslist" is een waar-of-niet-waar. De
+stand van het jaar en het jaar in getallen bewaart de film ook voor na de
+uitslag.
 
 De film loopt vanzelf door; met **Pauze** (`P`) zet je hem stil, met `spatie`
 ga je sneller, met `←` een stap terug, en *De film overslaan* brengt je meteen
@@ -80,7 +87,9 @@ naar ronde 1.
 
 **Na de uitslag kun je dezelfde film nog eens draaien, nu zonder balken.** De
 knop staat bij de eindstand. De woorden die de hele avond zwart waren, krijgen
-dan een messing streep: je ziet in één oogopslag waar de quiz over ging.
+dan een messing streep: je ziet in één oogopslag waar de quiz over ging. Dan
+komen ook de achtergehouden regels, onze landen en taarten, en de slotkaart
+met het jaar in getallen.
 
 Oktober, november en december staan nog leeg; die schrijf je in december bij,
 net als de ronde *Oktober tot december*. Een maand waar niets van te vertellen
@@ -231,19 +240,33 @@ content:sync` mee naar dit bestand (zonder Node kun je hier rechtstreeks bij
   nr: 7,
   kop: "De maand waarin alles tegelijk gebeurt",
   momenten: [
-    {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale, pas in de verlenging.",
-     bij:"Invaller [[Ferran Torres]] maakt de enige goal."},
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
     {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
   ]
 }
 ```
 
 Wat tussen dubbele haken staat is een antwoord van vanavond en krijgt de zwarte
-balk. Drie afspraken bij het schrijven: elke bewering staat ook ergens in de
-vragen (de film voegt geen feiten toe, hij zet ze op volgorde), de kop van een
-maand verraadt niets — ook niet het antwoord van een andere vraag — en een
-regel die nog op invulling wacht krijgt `teVullen: true`, waarna de film hem
-overslaat. In de meespeelversie controleert `npm run verify` deze drie punten.
+balk. De afspraken bij het schrijven:
+
+- Elke bewering staat ook ergens in de vragen; de film voegt geen feiten toe,
+  hij zet ze op volgorde.
+- De kop van een maand verraadt niets, ook niet het antwoord van een andere
+  vraag.
+- De open tekst rond een balk vult hem niet in ("bij 1-1, ■■■" is
+  strafschoppen) en beantwoordt geen waar-of-niet-waar. Let ook op het emoji:
+  ❄️ zegt sneeuw.
+- Geeft een regel met balken en al iets weg, omdat de hele zin een
+  waar-of-niet-waar beantwoordt of omdat de maand zelf de vraag is, zet er dan
+  `pasNaAfloop: true` bij. Dan komt hij alleen in de herhaling.
+- Een regel die nog op invulling wacht krijgt `teVullen: true`; die slaat de
+  film over.
+
+In de meespeelversie controleren `npm run verify` en de tests deze punten
+voor zover een machine dat kan: of een antwoord letterlijk in een kop of in de
+open tekst staat, en of elke balk bij een vraag hoort. Of een zin iets
+*verraadt*, blijft mensenwerk.
 
 Onze eigen cijfers per maand hoef je niet bij te houden: `npm run content:sync`
 schrijft ze in `const ONS_JAAR`, uitgerekend op dezelfde momentopname uit
