@@ -188,3 +188,25 @@ export function stempel(): void {
   ruis(0, 0.06, 0.3);
   toon(110, 0, 0.16, { vorm: 'square', volume: 0.22, glijNaar: 60 });
 }
+
+/* ---- Het jaaroverzicht ---------------------------------------------- */
+
+/** De projector slaat aan: geratel en een lage bromtoon eronder. */
+export function projector(): void {
+  for (let i = 0; i < 8; i++) ruis(i * 0.07, 0.035, 0.1 - i * 0.008);
+  toon(98, 0.05, 1.2, { vorm: 'sine', volume: 0.16, glijNaar: 110 });
+  toon(392, 0.3, 0.5, { volume: 0.2 });
+  toon(523.25, 0.44, 0.7, { volume: 0.22 });
+}
+
+/** De volgende maand schuift in beeld: één kort tikje. */
+export function filmtik(): void {
+  ruis(0, 0.03, 0.09);
+  toon(196, 0, 0.09, { vorm: 'sine', volume: 0.12 });
+}
+
+/** De balken gaan eraf bij de herhaling: een glijdende onthulling. */
+export function balkOpen(): void {
+  toon(330, 0, 0.5, { vorm: 'sine', volume: 0.22, glijNaar: 660 });
+  toon(659.25, 0.16, 0.6, { volume: 0.2 });
+}

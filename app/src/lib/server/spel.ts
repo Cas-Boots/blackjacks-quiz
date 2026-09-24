@@ -23,6 +23,7 @@ import { nieuwjaarRond, leesNieuwjaarOp, type Nieuwjaar } from '$lib/shared/nieu
 import { recapAnalyse } from './recap/bron';
 import { verlevendig } from './recap/vragen';
 import { cijfersVoor } from './recap/cijfers';
+import { jaaroverzichtVoor } from './jaaroverzicht';
 import { beoordeelVoorspellingen, type Omgeving } from './recap/voorspellingen';
 import type { Analyse } from './recap/analyse';
 
@@ -428,6 +429,12 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     nieuwjaar: nieuwjaarVoor(nu),
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
     cijfers: spel.fase === 'cijfers' && ronde?.cijfers ? cijfersVoor(ronde.cijfers, recapAnalyse(), spel.vraagIndex, omgevingVan(spel.id)) : null,
+    // De balken gaan eraf zodra de avond voorbij is: dan is alles gevraagd,
+    // en draait dezelfde film als jaaroverzicht mét de antwoorden erin.
+    jaaroverzicht:
+      spel.fase === 'jaaroverzicht'
+        ? jaaroverzichtVoor(recapAnalyse(), spel.vraagIndex, spel.geeindigdOp !== null)
+        : null,
     ingeleverd,
     inzendingen,
     uitdeling,

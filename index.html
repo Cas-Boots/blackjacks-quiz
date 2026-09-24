@@ -90,6 +90,7 @@ button{font-family:inherit}
   border-bottom:1px solid var(--rand-zacht);
   position:relative;z-index:20;
 }
+.rail[hidden]{display:none}
 .rail-suit{font-size:calc(var(--fs-railnaam) * 1.1);color:var(--goud);line-height:1}
 .rail-suit.is-rood{color:var(--rood-licht)}
 .rail-info{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
@@ -582,6 +583,63 @@ input[type=file]{display:none}
 .schaalrij{display:flex;align-items:center;gap:var(--sp-2)}
 .schaalrij .waarde{font-family:var(--mono);font-size:.85rem;color:var(--goud-licht);min-width:3.5ch;text-align:center}
 
+/* ---- Het jaaroverzicht: de film waarmee de avond opent ----------- */
+.film{display:flex;flex-direction:column;gap:var(--sp-3);width:100%}
+.film-kaart{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+.film-kaart.is-titel{align-items:center;text-align:center;gap:var(--sp-3)}
+.film-jaartal{font-family:var(--display);font-size:calc(var(--fs-titel) * 1.1);line-height:.92;color:var(--goud-licht);margin:0}
+.film-jaartal.is-klein{font-size:var(--fs-kop);color:var(--ivoor)}
+.film-ondertitel{font-family:var(--display);font-size:var(--fs-lood);color:var(--ivoor);margin:0;max-width:32ch}
+.film-inleiding{font-size:calc(var(--fs-lood) * .96);color:var(--ivoor-zacht);margin:0;max-width:46ch;line-height:1.5}
+.film-maandkop{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.film-maand{font-family:var(--display);font-size:var(--fs-titel);line-height:.95;margin:0;color:var(--ivoor);text-transform:lowercase}
+.film-jaarschaduw{font-family:var(--display);font-size:calc(var(--fs-kop) * .85);color:var(--goud);opacity:.38;letter-spacing:.06em}
+.film-hoed{font-family:var(--display);font-size:calc(var(--fs-lood) * 1.12);color:var(--goud-licht);margin:0}
+.film-regels{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-1)}
+.film-regel{
+  display:grid;grid-template-columns:auto 1fr;align-items:start;gap:var(--sp-3);
+  padding:var(--sp-2) var(--sp-3);border-radius:12px;border-left:2px solid var(--goud-diep);
+  background:linear-gradient(90deg,rgba(255,255,255,.045),transparent 70%);
+}
+.film-regel .emoji{font-size:calc(var(--fs-lood) * 1.25);line-height:1.35}
+.film-regel .tekst{font-size:calc(var(--fs-lood) * 1.06);line-height:1.45;color:var(--ivoor)}
+.film-regel .bij{display:block;margin-top:.2rem;font-size:.82em;color:var(--salie)}
+/* Een antwoord van vanavond in de film: een messing streep eronder, en er
+   schuift een zwarte balk vanaf. (De klokbalk in de rail heet .balk; deze
+   heeft daarom een eigen naam.) In de trailer komt hij niet voor. */
+.film-balk{
+  display:inline-block;min-width:4.4em;height:1em;margin:0 .12em;
+  transform:translateY(.14em);border-radius:3px;background:#050806;
+  box-shadow:inset 0 0 0 1px rgba(201,162,39,.35),0 1px 0 rgba(255,255,255,.04);
+  background-image:repeating-linear-gradient(100deg,rgba(255,255,255,.05) 0 2px,transparent 2px 7px);
+}
+.is-onthuld .film-balk{
+  min-width:0;height:auto;transform:none;padding:0 .1em;border-radius:2px;
+  background:none;background-image:none;box-shadow:inset 0 -.42em 0 rgba(201,162,39,.24);
+  color:var(--goud-licht);
+}
+.film-onsjaar{display:flex;flex-direction:column;gap:.45rem;margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1px solid var(--rand)}
+.film-chips{display:flex;flex-wrap:wrap;gap:.45rem .6rem;align-items:center}
+.film-chip{
+  display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .85rem .3rem .6rem;border-radius:999px;
+  border:1px solid var(--rand);background:var(--vilt-hoog);font-size:calc(var(--fs-lood) * .82);
+  color:var(--ivoor-zacht);white-space:nowrap;
+}
+.film-chip b{font-family:var(--mono);color:var(--goud-licht);font-variant-numeric:tabular-nums}
+.film-chip small{color:var(--salie);font-size:.78em}
+.film-chip.is-stil{border-style:dashed;color:var(--salie)}
+.film-chip.is-top{border-color:var(--goud-diep);color:var(--ivoor)}
+.film-meeloop{display:flex;flex-wrap:wrap;gap:.2rem 1.1rem;font-family:var(--mono);font-size:.8rem;color:var(--salie);font-variant-numeric:tabular-nums}
+.film-strook{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(3px,.5vw,8px);margin-top:var(--sp-2)}
+.film-vak{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.film-vak i{display:block;width:100%;height:clamp(4px,.8vh,8px);border-radius:2px;background:rgba(255,255,255,.07)}
+.film-vak.is-mee i{background:rgba(255,255,255,.16)}
+.film-vak.is-gehad i{background:var(--goud-diep)}
+.film-vak.is-nu i{background:var(--goud-licht);box-shadow:0 0 12px rgba(235,210,124,.5)}
+.film-vak em{font-family:var(--mono);font-style:normal;font-size:.62rem;letter-spacing:.06em;color:rgba(255,255,255,.22);text-transform:uppercase}
+.film-vak.is-mee em{color:var(--salie)}
+.film-vak.is-nu em{color:var(--goud-licht)}
+
 @media (max-width:560px){
   .rail-teller{display:none}
   .knop{padding:.62rem 1rem;font-size:.85rem}
@@ -1032,6 +1090,374 @@ const PAKKETTEN = {
   }
 };
 
+const JAAROVERZICHT = {
+  jaar: 2026,
+  // De trailer, vóór de quiz.
+  titel: "De trailer",
+  inleiding: "Alvast een voorproefje van ons jaar. Wat er in de wereld gebeurde, laten we nog even weg: dat vragen we jullie zo.",
+  slot: "De rest is een vraag van vanavond. Na de uitslag draait de hele film.",
+  // De film, na de uitslag.
+  titelNaAfloop: "Het jaar in twee minuten",
+  inleidingNaAfloop: "Het hele jaar, zo snel als het voorbijging. Wat onderstreept staat, werd vanavond gevraagd.",
+  slotNaAfloop: "Dat was het jaar, en dat was de quiz. Alles is gevraagd, alles is gezegd.",
+
+  maanden: [
+    {
+      nr: 1,
+      kop: "Het begint zoals het eindigt: met vuurwerk",
+      momenten: [
+        {emoji:"🎆", tekst:"De jaarwisseling levert [[361]] autobranden en [[228]] woningbranden op.",
+         bij:"Het jaar is elf uur oud en de teller staat al vol."},
+        {emoji:"🚆", tekst:"[[Sneeuw]] legt het openbaar vervoer en het vliegverkeer grotendeels plat."},
+        {emoji:"🤝", tekst:"Eind januari presenteren [[D66, VVD en CDA]] hun regeerakkoord."},
+        {emoji:"🔮", tekst:"En wij doen veertien voorspellingen over dit jaar.",
+         bij:"Opgeschreven, ondertekend, niet meer weg te praten."}
+      ]
+    },
+    {
+      nr: 2,
+      kop: "Op het bordes",
+      momenten: [
+        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]]."},
+        {emoji:"🥇", tekst:"Nederland wint [[tien]] keer goud; [[Noorwegen]] gaat met [[41]] medailles aan kop.",
+         bij:"Schaatsen, en nog eens schaatsen."},
+        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels."},
+        {emoji:"🏛️", tekst:"Het kabinet-[[Jetten]] wordt beëdigd."},
+        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels."}
+      ]
+    },
+    {
+      nr: 3,
+      kop: "De motoren slaan aan",
+      momenten: [
+        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels."},
+        {emoji:"🔋", tekst:"Coureurs moeten opeens hun accu-inzet over de hele ronde verdelen.",
+         bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true}
+      ]
+    },
+    {
+      nr: 4,
+      kop: "Terug op aarde",
+      momenten: [
+        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig."},
+        {emoji:"🌊", tekst:"Een capsule plonst in zee, na [[tien]] dagen onderweg."}
+      ]
+    },
+    {
+      nr: 5,
+      kop: "Het Songfestival strijkt neer",
+      momenten: [
+        {emoji:"🎤", tekst:"[[Bulgarije]] wint, met [[Bangaranga van Dara]]."},
+        {emoji:"📣", tekst:"Goed voor [[516]] punten, in de [[zeventigste]] editie."}
+      ]
+    },
+    {
+      nr: 6,
+      kop: "Het WK begint",
+      momenten: [
+        {emoji:"⚽", tekst:"Het toernooi opent in [[de Verenigde Staten, Canada en Mexico]]."},
+        {emoji:"🇳🇱", tekst:"Oranje begint tegen [[Japan]] en wint in de groepsfase van [[Tunesië]]."},
+        {emoji:"🏎️", tekst:"Na de Grand Prix van Spanje leidt [[Kimi Antonelli]] met [[292]] punten; Verstappen staat [[zesde]]."}
+      ]
+    },
+    {
+      nr: 7,
+      kop: "De maand waarin alles tegelijk gebeurt",
+      momenten: [
+        {emoji:"💶", tekst:"De AOW gaat [[omhoog]]."},
+        {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+        {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale in het [[MetLife Stadium]], [[pas in de verlenging]].",
+         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]]."},
+        {emoji:"🚴", tekst:"In Parijs wint [[Pogačar]] zijn [[vijfde]] Tour."},
+        {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx, Hinault, Anquetil en Indurain.", pasNaAfloop:true},
+        {emoji:"⛰️", tekst:"[[Carapaz]] grijpt de bolletjestrui op [[Alpe d’Huez]], in etappe 20."}
+      ]
+    },
+    {
+      nr: 8,
+      kop: "Zomer, en de zalen zitten vol",
+      momenten: [
+        {emoji:"🎬", tekst:"[[Spider-Man: Brand New Day]] wordt de grootste kaskraker in de Amerikaanse bioscopen."},
+        {emoji:"🍿", tekst:"Ook vol: de verfilming van [[The Odyssey]], en een nieuw deel van [[Toy Story]]."}
+      ]
+    },
+    {
+      nr: 9,
+      kop: "Nog honderd dagen te gaan",
+      momenten: [
+        {emoji:"🗓️", tekst:"De voorspellingen van januari beginnen erom te spannen.",
+         bij:"Sommige staan er goed voor. Sommige echt niet."}
+      ]
+    },
+    {
+      nr: 10,
+      kop: "De staart van het jaar",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in oktober?", teVullen:true}
+      ]
+    },
+    {
+      nr: 11,
+      kop: "De donkere maanden",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in november?", teVullen:true}
+      ]
+    },
+    {
+      nr: 12,
+      kop: "En toen was het oud en nieuw",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in december?", teVullen:true},
+        {emoji:"🥂", tekst:"En dan is het oud en nieuw, en zitten we hier."}
+      ]
+    }
+  ]
+};
+
+/* Onze eigen cijfers per maand: een momentopname uit resolution-recap,
+   uitgerekend door npm run content:sync. De meespeelversie rekent ze op
+   de avond zelf uit op de verse cijfers. */
+const ONS_JAAR = {
+  "peildatum": "2026-09-18",
+  "jaartotaal": {
+    "sport": 462,
+    "taart": 46,
+    "landen": 13,
+    "dagen": 195
+  },
+  "maanden": {
+    "1": {
+      "sport": 58,
+      "taart": 12,
+      "landen": [],
+      "bijStart": 4,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 19
+      },
+      "totaal": {
+        "sport": 58,
+        "taart": 12,
+        "landen": 4
+      }
+    },
+    "2": {
+      "sport": 55,
+      "taart": 12,
+      "landen": [
+        {
+          "vlag": "🇬🇧",
+          "naam": "het Verenigd Koninkrijk",
+          "wie": "Cas",
+          "datum": "2026-02-02"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 12
+      },
+      "totaal": {
+        "sport": 113,
+        "taart": 24,
+        "landen": 5
+      }
+    },
+    "3": {
+      "sport": 60,
+      "taart": 4,
+      "landen": [
+        {
+          "vlag": "🇫🇮",
+          "naam": "Finland",
+          "wie": "Cas",
+          "datum": "2026-03-03"
+        },
+        {
+          "vlag": "🇷🇸",
+          "naam": "Servië",
+          "wie": "Cas",
+          "datum": "2026-03-03"
+        },
+        {
+          "vlag": "🇧🇪",
+          "naam": "België",
+          "wie": "Cas & Joris",
+          "datum": "2026-03-16"
+        },
+        {
+          "vlag": "🇮🇹",
+          "naam": "Italië",
+          "wie": "Cas",
+          "datum": "2026-03-16"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 16
+      },
+      "totaal": {
+        "sport": 173,
+        "taart": 28,
+        "landen": 9
+      }
+    },
+    "4": {
+      "sport": 68,
+      "taart": 2,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 18
+      },
+      "totaal": {
+        "sport": 241,
+        "taart": 30,
+        "landen": 9
+      }
+    },
+    "5": {
+      "sport": 45,
+      "taart": 7,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 11
+      },
+      "totaal": {
+        "sport": 286,
+        "taart": 37,
+        "landen": 9
+      }
+    },
+    "6": {
+      "sport": 40,
+      "taart": 3,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 12
+      },
+      "totaal": {
+        "sport": 326,
+        "taart": 40,
+        "landen": 9
+      }
+    },
+    "7": {
+      "sport": 53,
+      "taart": 5,
+      "landen": [
+        {
+          "vlag": "🇫🇷",
+          "naam": "Frankrijk",
+          "wie": "Eva",
+          "datum": "2026-07-12"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 11
+      },
+      "totaal": {
+        "sport": 379,
+        "taart": 45,
+        "landen": 10
+      }
+    },
+    "8": {
+      "sport": 47,
+      "taart": 1,
+      "landen": [
+        {
+          "vlag": "🇦🇪",
+          "naam": "de Verenigde Arabische Emiraten",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        },
+        {
+          "vlag": "🇭🇷",
+          "naam": "Kroatië",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        },
+        {
+          "vlag": "🇸🇦",
+          "naam": "Saoedi-Arabië",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 14
+      },
+      "totaal": {
+        "sport": 426,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "9": {
+      "sport": 36,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 10
+      },
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "10": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "11": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "12": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    }
+  }
+};
+
 const STANDAARD_SPELERS = ["Liz","Bastiaan","Joris","Rik","Eva"];
 const STANDAARD_QUIZMASTER = "Cas";
 const TEAMNAMEN = [
@@ -1055,6 +1481,9 @@ const LEEG = () => ({
   r: 0, v: 0,
   punten: {}, teams: {}, toegekend: {}, uitgedeeld: {},
   gissingen: {}, standVoorRonde: {},
+  /* Bij welke dia het jaaroverzicht staat, en of de uitslag geweest is —
+     daarvoor draait de trailer, daarna de hele film. */
+  film: 0, geeindigd: false,
   geluid: true, schaal: 1, gestartOp: null
 });
 
@@ -1425,6 +1854,9 @@ function stopKlok(){
   K.raf = 0;
 }
 function pauzeerKlok(){
+  // In de film is er altijd een klok: staat hij stil (na hervatten
+  // bijvoorbeeld), dan zet deze knop hem weer aan het lopen.
+  if(!K.totaal && S.fase === "jaaroverzicht"){ startKlok(filmSeconden()); return; }
   if(!K.totaal) return;
   if(K.loopt){ K.rest = Math.max(0, K.eind - Date.now()); stopKlok(); }
   else { K.eind = Date.now() + K.rest; K.loopt = true; lusKlok(); }
@@ -1457,7 +1889,13 @@ function toonKlok(){
   balkEl.style.transform = "scaleX(" + Math.max(0, over / (K.totaal * 1000)) + ")";
   if(K.loopt){
     if(sec <= 3 && sec > 0 && !K.gepiept[sec]){ K.gepiept[sec] = 1; piep(660,.07); }
-    if(over <= 0){ stopKlok(); piep(300,.5); meld("Tijd is om"); tekenBesturing(); }
+    if(over <= 0){
+      stopKlok();
+      // In het jaaroverzicht is de klok de speelduur van de dia: die telt
+      // niet af naar "tijd is om", hij schuift door naar de volgende.
+      if(S.fase === "jaaroverzicht"){ piep(196,.09); filmVolgende(); return; }
+      piep(300,.5); meld("Tijd is om"); tekenBesturing();
+    }
   }
 }
 
@@ -1586,13 +2024,14 @@ function koppelMedia(){
 function teken(){
   document.documentElement.style.setProperty("--schaal", S.schaal || 1);
   stopAlleMedia();
-  const metRail = S.fase !== "start";
+  const metRail = S.fase !== "start" && S.fase !== "jaaroverzicht";
   rail.hidden = !metRail;
   besturing.hidden = S.fase === "start";
   if(metRail) tekenRail();
   podium.scrollTop = 0;
 
   if(S.fase === "start")         podium.innerHTML = schermStart();
+  else if(S.fase === "jaaroverzicht") podium.innerHTML = schermJaaroverzicht();
   else if(S.fase === "ronde")    podium.innerHTML = schermRonde();
   else if(S.fase === "vraag")    podium.innerHTML = schermVraag();
   else if(S.fase === "antwoord") podium.innerHTML = schermAntwoord();
@@ -1791,7 +2230,8 @@ function schermStart(){
     </div>
 
     <div class="knoprij">
-      <button class="knop is-hoofd is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Start de quiz</button>
+      <button class="knop is-hoofd is-groot" data-actie="start-film"${telling.vragen ? "" : " disabled"}>&#127902; Begin met de trailer</button>
+      <button class="knop is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Meteen naar ronde 1</button>
       <button class="knop is-stil" data-actie="menu">Menu &amp; sneltoetsen</button>
       ${telling.vragen ? "" : `<span class="fijn" style="color:var(--rood-licht)">Kies eerst minstens één vraag.</span>`}
     </div>
@@ -2021,9 +2461,199 @@ function schermEinde(){
 
     <div class="knoprij" style="justify-content:center">
       <button class="knop is-hoofd" data-actie="exporteer">Uitslag opslaan</button>
+      <button class="knop" data-actie="film-herhaling">&#127902; De film: het hele jaar</button>
       <button class="knop" data-actie="opnieuw">Nieuwe quiz</button>
     </div>
   </div>`;
+}
+
+/* -----------------------------------------------------------------
+   HET JAAROVERZICHT — een trailer vóór de quiz, de film erna
+
+   De trailer laat alleen zien wat de quiz niet vraagt: regels zonder
+   dubbele haken, geen maandkoppen, en van onze eigen cijfers alleen hoe
+   vaak er gesport is. Na de uitslag draait de hele film, met de antwoorden
+   van vanavond onderstreept. De tijdlijn staat in JAAROVERZICHT, onze eigen
+   cijfers per maand in ONS_JAAR; allebei geschreven door npm run
+   content:sync.
+   ----------------------------------------------------------------- */
+const MAANDEN_KORT = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+const MAANDEN_VOL = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+
+const onsVan = (nr) => (ONS_JAAR.maanden || {})[String(nr)] || null;
+function filmIetsGedaan(o){
+  return !!o && (o.sport > 0 || o.taart > 0 || (o.landen || []).length > 0);
+}
+/** In de trailer alleen regels zonder haken (en niet bewaard voor de film); in de film alles. */
+const filmInTrailer = (x) => !x.teVullen && !x.pasNaAfloop && !/\[\[/.test(x.tekst + " " + (x.bij || ""));
+const filmZichtbaar = (x) => filmOnthuld() ? !x.teVullen : filmInTrailer(x);
+/** De maanden die meedoen. In de trailer: met een regel die erin mag. In de film: ook met alleen onze cijfers. */
+function filmMaanden(){
+  return JAAROVERZICHT.maanden
+    .filter(m => filmOnthuld()
+      ? m.momenten.some(filmZichtbaar) || filmIetsGedaan(onsVan(m.nr))
+      : m.momenten.some(filmInTrailer))
+    .map(m => m.nr);
+}
+const filmStappen = () => filmMaanden().length + 2;
+const filmOnthuld = () => !!S.geeindigd;
+function filmSeconden(){
+  const nr = filmMaandNr();
+  if(nr === null) return S.film === 0 ? 7 : 12;
+  const m = JAAROVERZICHT.maanden.find(x => x.nr === nr);
+  const regels = m.momenten.filter(filmZichtbaar).length;
+  const o = onsVan(nr);
+  const eigen = filmOnthuld() ? filmIetsGedaan(o) : !!o && o.sport > 0;
+  return Math.min(18, Math.max(8, Math.round(5 + regels * 1.8 + (eigen ? 2 : 0))));
+}
+/** Het maandnummer bij de huidige dia, of null op de titel- en slotkaart. */
+function filmMaandNr(){
+  const lijst = filmMaanden();
+  if(S.film <= 0 || S.film > lijst.length) return null;
+  return lijst[S.film - 1];
+}
+
+/** Knipt een regel op de dubbele haken; wat eronder zit blijft weg tot de avond om is. */
+function filmTekst(tekst, onthuld){
+  let uit = "", laatste = 0;
+  const patroon = /\[\[(.+?)\]\]/g;
+  let m;
+  while((m = patroon.exec(tekst)) !== null){
+    uit += esc(tekst.slice(laatste, m.index));
+    uit += `<span class="film-balk">${onthuld ? esc(m[1]) : ""}</span>`;
+    laatste = m.index + m[0].length;
+  }
+  return uit + esc(tekst.slice(laatste));
+}
+
+function filmStrook(){
+  const mee = filmMaanden(), nu = filmMaandNr(), slot = S.film >= filmStappen() - 1;
+  return `<div class="film-strook" aria-hidden="true">${MAANDEN_KORT.map((naam,i) => {
+    const nr = i + 1;
+    const klas = "film-vak"
+      + (mee.includes(nr) ? " is-mee" : "")
+      + (nu === nr ? " is-nu" : "")
+      + (mee.includes(nr) && (slot || (nu !== null && nr < nu)) ? " is-gehad" : "");
+    return `<span class="${klas}"><i></i><em>${naam}</em></span>`;
+  }).join("")}</div>`;
+}
+
+function filmEigen(nr){
+  const o = onsVan(nr);
+  if(!filmIetsGedaan(o) && !(o && o.bijStart)) return "";
+  if(!filmOnthuld()){
+    // De trailer: alleen hoe vaak er gesport is. De taarten, de landen, de
+    // koploper en de stand van het jaar vragen de recap-rondes.
+    if(!o.sport) return "";
+    return `
+    <div class="film-onsjaar">
+      <p class="opschrift">Wij in ${esc(MAANDEN_VOL[nr-1])}</p>
+      <div class="film-chips">
+        <span class="film-chip">&#127939; <b>${o.sport}</b> keer gesport</span>
+      </div>
+    </div>`;
+  }
+  const landen = (o.landen || []).map(l =>
+    `<span class="film-chip"><span style="font-size:1.2em">${esc(l.vlag)}</span>${esc(l.naam)} <small>${esc(l.wie)} &middot; ${esc(datumKort(l.datum))}</small></span>`).join("");
+  const start = o.bijStart ? `<span class="film-chip is-stil">De lijst begon met ${o.bijStart} ${o.bijStart === 1 ? "land" : "landen"}</span>` : "";
+  const top = o.koploper ? `<span class="film-chip is-top">${esc(o.koploper.naam)} het vaakst — <b>${o.koploper.aantal}&times;</b></span>` : "";
+  return `
+    <div class="film-onsjaar">
+      <p class="opschrift">Wij in ${esc(MAANDEN_VOL[nr-1])}</p>
+      <div class="film-chips">
+        <span class="film-chip">&#127939; <b>${o.sport}</b> keer gesport</span>
+        <span class="film-chip">&#127856; <b>${o.taart}</b> ${o.taart === 1 ? "taart" : "taarten"}</span>
+        ${landen}${start}${top}
+      </div>
+      <div class="film-meeloop">
+        <span>${o.totaal.sport} keer gesport</span>
+        <span>${o.totaal.taart} taarten</span>
+        <span>${o.totaal.landen} landen</span>
+        <span>dit jaar tot hier</span>
+      </div>
+    </div>`;
+}
+
+function datumKort(datum){
+  return Number(datum.slice(8,10)) + " " + MAANDEN_KORT[Number(datum.slice(5,7)) - 1];
+}
+
+function schermJaaroverzicht(){
+  const onthuld = filmOnthuld();
+  const nr = filmMaandNr();
+  const slot = S.film >= filmStappen() - 1;
+  let binnen;
+
+  if(nr === null && !slot){
+    binnen = `
+      <div class="film-kaart is-titel">
+        <p class="opschrift">Het jaaroverzicht</p>
+        <h1 class="film-jaartal">${JAAROVERZICHT.jaar}</h1>
+        <hr class="scheiding" style="max-width:520px">
+        <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.titelNaAfloop : JAAROVERZICHT.titel)}</p>
+        <p class="film-inleiding">${filmTekst(onthuld ? JAAROVERZICHT.inleidingNaAfloop : JAAROVERZICHT.inleiding, onthuld)}</p>
+      </div>`;
+  } else if(slot){
+    const t = ONS_JAAR.jaartotaal;
+    // Het jaar in getallen komt pas in de film: de totalen zijn vragen.
+    const getallen = onthuld ? `
+        <div class="telkaarten" style="max-width:720px;width:100%">
+          <div class="telkaart"><span class="waarde">${t.sport}</span><span class="etiket">keer gesport</span></div>
+          <div class="telkaart"><span class="waarde">${t.taart}</span><span class="etiket">taarten</span></div>
+          <div class="telkaart"><span class="waarde">${t.landen}</span><span class="etiket">landen</span></div>
+          <div class="telkaart"><span class="waarde">${t.dagen}</span><span class="etiket">dagen met iets erop</span></div>
+        </div>
+        <p class="fijn">Onze cijfers lopen tot ${esc(datumKort(ONS_JAAR.peildatum))}.</p>` : "";
+    binnen = `
+      <div class="film-kaart is-titel">
+        <p class="opschrift">${onthuld ? "Aftiteling" : "Na de uitslag"}</p>
+        <h1 class="film-jaartal is-klein">${onthuld ? "Dat was " + JAAROVERZICHT.jaar : "Straks het hele jaar"}</h1>
+        <hr class="scheiding" style="max-width:520px">
+        <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.slotNaAfloop : JAAROVERZICHT.slot)}</p>${getallen}
+      </div>`;
+  } else {
+    const m = JAAROVERZICHT.maanden.find(x => x.nr === nr);
+    const regels = m.momenten.filter(filmZichtbaar).map(mo => `
+      <div class="film-regel">
+        <span class="emoji">${esc(mo.emoji || "")}</span>
+        <span class="tekst">${filmTekst(mo.tekst, onthuld)}${mo.bij ? `<span class="bij">${filmTekst(mo.bij, onthuld)}</span>` : ""}</span>
+      </div>`).join("");
+    binnen = `
+      <div class="film-kaart">
+        <div class="film-maandkop">
+          <h1 class="film-maand">${esc(MAANDEN_VOL[nr-1])}</h1>
+          <span class="film-jaarschaduw">${JAAROVERZICHT.jaar}</span>
+        </div>
+        ${onthuld ? `<p class="film-hoed">${esc(m.kop)}</p>` : ""}
+        ${regels ? `<div class="film-regels">${regels}</div>` : ""}
+        ${filmEigen(nr)}
+      </div>`;
+  }
+
+  return `<div class="vlak"><div class="film${onthuld ? " is-onthuld" : ""}">${binnen}${filmStrook()}</div></div>`;
+}
+
+/* ---- Door de film heen ---- */
+function naarFilm(stap){
+  stopKlok();
+  S.fase = "jaaroverzicht";
+  S.film = Math.max(0, Math.min(stap, filmStappen() - 1));
+  bewaar(); teken();
+  startKlok(filmSeconden());
+}
+function filmVolgende(){
+  if(S.film + 1 < filmStappen()){ naarFilm(S.film + 1); return; }
+  stopKlok(); K.totaal = 0;
+  // Na de laatste dia: de quiz in, of terug naar de uitslag bij de herhaling.
+  if(filmOnthuld()){ S.fase = "einde"; bewaar(); teken(); }
+  else if(S.spel && rondes().length) naarRonde(0);
+  else { S.fase = "start"; bewaar(); teken(); }
+}
+function filmVorige(){
+  if(S.film > 0){ naarFilm(S.film - 1); return; }
+  stopKlok(); K.totaal = 0;
+  S.fase = filmOnthuld() ? "einde" : "start";
+  bewaar(); teken();
 }
 
 /* -----------------------------------------------------------------
@@ -2036,7 +2666,15 @@ function tekenBesturing(){
   const f = S.fase;
   let h = knop("menu","&#9776; Menu","is-stil");
 
-  if(f === "ronde"){
+  if(f === "jaaroverzicht"){
+    const laatste = S.film + 1 >= filmStappen();
+    h += knop("film-terug","&larr; Terug","is-stil");
+    h += knop("pauze", K.loopt ? "&#10073;&#10073; Pauze" : "&#9654; Laat lopen");
+    if(!laatste && !filmOnthuld()) h += knop("film-over","De trailer overslaan","is-stil");
+    h += `<span class="rek"></span>`;
+    h += knop("film-verder", laatste ? (filmOnthuld() ? "Terug naar de uitslag &rarr;" : "Naar ronde 1 &rarr;") : "Volgende dia &rarr;","is-hoofd");
+  }
+  else if(f === "ronde"){
     const inTeams = (ronde().teamModus || "individueel") === "teams";
     h += knop("terug","&larr; Terug","is-stil");
     if(inTeams) h += knop("herverdeel","&#9850; Herverdeel");
@@ -2230,6 +2868,8 @@ function terug(){
 }
 function naarEinde(){
   stopKlok(); K.totaal = 0;
+  // Vanaf hier is alles gevraagd: het jaaroverzicht mag zijn balken laten vallen.
+  S.geeindigd = true;
   S.fase = "einde"; bewaar(); teken();
   fanfare(); vierFeest();
 }
@@ -2469,6 +3109,22 @@ const ACTIES = {
   "herverdeel": () => { momentopname(); S.teams[S.r] = maakTeams(S.r); bewaar(); teken(); meld("Teams opnieuw verdeeld"); },
   "verplaats": (id) => { momentopname(); verplaatsSpeler(id); bewaar(); teken(); },
   "start-ronde": () => { wekGeluid(); startRonde(); },
+  "start-film": () => {
+    // Zelfde voorbereiding als 'start de quiz': de film loopt erin over.
+    wekGeluid();
+    S.spelers.forEach((p,i) => { if(!p.naam.trim()) p.naam = "Speler " + (i+1); });
+    S.spel = stelSamen();
+    if(!S.spel.rondes.length){ meld("Kies eerst minstens één vraag"); return; }
+    S.punten = {}; S.toegekend = {}; S.uitgedeeld = {}; S.gissingen = {};
+    S.teams = {}; S.standVoorRonde = {}; historie = [];
+    S.geeindigd = false;
+    S.gestartOp = Date.now();
+    naarFilm(0);
+  },
+  "film-herhaling": () => { wekGeluid(); naarFilm(0); },
+  "film-verder": filmVolgende,
+  "film-terug": filmVorige,
+  "film-over": () => { stopKlok(); K.totaal = 0; S.spel && rondes().length ? naarRonde(0) : (S.fase = "start", bewaar(), teken()); },
   "toon-antwoord": toonAntwoord,
   "volgende": volgendeVraag,
   "volgende-ronde": () => naarRonde(S.r + 1),
@@ -2600,15 +3256,16 @@ document.addEventListener("keydown", (e) => {
   if(P.soort) return;
   if(e.key === " " || e.key === "Enter"){
     e.preventDefault();
-    if(S.fase === "start") ACTIES["start-quiz"]();
+    if(S.fase === "start") ACTIES["start-film"]();
+    else if(S.fase === "jaaroverzicht") filmVolgende();
     else if(S.fase === "ronde") startRonde();
     else if(S.fase === "vraag") toonAntwoord();
     else if(S.fase === "antwoord") volgendeVraag();
     else if(S.fase === "stand"){ S.r + 1 < rondes().length ? naarRonde(S.r + 1) : naarEinde(); }
   }
-  else if(e.key === "ArrowLeft"){ e.preventDefault(); if(S.fase !== "start") terug(); }
-  else if(e.key === "ArrowRight"){ e.preventDefault(); if(S.fase === "vraag") toonAntwoord(); else if(S.fase === "antwoord") volgendeVraag(); }
-  else if(e.key === "p" || e.key === "P"){ if(S.fase === "vraag") pauzeerKlok(); }
+  else if(e.key === "ArrowLeft"){ e.preventDefault(); if(S.fase === "jaaroverzicht") filmVorige(); else if(S.fase !== "start") terug(); }
+  else if(e.key === "ArrowRight"){ e.preventDefault(); if(S.fase === "jaaroverzicht") filmVolgende(); else if(S.fase === "vraag") toonAntwoord(); else if(S.fase === "antwoord") volgendeVraag(); }
+  else if(e.key === "p" || e.key === "P"){ if(S.fase === "vraag" || S.fase === "jaaroverzicht") pauzeerKlok(); }
   else if(e.key === "t" || e.key === "T"){ if(S.fase === "vraag") verlengKlok(30); }
   else if(e.key === "m" || e.key === "M"){ speelPauzeerMedia(null); }
   else if(e.key === "z" || e.key === "Z"){ herstel(); }

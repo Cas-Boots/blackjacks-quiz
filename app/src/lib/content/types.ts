@@ -69,3 +69,49 @@ export interface Pakket {
 }
 
 export type Pakketten = Record<string, Pakket>;
+
+/* ---- Het jaaroverzicht -------------------------------------------------
+   Een trailer vóór de quiz, met alleen wat de quiz niet vraagt, en de hele
+   film na de uitslag. Zie content/jaaroverzicht.ts voor de tijdlijn zelf. */
+
+export interface JaarMoment {
+  /**
+   * De regel zoals hij op het scherm komt. Wat tussen dubbele haken staat
+   * is een antwoord van vanavond; zo'n regel komt alleen in de film na de
+   * uitslag, met het antwoord onderstreept. Een regel zonder haken komt ook
+   * in de trailer. Bijvoorbeeld: "[[Bulgarije]] wint het Songfestival."
+   */
+  tekst: string;
+  /** Een klein bijschrift eronder. Haken tellen hier net zo: dan is de regel alleen voor de film. */
+  bij?: string;
+  emoji?: string;
+  /** Deze regel wacht nog op invulling; de televisie slaat hem over. */
+  teVullen?: boolean;
+  /**
+   * Niet in de trailer, ook al staan er geen haken in. Voor een regel die
+   * toch iets van de quiz raakt, zoals een zin die in z'n geheel een
+   * waar-of-niet-waar beantwoordt.
+   */
+  pasNaAfloop?: boolean;
+}
+
+export interface JaarMaand {
+  /** 1 tot en met 12. */
+  nr: number;
+  /** De kop boven de maand. Alleen in de film: in de trailer zou hij het onderwerp verklappen. */
+  kop: string;
+  momenten: JaarMoment[];
+}
+
+export interface Jaaroverzicht {
+  jaar: number;
+  /** De trailer, vóór de quiz: titel, wat er op de titelkaart staat, en de slotkaart vlak voor ronde 1. */
+  titel: string;
+  inleiding: string;
+  slot: string;
+  /** Hetzelfde voor de film na de uitslag. */
+  titelNaAfloop: string;
+  inleidingNaAfloop: string;
+  slotNaAfloop: string;
+  maanden: JaarMaand[];
+}

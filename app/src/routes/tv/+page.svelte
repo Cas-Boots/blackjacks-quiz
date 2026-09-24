@@ -15,6 +15,7 @@
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Pauzescherm from '$lib/client/Pauzescherm.svelte';
   import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
+  import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -42,12 +43,14 @@
   /* Buiten een ronde om — aanmelden en uitslag — staat de tafel in zijn
      eigen kleuren, zodat begin en eind herkenbaar bij elkaar horen. */
   let sfeer = $derived(
-    staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt') : 'vilt',
+    staat?.fase === 'jaaroverzicht' ? 'bioscoop'
+      : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
+        : 'vilt',
   );
 
   /** Eén sleutel per dia, zodat Svelte de overgang echt opnieuw speelt. */
   let diaSleutel = $derived(
-    `${staat?.fase ?? 'leeg'}:${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}:${staat?.cijfers?.stap ?? ''}`,
+    `${staat?.fase ?? 'leeg'}:${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}:${staat?.cijfers?.stap ?? ''}:${staat?.jaaroverzicht?.stap ?? ''}`,
   );
 
   let aantalVerbonden = $derived((staat?.spelers ?? []).filter((s) => s.verbonden).length);
@@ -205,6 +208,8 @@
      vergelijking met de vorige waarde zou elke binnenkomende momentopname
      het geluid opnieuw afspelen. */
   let vorigeFase = $state('');
+  /** Bij welke dia van de film het geluid het laatst klonk. */
+  let vorigeFilmStap = -1;
   let vorigeVraag = $state('');
   let vorigAantalIngeleverd = $state(0);
   let vorigeSeconde = $state(99);
@@ -233,6 +238,7 @@
     const vraagSleutel = `${st.rondeIndex}:${st.vraag?.index ?? -1}`;
 
     if (st.fase !== vorigeFase) {
+      if (st.fase === 'jaaroverzicht') geluid.projector();
       if (st.fase === 'ronde') geluid.rondeStart();
       if (st.fase === 'antwoord') geluid.onthul();
       if (st.fase === 'stand' || st.fase === 'einde') {
@@ -245,6 +251,13 @@
       }
       vorigeFase = st.fase;
     }
+
+    if (st.fase === 'jaaroverzicht' && st.jaaroverzicht && st.jaaroverzicht.stap !== vorigeFilmStap) {
+      // De titelkaart heeft de projector al; de rest krijgt een tikje.
+      if (vorigeFilmStap >= 0) (st.jaaroverzicht.onthuld ? geluid.balkOpen : geluid.filmtik)();
+      vorigeFilmStap = st.jaaroverzicht.stap;
+    }
+    if (st.fase !== 'jaaroverzicht') vorigeFilmStap = -1;
 
     if (st.fase === 'vraag' && vraagSleutel !== vorigeVraag) {
       geluid.vraagOp();
@@ -359,7 +372,7 @@
   {/if}
 
   <!-- De rondekop hoort bij het spel, niet bij het aanmelden of de uitslag. -->
-  {#if staat && ronde && staat.fase !== 'lobby' && staat.fase !== 'einde'}
+  {#if staat && ronde && staat.fase !== 'lobby' && staat.fase !== 'einde' && staat.fase !== 'jaaroverzicht'}
     <header class="rail">
       <span class="suit" class:rood>{ronde?.suit}</span>
       <span class="titel">
@@ -450,6 +463,10 @@
               </div>
             {/if}
           </div>
+
+          <!-- ══ Het jaaroverzicht ══════════════════════════════════════ -->
+        {:else if staat.fase === 'jaaroverzicht' && staat.jaaroverzicht}
+          <Jaaroverzicht dia={staat.jaaroverzicht} spelers={staat.spelers} loopt={staat.klok?.loopt === true} />
 
           <!-- ══ Titelkaart van de ronde ════════════════════════════════ -->
         {:else if staat.fase === 'ronde'}

@@ -11,14 +11,14 @@ import { writeFileSync } from 'node:fs';
 import { vergelijkInhoud, HTML_PAD } from './lib/inhoud';
 
 const alleenControleren = process.argv.includes('--check');
-const { gelijk, nieuw, aantalRondes } = vergelijkInhoud();
+const { gelijk, nieuw, aantalRondes, aantalMaanden } = vergelijkInhoud();
 
 if (gelijk) {
-  console.log(`index.html loopt gelijk met packs.ts — ${aantalRondes} rondes.`);
+  console.log(`index.html loopt gelijk met de inhoud — ${aantalRondes} rondes, ${aantalMaanden} maanden.`);
 } else if (alleenControleren) {
-  console.error('index.html loopt achter op src/lib/content/packs.ts. Draai: npm run content:sync');
+  console.error('index.html loopt achter op de inhoud in src/lib/content/. Draai: npm run content:sync');
   process.exit(1);
 } else {
   writeFileSync(HTML_PAD, nieuw);
-  console.log(`index.html bijgewerkt — ${aantalRondes} rondes, ${nieuw.length} tekens.`);
+  console.log(`index.html bijgewerkt — ${aantalRondes} rondes, ${aantalMaanden} maanden, ${nieuw.length} tekens.`);
 }
