@@ -68,6 +68,11 @@ test('spelers toevoegen, hernoemen, gast maken en weghalen', async ({ browser })
   await expect(hernoemd.getByText('gast', { exact: true })).toBeVisible();
   await hernoemd.getByRole('button', { name: 'Maak vast' }).click();
   await expect(hernoemd.getByText('gast', { exact: true })).toHaveCount(0);
+
+  // Opruimen: als gast telt hij niet mee bij de volgende tests (de proefrit
+  // neemt alleen de vaste spelers over).
+  await hernoemd.getByRole('button', { name: 'Maak gast' }).click();
+  await expect(hernoemd.getByText('gast', { exact: true })).toBeVisible();
 });
 
 test('een proefrit weggooien laat de schermen niet zonder spel', async ({ browser }) => {

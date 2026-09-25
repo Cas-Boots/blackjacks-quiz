@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { live } from '$lib/client/live.svelte';
   import { zelfde } from '$lib/client/proef';
+  import Portret from '$lib/client/Portret.svelte';
 
   let pin = $state('');
   let fout = $state('');
@@ -68,7 +69,7 @@
     <div class="raster">
       {#each spelers as s (s.id)}
         <button class="knop groot" onclick={() => alsSpeler(s.id)}>
-          {#if s.foto}<img class="avatar" src={s.foto} alt="" />{:else}<span class="avatar">{s.naam.slice(0, 2)}</span>{/if}
+          <Portret naam={s.naam} foto={s.foto} dier={s.dier} />
           {s.naam}
         </button>
       {:else}

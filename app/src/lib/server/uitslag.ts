@@ -35,7 +35,7 @@ export interface Uitslag {
   isActief: boolean;
   gestartOp: string;
   geeindigdOp: string | null;
-  stand: { spelerId: number; naam: string; foto: string | null; punten: number; plek: number }[];
+  stand: { spelerId: number; naam: string; foto: string | null; dier: string | null; punten: number; plek: number }[];
   prijzen: Prijs[];
   /** Per ronde de punten per speler, in de volgorde van de eindstand. */
   rondes: { naam: string; suit: string; type: string; punten: Record<number, number>; gespeeld: boolean }[];
@@ -81,7 +81,7 @@ export function uitslagVan(spelId: number): Uitslag | null {
   const lijst = deelnemersVan(spel.id);
   const totaal = standVan(spel.id);
   const gesorteerd = lijst
-    .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: totaal[s.id] ?? 0 }))
+    .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, dier: s.dier, punten: totaal[s.id] ?? 0 }))
     .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl'));
   // Gelijke punten, gelijke plek.
   const stand = gesorteerd.map((r, i) => ({

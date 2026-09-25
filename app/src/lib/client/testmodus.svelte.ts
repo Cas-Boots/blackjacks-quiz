@@ -46,10 +46,13 @@ function portret(kleur: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+/** Elk een dier met een andere gang: lopen, springen, slingeren, zwemmen, vliegen, graven. */
+const TESTDIEREN = ['lama', 'kangoeroe', 'aap', 'goudvis', 'bij', 'das', 'pinguin', 'slak'];
+
 function spelers(verbonden: number | boolean = true): PubliekeSpeler[] {
   return NAMEN.map((naam, i) => {
     const aan = typeof verbonden === 'boolean' ? verbonden : i < verbonden;
-    return { id: i + 1, naam, foto: naam === 'Eva' ? portret('#7d6312') : null, stilSinds: aan ? 2 : null, verbonden: aan };
+    return { id: i + 1, naam, foto: naam === 'Eva' ? portret('#7d6312') : null, dier: TESTDIEREN[i % TESTDIEREN.length], stilSinds: aan ? 2 : null, verbonden: aan };
   });
 }
 
@@ -66,7 +69,7 @@ const TEAMS: PubliekTeam[] = [
 
 function stand(punten: Punten): PubliekeStaat['stand'] {
   return spelers()
-    .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: punten[s.id] ?? 0 }))
+    .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, dier: s.dier, punten: punten[s.id] ?? 0 }))
     .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl'));
 }
 

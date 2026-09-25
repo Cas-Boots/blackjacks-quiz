@@ -19,6 +19,9 @@
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
   import { REEKS_VANAF } from '$lib/shared/bonus';
+  import Portret from '$lib/client/Portret.svelte';
+  import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
+  import { dierVan, dierenroep } from '$lib/shared/dieren';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -130,6 +133,22 @@
 
   /* Wie er net binnenkomt krijgt een welkom; vijf seconden later is het weg. */
   let begroeting = $state('');
+  /* ---- De maatjes op de grote momenten -------------------------------
+     Eén optocht tegelijk: bij binnenkomst, bij een goed antwoord, als
+     iedereen fout zit, voor de stijger en voor de winnaar. Verder blijven
+     de dieren stil op hun portret, zodat het nooit druk wordt. */
+  let optocht = $state<{ id: number; lopers: Loper[]; stemming: 'blij' | 'sip' } | null>(null);
+  let optochtTeller = 0;
+  function laatLopen(lopers: Loper[], stemming: 'blij' | 'sip' = 'blij', wacht = 0) {
+    if (!lopers.length) return;
+    setTimeout(() => (optocht = { id: ++optochtTeller, lopers, stemming }), wacht);
+  }
+  function lopersVan(ids: number[]): Loper[] {
+    return ids
+      .map((id) => staat?.spelers.find((s) => s.id === id))
+      .filter((s) => !!s)
+      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier }));
+  }
   // Boekhouding, geen toestand voor het scherm: bewust niet reactief, anders
   // zou het effect zichzelf bij elke schrijfactie opnieuw aanzwengelen.
   let begroetingTeller = 0;
@@ -141,7 +160,11 @@
     const nieuw = st.spelers.find((s) => nu.has(s.id) && !eerderVerbonden.has(s.id) && eerderVerbonden.size > 0);
     if (nieuw && st.fase === 'lobby') {
       begroetingTeller += 1;
-      begroeting = metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
+      const d = dierVan(nieuw.dier, nieuw.naam);
+      begroeting = begroetingTeller % 2
+        ? `${d.emoji} ${nieuw.naam}, ${d.titel}, ${d.entree}.`
+        : metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
+      laatLopen([{ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier }]);
       geluid.boing();
     }
     // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
@@ -172,9 +195,33 @@
     winnaars.length === 0 ? 'Niemand wint' : winnaars.length === 1 ? `${winnaars[0].naam} wint` : `${winnaars.map((w) => w.naam).join(' & ')} winnen`,
   );
 
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
+  /** De spelers achter een inzender: één bij ieder voor zich, meer bij een team. */
+  function ledenVan(inzender: string) {
+    const team = staat?.teams.find((t) => t.id === inzender);
+    return (team?.leden ?? []).map((id) => staat?.spelers.find((s) => s.id === id)).filter((s) => !!s);
   }
+
+  /* Eén dier roept iets bij de onthulling: van de eerste die het goed had. */
+  let roeper = $derived.by(() => {
+    if (!staat || staat.fase !== 'antwoord' || alleGoed) return null;
+    const eerste = staat.inzendingen.find((i) => i.isGoed === true);
+    const sp = eerste ? ledenVan(eerste.inzender)[0] : null;
+    if (!sp) return null;
+    return { dier: dierVan(sp.dier, sp.naam), zin: dierenroep(sp.dier, sp.naam, 'goed', vraagSleutelNu) };
+  });
+  let winDier = $derived(winnaars.length === 1 ? dierVan(winnaars[0].dier, winnaars[0].naam) : null);
+
+  /* Zodra een vraag beoordeeld is: wie punten pakte rent blij over het
+     scherm; zat iedereen fout, dan sjokt de hele tafel eronderdoor. Eén keer
+     per vraag, en pas als de onthulling even heeft kunnen landen. */
+  let optochtVoorVraag = '';
+  $effect(() => {
+    if (staat?.fase !== 'antwoord' || !beoordeeld || optochtVoorVraag === vraagSleutelNu) return;
+    optochtVoorVraag = vraagSleutelNu;
+    const winnaarIds = Object.entries(staat.uitdeling).filter(([, p]) => p > 0).map(([id]) => Number(id));
+    if (winnaarIds.length) laatLopen(lopersVan(winnaarIds), 'blij', 1400);
+    else if (alleFout) laatLopen(lopersVan(staat.inzendingen.flatMap((i) => ledenVan(i.inzender).map((s) => s.id))), 'sip', 1400);
+  });
 
   /** De naam waaronder een inzender op het scherm staat: speler of team. */
   function naamVan(inzender: string): string {
@@ -357,6 +404,9 @@
         setTimeout(() => (toonNieuweVolgorde = true), 900 + naOvergang);
         // De fanfare pas als de eerste trede van het podium staat.
         if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), WINNAAR_NA_MS);
+        // Het maatje van de stijger maakt een rondje; bij de uitslag dat van de winnaar.
+        if (st.fase === 'stand' && stijgerId !== null) laatLopen(lopersVan([stijgerId]), 'blij', 2200 + naOvergang);
+        if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', WINNAAR_NA_MS + 900);
       }
       vorigeFase = st.fase;
     }
@@ -478,6 +528,12 @@
     {/each}
   </div>
 
+  {#if optocht}
+    {#key optocht.id}
+      <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
+    {/key}
+  {/if}
+
   <button
     class="geluidsknop"
     onclick={wisselGeluid}
@@ -541,11 +597,7 @@
                 {#each staat.spelers as s, i (s.id)}
                   <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
                     <span class="stip" class:aan={s.verbonden}></span>
-                    {#if s.foto}
-                      <img class="avatar" src={s.foto} alt="" />
-                    {:else}
-                      <span class="avatar">{initialen(s.naam)}</span>
-                    {/if}
+                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} />
                     <strong>{s.naam}</strong>
                   </span>
                 {/each}
@@ -628,11 +680,7 @@
                       {#each t.leden as id (id)}
                         {@const sp = staat.spelers.find((x) => x.id === id)}
                         <span class="naamplaat" style="padding:.35rem .8rem .35rem .35rem">
-                          {#if sp?.foto}
-                            <img class="avatar" style="width:1.9rem;height:1.9rem" src={sp.foto} alt="" />
-                          {:else}
-                            <span class="avatar" style="width:1.9rem;height:1.9rem;font-size:.7rem">{initialen(sp?.naam ?? '?')}</span>
-                          {/if}
+                          <Portret naam={sp?.naam ?? '?'} foto={sp?.foto} dier={sp?.dier} stijl="width:1.9rem;height:1.9rem;font-size:1.1rem" />
                           {sp?.naam ?? '?'}
                         </span>
                       {/each}
@@ -646,11 +694,7 @@
                 <div class="knoprij">
                   {#each staat.spelers as sp, i (sp.id)}
                     <span class="naamplaat" in:fly={{ y: 20, duration: 440, delay: 420 + i * 90, easing: cubicOut }}>
-                      {#if sp.foto}
-                        <img class="avatar" src={sp.foto} alt="" />
-                      {:else}
-                        <span class="avatar">{initialen(sp.naam)}</span>
-                      {/if}
+                      <Portret naam={sp.naam} foto={sp.foto} dier={sp.dier} />
                       <strong>{sp.naam}</strong>
                     </span>
                   {/each}
@@ -758,6 +802,10 @@
               <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_FOUT, vraagSleutelNu)}</p>
             {:else if alleGoed}
               <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
+            {:else if roeper}
+              <p class="kwinkslag dierenroep" style="animation-delay:.8s">
+                <span aria-hidden="true">{roeper.dier.emoji}</span>{roeper.zin}
+              </p>
             {/if}
             {#if staat.inzendingen.length}
               {#if vraag.type === 'stem' && staat.onthulling?.stemmen}
@@ -767,7 +815,7 @@
                     {@const meeste = staat.onthulling.stemmen[0].aantal}
                     <div class="stemrij" class:wint={t.aantal === meeste} style="--i:{n}" in:fly={{ x: -18, duration: 380, delay: 500 + n * 120, easing: cubicOut }}>
                       <span class="kroonhouder" class:kroon={t.aantal === meeste}>
-                        {#if sp?.foto}<img class="avatar m" src={sp.foto} alt="" />{:else}<span class="avatar m">{initialen(t.naam)}</span>{/if}
+                        <Portret naam={t.naam} foto={sp?.foto} dier={sp?.dier} maat="m" />
                       </span>
                       <span class="naam">{t.naam}</span>
                       <span class="stembalk"><i style="--deel:{t.aantal / Math.max(1, staat.inzendingen.length)}"></i></span>
@@ -841,11 +889,7 @@
                 <div class="standrij" class:leider={toonNieuweVolgorde && i === 0} class:laatste={toonNieuweVolgorde && r.spelerId === laatsteId && r.punten < standNu[0].punten} style="--i:{i}" animate:flip={{ duration: 720, easing: cubicOut }}>
                   <span class="plek">{i + 1}</span>
                   <span class="kroonhouder" class:kroon={toonNieuweVolgorde && i === 0}>
-                    {#if r.foto}
-                      <img class="avatar m" class:goud={toonNieuweVolgorde && i === 0} src={r.foto} alt="" />
-                    {:else}
-                      <span class="avatar m" class:goud={toonNieuweVolgorde && i === 0}>{initialen(r.naam)}</span>
-                    {/if}
+                    <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat="m" goud={toonNieuweVolgorde && i === 0} />
                   </span>
                   <span class="naam">
                     {r.naam}
@@ -873,6 +917,7 @@
             </h1>
             <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
               Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
+              {#if winDier}<br /><span class="dierenroep"><span aria-hidden="true">{winDier.emoji}</span> Hulde aan {winDier.titel}!</span>{/if}
             </p>
 
             <Podium {top3} vorigePunten={live.vorigePunten} />

@@ -21,17 +21,27 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 ## De twee pakketten
 
-| Pakket | Rondes | Vragen |
+| Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 14 | 105 |
-| Familie Proefronde 2026 | 7 | 50 |
+| Blackjacks 2026 — Het Jaaroverzicht | 10 rondes, 50 vragen (± een uur en een kwartier) | 15 rondes, 77 vragen |
+| Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
+
+De avond is bewust kort gehouden. Rondes van vier tot acht vragen, dertig
+seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
+dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
+naar de laatste vijf seconden), en het ritme wisselt steeds: een ronde over
+het jaar, dan een over onszelf, en om en om ieder voor zich en in teams. Rondes
+die nog leeg zijn of alleen voor kenners (*Sport: de Marges*, *De WK-poule*,
+*Jullie Jaar in Beeld*, *Bliksemronde*, *Oktober tot december*) staan
+uitgevinkt. Vink ze aan in de
+vragenkiezer als je ze wilt spelen.
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
 
 ### Rondes over de groep zelf
 
-Twee rondes zijn **al gevuld** met de echte cijfers uit
+Drie rondes zijn **al gevuld** met de echte cijfers uit
 [`resolution-recap`](https://github.com/Cas-Boots/resolution-recap), overgenomen
 uit de dagelijkse back-up van 18 september. In de meespeelversie in `app/`
 worden deze vragen op de avond zelf live uitgerekend (zie
@@ -42,6 +52,8 @@ momentopname:
   kwam, welke sport iedereen precies één keer deed, wie zijn jaardoel al haalde.
 - **Taart & Verre Landen** — de taartteller, de landenteller, de drukste
   taartdag van het jaar.
+- **Hoger of Lager** — dichtstbij wint, over onszelf: hoe vaak we samen
+  sportten, hoe vaak Rik padelde, hoe ver Joris van zijn jaardoel af zat.
 
 Nog twee rondes over de groep:
 
@@ -49,9 +61,10 @@ Nog twee rondes over de groep:
   meespeelversie leven ze in `app/src/lib/content/voorspellingen.ts`, met de
   uitkomsten; hier wachten ze op handwerk.
 - **De WK-poule** — wacht op een export uit `blackjacks-cup`; die bestaat nog niet.
+  Tot die tijd staat hij uitgevinkt.
 
-Daarnaast is er een lege ronde **Oktober tot december**, want die maanden hadden
-bij het schrijven nog niet plaatsgevonden.
+Daarnaast is er een lege, uitgevinkte ronde **Oktober tot december**, want die
+maanden hadden bij het schrijven nog niet plaatsgevonden.
 
 Werk je de cijfers bij? Draai dan de analyse opnieuw tegen de nieuwste back-up in
 `resolution-recap/backups/` en pas de antwoorden aan.

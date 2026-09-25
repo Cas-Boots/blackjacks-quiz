@@ -7,6 +7,8 @@ export const spelers = sqliteTable('spelers', {
   naam: text('naam').notNull().unique(),
   /** Portret als data-URI; klein gehouden (256x256 JPEG). */
   foto: text('foto'),
+  /** Het maatje, een sleutel uit shared/dieren.ts. Alleen voor de lol. */
+  dier: text('dier'),
   isQuizmaster: integer('is_quizmaster', { mode: 'boolean' }).notNull().default(false),
   /** Een gast van één avond: doet niet vanzelf mee aan het volgende spel. */
   isGast: integer('is_gast', { mode: 'boolean' }).notNull().default(false),

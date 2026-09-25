@@ -8,6 +8,7 @@
   import { isAfrekening, type LogRegel } from '$lib/shared/state';
   import { GELUIDSBORD } from '$lib/shared/geluidsbord';
   import { WAARSCHUW_VANAF_MS, DRINGEND_VANAF_MS, aftelTekst, nogTekst } from '$lib/shared/nieuwjaar';
+  import { dierVan } from '$lib/shared/dieren';
 
   type Voorstel = { automatisch: boolean; goed: boolean; reden: string };
   type Inzending = { inzender: string; tekst: string; ingediendOp: number; isGoed: boolean | null; voorstel: Voorstel | null };
@@ -395,6 +396,7 @@
         {#each staat?.spelers ?? [] as s (s.id)}
           <span class="naamplaat" style="padding:.35rem .85rem">
             <span class="stip" class:aan={s.verbonden} class:uit={!s.verbonden}></span>
+            <span class="dier" data-beweging={s.verbonden ? dierVan(s.dier, s.naam).beweging : null} aria-hidden="true">{dierVan(s.dier, s.naam).emoji}</span>
             {s.naam}
             {#if !s.verbonden && s.stilSinds !== null}<span class="fijn">{s.stilSinds}s stil</span>{/if}
             {#if s.stilSinds === null}<span class="fijn">nog niet gezien</span>{/if}
@@ -653,7 +655,7 @@
         {#each staat?.stand ?? [] as r, i (r.spelerId)}
           <div class="standrij" class:leider={i === 0}>
             <span style="font-family:var(--mono);color:var(--salie)">{i + 1}</span>
-            <span></span>
+            <span class="dier" aria-hidden="true" title={dierVan(r.dier, r.naam).titel}>{dierVan(r.dier, r.naam).emoji}</span>
             <span class="naam" style="font-size:1.1rem">{r.naam}</span>
             <span style="display:flex;gap:.4rem;align-items:center">
               <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: -1 })} aria-label="Een punt eraf voor {r.naam}">−</button>

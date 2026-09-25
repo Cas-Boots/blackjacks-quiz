@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Podium from '$lib/client/Podium.svelte';
+  import Portret from '$lib/client/Portret.svelte';
   import { prijsIcoon } from '$lib/shared/prijzen';
 
   let { data }: { data: PageData } = $props();
@@ -12,9 +13,6 @@
     return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
-  }
 
   /** Een samenvatting in platte tekst, voor in de groepsapp. */
   let samenvatting = $derived.by(() => {
@@ -78,7 +76,7 @@
         {#each u.stand as r, i (r.spelerId)}
           <div class="standrij" class:leider={r.plek === 1} style="--i:{i}">
             <span class="plek">{r.plek}</span>
-            {#if r.foto}<img class="avatar" class:goud={r.plek === 1} src={r.foto} alt="" />{:else}<span class="avatar" class:goud={r.plek === 1}>{initialen(r.naam)}</span>{/if}
+            <Portret naam={r.naam} foto={r.foto} dier={r.dier} goud={r.plek === 1} />
             <span class="naam" style="font-size:1.3rem">{r.naam}</span>
             <span class="standpunten" style="font-size:1.1rem">{r.punten}</span>
           </div>

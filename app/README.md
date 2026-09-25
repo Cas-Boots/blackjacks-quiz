@@ -360,6 +360,63 @@ komt alleen op een moment dat het mag:
   tromgeroffel, een toeter, "ooooh", een bel, de foute zoemer, de treurige
   trombone en een fanfare. De quizmaster drukt, de televisie speelt.
 
+### De maatjes
+
+Je foto (of selfie) blijft je portret. Daarnaast kiest iedereen een
+**maatje**: een dier dat de avond meegaat, zoals *Liz, het Konijn met een Gat
+in de Tuin* of *Rik, de Goudvis met Drie Seconden Geheugen*. Het telt nergens
+mee; het is er alleen voor de lol.
+
+- **Kiezen.** Op de telefoon staat in de lobby *Kies je maatje*, met alle 31
+  dieren. Een dier dat een ander aan tafel al heeft, is grijs. Wie niets
+  kiest, krijgt er vanzelf een. De quizmaster kan op het beheerscherm een
+  ander dier dobbelen.
+- **Stil op je portret.** Het maatje zit klein en stil op de rand van je
+  portret, op de televisie, de telefoon, het hostscherm en het podium.
+- **Over het scherm op de grote momenten**, en alleen dan:
+  - als je in de lobby binnenkomt;
+  - als je punten pakt bij een vraag: de maatjes van wie het goed had rennen
+    blij over de televisie, en dat van jou over je eigen telefoon;
+  - als iedereen fout zit: de tafel sjokt grijs en met een regenwolkje voorbij
+    (op je telefoon ook als alleen jij het fout had);
+  - bij de tussenstand voor de stijger, en bij de uitslag voor de winnaar.
+
+  Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
+  het leuk blijft en niet druk wordt.
+- **Erin, een kunstje, en weer weg.** Elk dier komt op zijn eigen manier
+  binnen, stopt op zijn eigen plek, doet een kunstje en gaat weer. Met meer
+  dieren staan ze even naast elkaar, elk met een eigen kunstje.
+- **Met lijf en decor.** Emoji kunnen hun poten niet bewegen, dus krijgen ze
+  tekenfilmdelen die met ze meebewegen:
+  - lopers (lama, giraf, hond) rennen op wervelende pootjes, met stofwolkjes;
+  - springers (kangoeroe, kikker, eenhoorn) stuiteren op een springveer;
+  - slingeraars (aap, luiaard) hangen aan een liaan onder een tak die over
+    het scherm loopt;
+  - zwemmers (goudvis, dolfijn, krokodil) gaan half onder de golven, met
+    bubbels en een peddelend vinnetje;
+  - vogels en insecten klapperen met vleugels, met fartlijnen erachter;
+  - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
+    in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
+
+  Ze kijken ook de kant op waar ze heen gaan: de meeste emoji kijken naar
+  links, dus die worden gespiegeld.
+- **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke
+  keer een verrassing. Eigen kunstjes: de lama spuugt, de kip legt een ei, de
+  aap gooit met bananen, de eenhoorn maakt een regenboog, de eekhoorn begraaft
+  een nootje, de luiaard hangt ondersteboven, de egel rolt zich op, de
+  zeehond houdt een bal hoog. Daarnaast kan elk dier een paar van de
+  algemene: een salto, een dansje met muzieknootjes, een pirouette met
+  sterretjes, stuiteren met confetti. Sip: een zucht met een traan, omvallen,
+  mokken met een boos wolkje, of zich klein maken.
+- **Het roept iets.** Bij de onthulling roept het maatje van de eerste die het
+  goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
+  telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
+
+De dieren, hun titels en wat ze roepen staan in `src/lib/shared/dieren.ts`;
+de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-,
+`kunst-…`- en `ding-…`-animaties onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
+geen optochten.
+
 ### Het hostscherm
 
 Bovenaan staat de vraag die open staat, met een **spiekbriefje** dat je zelf
@@ -471,8 +528,8 @@ meebewegen. Vragen zelf pas je niet hier aan maar in
 
 ### De cijfers van het jaar, live
 
-Twee rondes gaan over onszelf: *Onze Sportcompetitie* en *Taart & Verre
-Landen*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
+Drie rondes gaan over onszelf: *Onze Sportcompetitie*, *Taart & Verre
+Landen* en *Hoger of Lager*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
 de avond zelf uitgerekend uit de export van
 [`resolution-recap`](https://github.com/Cas-Boots/resolution-recap). Sport
 iemand op oudejaarsdag nog, dan telt dat mee. Ook de tekst van een vraag past

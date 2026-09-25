@@ -10,6 +10,8 @@ export interface PubliekeSpeler {
   id: number;
   naam: string;
   foto: string | null;
+  /** Het maatje, een sleutel uit shared/dieren.ts. */
+  dier: string;
   /** Aantal seconden sinds dit apparaat zich voor het laatst meldde. */
   stilSinds: number | null;
   verbonden: boolean;
@@ -108,6 +110,8 @@ export interface PubliekeStaat {
     naam: string;
     punten: number;
     foto: string | null;
+    /** Het maatje, een sleutel uit shared/dieren.ts. */
+    dier: string;
     /** Punten in de huidige ronde, bonussen inbegrepen. Voor de fiches bij de tussenstand. */
     dezeRonde?: number;
   }[];

@@ -2613,3 +2613,734 @@ a.uitslagrij:hover {
   font-size: 0.92rem;
   animation: opkomen 0.45s 0.4s var(--deal) both;
 }
+
+/* ===== De maatjes ===================================================
+   Ieder kiest een dier dat meegaat (shared/dieren.ts). Het zit stil en
+   klein op de rand van het portret (Portret.svelte), en rent alleen op de
+   grote momenten over het scherm (Dierenparade.svelte). */
+.portret {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.dierbadge {
+  position: absolute;
+  right: -0.35em;
+  bottom: -0.25em;
+  font-size: 0.95rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+.portret.m .dierbadge { font-size: clamp(1rem, 1.5vw, 1.5rem); }
+.portret.l .dierbadge { font-size: clamp(1.4rem, 2.3vw, 2.3rem); }
+
+/* ---- De kiezer op de telefoon: alleen het gekozen dier beweegt ------- */
+.dierenkiezer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.1rem, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+.dierenkiezer button {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 1.7rem;
+  line-height: 1;
+  border-radius: 0.8rem;
+  border: 1px solid var(--rand);
+  background: var(--vilt-diep);
+  cursor: pointer;
+  padding: 0;
+  overflow: visible;
+}
+.dierenkiezer button.gekozen {
+  border-color: var(--goud);
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.28), var(--vilt-diep));
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.3);
+}
+.dierenkiezer button:disabled:not(.gekozen) {
+  opacity: 0.28;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.dier {
+  display: inline-block;
+  line-height: 1;
+  transform-origin: 50% 90%;
+}
+.dier[data-beweging="loop"] { animation: dier-stap 0.5s ease-in-out infinite; }
+.dier[data-beweging="spring"],
+.dier[data-beweging="stuiter"] { animation: dier-spring 1.2s cubic-bezier(0.3, 0, 0.5, 1) infinite; transform-origin: 50% 100%; }
+.dier[data-beweging="schommel"] { animation: dier-schommel 1.8s ease-in-out infinite; transform-origin: 50% -40%; }
+.dier[data-beweging="zwem"] { animation: dier-golf 1.6s ease-in-out infinite; }
+.dier[data-beweging="vlieg"] { animation: dier-fladder 1.6s ease-in-out infinite; }
+.dier[data-beweging="graaf"] { animation: dier-graaf 3s ease-in-out infinite; }
+.dier[data-beweging="draai"] { animation: dier-draai 3s ease-in-out infinite; transform-origin: 50% 50%; }
+.dier[data-beweging="waggel"] { animation: dier-waggel 0.9s ease-in-out infinite; }
+.dier[data-beweging="kruip"] { animation: dier-kruip 3s ease-in-out infinite; }
+
+/* ---- De optocht: erin, een kunstje, en weer weg ---------------------- */
+.dierenparade {
+  position: fixed;
+  left: 0;
+  bottom: 5vh;
+  z-index: 7;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: clamp(3rem, 7vw, 6rem);
+  transform: translateX(-20vw);
+}
+.dierenparade[data-fase="wacht"],
+.dierenparade[data-fase="klaar"] { visibility: hidden; }
+.dierenparade[data-fase="heen"] { animation: dier-heen var(--heen) cubic-bezier(0.2, 0.6, 0.35, 1) both; }
+.dierenparade[data-fase="actie"] { transform: translateX(calc(var(--stop) - 50%)); }
+.dierenparade[data-fase="weg"] { animation: dier-weg var(--weg) cubic-bezier(0.55, 0, 0.8, 0.45) both; }
+/* Tijdens het kunstje staat de gang stil; het kunstje zit op .actie. */
+.dierenparade[data-fase="actie"][data-gang] .dier { animation: none; }
+@keyframes dier-heen {
+  from { transform: translateX(-20vw); }
+  to { transform: translateX(calc(var(--stop) - 50%)); }
+}
+@keyframes dier-weg {
+  from { transform: translateX(calc(var(--stop) - 50%)); }
+  to { transform: translateX(110vw); }
+}
+
+/* ---- De kunstjes: het lijf ------------------------------------------- */
+.actie {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  transform-origin: 50% 85%;
+}
+.actie[data-lijf] { animation: 2.2s ease-in-out both; }
+.actie[data-lijf="salto"] { animation-name: kunst-salto; transform-origin: 50% 50%; }
+.actie[data-lijf="dans"] { animation-name: kunst-dans; }
+.actie[data-lijf="pirouette"] { animation-name: kunst-pirouette; }
+.actie[data-lijf="boing"] { animation-name: kunst-boing; transform-origin: 50% 100%; }
+.actie[data-lijf="rol"] { animation-name: kunst-rol; transform-origin: 50% 50%; }
+.actie[data-lijf="rek"] { animation-name: kunst-rek; transform-origin: 50% 100%; }
+.actie[data-lijf="opblaas"] { animation-name: kunst-opblaas; }
+.actie[data-lijf="schud"] { animation-name: kunst-schud; }
+.actie[data-lijf="acht"] { animation-name: kunst-acht; }
+.actie[data-lijf="ondersteboven"] { animation-name: kunst-ondersteboven; transform-origin: 50% 0%; }
+.actie[data-lijf="balans"] { animation-name: kunst-balans; transform-origin: 50% 100%; }
+.actie[data-lijf="glij"] { animation-name: kunst-glij; }
+.actie[data-lijf="graaf"] { animation-name: kunst-graaf; }
+.actie[data-lijf="kronkel"] { animation-name: kunst-kronkel; }
+.actie[data-lijf="zak"] { animation-name: kunst-zak; transform-origin: 50% 100%; }
+.actie[data-lijf="omval"] { animation-name: kunst-omval; transform-origin: 20% 100%; }
+.actie[data-lijf="mok"] { animation-name: kunst-mok; }
+.actie[data-lijf="verstop"] { animation-name: kunst-verstop; transform-origin: 50% 100%; }
+
+@keyframes kunst-salto {
+  0% { transform: translateY(0) rotate(0); }
+  15% { transform: translateY(8%) scale(1.1, 0.85); }
+  50% { transform: translateY(-110%) rotate(-360deg); }
+  70% { transform: translateY(0) rotate(-360deg) scale(1.1, 0.85); }
+  82%, 100% { transform: translateY(0) rotate(-360deg); }
+}
+@keyframes kunst-dans {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  12.5% { transform: translate(-12%, -12%) rotate(-14deg); }
+  25% { transform: translate(0, 0) rotate(0); }
+  37.5% { transform: translate(12%, -12%) rotate(14deg); }
+  50% { transform: translate(0, 0) rotate(0); }
+  62.5% { transform: translate(-12%, -12%) rotate(-14deg); }
+  75% { transform: translate(0, 0) rotate(0); }
+  87.5% { transform: translate(12%, -12%) rotate(14deg); }
+}
+@keyframes kunst-pirouette {
+  0%, 100% { transform: translateY(0) scaleX(1); }
+  12% { transform: translateY(-10%) scaleX(-1); }
+  24% { transform: translateY(-14%) scaleX(1); }
+  36% { transform: translateY(-16%) scaleX(-1); }
+  48% { transform: translateY(-16%) scaleX(1); }
+  60% { transform: translateY(-14%) scaleX(-1); }
+  72% { transform: translateY(-10%) scaleX(1); }
+  86% { transform: translateY(0) scaleX(1) scale(1.08); }
+}
+@keyframes kunst-boing {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  8%, 38%, 68% { transform: translateY(0) scale(1.2, 0.78); }
+  20% { transform: translateY(-70%) scale(0.9, 1.12); }
+  50% { transform: translateY(-50%) scale(0.92, 1.1); }
+  80% { transform: translateY(-30%) scale(0.95, 1.05); }
+  30%, 60%, 90% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes kunst-rol {
+  0% { transform: translateX(0) rotate(0) scale(1); }
+  15% { transform: translateX(0) rotate(0) scale(0.75); }
+  50% { transform: translateX(40%) rotate(540deg) scale(0.75); }
+  85% { transform: translateX(0) rotate(1080deg) scale(0.75); }
+  100% { transform: translateX(0) rotate(1080deg) scale(1); }
+}
+@keyframes kunst-rek {
+  0%, 100% { transform: scale(1, 1); }
+  20%, 40% { transform: scale(0.85, 1.6); }
+  50% { transform: scale(1.1, 0.9); }
+  65%, 80% { transform: scale(0.85, 1.6); }
+  90% { transform: scale(1.1, 0.9); }
+}
+@keyframes kunst-opblaas {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.55); }
+  55% { transform: scale(1.5) rotate(-6deg); }
+  62% { transform: scale(1.55) rotate(6deg); }
+  70% { transform: scale(0.85); }
+  80% { transform: scale(1.1); }
+  90% { transform: scale(0.97); }
+}
+@keyframes kunst-schud {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  5%, 25%, 45%, 65%, 85% { transform: translateX(-10%) rotate(-12deg); }
+  15%, 35%, 55%, 75%, 95% { transform: translateX(10%) rotate(12deg); }
+}
+@keyframes kunst-acht {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  12.5% { transform: translate(30%, -30%) rotate(15deg); }
+  25% { transform: translate(60%, 0) rotate(0); }
+  37.5% { transform: translate(30%, 30%) rotate(-15deg); }
+  50% { transform: translate(0, 0) rotate(0); }
+  62.5% { transform: translate(-30%, -30%) scaleX(-1) rotate(15deg); }
+  75% { transform: translate(-60%, 0) scaleX(-1); }
+  87.5% { transform: translate(-30%, 30%) scaleX(-1) rotate(-15deg); }
+}
+@keyframes kunst-ondersteboven {
+  0% { transform: rotate(0); }
+  20% { transform: translateY(-40%) rotate(180deg); }
+  35% { transform: translateY(-40%) rotate(160deg); }
+  50% { transform: translateY(-40%) rotate(200deg); }
+  65% { transform: translateY(-40%) rotate(165deg); }
+  80% { transform: translateY(-40%) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+@keyframes kunst-balans {
+  0%, 100% { transform: rotate(0) scaleX(1); }
+  15% { transform: rotate(-4deg) scaleX(0.8); }
+  30% { transform: rotate(18deg) scaleX(0.8); }
+  45% { transform: rotate(-20deg) scaleX(0.8); }
+  60% { transform: rotate(14deg) scaleX(0.8); }
+  75% { transform: rotate(-8deg) scaleX(0.8); }
+  88% { transform: rotate(0) scaleX(1) translateY(-10%); }
+}
+@keyframes kunst-glij {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(0) rotate(-80deg); }
+  45% { transform: translateX(60%) rotate(-90deg); }
+  75% { transform: translateX(-30%) rotate(-90deg); }
+  90% { transform: translateX(0) rotate(0); }
+}
+@keyframes kunst-graaf {
+  0%, 100% { transform: translateY(0) scaleY(1); opacity: 1; }
+  12% { transform: translateY(8%) rotate(24deg); }
+  18% { transform: translateY(12%) rotate(14deg); }
+  24% { transform: translateY(14%) rotate(26deg); }
+  40% { transform: translateY(70%) scaleY(0.3); opacity: 0; }
+  60% { transform: translateY(70%) scaleY(0.3); opacity: 0; }
+  75% { transform: translateY(-40%) scaleY(1.2); opacity: 1; }
+  88% { transform: translateY(5%) scaleY(0.9); }
+}
+@keyframes kunst-kronkel {
+  0%, 100% { transform: skewX(0) scaleY(1); }
+  12.5%, 62.5% { transform: skewX(-22deg) scaleY(1.15); }
+  25%, 75% { transform: skewX(0) scaleY(0.85); }
+  37.5%, 87.5% { transform: skewX(22deg) scaleY(1.15); }
+}
+@keyframes kunst-zak {
+  0%, 100% { transform: scale(1, 1) rotate(0); }
+  25% { transform: scale(1.05, 0.95) rotate(0); }
+  45%, 80% { transform: scale(1.12, 0.72) rotate(-10deg) translateY(8%); }
+}
+@keyframes kunst-omval {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-8deg); }
+  35% { transform: rotate(92deg); }
+  40% { transform: rotate(84deg); }
+  45%, 75% { transform: rotate(90deg); }
+  90% { transform: rotate(-6deg); }
+}
+@keyframes kunst-mok {
+  0%, 100% { transform: scaleX(1); }
+  15%, 80% { transform: scaleX(-1); }
+  30%, 50% { transform: scaleX(-1) translateX(4%) rotate(-5deg); }
+  40%, 60% { transform: scaleX(-1) translateX(-4%) rotate(5deg); }
+}
+@keyframes kunst-verstop {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  25% { transform: scale(0.2); opacity: 0.4; }
+  55% { transform: scale(0.2); opacity: 0.4; }
+  65% { transform: scale(0.45) translateY(-10%); opacity: 1; }
+  72% { transform: scale(0.2); opacity: 0.4; }
+  88% { transform: scale(1.1); opacity: 1; }
+}
+
+/* ---- De kunstjes: wat erbij komt -------------------------------------- */
+.ding {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  width: 1em;
+  margin-left: -0.5em;
+  text-align: center;
+  font-size: 0.42em;
+  line-height: 1;
+  opacity: 0;
+  animation: 1.8s ease-out calc(0.2s + var(--n, 0) * 0.35s) both;
+}
+.ding[data-gaat="op"] { animation-name: ding-op; }
+.ding[data-gaat="gooi"] { animation-name: ding-gooi; animation-duration: 1.4s; }
+.ding[data-gaat="val"] { animation-name: ding-val; animation-timing-function: ease-in; }
+.ding[data-gaat="rond"] { animation-name: ding-rond; animation-timing-function: linear; }
+@keyframes ding-op {
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 70%), 0) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 110%), -260%) scale(1.2); }
+}
+@keyframes ding-gooi {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  45% { opacity: 1; transform: translate(160%, -220%) rotate(360deg); }
+  100% { opacity: 0; transform: translate(300%, 120%) rotate(720deg); }
+}
+@keyframes ding-val {
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 60%), -60%); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 60%), 260%); }
+}
+@keyframes ding-rond {
+  0% { opacity: 0; transform: rotate(0) translateY(-180%) rotate(0); }
+  10%, 85% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(720deg) translateY(-180%) rotate(-720deg); }
+}
+.dierenparade .dier {
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
+}
+.lopernaam {
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: max(0.85rem, 0.2em);
+  line-height: 1.2;
+  color: var(--goud-licht);
+  background: rgba(8, 21, 17, 0.82);
+  border: 1px solid var(--goud-diep);
+  border-radius: 999px;
+  padding: 0.1em 0.7em;
+  white-space: nowrap;
+}
+.lopernaam::before {
+  content: attr(data-naam);
+}
+/* Wie in het water of onder de grond zit, heeft zijn naam erboven. */
+.dierenparade[data-gang="zwem"],
+.dierenparade[data-gang="graaf"] { flex-direction: column-reverse; }
+
+/* ---- Lijf en ledematen ---------------------------------------------------
+   Emoji kunnen hun eigen poten niet bewegen, dus krijgen ze er tekenfilmdelen
+   bij die met ze meebewegen: vleugels, rennende pootjes, een springveer,
+   graafklauwen, een liaan. In .kijk staat alles zoals de emoji zelf: met de
+   kop naar links. Links is dus voor, rechts is achter. */
+.kijk {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+.kijk.rechts { transform: none; }
+.dierenparade .dier { position: relative; }
+.dierenparade .emoji {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+/* Vleugels: achter het lijf, klapperend vanuit de schouders. */
+.vleugel {
+  position: absolute;
+  z-index: 0;
+  top: 0.02em;
+  width: 0.5em;
+  height: 0.34em;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(210, 228, 240, 0.8));
+  border: 0.025em solid rgba(70, 90, 110, 0.55);
+  border-radius: 70% 70% 15% 70%;
+  animation: vleugel-klap 0.18s ease-in-out infinite alternate;
+}
+.vleugel.links { left: 0.08em; transform-origin: 100% 100%; }
+.vleugel.rechts {
+  right: 0.08em;
+  transform-origin: 0% 100%;
+  border-radius: 70% 70% 70% 15%;
+  animation-name: vleugel-klap-r;
+}
+@keyframes vleugel-klap { from { transform: rotate(-40deg); } to { transform: rotate(25deg) scaleY(0.7); } }
+@keyframes vleugel-klap-r { from { transform: rotate(40deg); } to { transform: rotate(-25deg) scaleY(0.7); } }
+.fartlijnen {
+  position: absolute;
+  z-index: 0;
+  right: -0.45em;
+  top: 0.3em;
+  width: 0.4em;
+  height: 0.32em;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0 0.025em, transparent 0.025em 0.1em);
+  border-radius: 0.05em;
+  animation: fartlijnen 0.3s linear infinite;
+}
+@keyframes fartlijnen {
+  0%, 100% { opacity: 0.3; transform: translateX(0) scaleX(0.7); }
+  50% { opacity: 0.9; transform: translateX(0.08em) scaleX(1); }
+}
+
+/* Rennende pootjes: een wervel van benen onder de buik, als in een tekenfilm. */
+.pootjes {
+  position: absolute;
+  z-index: 0;
+  left: 30%;
+  width: 40%;
+  bottom: -0.16em;
+  height: 0.3em;
+}
+.pootjes i {
+  position: absolute;
+  top: 0;
+  width: 0.075em;
+  height: 0.3em;
+  border-radius: 0.04em;
+  background: #4a3524;
+  transform-origin: 50% 0;
+  animation: poot 0.22s ease-in-out infinite alternate;
+}
+.pootjes i:first-child { left: 20%; }
+.pootjes i:last-child { left: 65%; animation-direction: alternate-reverse; }
+@keyframes poot { from { transform: rotate(40deg); } to { transform: rotate(-40deg); } }
+/* Stofwolkjes achter de rennende pootjes. */
+.pootjes::after {
+  content: "💨";
+  position: absolute;
+  right: -0.9em;
+  bottom: 0;
+  font-size: 0.4em;
+  animation: stofje 0.44s ease-out infinite;
+}
+@keyframes stofje {
+  from { opacity: 0.9; transform: translateX(0) scale(0.6); }
+  to { opacity: 0; transform: translateX(0.6em) scale(1.2); }
+}
+
+/* De springveer onder de voeten: ingedrukt bij de landing, lang in de lucht. */
+.veer {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 92%;
+  width: 0.28em;
+  height: 0.36em;
+  margin-left: -0.14em;
+  border-radius: 0.05em;
+  background: repeating-linear-gradient(to bottom, #b8bec4 0 0.045em, #5f666d 0.045em 0.075em, transparent 0.075em 0.1em);
+  transform-origin: 50% 0;
+  animation: veer 1.05s cubic-bezier(0.3, 0, 0.5, 1) infinite;
+}
+@keyframes veer {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1.4); }
+}
+
+/* Zwemvinnetje dat peddelt. */
+.vin {
+  position: absolute;
+  z-index: 2;
+  left: 0.25em;
+  top: 0.55em;
+  width: 0.26em;
+  height: 0.14em;
+  border-radius: 50% 10% 50% 50%;
+  background: rgba(120, 190, 235, 0.9);
+  transform-origin: 100% 50%;
+  animation: peddel 0.35s ease-in-out infinite alternate;
+}
+@keyframes peddel { from { transform: rotate(-35deg); } to { transform: rotate(30deg); } }
+
+/* Graafklauwen voor het lijf, om en om krabbend. */
+.klauwen {
+  position: absolute;
+  z-index: 2;
+  left: -0.08em;
+  bottom: 0.02em;
+  width: 0.45em;
+  height: 0.2em;
+}
+.klauwen i {
+  position: absolute;
+  bottom: 0;
+  width: 0.2em;
+  height: 0.15em;
+  border-radius: 50% 50% 40% 40%;
+  background: radial-gradient(circle at 50% 30%, #8a6342, #5a3d25);
+  transform-origin: 80% 20%;
+  animation: krab 0.2s ease-in-out infinite alternate;
+}
+.klauwen i::after {
+  content: "";
+  position: absolute;
+  left: -0.05em;
+  bottom: -0.03em;
+  width: 0.12em;
+  height: 0.07em;
+  background: repeating-linear-gradient(90deg, #f1e6cf 0 0.02em, transparent 0.02em 0.045em);
+}
+.klauwen i:first-child { left: 0; }
+.klauwen i:last-child { left: 0.2em; animation-direction: alternate-reverse; }
+@keyframes krab {
+  from { transform: rotate(10deg) translate(0, 0); }
+  to { transform: rotate(-45deg) translate(-0.04em, 0.07em); }
+}
+/* Aardkluiten die achter de graver wegvliegen (in beeld: naar links). */
+.kluiten {
+  position: absolute;
+  left: 30%;
+  bottom: 0.1em;
+  width: 0;
+  height: 0;
+}
+.kluiten i {
+  position: absolute;
+  width: 0.12em;
+  height: 0.1em;
+  border-radius: 45%;
+  background: #6b4423;
+  animation: kluit 0.7s ease-out infinite;
+}
+.kluiten i:nth-child(2) { animation-delay: 0.23s; width: 0.08em; height: 0.08em; }
+.kluiten i:nth-child(3) { animation-delay: 0.46s; background: #87603a; }
+@keyframes kluit {
+  0% { opacity: 1; transform: translate(0, 0); }
+  50% { opacity: 1; transform: translate(-0.35em, -0.45em) rotate(120deg); }
+  100% { opacity: 0; transform: translate(-0.7em, 0.1em) rotate(240deg); }
+}
+
+/* De liaan waar de slingeraar aan hangt, tot aan de tak. */
+.liaan {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 70%;
+  width: 0.06em;
+  height: 1.1em;
+  margin-left: -0.03em;
+  border-radius: 0.03em;
+  background: linear-gradient(to top, #3f6b2a, #6c9a45);
+}
+.liaan::after {
+  content: "🍃";
+  position: absolute;
+  left: 0.02em;
+  top: 35%;
+  font-size: 0.25em;
+}
+
+/* ---- Het decor: een tak over het scherm, water, de grond --------------- */
+.parade-tak,
+.parade-water,
+.parade-grond {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  font-size: clamp(3rem, 7vw, 6rem);
+  animation: decor-in 0.5s ease-out both;
+}
+@keyframes decor-in { from { opacity: 0; } to { opacity: 1; } }
+.parade-tak {
+  z-index: 6;
+  top: 14vh;
+  height: 0.14em;
+  border-radius: 0.07em;
+  background: linear-gradient(to bottom, #8a5a33, #5c3a1e);
+  box-shadow: 0 0.04em 0.1em rgba(0, 0, 0, 0.4);
+}
+.parade-tak i {
+  position: absolute;
+  top: -0.18em;
+  font-size: 0.4em;
+  font-style: normal;
+}
+.parade-tak i::after { content: "🍃"; }
+.parade-tak i:nth-child(1) { left: 6%; }
+.parade-tak i:nth-child(2) { left: 27%; transform: scaleX(-1); }
+.parade-tak i:nth-child(3) { left: 49%; }
+.parade-tak i:nth-child(4) { left: 71%; transform: scaleX(-1); }
+.parade-tak i:nth-child(5) { left: 92%; }
+.parade-water {
+  bottom: 0;
+}
+.parade-water.achter {
+  z-index: 6;
+  height: calc(1vh + 0.62em);
+  background: linear-gradient(to bottom, rgba(40, 110, 170, 0.25), rgba(20, 60, 110, 0.5));
+}
+/* De voorste golven liggen over de onderkant van de zwemmer heen. */
+.parade-water.voor {
+  z-index: 8;
+  height: calc(1vh + 0.5em);
+  background:
+    radial-gradient(circle at 50% 100%, rgba(110, 185, 235, 0.6) 0.1em, transparent 0.11em) 0 0 / 0.36em 0.12em repeat-x,
+    linear-gradient(to bottom, transparent 0.1em, rgba(110, 185, 235, 0.6) 0.1em, rgba(40, 110, 170, 0.75));
+  animation: decor-in 0.5s ease-out both, golven 1.6s linear infinite;
+}
+@keyframes golven { to { background-position: 0.36em 0, 0 0; } }
+.parade-grond {
+  z-index: 8;
+  bottom: 0;
+  height: calc(1.5vh + 0.3em);
+  background:
+    radial-gradient(circle at 50% 100%, #7a5230 0.14em, transparent 0.15em) 0 -0.08em / 0.5em 0.3em repeat-x,
+    linear-gradient(to bottom, #7a5230, #4d321b 70%);
+  background-color: transparent;
+}
+/* Onderweg beweegt elk dier op zijn eigen manier. */
+.dierenparade[data-gang="stap"] .dier { animation: dier-stap 0.45s ease-in-out infinite; }
+.dierenparade[data-gang="spring"] .dier { animation: dier-sprongen 1.05s cubic-bezier(0.3, 0, 0.5, 1) infinite; transform-origin: 50% 100%; }
+.dierenparade[data-gang="schommel"] { bottom: auto; top: calc(14vh + 0.9em); }
+.dierenparade[data-gang="zwem"] { bottom: 1vh; }
+.dierenparade[data-gang="graaf"] { bottom: 1.5vh; }
+.dierenparade[data-gang="schommel"] .dier { animation: dier-slinger 1.05s ease-in-out infinite; transform-origin: 50% -90%; }
+.dierenparade[data-gang="vlieg"] { bottom: auto; top: 14vh; }
+.dierenparade[data-gang="vlieg"] .dier { animation: dier-fladder 1.5s ease-in-out infinite; }
+.dierenparade[data-gang="zwem"] .dier { animation: dier-golf 1.2s ease-in-out infinite; }
+.dierenparade[data-gang="graaf"] .dier { animation: dier-tunnel 1.05s ease-in-out infinite; }
+/* Wat erachteraan komt: bubbels, omgewoelde aarde, of een regenwolkje erboven. */
+.dierenparade[data-gang="zwem"]::before,
+.dierenparade[data-gang="sip"]::before {
+  position: absolute;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.dierenparade[data-gang="zwem"]::before {
+  content: "° ｡ °";
+  right: 100%;
+  top: 10%;
+  font-size: 0.4em;
+  color: rgba(200, 230, 255, 0.75);
+  animation: dier-bubbels 1.2s ease-in-out infinite;
+}
+/* Sip: sjokken in plaats van rennen, grijs, en een wolkje dat meeloopt. */
+.dierenparade[data-gang="sip"] .dier { animation: dier-sjok 1.1s ease-in-out infinite; filter: grayscale(0.7) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45)); }
+.dierenparade[data-gang="sip"]::before {
+  content: "🌧️";
+  top: -0.55em;
+  left: 50%;
+  font-size: 0.55em;
+  transform: translateX(-50%);
+  animation: dier-wolk 2s ease-in-out infinite;
+}
+
+@keyframes dier-stap {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-14%) rotate(6deg); }
+}
+@keyframes dier-spring {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.2, 0.75); }
+  45% { transform: translateY(-40%) scale(0.9, 1.15) rotate(-8deg); }
+  70% { transform: translateY(0) scale(1.15, 0.85); }
+  82% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes dier-sprongen {
+  0%, 100% { transform: translateY(0) scale(1.15, 0.8); }
+  50% { transform: translateY(-150%) scale(0.92, 1.1) rotate(-10deg); }
+}
+@keyframes dier-schommel {
+  0%, 100% { transform: rotate(-26deg); }
+  50% { transform: rotate(26deg); }
+}
+/* Van liaan naar liaan: slingeren en onderweg even omlaag. */
+@keyframes dier-slinger {
+  0%, 100% { transform: rotate(-40deg) translateY(0); }
+  50% { transform: rotate(40deg) translateY(40%); }
+}
+@keyframes dier-golf {
+  0%, 100% { transform: translateY(0) rotate(10deg); }
+  50% { transform: translateY(-30%) rotate(-10deg); }
+}
+@keyframes dier-bubbels {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-60%); opacity: 0.4; }
+}
+@keyframes dier-fladder {
+  0%, 100% { transform: translateY(0) rotate(-8deg) scaleY(1); }
+  12% { transform: translateY(-10%) rotate(-4deg) scaleY(0.75); }
+  25% { transform: translateY(-30%) rotate(6deg) scaleY(1); }
+  37% { transform: translateY(-20%) rotate(2deg) scaleY(0.75); }
+  50% { transform: translateY(35%) rotate(10deg) scaleY(1); }
+  62% { transform: translateY(50%) rotate(4deg) scaleY(0.75); }
+  75% { transform: translateY(25%) rotate(-6deg) scaleY(1); }
+  87% { transform: translateY(8%) rotate(-10deg) scaleY(0.75); }
+}
+/* Graven: kop omlaag, wroeten, weg onder de grond, weer omhoog ploppen. */
+@keyframes dier-graaf {
+  0%, 12% { transform: translateY(0) rotate(0) scaleY(1); opacity: 1; }
+  20% { transform: translateY(8%) rotate(24deg); }
+  26% { transform: translateY(12%) rotate(16deg) translateX(-4%); }
+  32% { transform: translateY(14%) rotate(26deg) translateX(4%); }
+  46% { transform: translateY(60%) scaleY(0.3); opacity: 0; }
+  66% { transform: translateY(60%) scaleY(0.3); opacity: 0; }
+  78% { transform: translateY(-20%) scaleY(1.15); opacity: 1; }
+  88%, 100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+/* Onder de grond door: kop op, weer weg, verderop weer op. */
+/* Onder de grond door: de voorgrond (.parade-grond) dekt de onderkant af. */
+@keyframes dier-tunnel {
+  0%, 100% { transform: translateY(75%) rotate(18deg); }
+  35% { transform: translateY(-8%) rotate(-8deg); }
+  55% { transform: translateY(0) rotate(6deg); }
+  80% { transform: translateY(75%) rotate(22deg); }
+}
+@keyframes dier-draai {
+  0%, 60% { transform: rotate(0); }
+  80%, 100% { transform: rotate(360deg); }
+}
+@keyframes dier-waggel {
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(12deg); }
+}
+@keyframes dier-kruip {
+  0%, 100% { transform: scaleX(1) translateX(0); }
+  50% { transform: scaleX(1.15) translateX(4%); }
+}
+@keyframes dier-sjok {
+  0%, 100% { transform: translateY(4%) rotate(-4deg); }
+  50% { transform: translateY(10%) rotate(4deg); }
+}
+@keyframes dier-wolk {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -12%); }
+}
+
+.dierenroep {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dier,
+  .dier[data-beweging],
+  .dierenparade .dier,
+  .dierenparade::before,
+  .actie,
+  .ding {
+    animation: none;
+  }
+  .dierenparade,
+  .parade-tak,
+  .parade-water,
+  .parade-grond {
+    display: none;
+  }
+}

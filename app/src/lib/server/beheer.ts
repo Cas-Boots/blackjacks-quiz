@@ -23,6 +23,8 @@ import type { Pakketten } from '$lib/content/types';
 import { actiefSpel, bumpVersie, deelnemersVan, standVan, voegDeelnemerToe, MAX_NAAM_TEKENS } from './spel';
 import { maakSpel } from './seed';
 import { geldigeFoto } from './foto';
+import { zorgVoorDieren, dobbelDier } from './dieren';
+import { dierVan } from '$lib/shared/dieren';
 import { aantalLuisteraars } from './bus';
 import { inProductie, omgevingsFouten, omgevingsWaarschuwingen } from './omgeving';
 import { recapStatus, type RecapStatus } from './recap/bron';
@@ -34,6 +36,8 @@ export interface BeheerSpeler {
   id: number;
   naam: string;
   foto: string | null;
+  /** Het maatje, een sleutel uit shared/dieren.ts. */
+  dier: string;
   isQuizmaster: boolean;
   isGast: boolean;
   aangemaaktOp: string;
@@ -268,6 +272,7 @@ export function beheerSpelers(): BeheerSpeler[] {
       id: s.id,
       naam: s.naam,
       foto: s.foto,
+      dier: dierVan(s.dier, s.naam).sleutel,
       isQuizmaster: s.isQuizmaster,
       isGast: s.isGast,
       aangemaaktOp: s.aangemaaktOp,
@@ -362,6 +367,7 @@ export function voegSpelerToe(invoer: unknown) {
   const naam = schoneNaam(invoer);
   if (db.select().from(spelers).where(eq(spelers.naam, naam)).get()) throw new Error('Die naam is er al.');
   const speler = db.insert(spelers).values({ naam, isGast: false }).returning().get();
+  zorgVoorDieren();
   const spel = actiefSpel();
   if (spel && spel.fase === 'lobby') voegDeelnemerToe(spel, naam);
   meld();
@@ -402,6 +408,13 @@ export function zetFoto(id: number, foto: unknown) {
   const waarde = foto == null || foto === '' ? null : String(foto);
   if (waarde !== null && !geldigeFoto(waarde)) throw new Error('Geen geldige afbeelding.');
   db.update(spelers).set({ foto: waarde }).where(eq(spelers.id, id)).run();
+  meld();
+}
+
+/** Dobbelt een ander maatje voor deze speler. */
+export function wisselDier(id: number) {
+  spelerOfFout(id);
+  dobbelDier(id);
   meld();
 }
 
