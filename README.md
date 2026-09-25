@@ -21,10 +21,17 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 ## De twee pakketten
 
-| Pakket | Rondes | Vragen |
+| Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 14 | 105 |
-| Familie Proefronde 2026 | 7 | 50 |
+| Blackjacks 2026 — Het Jaaroverzicht | 9 rondes, 49 vragen (± een uur) | 13 rondes, 70 vragen |
+| Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
+
+De avond is bewust kort gehouden. Rondes van vier tot acht vragen, klokken van
+tien tot vijfentwintig seconden, en het ritme wisselt steeds: waar of niet waar,
+dan over onszelf, dan in teams schatten, dan meerkeuze. Rondes die nog leeg
+zijn of alleen voor kenners (*Sport: de Marges*, *De WK-poule*, *Jullie Jaar in
+Beeld*, *Oktober tot december*) staan uitgevinkt. Vink ze aan in de
+vragenkiezer als je ze wilt spelen.
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
@@ -49,9 +56,10 @@ Nog twee rondes over de groep:
   meespeelversie leven ze in `app/src/lib/content/voorspellingen.ts`, met de
   uitkomsten; hier wachten ze op handwerk.
 - **De WK-poule** — wacht op een export uit `blackjacks-cup`; die bestaat nog niet.
+  Tot die tijd staat hij uitgevinkt.
 
-Daarnaast is er een lege ronde **Oktober tot december**, want die maanden hadden
-bij het schrijven nog niet plaatsgevonden.
+Daarnaast is er een lege, uitgevinkte ronde **Oktober tot december**, want die
+maanden hadden bij het schrijven nog niet plaatsgevonden.
 
 Werk je de cijfers bij? Draai dan de analyse opnieuw tegen de nieuwste back-up in
 `resolution-recap/backups/` en pas de antwoorden aan.
