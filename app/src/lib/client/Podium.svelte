@@ -11,13 +11,14 @@
 
 <script lang="ts">
   import Teller from '$lib/client/Teller.svelte';
+  import Portret from '$lib/client/Portret.svelte';
 
   let {
     top3,
     vorigePunten = {},
     compact = false,
   }: {
-    top3: { spelerId: number; naam: string; punten: number; foto: string | null }[];
+    top3: { spelerId: number; naam: string; punten: number; foto: string | null; dier?: string | null }[];
     vorigePunten?: Record<number, number>;
     /** Voor de telefoon: kleiner, zonder tellende cijfers. */
     compact?: boolean;
@@ -27,10 +28,6 @@
   let volgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.length === 2 ? [1, 0] : top3.map((_, i) => i));
   /** De derde trede komt eerst, de eerste als laatste. */
   const vertraging = [1700, 1000, 300];
-
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
-  }
 </script>
 
 <div class="podium" class:compact>
@@ -39,11 +36,8 @@
     <div class="trede" data-plek={idx + 1} style="--vertraging:{compact ? vertraging[idx] / 2 : vertraging[idx]}ms">
       <div class="staander">
         <span class="kroonhouder" class:kroon={idx === 0}>
-          {#if r.foto}
-            <img class="avatar" class:l={!compact} class:m={compact} class:goud={idx === 0} src={r.foto} alt="" />
-          {:else}
-            <span class="avatar" class:l={!compact} class:m={compact} class:goud={idx === 0}>{initialen(r.naam)}</span>
-          {/if}
+          <!-- Wie wint, danst; de rest doet zijn eigen ding. -->
+          <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat={compact ? 'm' : 'l'} goud={idx === 0} stemming={idx === 0 ? 'feest' : null} />
         </span>
         <span class="naam">{r.naam}</span>
         <span class="punten">

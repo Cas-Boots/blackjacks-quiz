@@ -29,6 +29,13 @@
       "when": 1789675261328,
       "tag": "0003_gasten_en_logboek",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790342523623,
+      "tag": "0004_geestdieren",
+      "breakpoints": true
     }
   ]
 }

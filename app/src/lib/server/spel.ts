@@ -12,6 +12,7 @@ import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correctie
 import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
+import { zorgVoorDieren } from './dieren';
 import {
   vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, telStand,
 } from './scoring';
@@ -28,6 +29,7 @@ import type { Analyse } from './recap/analyse';
 import { berekenBonussen, metBonus, type BonusVraag } from './bonus';
 import { ingekort } from './klok';
 import type { Verdeling } from './scoring';
+import { dierVan } from '$lib/shared/dieren';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -138,7 +140,7 @@ export function schrijfTeams(spelId: number, rondeIndex: number, lijst: Team[]) 
 
 export function deelnemersVan(spelId: number) {
   return db
-    .select({ id: spelers.id, naam: spelers.naam, foto: spelers.foto })
+    .select({ id: spelers.id, naam: spelers.naam, foto: spelers.foto, dier: spelers.dier })
     .from(deelnemers)
     .innerJoin(spelers, eq(deelnemers.spelerId, spelers.id))
     .where(eq(deelnemers.spelId, spelId))
@@ -161,6 +163,7 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
   let speler = db.select().from(spelers).where(eq(spelers.naam, schoon)).get();
   if (!speler) {
     speler = db.insert(spelers).values({ naam: schoon, isGast: true }).returning().get();
+    zorgVoorDieren();
   }
   if (speler.isQuizmaster) throw new Error('de quizmaster speelt niet mee');
 
@@ -524,13 +527,13 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     spelers: lijst.map((s) => {
       const laatste = laatsteVan.get(s.id) ?? null;
       return {
-        id: s.id, naam: s.naam, foto: s.foto,
+        id: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel,
         stilSinds: laatste ? Math.round((nu - laatste) / 1000) : null,
         verbonden: laatste != null && nu - laatste < STIL_DREMPEL_MS,
       };
     }),
     stand: lijst
-      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
+      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
       .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl')),
     serverTijd: nu,
     klok: {

@@ -9,6 +9,8 @@
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Podium from '$lib/client/Podium.svelte';
+  import Portret from '$lib/client/Portret.svelte';
+  import { dierVan, dierenroep } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
@@ -26,6 +28,7 @@
   let ronde = $derived(staat?.ronde ?? null);
   let sleutel = $derived(`${staat?.rondeIndex ?? 0}:${vraag?.index ?? 0}`);
   let mijnTeam = $derived(staat?.teams.find((t) => t.leden.includes(live.spelerId ?? -1)) ?? null);
+  let ik = $derived(staat?.spelers.find((s) => s.id === live.spelerId) ?? null);
   let mijnNaam = $derived(staat?.spelers.find((s) => s.id === live.spelerId)?.naam ?? null);
   /** Wie er bij de cijfers op de televisie staat, om dat op de telefoon te kunnen zeggen. */
   let opTv = $derived(
@@ -116,6 +119,25 @@
   );
   let kantelingNu = $derived(kanteling(sleutel));
 
+  /* ---- Je geestdier ------------------------------------------------ */
+  let mijnDier = $derived(ik ? dierVan(ik.dier, ik.naam) : null);
+  /** Wat je dier roept bij het oordeel. */
+  let roep = $derived(
+    ik && (uitslag === 'goed' || uitslag === 'fout') ? dierenroep(ik.dier, ik.naam, uitslag, sleutel) : '',
+  );
+  let dierBezig = $state(false);
+  async function dobbelDier() {
+    if (dierBezig) return;
+    dierBezig = true;
+    try {
+      navigator.vibrate?.(30);
+    } catch { /* geen trilmotor */ }
+    try {
+      await fetch('/api/dier', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    } catch { /* dan blijft het huidige dier */ }
+    dierBezig = false;
+  }
+
   /* ---- Reacties naar de televisie ----------------------------------- */
   let laatsteReactie = $state('');
   async function reageer(emoji: string) {
@@ -173,14 +195,9 @@
     }
   }
 
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
-  }
-
   /* ---- Je portret ---------------------------------------------------
      Een selfie vanaf de telefoon, verkleind vóór het versturen. Hij staat
      daarna op de televisie bij je naam, in de stand en op het podium. */
-  let ik = $derived(staat?.spelers.find((s) => s.id === live.spelerId) ?? null);
   let fotoBezig = $state(false);
   let fotoMelding = $state('');
   let fotoInvoer = $state<HTMLInputElement | null>(null);
@@ -217,7 +234,7 @@
     <div style="display:flex;align-items:center;gap:.9rem">
       {#if ik}
         <button class="portretknop" onclick={() => fotoInvoer?.click()} disabled={fotoBezig} aria-label="Foto kiezen">
-          {#if ik.foto}<img class="avatar" src={ik.foto} alt="" />{:else}<span class="avatar">{initialen(ik.naam)}</span>{/if}
+          <Portret naam={ik.naam} foto={ik.foto} dier={ik.dier} />
         </button>
       {/if}
       <span style="flex:1 1 auto;min-width:0">
@@ -264,7 +281,7 @@
         <p class="lood" style="font-size:1rem;margin-top:.4rem">Je staat op de televisie. De quizmaster start zo.</p>
       </div>
       <div class="paneel" style="display:flex;gap:1rem;align-items:center" in:fly={{ y: 16, duration: 420, delay: 80, easing: cubicOut }}>
-        {#if ik?.foto}<img class="avatar l" src={ik.foto} alt="" />{:else}<span class="avatar l">{initialen(ik?.naam ?? '?')}</span>{/if}
+        <Portret naam={ik?.naam ?? '?'} foto={ik?.foto} dier={ik?.dier} maat="l" />
         <span style="flex:1 1 auto;min-width:0">
           <p class="lood" style="font-size:1rem">{ik?.foto ? 'Mooi. Zo sta je op het podium.' : 'Zet je gezicht op het scherm.'}</p>
           <button class="knop" style="margin-top:.6rem" onclick={() => fotoInvoer?.click()} disabled={fotoBezig}>
@@ -273,6 +290,21 @@
           {#if fotoMelding}<p class="fijn" style="margin-top:.4rem">{fotoMelding}</p>{/if}
         </span>
       </div>
+      {#if mijnDier}
+        {#key mijnDier.sleutel}
+          <div class="paneel" style="display:flex;gap:1rem;align-items:center" in:fly={{ y: 16, duration: 420, easing: cubicOut }}>
+            <span class="groot-dier" aria-hidden="true"><span class="dier" data-beweging={mijnDier.beweging}>{mijnDier.emoji}</span></span>
+            <span style="flex:1 1 auto;min-width:0">
+              <p class="etiket stil">Je geestdier</p>
+              <p class="lood" style="font-size:1.1rem;margin-top:.2rem">{ik?.naam}, {mijnDier.titel}</p>
+              <p class="fijn" style="margin-top:.2rem">Loopt de hele avond met je mee, juicht als je het goed hebt en druipt af als je het fout hebt.</p>
+              <button class="knop" style="margin-top:.6rem" onclick={dobbelDier} disabled={dierBezig}>
+                {dierBezig ? 'Dobbelen…' : '🎲 Ander dier'}
+              </button>
+            </span>
+          </div>
+        {/key}
+      {/if}
     {:else if staat.fase === 'jaaroverzicht' && staat.jaaroverzicht}
       {#key staat.jaaroverzicht.stap}
         <div class="paneel" in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
@@ -331,7 +363,7 @@
           {#each vraag.opties as naam (naam)}
             {@const sp = staat.spelers.find((x) => x.naam === naam)}
             <button class="knop groot stemknop" class:gekozen={antwoord === naam} onclick={() => stuur(naam)}>
-              {#if sp?.foto}<img class="avatar" src={sp.foto} alt="" />{:else}<span class="avatar">{initialen(naam)}</span>{/if}
+              <Portret naam={naam} foto={sp?.foto} dier={sp?.dier} />
               {naam}
             </button>
           {/each}
@@ -387,6 +419,7 @@
             <span class="teken">✓</span>
             <span>
               <strong>{kwinkslag}</strong>
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span class="dier" data-beweging="feest" aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
               <span class="plus">+{mijnPunten}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
               {#each mijnBonussen as b (b.soort)}
@@ -396,7 +429,11 @@
           {:else if uitslag === 'fout'}
             <span class="stempel" style="--hoek:-9deg">Mis</span>
             <span class="teken">✗</span>
-            <span><strong>{kwinkslag}</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
+            <span>
+              <strong>{kwinkslag}</strong>
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span class="dier" data-beweging="sip" aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
+              <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span>
+            </span>
           {:else if uitslag === 'wacht'}
             <span class="teken">…</span>
             <span><strong>De quizmaster kijkt ernaar.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
@@ -493,11 +530,7 @@
           {#each staat.stand as r, i (r.spelerId)}
             <div class="standrij" class:leider={i === 0} class:ik={r.spelerId === live.spelerId} style="--i:{i}">
               <span class="plek">{i + 1}</span>
-              {#if r.foto}
-                <img class="avatar" class:goud={i === 0} src={r.foto} alt="" />
-              {:else}
-                <span class="avatar" class:goud={i === 0}>{initialen(r.naam)}</span>
-              {/if}
+              <Portret naam={r.naam} foto={r.foto} dier={r.dier} goud={i === 0} stemming={i === 0 && r.punten > 0 ? 'feest' : null} />
               <span class="naam" style="font-size:1.15rem">{r.naam}</span>
               <span class="standpunten" style="font-size:1.05rem">{r.punten}</span>
             </div>

@@ -15,6 +15,7 @@
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import Teller from './Teller.svelte';
+  import Portret from './Portret.svelte';
   import type { JaarDia, PubliekeSpeler } from '$lib/shared/state';
 
   let {
@@ -41,9 +42,6 @@
 
   function fotoVan(naam: string) {
     return spelers.find((s) => s.naam === naam)?.foto ?? null;
-  }
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
   }
   function datumKort(datum: string) {
     return `${Number(datum.slice(8, 10))} ${MAANDEN_KORT[Number(datum.slice(5, 7)) - 1]}`;
@@ -154,11 +152,7 @@
               {/if}
               {#if eigen.koploper}
                 <span class="chip koploper">
-                  {#if fotoVan(eigen.koploper.naam)}
-                    <img class="avatar" src={fotoVan(eigen.koploper.naam)} alt="" />
-                  {:else}
-                    <span class="avatar">{initialen(eigen.koploper.naam)}</span>
-                  {/if}
+                  <Portret naam={eigen.koploper.naam} foto={fotoVan(eigen.koploper.naam)} dier={spelers.find((s) => s.naam === eigen.koploper?.naam)?.dier} />
                   {eigen.koploper.naam} het vaakst — <b>{eigen.koploper.aantal}×</b>
                 </span>
               {/if}
@@ -461,7 +455,7 @@
     color: var(--ivoor);
     padding-left: 0.3rem;
   }
-  .chip .avatar {
+  .chip :global(.avatar) {
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 50%;

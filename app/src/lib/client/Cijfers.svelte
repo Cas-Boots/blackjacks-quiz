@@ -9,6 +9,7 @@
    */
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
+  import Portret from '$lib/client/Portret.svelte';
   import type { Cijfers, CijfersPersoon, PubliekeSpeler, VoorspellingUitslag } from '$lib/shared/state';
 
   let {
@@ -39,8 +40,8 @@
   function fotoVan(naam: string) {
     return spelers.find((s) => s.naam === naam)?.foto ?? null;
   }
-  function initialen(naam: string) {
-    return naam.slice(0, 2);
+  function dierVanNaam(naam: string) {
+    return spelers.find((s) => s.naam === naam)?.dier ?? null;
   }
   function totaalVan(p: CijfersPersoon) {
     return sport ? p.sport.totaal : p.taart.totaal;
@@ -129,11 +130,7 @@
             in:fly={{ y: 16, duration: 380, delay: 300 + i * 80, easing: cubicOut }}
           >
             <span class="wie">
-              {#if fotoVan(a.naam)}
-                <img class="avatar" src={fotoVan(a.naam)} alt="" />
-              {:else}
-                <span class="avatar">{initialen(a.naam)}</span>
-              {/if}
+              <Portret naam={a.naam} foto={fotoVan(a.naam)} dier={dierVanNaam(a.naam)} />
               {a.naam}
             </span>
             <span class="wat">{a.antwoord}</span>
@@ -160,11 +157,7 @@
           <div class="rij" class:leider={i === 0 && s.punten > 0} class:ik={alleen === s.naam} in:fly={{ y: 14, duration: 380, delay: 150 + i * 80, easing: cubicOut }}>
             <span class="plek">{i + 1}</span>
             <span class="wie">
-              {#if fotoVan(s.naam)}
-                <img class="avatar" src={fotoVan(s.naam)} alt="" />
-              {:else}
-                <span class="avatar">{initialen(s.naam)}</span>
-              {/if}
+              <Portret naam={s.naam} foto={fotoVan(s.naam)} dier={dierVanNaam(s.naam)} />
               {s.naam}
               {#if s.quizmaster}<span class="rol">quizmaster</span>{/if}
             </span>
@@ -187,11 +180,7 @@
     {@const p = persoon}
     {@const totaal = totaalVan(p)}
     <div class="persoonkop" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>
-      {#if fotoVan(p.naam)}
-        <img class="avatar l" src={fotoVan(p.naam)} alt="" />
-      {:else}
-        <span class="avatar l">{initialen(p.naam)}</span>
-      {/if}
+      <Portret naam={p.naam} foto={fotoVan(p.naam)} dier={dierVanNaam(p.naam)} maat="l" />
       <div>
         <p class="etiket">{sport ? 'Gesport' : 'Taart'} in {cijfers.jaar} · tot {peildatumTekst}</p>
         <h2 class="naam">{p.naam}</h2>
@@ -276,11 +265,7 @@
         {@const totaal = totaalVan(p)}
         <div class="balkrij" class:ik={alleen === p.naam} in:fly={{ y: 14, duration: 380, delay: 120 + i * 90, easing: cubicOut }}>
           <span class="wie">
-            {#if fotoVan(p.naam)}
-              <img class="avatar" src={fotoVan(p.naam)} alt="" />
-            {:else}
-              <span class="avatar">{initialen(p.naam)}</span>
-            {/if}
+            <Portret naam={p.naam} foto={fotoVan(p.naam)} dier={dierVanNaam(p.naam)} />
             {p.naam}
           </span>
           <span class="baan">

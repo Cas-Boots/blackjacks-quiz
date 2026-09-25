@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import {
-  beheerOverzicht, voegSpelerToe, hernoemSpeler, zetGast, zetFoto, verwijderSpeler,
+  beheerOverzicht, voegSpelerToe, hernoemSpeler, zetGast, zetFoto, wisselDier, verwijderSpeler,
   activeerSpel, hernoemSpel, verwijderSpel, koppelLos, ruimApparatenOp,
 } from '$lib/server/beheer';
 
@@ -45,6 +45,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       case 'speler-foto':
         zetFoto(id, body.foto);
         melding = body.foto ? 'Portret gezet.' : 'Portret weggehaald.';
+        break;
+      case 'speler-dier':
+        wisselDier(id);
+        melding = 'Ander geestdier gedobbeld.';
         break;
       case 'speler-verwijderen':
         verwijderSpeler(id);

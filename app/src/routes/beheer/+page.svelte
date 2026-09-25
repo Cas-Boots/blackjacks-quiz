@@ -2,6 +2,8 @@
   import { fade } from 'svelte/transition';
   import { invalidateAll } from '$app/navigation';
   import { maakPortret } from '$lib/client/portret';
+  import Portret from '$lib/client/Portret.svelte';
+  import { dierVan } from '$lib/shared/dieren';
   import type { PageData } from './$types';
   import type { BeheerOverzicht } from '$lib/server/beheer';
 
@@ -311,7 +313,7 @@
           {#each o.spelers as s (s.id)}
             <div class="beheer-rij">
               <button class="portretknop" onclick={() => kiesFoto(s.id)} disabled={bezig} title="Portret kiezen voor {s.naam}" aria-label="Portret kiezen voor {s.naam}">
-                {#if s.foto}<img class="avatar" src={s.foto} alt="" />{:else}<span class="avatar">{s.naam.slice(0, 2)}</span>{/if}
+                <Portret naam={s.naam} foto={s.foto} dier={s.dier} />
               </button>
               <div style="min-width:0">
                 {#if hernoem?.soort === 'speler' && hernoem.id === s.id}
@@ -335,6 +337,9 @@
                   <button class="knop stil" onclick={() => doe('speler-gast', { id: s.id, isGast: !s.isGast })} disabled={bezig}>
                     {s.isGast ? 'Maak vast' : 'Maak gast'}
                   </button>
+                {/if}
+                {#if !s.isQuizmaster}
+                  <button class="knop stil" onclick={() => doe('speler-dier', { id: s.id })} disabled={bezig} title="Nu: {dierVan(s.dier, s.naam).titel}">🎲 Ander dier</button>
                 {/if}
                 {#if s.foto}
                   <button class="knop stil" onclick={() => doe('speler-foto', { id: s.id, foto: null })} disabled={bezig}>Portret weg</button>
