@@ -9,7 +9,7 @@ import { eq, desc } from 'drizzle-orm';
 import { db } from './db/index';
 import { spellen, antwoorden, correcties } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
-import { samengesteld, deelnemersVan, standVan, prijzenVan, antwoordTekst, sleutelVan, uitdelingenVan } from './spel';
+import { samengesteld, deelnemersVan, standVan, bonussenVan, prijzenVan, antwoordTekst, sleutelVan } from './spel';
 import { isAfrekening } from '$lib/shared/state';
 import { telStand } from './scoring';
 import type { Prijs } from './prijzen';
@@ -93,8 +93,8 @@ export function uitslagVan(spelId: number): Uitslag | null {
   const rondesLijst = samengesteld(spel);
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const correctieRijen = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
-  const verdelingVan = new Map<string, Record<number, number>>();
-  for (const u of uitdelingenVan(spel)) verdelingVan.set(u.vraagSleutel, u.verdeling);
+  // Met bonus, zodat de punten per ronde optellen tot de eindstand.
+  const verdelingVan = bonussenVan(spel).verdelingen;
   const naamVan = (id: number) => lijst.find((s) => s.id === id)?.naam ?? '?';
 
   const rondes = rondesLijst.map((r, ri) => {

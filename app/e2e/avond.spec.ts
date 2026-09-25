@@ -115,6 +115,44 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
   for (const x of [a, b, qm]) await x.ctx.close();
 });
 
+test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bonuspunt', async ({ browser }) => {
+  const qm = await quizmaster(browser);
+  await nieuwSpel(qm, { '1': [0] }); // Sport: de Marges, twee teams
+  const tv = await nieuwApparaat(browser, '/tv');
+  await qm.doe('naar-ronde', { ronde: 0 });
+  const st = await qm.staat();
+  expect(st.teams).toHaveLength(2);
+  const naamVan = (id: number) => st.spelers.find((s: { id: number }) => s.id === id).naam;
+  const snel = await telefoon(browser, naamVan(st.teams[0].leden[0]));
+  const traag = await telefoon(browser, naamVan(st.teams[1].leden[0]));
+
+  await qm.doe('start-ronde');
+  await expect(snel.pagina.getByPlaceholder('Jullie antwoord')).toBeVisible({ timeout: 15_000 });
+  await snel.pagina.getByPlaceholder('Jullie antwoord').fill('Ferran Torres');
+  await snel.pagina.getByRole('button', { name: 'Versturen' }).click();
+  await expect(snel.pagina.getByRole('button', { name: 'Antwoord aanpassen' })).toBeVisible({ timeout: 15_000 });
+  // Nog niet iedereen: de klok loopt gewoon door.
+  let nu = await qm.staat();
+  expect(nu.klok.eindigtOp - nu.serverTijd).toBeGreaterThan(10_000);
+
+  await traag.pagina.getByPlaceholder('Jullie antwoord').fill('Torres');
+  await traag.pagina.getByRole('button', { name: 'Versturen' }).click();
+  await expect(tv.pagina.locator('.iedereen-binnen')).toBeVisible({ timeout: 15_000 });
+  nu = await qm.staat();
+  expect(nu.klok.eindigtOp - nu.serverTijd).toBeLessThanOrEqual(5_000);
+
+  await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
+  await qm.pagina.getByRole('button', { name: /Vink de 2 aan/ }).click();
+  // Beide teams goed, twee punten per persoon; het snelste team één extra.
+  await expect(snel.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+3', { timeout: 15_000 });
+  await expect(snel.pagina.locator('.uitslag .bonusregel')).toContainText('Snelste vinger');
+  await expect(traag.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+2', { timeout: 15_000 });
+  await expect(traag.pagina.locator('.uitslag .bonusregel')).toHaveCount(0);
+  await expect(tv.pagina.locator('.bonus')).toContainText('Snelste vinger', { timeout: 15_000 });
+
+  for (const x of [snel, traag, tv, qm]) await x.ctx.close();
+});
+
 test('beeldvraag: de ingebouwde afbeelding staat op de televisie en op de telefoon', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await nieuwSpel(qm, { '9': [0] }); // Jullie Jaar in Beeld, de vraag met de ingebouwde afbeelding

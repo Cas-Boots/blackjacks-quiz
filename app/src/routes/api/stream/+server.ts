@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { luister, luisterReacties, luisterPorren } from '$lib/server/bus';
+import { luister, luisterReacties, luisterPorren, luisterGeluiden } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
 
 /**
@@ -19,6 +19,7 @@ export const GET: RequestHandler = ({ locals }) => {
   let stop: (() => void) | null = null;
   let stopReacties: (() => void) | null = null;
   let stopPorren: (() => void) | null = null;
+  let stopGeluiden: (() => void) | null = null;
   let hartslag: ReturnType<typeof setInterval> | null = null;
 
   const stroom = new ReadableStream({
@@ -34,6 +35,7 @@ export const GET: RequestHandler = ({ locals }) => {
       stuur('staat', bouwStaat(rol));
       stop = luister(() => stuur('staat', bouwStaat(rol)));
       stopReacties = luisterReacties((bericht) => stuur('reactie', bericht));
+      stopGeluiden = luisterGeluiden((bericht) => stuur('geluid', bericht));
       // Een por is alleen voor de telefoon waar hij voor bedoeld is.
       stopPorren = luisterPorren((por) => {
         if (spelerId !== null && por.spelerIds.includes(spelerId)) stuur('por', por);
@@ -50,6 +52,7 @@ export const GET: RequestHandler = ({ locals }) => {
       stop?.();
       stopReacties?.();
       stopPorren?.();
+      stopGeluiden?.();
       if (hartslag) clearInterval(hartslag);
     },
   });

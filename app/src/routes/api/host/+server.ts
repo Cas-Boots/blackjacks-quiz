@@ -9,7 +9,8 @@ import {
   scoorAutomatisch, voegDeelnemerToe, MAX_NAAM_TEKENS,
 } from '$lib/server/spel';
 import { momentopname, schrijfLog, draaiTerug, type Momentopname } from '$lib/server/logboek';
-import { meldPor } from '$lib/server/bus';
+import { meldPor, meldGeluid } from '$lib/server/bus';
+import { isBordgeluid } from '$lib/shared/geluidsbord';
 import { geldigeFoto } from '$lib/server/foto';
 import { maakSpel } from '$lib/server/seed';
 import { PAKKETTEN } from '$lib/content/packs';
@@ -313,6 +314,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       correctieId = rij.id;
       log = { omschrijving: `${punten > 0 ? '+' : ''}${punten} voor ${naamVan(spelerId)}`, terug: true };
       break;
+    }
+    case 'geluid': {
+      // Het geluidsbord: alleen doorgeven aan de televisie, de stand verandert niet.
+      if (!isBordgeluid(body.geluid)) error(400, 'onbekend geluid');
+      meldGeluid(body.geluid);
+      return json({ ok: true });
     }
     case 'por': {
       // Een por naar wie nog niet heeft ingeleverd, of naar één speler.

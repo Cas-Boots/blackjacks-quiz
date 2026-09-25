@@ -6,6 +6,7 @@
   import Klok from '$lib/client/Klok.svelte';
   import { houdWakker } from '$lib/client/wakker';
   import { isAfrekening, type LogRegel } from '$lib/shared/state';
+  import { GELUIDSBORD } from '$lib/shared/geluidsbord';
 
   type Voorstel = { automatisch: boolean; goed: boolean; reden: string };
   type Inzending = { inzender: string; tekst: string; ingediendOp: number; isGoed: boolean | null; voorstel: Voorstel | null };
@@ -498,6 +499,18 @@
       </details>
     {/if}
     <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> pauze · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt · <kbd>Z</kbd> ongedaan</p>
+
+    <!-- Het geluidsbord: de quizmaster drukt, de televisie speelt. -->
+    <details class="paneel">
+      <summary><span class="etiket stil">Geluidsbord</span> <span class="fijn">speelt af op de televisie</span></summary>
+      <div class="geluidsbord">
+        {#each GELUIDSBORD as g (g.sleutel)}
+          <button class="knop" onclick={() => live.opdracht('geluid', { geluid: g.sleutel }).catch(() => {})}>
+            <span aria-hidden="true">{g.emoji}</span> {g.label}
+          </button>
+        {/each}
+      </div>
+    </details>
 
     <!-- Antwoorden beoordelen -->
     {#if staat?.fase === 'vraag' || staat?.fase === 'antwoord'}

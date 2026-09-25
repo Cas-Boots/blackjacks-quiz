@@ -86,6 +86,27 @@ export function meldPor(spelerIds: number[], tekst: string): Por {
   return por;
 }
 
+type GeluidLuisteraar = (bericht: { id: number; geluid: string }) => void;
+const geluidLuisteraars = new Set<GeluidLuisteraar>();
+let geluidTeller = 0;
+
+export function luisterGeluiden(fn: GeluidLuisteraar): () => void {
+  geluidLuisteraars.add(fn);
+  return () => geluidLuisteraars.delete(fn);
+}
+
+/** Een geluid van het geluidsbord van de quizmaster, voor de televisie. Vluchtig. */
+export function meldGeluid(geluid: string) {
+  const bericht = { id: ++geluidTeller, geluid };
+  for (const fn of [...geluidLuisteraars]) {
+    try {
+      fn(bericht);
+    } catch (err) {
+      console.error('[bus] geluidluisteraar faalde:', err);
+    }
+  }
+}
+
 /** Hoeveel schermen er naar de echte avond kijken; proefritten tellen niet mee. */
 export function aantalLuisteraars() {
   return [...luisteraars].filter((a) => a.proef === null).length;

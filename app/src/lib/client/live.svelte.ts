@@ -30,6 +30,8 @@ class Live {
   /** De laatste por van de quizmaster aan deze telefoon; verdwijnt vanzelf. */
   por = $state<Por | null>(null);
   #porTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Het laatste geluid van het geluidsbord. De televisie speelt het af. */
+  geluid = $state<{ id: number; geluid: string } | null>(null);
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -98,6 +100,14 @@ class Live {
           this.reacties = [...this.reacties.slice(-24), r];
           // Na de zweefanimatie mag hij weg.
           setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('geluid', (e) => {
+        try {
+          this.geluid = JSON.parse((e as MessageEvent).data);
         } catch {
           /* kapot pakketje, laat maar */
         }

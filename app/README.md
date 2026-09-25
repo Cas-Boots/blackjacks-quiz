@@ -275,8 +275,12 @@ invulling wachten.
    meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld, en bij een
    stemvraag zijn de mensen aan tafel de knoppen. De televisie laat zien wie er
    al heeft ingeleverd, zonder de inhoud. Blijft iemand achter, dan **port** de
-   quizmaster hem: een trilling en een gele balk op die telefoon.
-2. **De onthulling.** De televisie toont het antwoord én wat iedereen had
+   quizmaster hem: een trilling en een gele balk op die telefoon. Heeft
+   iedereen ingeleverd, dan springt de klok naar de laatste vijf seconden:
+   niemand hoeft te wachten op een klok terwijl de tafel al klaar is.
+2. **De onthulling.** Eerst een tromgeroffel; de telefoons wachten mee, zodat
+   niemand het antwoord verklapt. Bij meerkeuze vallen de foute opties één voor
+   één af en klapt de goede om. Dan toont de televisie het antwoord én wat iedereen had
    ingetikt, als kaartjes. Bij dichtstbij wordt dat een getallenlijn met het
    doel erop, bij een stemvraag een telling met balkjes en wie op wie stemde.
    Dichtstbij en stem rekent de server op dit moment meteen uit. Elke telefoon
@@ -284,7 +288,24 @@ invulling wachten.
    en laat zien wat de rest had.
 3. **De quizmaster tikt aan** wie het goed had, of drukt op *Vink aan wat goed
    lijkt* (sneltoets `A`) om in één keer alles te nemen wat de machine met
-   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee.
+   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee, en
+   op elk goed kaartje landt een fiche met de punten.
+
+### Bonuspunten: snelheid en reeksen
+
+- **Snelste vinger, +1.** Het snelst ingeleverde goede antwoord krijgt een punt
+  extra. In een teamronde is dat het snelste team, en elk lid krijgt het punt.
+  Niet bij stemvragen (een mening), dichtstbij (heeft al een eigen bonus) en
+  rondes die de tafel samen speelt.
+- **Op dreef, +1.** Wie drie vragen of meer op rij punten pakt, krijgt vanaf de
+  derde een punt extra per vraag. De reeks is van de persoon en loopt door als
+  de teams wisselen; een vraag waar je geen punten kreeg begint hem opnieuw.
+
+Bonussen worden nergens opgeslagen: de server leidt ze bij elke telling af uit
+de uitdelingen en de antwoordtijden (`src/lib/server/bonus.ts`). Corrigeert de
+quizmaster een eerdere vraag of draait hij iets terug, dan schuiven de bonussen
+vanzelf mee. De televisie laat ze zien bij de onthulling, met een vlammetje in
+de tussenstand; de telefoon noemt ze onder je punten.
 
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
 "Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
@@ -332,6 +353,12 @@ komt alleen op een moment dat het mag:
   Bij dichtstbij krijgt een gok die er hopeloos naast zat een label.
 - **Poedelprijs** voor de laatste op het podium.
 - De vraagkaart ligt nooit precies recht en trilt in de laatste vijf seconden.
+- **Overgangen.** Bij een nieuwe ronde, de tussenstand en de uitslag vliegt er
+  een speelkaart zo groot als het scherm voorbij. De eerste ronde begint met
+  drie-twee-één onder twee zoeklichten.
+- **Het geluidsbord.** Op het hostscherm staan knoppen voor applaus, een
+  tromgeroffel, een toeter, "ooooh", een bel, de foute zoemer, de treurige
+  trombone en een fanfare. De quizmaster drukt, de televisie speelt.
 
 ### Het hostscherm
 

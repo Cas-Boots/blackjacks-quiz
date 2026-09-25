@@ -67,10 +67,32 @@
     return 'wacht';
   });
 
+  let mijnBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.spelerId === live.spelerId));
+
+  /* Op de televisie klinkt eerst een tromgeroffel. Zolang die duurt, verklapt
+     de telefoon het antwoord ook niet. Even lang als op de televisie. */
+  const ROFFEL_MS = 1450;
+  let onthulKlaar = $state(true);
+  let vorigeFase = '';
+  let onthulTimer: ReturnType<typeof setTimeout> | null = null;
+  $effect(() => {
+    const fase = staat?.fase ?? '';
+    if (fase === vorigeFase) return;
+    if (onthulTimer) clearTimeout(onthulTimer);
+    onthulTimer = null;
+    if (fase === 'antwoord' && vorigeFase === 'vraag') {
+      onthulKlaar = false;
+      onthulTimer = setTimeout(() => (onthulKlaar = true), ROFFEL_MS);
+    } else {
+      onthulKlaar = true;
+    }
+    vorigeFase = fase;
+  });
+
   // Een trilling bij het oordeel: kort en blij, of één lange voor 'helaas'.
   let vorigeUitslag = $state<string | null>(null);
   $effect(() => {
-    const nu = uitslag;
+    const nu = onthulKlaar ? uitslag : null;
     if (nu !== vorigeUitslag) {
       if (nu === 'goed') tril([40, 60, 40, 60, 80]);
       else if (nu === 'fout') tril([120]);
@@ -352,6 +374,12 @@
         <p class="fijn" in:fade={{ duration: 220 }}>Je antwoord staat genoteerd.</p>
       {/if}
     {:else if staat.fase === 'antwoord'}
+      {#if !onthulKlaar}
+        <div class="trommel" style="padding:1.4rem">
+          <span class="stokken" aria-hidden="true" style="font-size:3.4rem">🥁</span>
+          <p class="etiket">Kijk naar de televisie…</p>
+        </div>
+      {:else}
       {#key uitslag}
         <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
           {#if uitslag === 'goed'}
@@ -361,6 +389,9 @@
               <strong>{kwinkslag}</strong>
               <span class="plus">+{mijnPunten}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
+              {#each mijnBonussen as b (b.soort)}
+                <span class="bonusregel">{b.soort === 'snel' ? '⚡ Snelste vinger' : `🔥 ${b.opRij} op rij`} · +{b.punten} bonus</span>
+              {/each}
             </span>
           {:else if uitslag === 'fout'}
             <span class="stempel" style="--hoek:-9deg">Mis</span>
@@ -408,6 +439,7 @@
             </p>
           {/each}
         </div>
+      {/if}
       {/if}
     {:else if staat.fase === 'cijfers' && staat.cijfers}
       {#key staat.cijfers.stap}

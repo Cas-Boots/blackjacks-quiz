@@ -25,6 +25,9 @@ import { cijfersVoor } from './recap/cijfers';
 import { jaaroverzichtVoor } from './jaaroverzicht';
 import { beoordeelVoorspellingen, verdelingUitVoorspellingen, type Omgeving } from './recap/voorspellingen';
 import type { Analyse } from './recap/analyse';
+import { berekenBonussen, metBonus, type BonusVraag } from './bonus';
+import { ingekort } from './klok';
+import type { Verdeling } from './scoring';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -233,12 +236,62 @@ export function uitdelingenVan(spel: Parameters<typeof afrekeningVan>[0]): { vra
   return lijst;
 }
 
+/**
+ * De bonussen van een spel, afgeleid uit wat er vastligt. Zie bonus.ts.
+ * `verdelingen` geeft per sleutel de punten mét bonus, de afrekening van de
+ * voorspellingen inbegrepen.
+ */
+export function bonussenVan(spel: Parameters<typeof afrekeningVan>[0]) {
+  const verdelingVan = new Map<string, Verdeling>();
+  for (const u of uitdelingenVan(spel)) {
+    // Twee uitdelingen onder één sleutel (een vraag én de afrekening) tellen allebei.
+    const eerder = verdelingVan.get(u.vraagSleutel);
+    verdelingVan.set(u.vraagSleutel, eerder ? telStand([eerder, u.verdeling]) : u.verdeling);
+  }
+  const rondes = PAKKETTEN[spel.pakket] ? samengesteld(spel) : [];
+  const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
+  const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
+  const ledenVan = (rondeIndex: number, inzender: string): number[] => {
+    const t = teamRijen.find((r) => r.rondeIndex === rondeIndex && r.teamKey === inzender);
+    try {
+      return t ? (JSON.parse(t.leden) as number[]) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const vragen: BonusVraag[] = [];
+  rondes.forEach((r, ri) => {
+    // De afrekening van de voorspellingen is geen vraag: die maakt geen reeks en breekt er ook geen.
+    if (isAfrekening(r)) return;
+    r.vragen.forEach((_, vi) => {
+      const sleutel = sleutelVan(ri, vi);
+      vragen.push({
+        sleutel,
+        type: r.type,
+        teamModus: r.teamModus ?? 'individueel',
+        verdeling: verdelingVan.get(sleutel) ?? null,
+        antwoorden: antwoordRijen
+          .filter((a) => a.vraagSleutel === sleutel)
+          .map((a) => ({ inzender: a.inzender, isGoed: a.isGoed, naMs: a.naMs, leden: ledenVan(ri, a.inzender) })),
+      });
+    });
+  });
+
+  const bonus = berekenBonussen(vragen);
+  const verdelingen = new Map<string, Verdeling>();
+  // Uitdelingen bij vragen die niet (meer) in de samenstelling staan, tellen
+  // gewoon mee zoals ze zijn, zonder bonus: de stand verliest nooit punten.
+  for (const [sleutel, v] of verdelingVan) verdelingen.set(sleutel, metBonus(v, bonus.perVraag.get(sleutel)));
+  return { verdelingen, bonus };
+}
+
 export function standVan(spelId: number) {
   const spel = db.select().from(spellen).where(eq(spellen.id, spelId)).get();
   if (!spel) return {};
   const cor = db.select().from(correcties).where(eq(correcties.spelId, spelId)).all();
   return telStand(
-    uitdelingenVan(spel).map((u) => u.verdeling),
+    [...bonussenVan(spel).verdelingen.values()],
     cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
   );
 }
@@ -249,7 +302,8 @@ export function standVan(spelId: number) {
  */
 export function prijzenVan(spel: Parameters<typeof afrekeningVan>[0], lijst: { id: number; naam: string }[]): Prijs[] {
   const rondes = samengesteld(spel);
-  const uitdelingLijst = uitdelingenVan(spel);
+  // Met bonus, zodat 'beste ronde' en 'comeback' kloppen met de stand.
+  const uitdelingLijst = [...bonussenVan(spel).verdelingen].map(([vraagSleutel, verdeling]) => ({ vraagSleutel, verdeling }));
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
   const ledenVan = (rondeIndex: number, inzender: string): number[] => {
@@ -349,7 +403,16 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const vraag: Vraag | undefined = ronde?.vragen[spel.vraagIndex];
   const lijst = deelnemersVan(spel.id);
   const teamLijst = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst) : [];
-  const stand = standVan(spel.id);
+  const cor = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
+  const bonussen = bonussenVan(spel);
+  const stand = telStand(
+    [...bonussen.verdelingen.values()],
+    cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
+  );
+
+  const dezeRonde = telStand(
+    [...bonussen.verdelingen.entries()].filter(([k]) => k.startsWith(`${spel.rondeIndex}:`)).map(([, v]) => v),
+  );
 
   const apparaatRijen = db.select().from(apparaten).all();
   const laatsteVan = new Map<number, number>();
@@ -379,14 +442,14 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
         getal: ronde?.type === 'dichtstbij' ? leesGetal(r.tekst) : null,
       }))
     : [];
-  const uitdelingRij = onthuld
-    ? db.select().from(uitdelingen).where(and(eq(uitdelingen.spelId, spel.id), eq(uitdelingen.vraagSleutel, sleutel))).get()
-    : undefined;
-  let uitdeling: Record<number, number> = {};
-  try {
-    uitdeling = uitdelingRij ? JSON.parse(uitdelingRij.verdeling) : {};
-  } catch {
-    uitdeling = {};
+  const uitdeling: Record<number, number> = onthuld ? (bonussen.verdelingen.get(sleutel) ?? {}) : {};
+  const vraagBonus = onthuld ? bonussen.bonus.perVraag.get(sleutel) : undefined;
+  const bonusLijst: PubliekeStaat['bonussen'] = [];
+  if (vraagBonus) {
+    for (const id of Object.keys(vraagBonus.snel)) bonusLijst.push({ spelerId: Number(id), soort: 'snel', punten: vraagBonus.snel[Number(id)] });
+    for (const id of Object.keys(vraagBonus.reeks)) {
+      bonusLijst.push({ spelerId: Number(id), soort: 'reeks', punten: vraagBonus.reeks[Number(id)], opRij: vraagBonus.opRij[Number(id)] });
+    }
   }
 
   // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
@@ -437,7 +500,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       ? {
           naam: ronde.naam, suit: ronde.suit, thema: ronde.thema,
           sfeer: ronde.sfeer ?? 'vilt', uitleg: ronde.uitleg,
-          teamModus: ronde.teamModus, vragenAantal: ronde.vragen.length,
+          teamModus: ronde.teamModus, type: ronde.type, vragenAantal: ronde.vragen.length,
           cijfers: ronde.cijfers ?? null,
         }
       : null,
@@ -467,7 +530,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       };
     }),
     stand: lijst
-      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: stand[s.id] ?? 0 }))
+      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
       .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl')),
     serverTijd: nu,
     klok: {
@@ -493,6 +556,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     ingeleverd,
     inzendingen,
     uitdeling,
+    bonussen: bonusLijst,
+    reeksen: bonussen.bonus.lopend,
   };
   geheugen = { sleutel: sleutelGeheugen, op: nu, staat };
   return staat;
@@ -566,6 +631,25 @@ export function leverIn(spel: typeof spellen.$inferSelect, spelerId: number, inv
     db.insert(antwoorden)
       .values({ spelId: spel.id, vraagSleutel: sleutel, inzender: mijnTeam.id, spelerId, tekst, ingediendOp: nu, naMs })
       .run();
+  }
+
+  // Iedereen is binnen: niemand hoeft nog op de klok te wachten. Er blijven
+  // een paar seconden over, lang genoeg om nog iets te veranderen en voor
+  // de televisie om het te laten horen. Alleen als de klok loopt: een
+  // gepauzeerde klok is een bewuste keuze van de quizmaster.
+  if (spel.klokLoopt && spel.klokEindigtOp != null) {
+    const binnen = new Set(
+      db
+        .select({ inzender: antwoorden.inzender })
+        .from(antwoorden)
+        .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel)))
+        .all()
+        .map((r) => r.inzender),
+    );
+    const eindigtOp = ingekort(spel.klokEindigtOp, nu, teamLijst, binnen);
+    if (eindigtOp !== spel.klokEindigtOp) {
+      db.update(spellen).set({ klokEindigtOp: eindigtOp }).where(eq(spellen.id, spel.id)).run();
+    }
   }
 
   const teLaat = spel.klokEindigtOp != null && nu > spel.klokEindigtOp;

@@ -207,6 +207,8 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     ingeleverd: [],
     inzendingen: [],
     uitdeling: {},
+    bonussen: [],
+    reeksen: {},
     cijfers: null,
     jaaroverzicht: null,
     ...over,
@@ -645,13 +647,21 @@ export const DIAS: Dia[] = [
   /* ── Onthulling ── */
   {
     id: 'antwoord-gemengd', hoofdstuk: 'Onthulling', titel: 'Gemengd: goed en fout',
-    let: 'De goede keuze licht op, de rest dooft. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje. Tom leverde niets in.',
+    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en Joris zit op vier op rij: allebei een bonus. Tom leverde niets in.',
     vorigePunten: START,
     maak: () => antwoord(
       R.waar, V.waar,
       { antwoord: 'Niet waar', toelichting: 'Kwartfinale, strafschoppen. Het is een traditie.', goedeOptie: 1 },
       [inz('s_1', 'Niet waar', true, 3100), inz('s_2', 'Waar', false, 5400), inz('s_3', 'Niet waar', true, 6800), inz('s_4', 'Waar', false, 9900), inz('s_5', 'Niet waar', true, 12000)],
-      { stand: stand(erbij({ 1: 1, 3: 1, 5: 1 })), uitdeling: { 1: 1, 3: 1, 5: 1 } },
+      {
+        stand: stand(erbij({ 1: 2, 3: 2, 5: 1 })),
+        uitdeling: { 1: 2, 3: 2, 5: 1 },
+        bonussen: [
+          { spelerId: 1, soort: 'snel', punten: 1 },
+          { spelerId: 3, soort: 'reeks', punten: 1, opRij: 4 },
+        ],
+        reeksen: { 1: 1, 3: 4, 5: 1 },
+      },
     ),
   },
   {
@@ -769,7 +779,12 @@ export const DIAS: Dia[] = [
     id: 'stand', hoofdstuk: 'Stand', titel: 'De tussenstand',
     let: 'Eerst de oude volgorde, dan schuift alles: Joris klimt naar één en krijgt Stijger, de koploper het kroontje, Tom de rode lantaarn met een zin.',
     vorigePunten: START,
-    maak: () => metRonde(R.cijfers, { fase: 'stand', stand: stand(NA_STAND) }),
+    maak: () => metRonde(R.cijfers, {
+      fase: 'stand',
+      // Met een fiche voor de punten van deze ronde, en een vlammetje voor wie op dreef is.
+      stand: stand(NA_STAND).map((r) => ({ ...r, dezeRonde: r.punten - (START[r.spelerId] ?? 0) })),
+      reeksen: { 3: 3 },
+    }),
   },
 
   /* ── Uitslag ── */
