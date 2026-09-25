@@ -26,8 +26,9 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 | Blackjacks 2026 — Het Jaaroverzicht | 9 rondes, 49 vragen (± een uur) | 13 rondes, 70 vragen |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
-De avond is bewust kort gehouden. Rondes van vier tot acht vragen, klokken van
-tien tot vijfentwintig seconden, en het ritme wisselt steeds: waar of niet waar,
+De avond is bewust kort gehouden. Rondes van vier tot acht vragen, elke vraag
+dertig seconden (heeft iedereen al ingeleverd, dan springt de klok naar de
+laatste vijf), en het ritme wisselt steeds: waar of niet waar,
 dan over onszelf, dan in teams schatten, dan meerkeuze. Rondes die nog leeg
 zijn of alleen voor kenners (*Sport: de Marges*, *De WK-poule*, *Jullie Jaar in
 Beeld*, *Oktober tot december*) staan uitgevinkt. Vink ze aan in de

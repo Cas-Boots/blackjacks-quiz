@@ -23,8 +23,8 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Warmdraaien",
         suit: "♠", thema: "Waar of niet waar", sfeer: "vilt",
-        type: "waarnietwaar", tijd: 15, punten: 1, teamModus: "individueel",
-        uitleg: "Zes stellingen, vijftien seconden elk. Niet te lang over nadenken.",
+        type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
+        uitleg: "Zes stellingen om in te komen. Iedereen voor zich.",
         vragen: [
           {v:"De WK-finale werd pas in de verlenging beslist.", goed:true,
            toelichting:"Na negentig minuten stond het nog 0-0."},
@@ -43,7 +43,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Onze Sportcompetitie",
         suit: "♥", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
-        type: "open", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "sport",
         uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
         // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
@@ -62,7 +62,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Dichtstbij Wint",
         suit: "♦", thema: "2026 in cijfers", sfeer: "staal",
-        type: "dichtstbij", tijd: 25, punten: 3, teamModus: "teams", aantalTeams: 2,
+        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
@@ -77,7 +77,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Sport: de Marges",
         suit: "♣", thema: "Voor de echte kenners", sfeer: "gras",
-        type: "open", tijd: 20, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
         uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
         vragen: [
@@ -91,7 +91,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Vier Kaarten",
         suit: "♣", thema: "Het jaar in meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 20, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
@@ -118,7 +118,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "De WK-poule",
         suit: "♠", thema: "Blackjacks Cup", sfeer: "poule",
-        type: "open", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         optioneel: true, teVullen: true,
         uitleg: "Onze eigen poule. Vul deze ronde met de export uit blackjacks-cup en vink hem dan aan.",
         vragen: [
@@ -132,7 +132,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Taart & Verre Landen",
         suit: "♠", thema: "Resolution Recap — de rest", sfeer: "suiker",
-        type: "open", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "taart",
         uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
         vragen: [
@@ -146,7 +146,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Jullie Jaar in Beeld",
         suit: "♥", thema: "Eigen foto’s, video’s en muziek", sfeer: "bioscoop",
-        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
         uitleg: "Foto’s en filmpjes uit 2026. Laad ze in op het startscherm en vervang deze vragen door je eigen tekst.",
         vragen: [
@@ -163,9 +163,9 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Bliksemronde",
-        suit: "♥", thema: "Tien seconden per vraag", sfeer: "bliksem",
-        type: "open", tijd: 10, punten: 1, teamModus: "individueel",
-        uitleg: "Acht vragen, tien seconden elk. Eerste ingeving, meteen intikken. Tempo!",
+        suit: "♥", thema: "Korte vragen, snel punten", sfeer: "bliksem",
+        type: "open", tijd: 30, punten: 1, teamModus: "individueel",
+        uitleg: "Acht korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
         vragen: [
           {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
           {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
@@ -183,7 +183,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "De Voorspellingen",
         suit: "♦", thema: "Wat jullie in januari dachten", sfeer: "violet",
-        type: "open", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         teVullen: true, cijfers: "voorspellingen",
         uitleg: "Aan het begin van 2026 deed iedereen veertien voorspellingen — Cas incluis. Nu de afrekening.",
         // In de meespeelversie komen vraag en antwoord uit voorspellingen.ts;
@@ -199,7 +199,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Oktober tot december",
         suit: "♣", thema: "De staart van het jaar — zelf aanvullen", sfeer: "vuurwerk",
-        type: "open", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         optioneel: true, teVullen: true,
         uitleg: "Deze maanden waren er nog niet toen de quiz werd gemaakt. Vul ze in december aan.",
         vragen: [
@@ -212,7 +212,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "2027",
         suit: "♣", thema: "Vooruitkijken", sfeer: "vuurwerk",
-        type: "open", tijd: 20, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
@@ -226,7 +226,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Wie van de Blackjacks?",
         suit: "♥", thema: "Slotronde", sfeer: "vilt",
-        type: "stem", tijd: 20, punten: 3, teamModus: "individueel",
+        type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
         uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},
@@ -245,7 +245,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Waar of Niet Waar",
         suit: "♠", thema: "Om warm te draaien", sfeer: "vilt",
-        type: "waarnietwaar", tijd: 15, punten: 1, teamModus: "individueel",
+        type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
         uitleg: "Ieder voor zich. Waar of niet waar — één punt per goed antwoord.",
         vragen: [
           {v:"Spanje won in 2026 het WK voetbal.", goed:true},
@@ -263,7 +263,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Emoji Raden",
         suit: "♥", thema: "Films en sprookjes", sfeer: "bioscoop",
-        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Welk verhaal of welke film staat hier?",
         vragen: [
           {emoji:"❄️ 👭 ⛄", v:"Welke film?", a:"Frozen"},
@@ -277,7 +277,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Sport van het Jaar",
         suit: "♦", thema: "Voor iedereen te doen", sfeer: "gras",
-        type: "meerkeuze", tijd: 20, punten: 2, teamModus: "individueel",
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "individueel",
         uitleg: "Ieder voor zich. Kies A, B, C of D.",
         vragen: [
           {v:"In welk land waren de Olympische Winterspelen van 2026?",
@@ -307,7 +307,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Nederland & de Wereld",
         suit: "♠", thema: "Meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 20, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Nieuwe teams. Kies A, B, C of D.",
         vragen: [
           {v:"Wie werd in 2026 minister-president van Nederland?",
@@ -340,9 +340,9 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Bliksemronde",
-        suit: "♦", thema: "Tien seconden per vraag", sfeer: "bliksem",
-        type: "open", tijd: 10, punten: 1, teamModus: "individueel",
-        uitleg: "Korte vragen, tien seconden elk. Ieder voor zich, één punt per stuk. Tempo!",
+        suit: "♦", thema: "Korte vragen, snel punten", sfeer: "bliksem",
+        type: "open", tijd: 30, punten: 1, teamModus: "individueel",
+        uitleg: "Korte vragen. Ieder voor zich, één punt per stuk. Tempo!",
         vragen: [
           {v:"Welk land verloor de WK-finale?", a:"Argentinië"},
           {v:"Hoeveel poten heeft een spin?", a:"Acht"},
