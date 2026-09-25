@@ -117,7 +117,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
 
 test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bonuspunt', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '1': [0] }); // Sport: de Marges, twee teams
+  await nieuwSpel(qm, { '11': [0] }); // 2027, twee teams
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
@@ -128,14 +128,14 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bo
 
   await qm.doe('start-ronde');
   await expect(snel.pagina.getByPlaceholder('Jullie antwoord')).toBeVisible({ timeout: 15_000 });
-  await snel.pagina.getByPlaceholder('Jullie antwoord').fill('Ferran Torres');
+  await snel.pagina.getByPlaceholder('Jullie antwoord').fill('Brazilië');
   await snel.pagina.getByRole('button', { name: 'Versturen' }).click();
   await expect(snel.pagina.getByRole('button', { name: 'Antwoord aanpassen' })).toBeVisible({ timeout: 15_000 });
   // Nog niet iedereen: de klok loopt gewoon door.
   let nu = await qm.staat();
   expect(nu.klok.eindigtOp - nu.serverTijd).toBeGreaterThan(10_000);
 
-  await traag.pagina.getByPlaceholder('Jullie antwoord').fill('Torres');
+  await traag.pagina.getByPlaceholder('Jullie antwoord').fill('brazilie');
   await traag.pagina.getByRole('button', { name: 'Versturen' }).click();
   await expect(tv.pagina.locator('.iedereen-binnen')).toBeVisible({ timeout: 15_000 });
   nu = await qm.staat();

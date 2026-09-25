@@ -34,8 +34,8 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Een minderheidskabinet — samen 66 van de 150 zetels."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
-          {v:"Max Verstappen stond halverwege 2026 in de top drie van het Formule 1-kampioenschap.", goed:false,
-           toelichting:"Zesde, op ruim honderd punten van de koploper. Red Bull kreeg de nieuwe regels niet aan de praat."},
+          {v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
+           toelichting:"Omhoog, zoals elk half jaar."},
           {v:"Nederland won op de Winterspelen van 2026 meer dan tien keer goud.", goed:false,
            toelichting:"Precies tien keer. Wie ‘waar’ zei: net niet."}
         ]
@@ -67,7 +67,8 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
            toelichting:"Voor het eerst 48 in plaats van 32."},
-          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden"},
+          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
+           toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
           {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
           {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
           {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"}
@@ -105,12 +106,13 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Na strafschoppen, bij 1-1."},
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
-           toelichting:"Van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
+           toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
           {v:"Wie werd in Italië de succesvolste winterolympiër ooit?",
            opties:["Johannes Høsflot Klæbo","Marit Bjørgen","Ole Einar Bjørndalen","Sven Kramer"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
           {v:"Welke negentienjarige voerde lange tijd het Formule 1-kampioenschap aan?",
-           opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2}
+           opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
+           toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
       },
       {
@@ -167,11 +169,14 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
           {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
-          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie"},
+          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie",
+           toelichting:"De Verenigde Staten, Canada en Mexico."},
           {v:"Tegen wie speelde Oranje de openingswedstrijd?", a:"Japan"},
           {v:"Tegen welk Afrikaans land won Oranje in de groepsfase?", a:"Tunesië"},
-          {v:"In welke maand waren de Winterspelen?", a:"Februari"},
-          {v:"Welke verfilming van een Grieks epos was in 2026 een van de grootste kaskrakers?", a:"The Odyssey"},
+          {v:"In welke maand waren de Winterspelen?", a:"Februari",
+           toelichting:"In Milaan en Cortina d’Ampezzo."},
+          {v:"Welke verfilming van een Grieks epos was in 2026 een van de grootste kaskrakers?", a:"The Odyssey",
+           toelichting:"Alleen Spider-Man: Brand New Day bracht in Amerika nog meer op."},
           {v:"Van welke Pixar-film verscheen in 2026 het vijfde deel?", a:"Toy Story"}
         ]
       },
