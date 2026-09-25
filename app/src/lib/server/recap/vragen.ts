@@ -21,6 +21,9 @@ export interface LevendAntwoord {
   v: string;
   a: string;
   toelichting?: string;
+  /** Bij een dichtstbij-vraag: het getal dat het dichtst benaderd moet worden. */
+  getal?: number;
+  eenheid?: string;
 }
 
 type Oplosser = (a: Analyse, arg: string) => LevendAntwoord;
@@ -192,6 +195,64 @@ const OPLOSSERS: Record<string, Oplosser> = {
     };
   },
 
+  /* ---- Getallen, voor een dichtstbij-ronde over onszelf --------------- */
+
+  'getal.sportSamen': (a, arg) => {
+    const tag = arg ? zoekSportTag(arg) : '';
+    const totaal = a.personen.reduce((n, p) => n + (tag ? p.perSport.get(tag) ?? 0 : p.sport.totaal), 0);
+    const v =
+      !tag ? 'Hoeveel keer hebben we dit jaar met z’n allen gesport?'
+        : tag === 'gym' ? 'Hoeveel keer stonden we dit jaar samen in de sportschool?'
+          : `Hoeveel keer hebben we dit jaar samen ${sportNaam(tag).toLowerCase()} genoteerd?`;
+    return {
+      v,
+      a: keer(totaal),
+      getal: totaal,
+      eenheid: 'keer',
+      // Bewust zonder wie hoeveel deed: dat is een vraag in de sportronde.
+    };
+  },
+
+  'getal.sportVan': (a, arg) => {
+    const [naam, sport = ''] = arg.split('/');
+    const p = a.personen.find((x) => x.naam.toLowerCase() === naam.trim().toLowerCase());
+    if (!p) throw new Error(`onbekende persoon: ${naam}`);
+    const tag = sport ? zoekSportTag(sport) : '';
+    const n = tag ? p.perSport.get(tag) ?? 0 : p.sport.totaal;
+    return {
+      v: tag ? `Hoeveel keer noteerde ${p.naam} dit jaar ${sportNaam(tag).toLowerCase()}?` : `Hoeveel keer sportte ${p.naam} dit jaar?`,
+      a: keer(n),
+      getal: n,
+      eenheid: 'keer',
+      toelichting: tag ? `Van de ${p.sport.totaal} keer sporten in totaal.` : undefined,
+    };
+  },
+
+  'getal.doelVan': (a, arg) => {
+    const p = a.personen.find((x) => x.naam.toLowerCase() === arg.trim().toLowerCase());
+    if (!p || p.sport.doel === null) throw new Error(`geen doel voor: ${arg}`);
+    const maand = maandNaam(a.peildatum);
+    return {
+      v: `${p.naam} nam zich in januari voor om ${p.sport.doel} keer te sporten. Hoeveel keer stond de teller in ${maand}?`,
+      a: `${keer(p.sport.totaal)} van de ${p.sport.doel}`,
+      getal: p.sport.totaal,
+      eenheid: 'keer',
+      toelichting: `Dat is ${Math.round((100 * p.sport.totaal) / (p.sport.doel || 1))} procent van het doel.`,
+    };
+  },
+
+  'getal.sportSoorten': (a) => {
+    const soorten = [...a.sporten.keys()].filter((t) => t !== 'onbekend' && t !== 'other');
+    const zeldzaam = soorten.filter((t) => a.sporten.get(t) === 1).map(sportNaam);
+    return {
+      v: 'Hoeveel verschillende sporten hebben we dit jaar samen bijgehouden?',
+      a: `${soorten.length} sporten`,
+      getal: soorten.length,
+      eenheid: 'sporten',
+      toelichting: zeldzaam.length ? `Eenmalig: ${opsomming(zeldzaam.map((n) => n.toLowerCase()))}.` : undefined,
+    };
+  },
+
   /* ---- Taart --------------------------------------------------------- */
 
   'taart.totaal': (a) => {
@@ -334,5 +395,6 @@ export function verlevendig(vraag: Vraag, analyse: Analyse | null, voorspellinge
   if (!vraag.live || !analyse) return vraag;
   const uit = beantwoord(vraag.live, analyse, voorspellingen);
   if (!uit) return vraag;
-  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, teVullen: false };
+  const getal = uit.getal === undefined ? {} : { getal: uit.getal, eenheid: uit.eenheid ?? vraag.eenheid };
+  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, teVullen: false };
 }

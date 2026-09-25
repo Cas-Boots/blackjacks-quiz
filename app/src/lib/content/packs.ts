@@ -29,7 +29,7 @@ export const PAKKETTEN: Pakketten = {
           {v:"De WK-finale werd pas in de verlenging beslist.", goed:true,
            toelichting:"Na negentig minuten stond het nog 0-0."},
           {v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
-           toelichting:"Hij evenaarde het. Vijf zeges, net als Merckx, Hinault, Anquetil en Indurain."},
+           toelichting:"Hij evenaarde het. Met zijn vijfde zege staat hij naast Merckx, Hinault, Anquetil en Indurain."},
           {v:"Het kabinet-Jetten heeft een meerderheid in de Tweede Kamer.", goed:false,
            toelichting:"Een minderheidskabinet — samen 66 van de 150 zetels."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
@@ -41,64 +41,29 @@ export const PAKKETTEN: Pakketten = {
         ]
       },
       {
-        naam: "Onze Sportcompetitie",
-        suit: "♥", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
-        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
-        cijfers: "sport",
-        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
-        // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
-        // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
-        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
+        naam: "Hoger of Lager",
+        suit: "♥", thema: "Onze eigen cijfers, geschat", sfeer: "staal",
+        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Ieder voor zich een getal over onszelf. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
+        // Net als bij de sportcompetitie rekent de meespeelversie deze getallen
+        // op de avond zelf uit; hier staat de stand van 18 september.
         vragen: [
-          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
-           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
-          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
-          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
-          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
-          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
-           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
-        ]
-      },
-      {
-        naam: "Dichtstbij Wint",
-        suit: "♦", thema: "2026 in cijfers", sfeer: "staal",
-        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
-        vragen: [
-          {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
-           toelichting:"Voor het eerst 48 in plaats van 32."},
-          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
-           toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
-          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
-          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
-          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"}
-        ]
-      },
-      {
-        naam: "Sport: de Marges",
-        suit: "♣", thema: "Voor de echte kenners", sfeer: "gras",
-        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
-        optioneel: true,
-        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
-        vragen: [
-          {v:"In welk stadion werd de WK-finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
-          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
-          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
-          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
-          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"}
+          {v:"Hoeveel keer hebben we dit jaar met z’n allen gesport?", getal:462, eenheid:"keer", live:"getal.sportSamen"},
+          {v:"Hoeveel keer stonden we dit jaar samen in de sportschool?", getal:269, eenheid:"keer", live:"getal.sportSamen:gym"},
+          {v:"Hoeveel keer noteerde Rik dit jaar padel?", getal:27, eenheid:"keer", live:"getal.sportVan:Rik/padel"},
+          {v:"Joris nam zich in januari voor om 105 keer te sporten. Hoeveel keer stond de teller in september?", getal:59, eenheid:"keer", live:"getal.doelVan:Joris"},
+          {v:"Hoeveel verschillende sporten hebben we dit jaar samen bijgehouden?", getal:20, eenheid:"sporten", live:"getal.sportSoorten"}
         ]
       },
       {
         naam: "Vier Kaarten",
-        suit: "♣", thema: "Het jaar in meerkeuze", sfeer: "oranje",
+        suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
-          {v:"Waardoor lagen het openbaar vervoer en het vliegverkeer begin 2026 grotendeels stil?",
-           opties:["Een landelijke staking","Overvloedige sneeuwval","Een computerstoring","Dichte mist"], goed:1},
           {v:"Wie kwam er als invaller in en besliste de WK-finale?",
            opties:["Lamine Yamal","Ferran Torres","Álvaro Morata","Dani Olmo"], goed:1},
           {v:"Tegen welk land ging Oranje eruit op het WK?",
@@ -117,7 +82,7 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "De WK-poule",
-        suit: "♠", thema: "Blackjacks Cup", sfeer: "poule",
+        suit: "♣", thema: "Blackjacks Cup", sfeer: "poule",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         optioneel: true, teVullen: true,
         uitleg: "Onze eigen poule. Vul deze ronde met de export uit blackjacks-cup en vink hem dan aan.",
@@ -130,8 +95,56 @@ export const PAKKETTEN: Pakketten = {
         ]
       },
       {
+        naam: "Onze Sportcompetitie",
+        suit: "♠", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
+        cijfers: "sport",
+        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
+        // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
+        // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
+        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
+        vragen: [
+          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
+           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
+          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
+          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
+          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
+        ]
+      },
+      {
+        naam: "Dichtstbij Wint",
+        suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
+        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
+        vragen: [
+          {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
+           toelichting:"Voor het eerst 48 in plaats van 32."},
+          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
+           toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
+          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
+          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
+          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"}
+        ]
+      },
+      {
+        naam: "Sport: de Marges",
+        suit: "♦", thema: "Voor de echte kenners", sfeer: "gras",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        optioneel: true,
+        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
+        vragen: [
+          {v:"In welk stadion werd de WK-finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
+          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
+          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
+          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
+          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"}
+        ]
+      },
+      {
         naam: "Taart & Verre Landen",
-        suit: "♠", thema: "Resolution Recap — de rest", sfeer: "suiker",
+        suit: "♣", thema: "Resolution Recap — de rest", sfeer: "suiker",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "taart",
         uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
@@ -141,6 +154,22 @@ export const PAKKETTEN: Pakketten = {
           {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
           {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
           {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
+        ]
+      },
+      {
+        naam: "2026 in Emoji",
+        suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
+        vragen: [
+          {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
+           toelichting:"Het openbaar vervoer en het vliegverkeer lagen grotendeels stil."},
+          {emoji:"🇮🇹 ⛷️ 🏔️ 🥇", v:"Welk sportfeest?", a:"De Olympische Winterspelen in Milaan en Cortina"},
+          {emoji:"🕷️ 🧑 🆕 🌅", v:"Welke film?", a:"Spider-Man: Brand New Day",
+           toelichting:"De grootste kaskraker van het jaar in de Amerikaanse bioscopen."},
+          {emoji:"⛵ 🌊 👁️ 🏛️", v:"Welke film?", a:"The Odyssey",
+           toelichting:"De verfilming van het Griekse epos was een van de grootste kaskrakers van 2026."},
+          {emoji:"🤠 🧑‍🚀 🧸 5️⃣", v:"Welke film?", a:"Toy Story 5"}
         ]
       },
       {
@@ -163,9 +192,10 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Bliksemronde",
-        suit: "♥", thema: "Korte vragen, snel punten", sfeer: "bliksem",
+        suit: "♦", thema: "Korte vragen, snel punten", sfeer: "bliksem",
         type: "open", tijd: 30, punten: 1, teamModus: "individueel",
-        uitleg: "Acht korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
+        optioneel: true,
+        uitleg: "Zes korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
         vragen: [
           {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
           {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
@@ -174,15 +204,12 @@ export const PAKKETTEN: Pakketten = {
           {v:"Tegen wie speelde Oranje de openingswedstrijd?", a:"Japan"},
           {v:"Tegen welk Afrikaans land won Oranje in de groepsfase?", a:"Tunesië"},
           {v:"In welke maand waren de Winterspelen?", a:"Februari",
-           toelichting:"In Milaan en Cortina d’Ampezzo."},
-          {v:"Welke verfilming van een Grieks epos was in 2026 een van de grootste kaskrakers?", a:"The Odyssey",
-           toelichting:"Alleen Spider-Man: Brand New Day bracht in Amerika nog meer op."},
-          {v:"Van welke Pixar-film verscheen in 2026 het vijfde deel?", a:"Toy Story"}
+           toelichting:"In Milaan en Cortina d’Ampezzo."}
         ]
       },
       {
         naam: "De Voorspellingen",
-        suit: "♦", thema: "Wat jullie in januari dachten", sfeer: "violet",
+        suit: "♣", thema: "Wat jullie in januari dachten", sfeer: "violet",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         teVullen: true, cijfers: "voorspellingen",
         uitleg: "Aan het begin van 2026 deed iedereen veertien voorspellingen — Cas incluis. Nu de afrekening.",
@@ -198,7 +225,7 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Oktober tot december",
-        suit: "♣", thema: "De staart van het jaar — zelf aanvullen", sfeer: "vuurwerk",
+        suit: "♠", thema: "De staart van het jaar — zelf aanvullen", sfeer: "vuurwerk",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         optioneel: true, teVullen: true,
         uitleg: "Deze maanden waren er nog niet toen de quiz werd gemaakt. Vul ze in december aan.",
@@ -211,7 +238,7 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "2027",
-        suit: "♣", thema: "Vooruitkijken", sfeer: "vuurwerk",
+        suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
@@ -225,7 +252,7 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Wie van de Blackjacks?",
-        suit: "♥", thema: "Slotronde", sfeer: "vilt",
+        suit: "♦", thema: "Slotronde", sfeer: "vilt",
         type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
         uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [

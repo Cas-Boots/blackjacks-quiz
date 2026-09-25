@@ -264,3 +264,23 @@ describe('cijfers voor de televisie', () => {
     expect(c.voorspellingen?.vragen.length).toBe(14);
   });
 });
+
+describe('getallen over onszelf', () => {
+  it('geeft een dichtstbij-vraag een getal uit de cijfers', () => {
+    expect(beantwoord('getal.sportSamen', analyse)?.getal).toBe(analyse.personen.reduce((n, p) => n + p.sport.totaal, 0));
+    expect(beantwoord('getal.sportVan:Rik/padel', analyse)?.getal).toBe(27);
+    const doel = beantwoord('getal.doelVan:Joris', analyse);
+    expect(doel?.getal).toBe(59);
+    expect(doel?.v).toContain('105');
+  });
+  it('laat de vraag staan als de persoon onbekend is', () => {
+    expect(beantwoord('getal.sportVan:Niemand', analyse)).toBeNull();
+    const vraag = { v: 'Hoeveel?', getal: 3, eenheid: 'keer', live: 'getal.sportVan:Niemand' };
+    expect(verlevendig(vraag, analyse).getal).toBe(3);
+  });
+  it('neemt het getal over in de levende vraag', () => {
+    const uit = verlevendig({ v: 'Hoeveel?', getal: 1, eenheid: 'keer', live: 'getal.sportSoorten' }, analyse);
+    expect(uit.getal).toBeGreaterThan(1);
+    expect(uit.eenheid).toBe('sporten');
+  });
+});

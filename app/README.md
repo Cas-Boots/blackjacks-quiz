@@ -440,8 +440,8 @@ meebewegen. Vragen zelf pas je niet hier aan maar in
 
 ### De cijfers van het jaar, live
 
-Twee rondes gaan over onszelf: *Onze Sportcompetitie* en *Taart & Verre
-Landen*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
+Drie rondes gaan over onszelf: *Onze Sportcompetitie*, *Taart & Verre
+Landen* en *Hoger of Lager*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
 de avond zelf uitgerekend uit de export van
 [`resolution-recap`](https://github.com/Cas-Boots/resolution-recap). Sport
 iemand op oudejaarsdag nog, dan telt dat mee. Ook de tekst van een vraag past

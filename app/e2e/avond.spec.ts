@@ -56,7 +56,7 @@ async function telefoon(browser: Browser, naam: string): Promise<Apparaat & { na
 
 test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '2': [0] }); // Dichtstbij Wint, eerste vraag: 48 landen op het WK
+  await nieuwSpel(qm, { '5': [0] }); // Dichtstbij Wint, eerste vraag: 48 landen op het WK
   const tv = await nieuwApparaat(browser, '/tv');
 
   await qm.doe('naar-ronde', { ronde: 0 });
@@ -88,7 +88,7 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
 
 test('teamronde: één telefoon levert in voor het hele team', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '11': [0] }); // 2027, in teams
+  await nieuwSpel(qm, { '13': [0] }); // 2027, in teams
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
   const team = st.teams.find((t: { leden: number[] }) => t.leden.length >= 2);
@@ -117,7 +117,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
 
 test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bonuspunt', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '11': [0] }); // 2027, twee teams
+  await nieuwSpel(qm, { '13': [0] }); // 2027, twee teams
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
@@ -155,7 +155,7 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bo
 
 test('beeldvraag: de ingebouwde afbeelding staat op de televisie en op de telefoon', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '7': [0] }); // Jullie Jaar in Beeld, de vraag met de ingebouwde afbeelding
+  await nieuwSpel(qm, { '9': [0] }); // Jullie Jaar in Beeld, de vraag met de ingebouwde afbeelding
   const tv = await nieuwApparaat(browser, '/tv');
   const t = await telefoon(browser, 'Eva');
 
@@ -172,7 +172,7 @@ test('beeldvraag: de ingebouwde afbeelding staat op de televisie en op de telefo
 
 test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '12': [0, 1] }); // Wie van de Blackjacks?
+  await nieuwSpel(qm, { '14': [0, 1] }); // Wie van de Blackjacks?
   const tv = await nieuwApparaat(browser, '/tv');
 
   // Een gast die niet in de lijst staat schuift aan via het aanmeldscherm.
