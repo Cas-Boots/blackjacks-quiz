@@ -194,6 +194,7 @@ oude tekst, en de controle zegt dat de server een oudere bouw draait.
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 | Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
 | Beheer | `/beheer` | de quizmaster, buiten de avond om; spelers, oude spellen, telefoons, bestanden bij de vragen, back-up |
+| Proefrit | `/proef` (of `/playtest`) | de quizmaster; de hele avond uitproberen met bots, zonder de echte te raken |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
@@ -508,6 +509,47 @@ Dit is het belangrijkste stuk gereedschap: je kunt de hele avond vooraf
 naspelen. Draai eerst `npm run verify` (zie [Komen de vragen goed
 door?](#komen-de-vragen-goed-door)), dan weet je dat de vragen kloppen
 voordat je de bediening oefent.
+
+### De hele avond: `/proef`
+
+Open **`/proef`** (of `/playtest`), meld je aan met de pincode van het
+hostscherm, kies hoe vaak de bots het goed hebben en of er een plus-één aan
+tafel zit, en druk op **Begin de proefrit**.
+
+- **Niets echts wordt geraakt.** Een proefrit is een eigen spel met een eigen
+  database in het geheugen van de server. De echte televisie en telefoons
+  zien er niets van, hij komt niet in de uitslagen of het beheer, en een
+  echte avond kan tegelijk gewoon doorlopen. Elk scherm van een proefrit
+  draagt een geel etiket *Proefrit*. Een proefrit verdwijnt na vier uur
+  zonder gebruik, bij *Stop de proefrit*, en bij een herstart van de server.
+- **Wat je gaat spelen.** De proefrit neemt de spelers (met portret) en de
+  gekozen rondes en vragen van de echte avond over.
+- **Alle schermen naast elkaar.** De televisie, een tot vier telefoons en
+  het hostscherm staan naast elkaar, elk op ware grootte en verkleind. Klik
+  door op het hostscherm en speel mee op de telefoons: elke telefoon is een
+  eigen apparaat en kiest zijn naam zoals een echte. **Opnieuw** zet een
+  telefoon terug bij het kiezen van een naam. *Los openen* opent een scherm
+  in een eigen tabblad.
+- **Bots aan tafel.** Elke naam waar geen telefoon op zit, speelt een bot: hij
+  levert op een geloofwaardig moment in, goed zo vaak als je instelt (70 %
+  standaard), bij een teamronde één keer per team. Zet je een telefoon op
+  een naam, dan stopt die bot; laat je de telefoon een minuut liggen, dan
+  neemt de bot het weer over. Bots uitzetten en een plus-één laten
+  aanschuiven kan ook tijdens de proefrit.
+- **Spring naar.** Elk onderdeel van de avond is één klik verderop: de lobby,
+  de trailer, per ronde de titelkaart, elke vraag **open** (klok loopt) of
+  **antwoord** (onthuld), de cijfers of de voorspellingen, de tussenstand,
+  het podium en de film na afloop. Alles ervoor spelen de bots meteen, zodat
+  de stand eruitziet als bij een echte avond; alles erna wordt gewist, dus
+  een vraag opnieuw openen begint hem leeg.
+- **Op je eigen telefoon.** Scan de QR-code op de proefpagina (of op de
+  televisie van de proefrit) om met een echte telefoon mee te doen. Die zit
+  dan in de proefrit, niet in de echte avond, en houdt zijn naam voor de
+  echte avond gewoon.
+
+Het verschil met de testmodus hieronder: `/tv?test` laat met verzonnen
+vragen zien hoe elke dia van de televisie eruitziet, zonder server. De
+proefrit speelt je echte vragen met de echte spelmotor, op alle schermen.
 
 ### De televisie alleen: `/tv?test`
 

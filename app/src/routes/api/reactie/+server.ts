@@ -5,7 +5,6 @@ import { db } from '$lib/server/db/index';
 import { spelers } from '$lib/server/db/schema';
 import { meldReactie } from '$lib/server/bus';
 import { REACTIES } from '$lib/shared/kwinkslagen';
-import { TOKEN_COOKIE } from '../../../hooks.server';
 
 /** Niet vaker dan dit per telefoon, anders wordt het een emoji-regen. */
 const MINSTE_TUSSENTIJD_MS = 400;
@@ -18,9 +17,9 @@ let teller = 0;
  * Vluchtig: niets hiervan komt in de database. Het gaat via de bus naar
  * iedereen die op dat moment naar de stroom kijkt en is daarna weg.
  */
-export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   if (locals.rol !== 'speler' || !locals.spelerId) error(403, 'niet als speler aangemeld');
-  const token = cookies.get(TOKEN_COOKIE) ?? String(locals.spelerId);
+  const token = locals.token ?? String(locals.spelerId);
 
   const nu = Date.now();
   if (nu - (laatsteVan.get(token) ?? 0) < MINSTE_TUSSENTIJD_MS) return json({ ok: true, genegeerd: true });

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { api, proefSpeelAdres } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fly, fade, scale } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
@@ -85,11 +86,11 @@
      een televisiescherm op de laptop zelf gewoon werkt; de waarschuwing zegt
      erbij wat er gebeurd is. */
   let netwerkAdressen = $state<{ naam: string; url: string }[]>([]);
-  let qrDoel = $derived(lokaalAdres && netwerkAdressen.length ? netwerkAdressen[0].url : joinAdres);
+  let qrDoel = $derived(lokaalAdres && netwerkAdressen.length ? proefSpeelAdres(netwerkAdressen[0].url) : joinAdres);
   let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(qrDoel)}`);
   $effect(() => {
     if (!lokaalAdres) return;
-    fetch('/api/adressen')
+    fetch(api('/api/adressen'))
       .then((r) => (r.ok ? r.json() : { adressen: [] }))
       .then((d: { adressen: { naam: string; url: string }[] }) => (netwerkAdressen = d.adressen))
       .catch(() => {});
@@ -308,7 +309,8 @@
   let tijdOm = $derived(live.staat?.fase === 'vraag' && live.staat?.klok?.loopt === true && restSec <= 0);
 
   onMount(() => {
-    joinAdres = `${location.origin}/`;
+    // Bij een proefrit brengt de code een telefoon naar die proefrit, niet naar de echte avond.
+    joinAdres = proefSpeelAdres(`${location.origin}/`);
     const wacht = setInterval(() => (wachtTeller += 1), 7000);
     if (inTest) {
       testmodus.start(page.url.searchParams.get('test'));

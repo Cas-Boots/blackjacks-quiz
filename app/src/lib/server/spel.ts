@@ -7,7 +7,7 @@
  * die in elke momentopname meekomt.
  */
 import { eq, and, desc } from 'drizzle-orm';
-import { db } from './db/index';
+import { db, huidigeProef } from './db/index';
 import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correcties, apparaten } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
@@ -56,12 +56,19 @@ export function omgevingVan(spelId: number): Omgeving {
   };
 }
 
+/** Ruimt de bewaarde pakketten van een opgeruimde proefrit op. */
+export function vergeetProefPakketten(proefId: string) {
+  for (const sleutel of levend.keys()) if (sleutel.startsWith(`${proefId}:`)) levend.delete(sleutel);
+}
+
 export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
   const p = PAKKETTEN[spel.pakket];
   if (!p) throw new Error(`onbekend pakket: ${spel.pakket}`);
   const analyse = recapAnalyse();
   const omgeving = spel.id !== undefined ? omgevingVan(spel.id) : { analyse, aantalSpelers: null };
-  const bekend = levend.get(spel.pakket);
+  // Een proefrit heeft een eigen database en dus een eigen aantal spelers.
+  const cacheSleutel = `${huidigeProef() ?? ''}:${spel.pakket}`;
+  const bekend = levend.get(cacheSleutel);
   if (bekend && bekend.analyse === analyse && bekend.aantalSpelers === omgeving.aantalSpelers) return bekend.pakket;
   const uitslag = beoordeelVoorspellingen(omgeving);
   const pakket: Pakket = {
@@ -72,7 +79,7 @@ export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
       return { ...r, vragen, teVullen: r.teVullen && vragen.some((v) => v.teVullen) };
     }),
   };
-  levend.set(spel.pakket, { analyse, aantalSpelers: omgeving.aantalSpelers, pakket });
+  levend.set(cacheSleutel, { analyse, aantalSpelers: omgeving.aantalSpelers, pakket });
   return pakket;
 }
 
@@ -332,7 +339,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const spel = actiefSpel();
   if (!spel) return null;
 
-  const sleutelGeheugen = `${spel.id}:${spel.versie}:${rol}`;
+  // Een proefrit heeft een eigen database, dus spelnummers kunnen samenvallen.
+  const sleutelGeheugen = `${huidigeProef() ?? ''}:${spel.id}:${spel.versie}:${rol}`;
   const nu = Date.now();
   if (geheugen && geheugen.sleutel === sleutelGeheugen && nu - geheugen.op < GEHEUGEN_MS) return geheugen.staat;
 
@@ -511,6 +519,57 @@ export function schrijfUitdeling(spelId: number, vraagSleutel: string, verdeling
   } else {
     db.insert(uitdelingen).values({ spelId, vraagSleutel, verdeling: json }).run();
   }
+}
+
+/**
+ * Een speler levert een antwoord in voor zijn team.
+ *
+ * Inleveren mag zolang de quizmaster het antwoord nog niet heeft onthuld, ook
+ * als de klok al op nul staat. De servertijd wordt vastgelegd, zodat te laat
+ * ingeleverde antwoorden zichtbaar zijn op het hostscherm in plaats van
+ * geruisloos te verdwijnen — dat scheelt discussie aan tafel.
+ *
+ * Een telefoon en een bot van een proefrit gaan hier allebei langs.
+ */
+export function leverIn(spel: typeof spellen.$inferSelect, spelerId: number, invoer: string): { inzender: string; teLaat: boolean } | { fout: string } {
+  if (spel.fase !== 'vraag') return { fout: 'er staat nu geen vraag open' };
+  const { ronde } = huidige(spel);
+  if (!ronde) return { fout: 'geen ronde' };
+  const tekst = invoer.slice(0, 300);
+
+  const lijst = deelnemersVan(spel.id);
+  const teamLijst = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
+  const mijnTeam = teamLijst.find((t) => t.leden.includes(spelerId));
+  if (!mijnTeam) return { fout: 'je zit niet in een team voor deze ronde' };
+
+  const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
+  const nu = Date.now();
+
+  // Hoe lang na het opengaan van de vraag dit binnenkwam. De klok kan
+  // gepauzeerd of verlengd zijn; verstreken = totale duur min wat er nog
+  // op staat, en dat klopt in alle drie de gevallen.
+  const rest = spel.klokLoopt ? Math.max(0, (spel.klokEindigtOp ?? nu) - nu) : spel.klokRestMs;
+  const naMs = spel.klokDuurMs > 0 ? Math.max(0, spel.klokDuurMs - rest) : null;
+
+  const bestaand = db
+    .select()
+    .from(antwoorden)
+    .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel), eq(antwoorden.inzender, mijnTeam.id)))
+    .get();
+
+  if (bestaand) {
+    db.update(antwoorden)
+      .set({ tekst, ingediendOp: nu, naMs, spelerId, isGoed: null })
+      .where(eq(antwoorden.id, bestaand.id))
+      .run();
+  } else {
+    db.insert(antwoorden)
+      .values({ spelId: spel.id, vraagSleutel: sleutel, inzender: mijnTeam.id, spelerId, tekst, ingediendOp: nu, naMs })
+      .run();
+  }
+
+  const teLaat = spel.klokEindigtOp != null && nu > spel.klokEindigtOp;
+  return { inzender: mijnTeam.id, teLaat };
 }
 
 /** Zet de vinkjes op de antwoorden van één vraag: goed voor de winnaars, fout voor de rest. */

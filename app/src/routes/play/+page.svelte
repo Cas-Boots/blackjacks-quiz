@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { api, metProef } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
@@ -134,7 +135,7 @@
     bezig = true;
     melding = '';
     try {
-      const r = await fetch('/api/answer', {
+      const r = await fetch(api('/api/answer'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ tekst: antwoord }),
@@ -169,7 +170,7 @@
     fotoMelding = '';
     try {
       const foto = await maakPortret(bestand);
-      const r = await fetch('/api/foto', {
+      const r = await fetch(api('/api/foto'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ foto }),
@@ -446,7 +447,7 @@
             {/each}
           </div>
         {/if}
-        <a class="knop vol" href="/uitslag/{staat.spelId}">Bekijk en deel de uitslag</a>
+        <a class="knop vol" href={metProef(`/uitslag/${staat.spelId}`)}>Bekijk en deel de uitslag</a>
       {/if}
       <div class="reactierij" aria-label="Reageer op de televisie">
         {#each REACTIES as emoji (emoji)}

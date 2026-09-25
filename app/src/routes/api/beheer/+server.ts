@@ -1,6 +1,5 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { TOKEN_COOKIE } from '../../../hooks.server';
 import {
   beheerOverzicht, voegSpelerToe, hernoemSpeler, zetGast, zetFoto, verwijderSpeler,
   activeerSpel, hernoemSpel, verwijderSpel, koppelLos, ruimApparatenOp,
@@ -13,14 +12,14 @@ import {
  * ook de spelers en de oude spellen. Elke opdracht geeft het verse overzicht
  * terug, zodat het scherm na één rondreis weer klopt.
  */
-export const GET: RequestHandler = ({ locals, cookies }) => {
+export const GET: RequestHandler = ({ locals }) => {
   if (locals.rol !== 'quizmaster') error(403, 'alleen de quizmaster');
-  return json(beheerOverzicht(cookies.get(TOKEN_COOKIE)));
+  return json(beheerOverzicht(locals.token));
 };
 
-export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   if (locals.rol !== 'quizmaster') error(403, 'alleen de quizmaster');
-  const eigenToken = cookies.get(TOKEN_COOKIE);
+  const eigenToken = locals.token;
 
   const body = await request.json().catch(() => ({}));
   const opdracht = String(body.opdracht ?? '');

@@ -1,7 +1,6 @@
 import type { RequestHandler } from './$types';
 import { luister, luisterReacties, luisterPorren } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
-import { TOKEN_COOKIE } from '../../../hooks.server';
 
 /**
  * Live stroom met de stand, als server-sent events.
@@ -11,10 +10,10 @@ import { TOKEN_COOKIE } from '../../../hooks.server';
  * heeft daarnaast een terugval op /api/state, zodat een geblokkeerde stroom
  * de avond niet stillegt.
  */
-export const GET: RequestHandler = ({ locals, cookies }) => {
+export const GET: RequestHandler = ({ locals }) => {
   const rol = locals.rol;
   const spelerId = locals.spelerId;
-  const token = cookies.get(TOKEN_COOKIE);
+  const token = locals.token;
   if (token) raakApparaatAan(token, rol, spelerId, null);
 
   let stop: (() => void) | null = null;

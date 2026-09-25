@@ -5,7 +5,6 @@ import { db } from '$lib/server/db/index';
 import { spelers } from '$lib/server/db/schema';
 import { raakApparaatAan, bumpVersie, actiefSpel, voegDeelnemerToe, MAX_NAAM_TEKENS } from '$lib/server/spel';
 import { schrijfLog } from '$lib/server/logboek';
-import { TOKEN_COOKIE } from '../../../hooks.server';
 import { hostPin, omgevingsFouten } from '$lib/server/omgeving';
 import { Rem } from '$lib/server/rem';
 import { timingSafeEqual } from 'node:crypto';
@@ -34,8 +33,8 @@ function pinKlopt(gegeven: string, verwacht: string): boolean {
  * Een gast die niet in de lijst staat tikt zijn naam in en schuift aan; ook
  * midden in een ronde.
  */
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
-  const token = cookies.get(TOKEN_COOKIE);
+export const POST: RequestHandler = async ({ request, locals, getClientAddress }) => {
+  const token = locals.token;
   if (!token) error(400, 'geen apparaat-token');
 
   const body = await request.json().catch(() => ({}));

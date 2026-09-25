@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { api, metProef } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
   import { live } from '$lib/client/live.svelte';
@@ -105,7 +106,7 @@
       return;
     }
     try {
-      const r = await fetch('/api/host/antwoorden', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/antwoorden'), { cache: 'no-store' });
       if (!r.ok) return;
       const uit = await r.json();
       inzendingen = uit.inzendingen;
@@ -115,7 +116,7 @@
 
   async function haalRondes() {
     try {
-      const r = await fetch('/api/host/rondes', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/rondes'), { cache: 'no-store' });
       if (!r.ok) return;
       const uit: RondesAntwoord = await r.json();
       rondesInfo = uit;
@@ -127,7 +128,7 @@
 
   async function haalLogboek() {
     try {
-      const r = await fetch('/api/host/logboek', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/logboek'), { cache: 'no-store' });
       if (!r.ok) return;
       logboek = (await r.json()).regels;
     } catch { /* volgende keer weer */ }
@@ -662,8 +663,8 @@
     {/if}
 
     <div class="knoprij">
-      <a class="knop stil" href="/tv" target="_blank" rel="noreferrer">Televisiescherm openen</a>
-      <a class="knop stil" href="/uitslag" target="_blank" rel="noreferrer">Uitslagen</a>
+      <a class="knop stil" href={metProef('/tv')} target="_blank" rel="noreferrer">Televisiescherm openen</a>
+      <a class="knop stil" href={metProef('/uitslag')} target="_blank" rel="noreferrer">Uitslagen</a>
       <a class="knop stil" href="/beheer">Beheer</a>
       {#if staat?.fase !== 'lobby'}
         <button class="knop stil" onclick={() => doe('naar-lobby')} disabled={bezig}>Terug naar de lobby</button>

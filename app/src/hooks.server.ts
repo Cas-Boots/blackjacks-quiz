@@ -2,7 +2,8 @@ import type { Handle } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { zorgVoorMigraties } from '$lib/server/db/migrate';
 import { zorgVoorBasis } from '$lib/server/seed';
-import { db } from '$lib/server/db/index';
+import { db, binnen } from '$lib/server/db/index';
+import { zoekProef, tokenVoor, geldigApparaat } from '$lib/server/proef';
 import { apparaten } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -35,7 +36,35 @@ function echtHttps(url: URL): boolean {
   return !!process.env.ORIGIN || !!process.env.PROTOCOL_HEADER || process.env.NODE_ENV !== 'production';
 }
 
+/**
+ * Een verzoek met `?proef=<id>` (of de kop `x-proef`) hoort bij een proefrit
+ * en draait in zijn geheel tegen diens database. Binnen een proefrit mag een
+ * scherm ook zeggen welk apparaat het is (`apparaat=telefoon-2`), zodat de
+ * telefoons naast elkaar op de proefpagina elk een eigen speler zijn.
+ */
 export const handle: Handle = async ({ event, resolve }) => {
+  const { url, request } = event;
+  const proefId = url.searchParams.get('proef') ?? request.headers.get('x-proef');
+  if (proefId) {
+    const context = zoekProef(proefId);
+    if (!context) {
+      if (url.pathname.startsWith('/api/')) {
+        return json({ fout: 'Deze proefrit bestaat niet meer. Begin een nieuwe op /proef.' }, { status: 410 });
+      }
+    } else {
+      const apparaat = geldigApparaat(url.searchParams.get('apparaat') ?? request.headers.get('x-apparaat'));
+      return binnen(context, () => verwerk(event, resolve, proefId, apparaat ? tokenVoor(proefId, apparaat) : null));
+    }
+  }
+  return verwerk(event, resolve, null, null);
+};
+
+async function verwerk(
+  event: Parameters<Handle>[0]['event'],
+  resolve: Parameters<Handle>[0]['resolve'],
+  proef: string | null,
+  vasteToken: string | null,
+) {
   const { url, request } = event;
   const isApi = url.pathname.startsWith('/api/');
   const https = echtHttps(url);
@@ -69,9 +98,14 @@ export const handle: Handle = async ({ event, resolve }) => {
     });
   }
 
+  // Binnen een proefrit is het apparaat uit de adresregel het token; het
+  // cookie blijft dan onaangeroerd, zodat de echte telefoon zijn naam houdt.
+  if (vasteToken) token = vasteToken;
   const rij = db.select().from(apparaten).where(eq(apparaten.token, token)).get();
   event.locals.rol = (rij?.rol as App.Locals['rol']) ?? 'gast';
   event.locals.spelerId = rij?.spelerId ?? null;
+  event.locals.token = token;
+  event.locals.proef = proef;
 
   const antwoord = await resolve(event);
 
@@ -79,7 +113,14 @@ export const handle: Handle = async ({ event, resolve }) => {
   // komt uit svelte.config.js (met nonces); dit is de rest.
   antwoord.headers.set('x-content-type-options', 'nosniff');
   antwoord.headers.set('referrer-policy', 'same-origin');
-  antwoord.headers.set('x-frame-options', 'DENY');
+  if (proef) {
+    // Een scherm van een proefrit staat in een kader op de proefpagina.
+    antwoord.headers.set('x-frame-options', 'SAMEORIGIN');
+    const csp = antwoord.headers.get('content-security-policy');
+    if (csp) antwoord.headers.set('content-security-policy', csp.replace("frame-ancestors 'none'", "frame-ancestors 'self'"));
+  } else {
+    antwoord.headers.set('x-frame-options', 'DENY');
+  }
   antwoord.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
   antwoord.headers.set('cross-origin-opener-policy', 'same-origin');
   antwoord.headers.set('cross-origin-resource-policy', 'same-origin');
@@ -92,4 +133,4 @@ export const handle: Handle = async ({ event, resolve }) => {
     antwoord.headers.set('cache-control', 'no-store');
   }
   return antwoord;
-};
+}

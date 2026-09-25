@@ -1,3 +1,4 @@
+import { api } from './proef';
 import type { PubliekeStaat, Rol, Por } from '$lib/shared/state';
 
 /**
@@ -72,7 +73,7 @@ class Live {
 
   #verbind() {
     try {
-      const bron = new EventSource('/api/stream');
+      const bron = new EventSource(api('/api/stream'));
       this.#bron = bron;
 
       bron.addEventListener('staat', (e) => {
@@ -144,7 +145,7 @@ class Live {
 
   async #haalOp() {
     try {
-      const r = await fetch('/api/state', { cache: 'no-store' });
+      const r = await fetch(api('/api/state'), { cache: 'no-store' });
       if (!r.ok) return;
       this.#neem(await r.json());
       this.verbonden = true;
@@ -161,7 +162,7 @@ class Live {
   }
 
   async opdracht(opdracht: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/host', {
+    const r = await fetch(api('/api/host'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ opdracht, ...extra }),
@@ -171,7 +172,7 @@ class Live {
   }
 
   async reageer(emoji: string) {
-    await fetch('/api/reactie', {
+    await fetch(api('/api/reactie'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ emoji }),
@@ -179,7 +180,7 @@ class Live {
   }
 
   async meld(rol: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/join', {
+    const r = await fetch(api('/api/join'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ rol, ...extra }),

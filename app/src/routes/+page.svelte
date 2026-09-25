@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { live } from '$lib/client/live.svelte';
+  import { zelfde } from '$lib/client/proef';
 
   let pin = $state('');
   let fout = $state('');
@@ -17,7 +18,7 @@
     fout = '';
     try {
       await live.meld('speler', { spelerId: id });
-      location.href = '/play';
+      location.href = zelfde('/play');
     } catch (e) {
       fout = 'Aanmelden lukte niet. Probeer het nog eens.';
     }
@@ -31,7 +32,7 @@
     bezig = true;
     try {
       await live.meld('speler', { naam });
-      location.href = '/play';
+      location.href = zelfde('/play');
     } catch (e) {
       let reden = '';
       try {
@@ -47,7 +48,7 @@
     fout = '';
     try {
       await live.meld('quizmaster', { pin });
-      location.href = '/host';
+      location.href = zelfde('/host');
     } catch {
       fout = 'Die pincode klopt niet.';
     }
