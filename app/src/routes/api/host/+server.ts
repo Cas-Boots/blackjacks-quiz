@@ -17,6 +17,7 @@ import { ververs } from '$lib/server/recap/bron';
 import { aantalStappen } from '$lib/server/recap/cijfers';
 import { aantalDias, jaaroverzichtVoor } from '$lib/server/jaaroverzicht';
 import { recapAnalyse } from '$lib/server/recap/bron';
+import { isAfrekening } from '$lib/shared/state';
 
 /**
  * Alle opdrachten van de quizmaster lopen hier langs.
@@ -129,6 +130,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
     case 'start-ronde': {
       if (!ronde) error(409, 'geen ronde');
+      if (isAfrekening(ronde)) {
+        // Geen vragen op de telefoon: meteen de voorspellingen van januari.
+        stopKlok();
+        zet({ fase: 'cijfers', vraagIndex: 0 });
+        log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
+        break;
+      }
       zet({ fase: 'vraag', vraagIndex: 0 });
       startKlok(vraagTijd(ronde, ronde.vragen[0]));
       log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
@@ -239,6 +247,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       else if (spel.fase === 'vraag' && spel.vraagIndex > 0) zet({ fase: 'antwoord', vraagIndex: spel.vraagIndex - 1 });
       else if (spel.fase === 'vraag') zet({ fase: 'ronde' });
       else if (spel.fase === 'cijfers' && spel.vraagIndex > 0) zet({ vraagIndex: spel.vraagIndex - 1 });
+      else if (spel.fase === 'cijfers' && isAfrekening(ronde)) zet({ fase: 'ronde', vraagIndex: 0 });
       else if (spel.fase === 'cijfers' && ronde) zet({ fase: 'antwoord', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
       else if (spel.fase === 'stand' && ronde?.cijfers && cijfersStappen() > 0) zet({ fase: 'cijfers', vraagIndex: cijfersStappen() - 1 });
       else if (spel.fase === 'stand' && ronde) zet({ fase: 'antwoord', vraagIndex: ronde.vragen.length - 1 });

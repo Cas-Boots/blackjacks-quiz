@@ -214,6 +214,10 @@ schuift aan, ook midden in een ronde: hij krijgt meteen een plek in de
 teamindeling. De quizmaster kan hetzelfde doen met *+ Gast* op het
 hostscherm. Een gast doet niet vanzelf mee aan het volgende spel.
 
+De vaste groep is vijf man: Liz, Bastiaan, Joris, Rik en Eva. Cas is de
+quizmaster en speelt de vragen niet mee. Een plus-één voeg je toe als gast;
+die speelt elke ronde mee, behalve *De Voorspellingen* (zie hieronder).
+
 Telefoon en televisie houden het scherm wakker zolang de quiz open staat, dus
 een vraag verdwijnt niet achter een slotscherm en de laptop schiet niet in de
 schermbeveiliging.
@@ -462,9 +466,21 @@ zelf) en wie de meeste voorspellingen goed had (uit de rest van de lijst).
 Voorspellingen zonder uitkomst staan als *nog open* op de televisie en tellen
 niet mee; de vragen van de ronde zeggen erbij hoeveel er nog open staan.
 
-Na de laatste vraag komt de afrekening op de televisie: de stand (goed, mis,
-open, punten) en dan één voorspelling per dia, met wat iedereen zei, de
-uitkomst en wie er scoorde. Op je telefoon licht je eigen regel op.
+Deze ronde heeft geen vragen op de telefoon. *Start de afrekening* gaat
+meteen naar de televisie: de stand (goed, mis, open, punten) en dan één
+voorspelling per dia, met wat iedereen zei, de uitkomst en wie er scoorde. Op
+je telefoon licht je eigen regel op. De vragen van de ronde staan alleen op
+het hostscherm, als spiekbriefje om bij de dia's te vertellen.
+
+Bij de tussenstand na deze ronde krijgt elke speler de punten van zijn eigen
+voorspellingen in de stand van de avond. Wie er in januari bij was, doet mee:
+de vaste vijf én Cas. De punten van Cas blijven in deze ronde: hij staat op
+de dia's met het etiket *quizmaster*, maar niet in de stand van de avond en
+niet op het podium. Een gast voorspelde in januari niet en zit deze ronde uit;
+de televisie en zijn telefoon zeggen dat erbij. De punten worden niet
+opgeslagen maar afgeleid van waar het spel staat, dus *← Terug* of
+*ongedaan* haalt ze weer weg, en een uitkomst die je later nog invult telt
+vanzelf mee.
 
 ### Foto's, video's en muziek bij vragen
 

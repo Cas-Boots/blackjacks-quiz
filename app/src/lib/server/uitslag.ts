@@ -7,9 +7,10 @@
  */
 import { eq, desc } from 'drizzle-orm';
 import { db } from './db/index';
-import { spellen, uitdelingen, antwoorden, correcties } from './db/schema';
+import { spellen, antwoorden, correcties } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
-import { samengesteld, deelnemersVan, standVan, prijzenVan, antwoordTekst, sleutelVan } from './spel';
+import { samengesteld, deelnemersVan, standVan, prijzenVan, antwoordTekst, sleutelVan, uitdelingenVan } from './spel';
+import { isAfrekening } from '$lib/shared/state';
 import { telStand } from './scoring';
 import type { Prijs } from './prijzen';
 
@@ -90,15 +91,10 @@ export function uitslagVan(spelId: number): Uitslag | null {
   for (let i = 1; i < stand.length; i++) if (stand[i].plek === 0) stand[i].plek = stand[i - 1].plek;
 
   const rondesLijst = samengesteld(spel);
-  const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const correctieRijen = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
   const verdelingVan = new Map<string, Record<number, number>>();
-  for (const r of uitdelingRijen) {
-    try {
-      verdelingVan.set(r.vraagSleutel, JSON.parse(r.verdeling));
-    } catch { /* kapotte rij, telt niet mee */ }
-  }
+  for (const u of uitdelingenVan(spel)) verdelingVan.set(u.vraagSleutel, u.verdeling);
   const naamVan = (id: number) => lijst.find((s) => s.id === id)?.naam ?? '?';
 
   const rondes = rondesLijst.map((r, ri) => {
@@ -115,6 +111,21 @@ export function uitslagVan(spelId: number): Uitslag | null {
 
   const vragen: Uitslag['vragen'] = [];
   rondesLijst.forEach((r, ri) => {
+    if (isAfrekening(r)) {
+      // Geen vragen, één regel: wie er punten aan zijn voorspellingen overhield.
+      const verdeling = verdelingVan.get(sleutelVan(ri, 0));
+      if (verdeling) {
+        vragen.push({
+          ronde: ri,
+          nummer: 1,
+          tekst: 'De voorspellingen van januari',
+          antwoord: 'ieder de punten van zijn eigen voorspellingen',
+          goed: Object.entries(verdeling).filter(([, p]) => p > 0).map(([id]) => naamVan(Number(id))),
+          inzenders: 0,
+        });
+      }
+      return;
+    }
     r.vragen.forEach((v, vi) => {
       const sleutel = sleutelVan(ri, vi);
       const verdeling = verdelingVan.get(sleutel);

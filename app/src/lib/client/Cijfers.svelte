@@ -166,6 +166,7 @@
                 <span class="avatar">{initialen(s.naam)}</span>
               {/if}
               {s.naam}
+              {#if s.quizmaster}<span class="rol">quizmaster</span>{/if}
             </span>
             <span class="num goedgetal">{s.goed}</span>
             <span class="num">{s.fout}</span>
@@ -174,6 +175,12 @@
           </div>
         {/each}
       </div>
+      {#if u.stand.some((s) => s.quizmaster) || u.zitUit?.length}
+        <p class="voetnoot" in:fade={{ duration: 400, delay: 150 + u.stand.length * 80 }}>
+          {#if u.stand.some((s) => s.quizmaster)}De punten gaan naar de stand van de avond; die van de quizmaster blijven in deze ronde.{/if}
+          {#if u.zitUit?.length}{u.zitUit.join(' en ')} voorspelde in januari niet mee en zit deze ronde uit.{/if}
+        </p>
+      {/if}
     {/if}
   {:else if persoon}
     <!-- ══ Eén persoon ═══════════════════════════════════════════════ -->
@@ -687,6 +694,22 @@
   .rij .num.punten {
     color: var(--goud-licht);
     font-size: 1.15em;
+  }
+  .rij .rol {
+    margin-left: 0.5rem;
+    font-family: var(--mono);
+    font-size: calc(var(--fs-etiket) * 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--salie);
+  }
+  .voetnoot {
+    margin: 0.8rem 0 0;
+    color: var(--salie);
+    font-size: calc(var(--fs-lood) * 0.8);
+  }
+  .compact .voetnoot {
+    font-size: 0.85rem;
   }
 
   .avatar {

@@ -19,6 +19,7 @@
   import { houdWakker } from '$lib/client/wakker';
   import { passend } from '$lib/client/passend';
   import { prijsIcoon } from '$lib/shared/prijzen';
+  import { isAfrekening } from '$lib/shared/state';
   import {
     kies, kanteling, metNaam, BEGROETINGEN, WACHTZINNEN, RONDEZINNEN, NIEMAND,
     IEDEREEN_FOUT, IEDEREEN_GOED, LANTAARN, POEDEL, VER_ERNAAST,
@@ -478,7 +479,13 @@
             </h1>
             <hr class="rule" style="animation-delay:.3s" />
             <p class="lood" in:fly={{ y: 16, duration: 520, delay: 300, easing: cubicOut }}>{ronde?.uitleg}</p>
-            <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
+            {#if isAfrekening(ronde)}
+              <p class="lood" style="opacity:.8" in:fly={{ y: 16, duration: 520, delay: 450, easing: cubicOut }}>
+                Telefoons mogen weg: wie in januari voorspelde, krijgt de punten van wat er uitkwam.
+              </p>
+            {:else}
+              <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
+            {/if}
 
             {#if inTeams}
               <div class="raster" style="margin-top:clamp(.5rem,2vh,1.5rem)">

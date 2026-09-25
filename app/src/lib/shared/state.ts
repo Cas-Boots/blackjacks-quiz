@@ -91,7 +91,8 @@ export interface PubliekeStaat {
     uitleg: string;
     teamModus: string;
     vragenAantal: number;
-    /** Na de laatste vraag volgen de cijfers van het jaar. */
+    /** Na de laatste vraag volgen de cijfers van het jaar. Bij 'voorspellingen'
+        zijn er geen vragen op de telefoon: zie isAfrekening. */
     cijfers: 'sport' | 'taart' | 'voorspellingen' | null;
   } | null;
   vraag: PubliekeVraag | null;
@@ -116,6 +117,19 @@ export interface PubliekeStaat {
   cijfers: Cijfers | null;
   /** De dia van het jaaroverzicht. Alleen gevuld in de fase 'jaaroverzicht'. */
   jaaroverzicht: JaarDia | null;
+  /** Alleen voor de quizmaster, tijdens de afrekening van de voorspellingen:
+      de vragen van die ronde met hun antwoord, om bij de dia's te vertellen. */
+  praatpunten?: { v: string; a: string; toelichting?: string }[];
+}
+
+/**
+ * De ronde met de voorspellingen van januari is een afrekening, geen
+ * vragenronde. Niemand tikt iets in: wie in januari voorspelde, krijgt de
+ * punten van wat er uitkwam. De quizmaster voorspelde ook, maar zijn punten
+ * blijven in deze ronde; een gast was er in januari niet bij en zit hem uit.
+ */
+export function isAfrekening(ronde: { cijfers?: string | null } | null | undefined): boolean {
+  return ronde?.cijfers === 'voorspellingen';
 }
 
 /* ---- De cijfers van het jaar ------------------------------------------
@@ -176,6 +190,8 @@ export interface VoorspellingUitslag {
 
 export interface VoorspellerStand {
   naam: string;
+  /** De quizmaster: voorspelde mee, maar staat niet in de stand van de avond. */
+  quizmaster?: boolean;
   goed: number;
   fout: number;
   open: number;
@@ -187,6 +203,8 @@ export interface VoorspellingenUitslag {
   stand: VoorspellerStand[];
   /** Hoeveel voorspellingen nog geen uitkomst hebben. */
   open: number;
+  /** Wie er vanavond meespeelt maar in januari niet voorspelde: de gasten. */
+  zitUit?: string[];
 }
 
 export interface Cijfers {

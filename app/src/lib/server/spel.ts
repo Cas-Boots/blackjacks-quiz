@@ -18,12 +18,12 @@ import {
 import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
-import type { PubliekeStaat, PubliekeInzending, Fase, Rol, Onthulling } from '$lib/shared/state';
+import { isAfrekening, type PubliekeStaat, type PubliekeInzending, type Fase, type Rol, type Onthulling } from '$lib/shared/state';
 import { recapAnalyse } from './recap/bron';
 import { verlevendig } from './recap/vragen';
 import { cijfersVoor } from './recap/cijfers';
 import { jaaroverzichtVoor } from './jaaroverzicht';
-import { beoordeelVoorspellingen, type Omgeving } from './recap/voorspellingen';
+import { beoordeelVoorspellingen, verdelingUitVoorspellingen, type Omgeving } from './recap/voorspellingen';
 import type { Analyse } from './recap/analyse';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
@@ -46,9 +46,14 @@ const levend = new Map<string, { analyse: Analyse; aantalSpelers: number | null;
 export function omgevingVan(spelId: number): Omgeving {
   // De quizmaster speelt niet mee, maar is er wel: 'met hoeveel mensen spelen
   // we de quiz' telt hem gewoon mee.
-  const n = db.select({ id: deelnemers.spelerId }).from(deelnemers).where(eq(deelnemers.spelId, spelId)).all().length;
-  const quizmaster = db.select({ id: spelers.id }).from(spelers).where(eq(spelers.isQuizmaster, true)).all().length;
-  return { analyse: recapAnalyse(), aantalSpelers: n > 0 ? n + quizmaster : null };
+  const namen = deelnemersVan(spelId).map((s) => s.naam);
+  const quizmasters = db.select({ naam: spelers.naam }).from(spelers).where(eq(spelers.isQuizmaster, true)).all();
+  return {
+    analyse: recapAnalyse(),
+    aantalSpelers: namen.length > 0 ? namen.length + quizmasters.length : null,
+    deelnemers: namen,
+    quizmaster: quizmasters[0]?.naam ?? null,
+  };
 }
 
 export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
@@ -179,11 +184,54 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
   return { speler, nieuw: true };
 }
 
+/**
+ * De punten van de afrekening van de voorspellingen, zodra die ronde
+ * voorbij is. Ze worden niet opgeslagen maar afgeleid van waar het spel
+ * staat: een stap terug of 'ongedaan' neemt ze vanzelf weer mee terug, en
+ * een uitkomst die je vóór de uitslag nog invult telt gewoon mee.
+ *
+ * Ze staan onder de sleutel van de eerste vraag van die ronde, zodat de
+ * uitslag en de prijzen ze bij de juiste ronde optellen.
+ */
+export function afrekeningVan(spel: { id: number; pakket: string; samenstelling: string; fase: string; rondeIndex: number; geeindigdOp: string | null }) {
+  const ri = samengesteld(spel).findIndex((r) => isAfrekening(r));
+  if (ri < 0) return null;
+  const voorbij =
+    spel.fase === 'einde' ||
+    // De film na de uitslag: de avond is voorbij, ook als dit de laatste ronde was.
+    (spel.fase === 'jaaroverzicht' && spel.geeindigdOp !== null) ||
+    spel.rondeIndex > ri ||
+    (spel.rondeIndex === ri && spel.fase === 'stand');
+  if (!voorbij) return null;
+  const uitslag = beoordeelVoorspellingen(omgevingVan(spel.id));
+  return { rondeIndex: ri, vraagSleutel: sleutelVan(ri, 0), verdeling: verdelingUitVoorspellingen(uitslag.stand, deelnemersVan(spel.id)) };
+}
+
+/** Alle uitdelingen van een spel, met de afrekening van de voorspellingen erbij. */
+export function uitdelingenVan(spel: Parameters<typeof afrekeningVan>[0]): { vraagSleutel: string; verdeling: Record<number, number> }[] {
+  const lijst = db
+    .select()
+    .from(uitdelingen)
+    .where(eq(uitdelingen.spelId, spel.id))
+    .all()
+    .flatMap((r) => {
+      try {
+        return [{ vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> }];
+      } catch {
+        return [];
+      }
+    });
+  const afrekening = afrekeningVan(spel);
+  if (afrekening) lijst.push({ vraagSleutel: afrekening.vraagSleutel, verdeling: afrekening.verdeling });
+  return lijst;
+}
+
 export function standVan(spelId: number) {
-  const rijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spelId)).all();
+  const spel = db.select().from(spellen).where(eq(spellen.id, spelId)).get();
+  if (!spel) return {};
   const cor = db.select().from(correcties).where(eq(correcties.spelId, spelId)).all();
   return telStand(
-    rijen.map((r) => JSON.parse(r.verdeling)),
+    uitdelingenVan(spel).map((u) => u.verdeling),
     cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
   );
 }
@@ -192,9 +240,9 @@ export function standVan(spelId: number) {
  * De prijzen voor de uitslag. Rekent alleen bij de uitslag zelf, want het
  * leest alle antwoorden van de avond — vaak genoeg, niet bij elke tik.
  */
-export function prijzenVan(spel: { id: number; pakket: string; samenstelling: string }, lijst: { id: number; naam: string }[]): Prijs[] {
+export function prijzenVan(spel: Parameters<typeof afrekeningVan>[0], lijst: { id: number; naam: string }[]): Prijs[] {
   const rondes = samengesteld(spel);
-  const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
+  const uitdelingLijst = uitdelingenVan(spel);
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
   const ledenVan = (rondeIndex: number, inzender: string): number[] => {
@@ -205,19 +253,15 @@ export function prijzenVan(spel: { id: number; pakket: string; samenstelling: st
       return [];
     }
   };
-  const uitdelingLijst = uitdelingRijen.map((r) => {
-    try {
-      return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
-    } catch {
-      return { vraagSleutel: r.vraagSleutel, verdeling: {} };
-    }
-  });
 
   // Alleen vragen die echt aan bod kwamen tellen mee voor reeksen en de
   // moeilijkste vraag: een avond die vroeg stopt heeft geen "onbeantwoorde" rest.
-  const gespeeld = new Set([...uitdelingRijen.map((r) => r.vraagSleutel), ...antwoordRijen.map((r) => r.vraagSleutel)]);
+  // De afrekening van de voorspellingen had geen vragen; die telt alleen
+  // mee voor de rondeprijzen.
+  const gespeeld = new Set([...uitdelingLijst.map((r) => r.vraagSleutel), ...antwoordRijen.map((r) => r.vraagSleutel)]);
   const vragen: { sleutel: string; tekst: string; inzenders: number }[] = [];
   rondes.forEach((r, ri) => {
+    if (isAfrekening(r)) return;
     r.vragen.forEach((v, vi) => {
       const sleutel = sleutelVan(ri, vi);
       if (!gespeeld.has(sleutel)) return;
@@ -432,6 +476,12 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       spel.fase === 'jaaroverzicht'
         ? jaaroverzichtVoor(recapAnalyse(), spel.vraagIndex, spel.geeindigdOp !== null)
         : null,
+    // Bij de afrekening heeft de quizmaster de vragen van die ronde als
+    // spiekbriefje; de televisie en de telefoons krijgen ze nooit.
+    praatpunten:
+      rol === 'quizmaster' && spel.fase === 'cijfers' && ronde && isAfrekening(ronde)
+        ? ronde.vragen.map((v) => ({ v: v.v, a: v.a ?? '', toelichting: v.toelichting }))
+        : undefined,
     ingeleverd,
     inzendingen,
     uitdeling,

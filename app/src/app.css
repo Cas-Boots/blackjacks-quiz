@@ -1568,6 +1568,24 @@ kbd {
   text-align: center;
   padding-top: 0.1rem;
 }
+/* Het spiekbriefje bij de afrekening van de voorspellingen. */
+.praatpunten {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 10px;
+}
+.praatpunten summary {
+  cursor: pointer;
+  color: var(--goud);
+}
+.praatpunten ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
 .rondedetails summary {
   cursor: pointer;
   display: flex;

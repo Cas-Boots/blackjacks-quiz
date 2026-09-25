@@ -11,6 +11,7 @@
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
+  import { isAfrekening } from '$lib/shared/state';
   import { kies, kanteling, JUICH, TROOST, NIETS_INGELEVERD, REACTIES } from '$lib/shared/kwinkslagen';
 
   let antwoord = $state('');
@@ -276,6 +277,12 @@
         <p class="etiket">{ronde?.suit} Ronde {staat.rondeIndex + 1}</p>
         <h2 class="groot" style="font-size:1.6rem;margin-top:.4rem">{ronde?.naam}</h2>
         <p class="lood" style="font-size:1rem;margin-top:.6rem">{ronde?.uitleg}</p>
+        {#if isAfrekening(ronde)}
+          <p class="fijn" style="margin-top:.6rem">
+            Deze ronde tik je niets in: wie in januari voorspelde, krijgt de punten van wat er uitkwam.
+            Was je er in januari niet bij, dan kijk je deze ronde mee.
+          </p>
+        {/if}
       </div>
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
@@ -408,6 +415,9 @@
           {#if staat.cijfers.soort !== 'voorspellingen' && !staat.cijfers.personen.some((p) => p.naam === mijnNaam)}
             <p class="fijn" style="margin-top:.5rem">Van jou zijn er geen cijfers bijgehouden. Kijk mee op de televisie.</p>
           {:else}
+            {#if mijnNaam && staat.cijfers.voorspellingen?.zitUit?.includes(mijnNaam)}
+              <p class="fijn" style="margin:.3rem 0 .6rem">Jij voorspelde in januari niet mee, dus deze ronde zit je uit. Kijk mee hoe de rest ervan afkomt.</p>
+            {/if}
             {#if opTv && opTv !== mijnNaam}<p class="fijn" style="margin:.3rem 0 .6rem">Op de televisie: {opTv}. Dit is jouw jaar.</p>{/if}
             <div style="margin-top:.6rem">
               <Cijfers cijfers={staat.cijfers} spelers={staat.spelers} compact alleen={mijnNaam} />
