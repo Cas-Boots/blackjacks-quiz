@@ -55,14 +55,14 @@ export const PAKKETTEN: Pakketten = {
           {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
           {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
           {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
-          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen",
+          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
            toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
         ]
       },
       {
         naam: "Dichtstbij Wint",
         suit: "♦", thema: "2026 in cijfers", sfeer: "staal",
-        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
+        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
@@ -77,7 +77,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Sport: de Marges",
         suit: "♣", thema: "Voor de echte kenners", sfeer: "gras",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
         uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
         vragen: [
@@ -91,7 +91,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Vier Kaarten",
         suit: "♣", thema: "Het jaar in meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
@@ -139,14 +139,14 @@ export const PAKKETTEN: Pakketten = {
           {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
           {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
           {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
-          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag"},
-          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers"}
+          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
+          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
         ]
       },
       {
         naam: "Jullie Jaar in Beeld",
         suit: "♥", thema: "Eigen foto’s, video’s en muziek", sfeer: "bioscoop",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
         uitleg: "Foto’s en filmpjes uit 2026. Laad ze in op het startscherm en vervang deze vragen door je eigen tekst.",
         vragen: [
@@ -212,7 +212,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "2027",
         suit: "♣", thema: "Vooruitkijken", sfeer: "vuurwerk",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
@@ -263,7 +263,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Emoji Raden",
         suit: "♥", thema: "Films en sprookjes", sfeer: "bioscoop",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Welk verhaal of welke film staat hier?",
         vragen: [
           {emoji:"❄️ 👭 ⛄", v:"Welke film?", a:"Frozen"},
@@ -295,7 +295,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Dichtstbij Wint",
         suit: "♣", thema: "Cijferronde", sfeer: "staal",
-        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
+        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel gouden medailles won Nederland op de Winterspelen van 2026?", getal:10, eenheid:"keer goud"},
@@ -307,7 +307,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Nederland & de Wereld",
         suit: "♠", thema: "Meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         uitleg: "Nieuwe teams. Kies A, B, C of D.",
         vragen: [
           {v:"Wie werd in 2026 minister-president van Nederland?",
@@ -327,7 +327,7 @@ export const PAKKETTEN: Pakketten = {
       {
         naam: "Ons Jaar in Beeld",
         suit: "♥", thema: "Eigen familiefoto’s", sfeer: "bioscoop",
-        type: "open", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true, teVullen: true,
         uitleg: "Oude familiefoto’s doen het hier altijd goed. Laad ze in op het startscherm.",
         vragen: [
