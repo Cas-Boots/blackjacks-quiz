@@ -36,8 +36,7 @@
     <div class="trede" data-plek={idx + 1} style="--vertraging:{compact ? vertraging[idx] / 2 : vertraging[idx]}ms">
       <div class="staander">
         <span class="kroonhouder" class:kroon={idx === 0}>
-          <!-- Wie wint, danst; de rest doet zijn eigen ding. -->
-          <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat={compact ? 'm' : 'l'} goud={idx === 0} stemming={idx === 0 ? 'feest' : null} />
+          <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat={compact ? 'm' : 'l'} goud={idx === 0} />
         </span>
         <span class="naam">{r.naam}</span>
         <span class="punten">

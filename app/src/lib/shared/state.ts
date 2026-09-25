@@ -8,7 +8,7 @@ export interface PubliekeSpeler {
   id: number;
   naam: string;
   foto: string | null;
-  /** Het geestdier, een sleutel uit shared/dieren.ts. */
+  /** Het maatje, een sleutel uit shared/dieren.ts. */
   dier: string;
   /** Aantal seconden sinds dit apparaat zich voor het laatst meldde. */
   stilSinds: number | null;
@@ -108,7 +108,7 @@ export interface PubliekeStaat {
     naam: string;
     punten: number;
     foto: string | null;
-    /** Het geestdier, een sleutel uit shared/dieren.ts. */
+    /** Het maatje, een sleutel uit shared/dieren.ts. */
     dier: string;
     /** Punten in de huidige ronde, bonussen inbegrepen. Voor de fiches bij de tussenstand. */
     dezeRonde?: number;

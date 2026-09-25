@@ -46,8 +46,8 @@ function portret(kleur: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-/** Elk een dier met een andere gang: lopen, springen, slingeren, zwemmen, vliegen, waggelen. */
-const TESTDIEREN = ['lama', 'kangoeroe', 'aap', 'goudvis', 'bij', 'pinguin', 'egel', 'slak'];
+/** Elk een dier met een andere gang: lopen, springen, slingeren, zwemmen, vliegen, graven. */
+const TESTDIEREN = ['lama', 'kangoeroe', 'aap', 'goudvis', 'bij', 'das', 'pinguin', 'slak'];
 
 function spelers(verbonden: number | boolean = true): PubliekeSpeler[] {
   return NAMEN.map((naam, i) => {

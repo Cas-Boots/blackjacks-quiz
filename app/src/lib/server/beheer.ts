@@ -36,7 +36,7 @@ export interface BeheerSpeler {
   id: number;
   naam: string;
   foto: string | null;
-  /** Het geestdier, een sleutel uit shared/dieren.ts. */
+  /** Het maatje, een sleutel uit shared/dieren.ts. */
   dier: string;
   isQuizmaster: boolean;
   isGast: boolean;
@@ -411,7 +411,7 @@ export function zetFoto(id: number, foto: unknown) {
   meld();
 }
 
-/** Dobbelt een ander geestdier voor deze speler. */
+/** Dobbelt een ander maatje voor deze speler. */
 export function wisselDier(id: number) {
   spelerOfFout(id);
   dobbelDier(id);

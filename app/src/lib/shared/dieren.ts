@@ -1,9 +1,10 @@
 /**
- * De geestdieren: ieder aan tafel krijgt er één, voor de hele avond.
+ * De maatjes: ieder aan tafel kiest een dier dat de avond meegaat.
  *
- * Het dier staat bij je naam op de televisie, op je telefoon, in de stand en
- * op het podium, en roept af en toe iets als je goed of fout zit. Puur voor
- * de lol: het dier telt nergens mee.
+ * Je foto blijft je portret; het dier zit klein op de rand en rent over het
+ * scherm op de grote momenten: als je binnenkomt, als je het goed hebt, als
+ * iedereen fout zit, als je stijgt en als je wint. Het roept er iets bij.
+ * Puur voor de lol: het dier telt nergens mee.
  *
  * In de database staat alleen de sleutel. Een sleutel die hier niet (meer)
  * bestaat valt terug op een dier gekozen op de naam, zodat er nooit een gat
@@ -11,7 +12,7 @@
  */
 import { hash, kies } from './kwinkslagen';
 
-export interface Geestdier {
+export interface Maatje {
   sleutel: string;
   emoji: string;
   /** Zoals het op het scherm staat: "de Dramatische Lama". */
@@ -22,17 +23,18 @@ export interface Geestdier {
   fout: readonly string[];
   /** Waarmee het dier zich in de lobby meldt. */
   entree: string;
-  /** Hoe het dier beweegt op het scherm; een CSS-animatie in app.css. */
+  /** Hoe het dier over het scherm gaat; zie gangVan en de `dier-…`-animaties in app.css. */
   beweging: Beweging;
 }
 
-/** De manieren waarop een dier beweegt. Elk heeft een @keyframes `dier-…` in app.css. */
+/** De manieren waarop een dier beweegt; `.dier[data-beweging=…]` in app.css. */
 export type Beweging =
-  | 'loop' | 'spring' | 'schommel' | 'zwem' | 'vlieg'
+  | 'loop' | 'spring' | 'schommel' | 'zwem' | 'vlieg' | 'graaf'
   | 'stuiter' | 'draai' | 'waggel' | 'kruip';
 
-/** Hoe het dier over de televisie gaat als het binnenkomt: lopen, springen, slingeren, zwemmen of vliegen. */
-export function gangVan(beweging: Beweging): 'stap' | 'spring' | 'schommel' | 'zwem' | 'vlieg' {
+/** Hoe het dier over de televisie gaat als het binnenkomt: lopen, springen, slingeren, zwemmen, vliegen of graven. */
+export function gangVan(beweging: Beweging): 'stap' | 'spring' | 'schommel' | 'zwem' | 'vlieg' | 'graaf' {
+  if (beweging === 'graaf') return 'graaf';
   if (beweging === 'zwem') return 'zwem';
   if (beweging === 'vlieg') return 'vlieg';
   if (beweging === 'spring' || beweging === 'stuiter') return 'spring';
@@ -40,7 +42,7 @@ export function gangVan(beweging: Beweging): 'stap' | 'spring' | 'schommel' | 'z
   return 'stap';
 }
 
-export const DIEREN: readonly Geestdier[] = [
+export const DIEREN: readonly Maatje[] = [
   {
     sleutel: 'lama', emoji: '🦙', titel: 'de Dramatische Lama',
     goed: ['De lama spuugt van blijdschap.', 'Lama zegt: dat wist ik al.'],
@@ -230,6 +232,34 @@ export const DIEREN: readonly Geestdier[] = [
     entree: 'landt op de lamp en roept iedereens naam',
     beweging: 'vlieg',
   },
+  {
+    sleutel: 'das', emoji: '🦡', titel: 'de Das die Overal Doorheen Graaft',
+    goed: ['De das groef het antwoord zo op.', 'Diep gegraven, goud gevonden.'],
+    fout: ['De das groef een gat. En viel erin.', 'Te diep gegraven. Niks gevonden.'],
+    entree: 'komt dwars door de vloer omhoog',
+    beweging: 'graaf',
+  },
+  {
+    sleutel: 'konijn', emoji: '🐇', titel: 'het Konijn met een Gat in de Tuin',
+    goed: ['Het konijn schiet van blijdschap zijn hol in en weer uit.', 'Snel als een konijn, en raak.'],
+    fout: ['Het konijn verdwijnt beschaamd in zijn hol.', 'Verkeerde afslag in de konijnenpijp.'],
+    entree: 'duikt uit een hol op dat er net nog niet was',
+    beweging: 'graaf',
+  },
+  {
+    sleutel: 'worm', emoji: '🪱', titel: 'de Worm die de Diepte in Gaat',
+    goed: ['De worm kronkelt van plezier.', 'Van onder de grond, recht in de roos.'],
+    fout: ['De worm kruipt terug de aarde in.', 'Kronkel. Mis.'],
+    entree: 'kronkelt omhoog uit de bloempot',
+    beweging: 'graaf',
+  },
+  {
+    sleutel: 'eekhoorn', emoji: '🐿️', titel: 'de Eekhoorn die Alles Begraaft',
+    goed: ['De eekhoorn begraaft het punt. Voor later.', 'Een nootje voor de winter!'],
+    fout: ['De eekhoorn weet niet meer waar hij het antwoord begroef.', 'Geen nootje vandaag.'],
+    entree: 'graaft eerst even een nootje in in de bank',
+    beweging: 'graaf',
+  },
 ];
 
 const PER_SLEUTEL = new Map(DIEREN.map((d) => [d.sleutel, d]));
@@ -239,7 +269,7 @@ export function isDier(sleutel: unknown): sleutel is string {
 }
 
 /** Het dier bij een sleutel. Zonder geldige sleutel beslist de naam. */
-export function dierVan(sleutel: string | null | undefined, naam = ''): Geestdier {
+export function dierVan(sleutel: string | null | undefined, naam = ''): Maatje {
   return (sleutel && PER_SLEUTEL.get(sleutel)) || kies(DIEREN, `dier:${naam}`);
 }
 

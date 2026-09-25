@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DIEREN, dierVan, vrijDier, dierenroep, gangVan, isDier } from '../src/lib/shared/dieren';
 
-describe('geestdieren', () => {
+describe('maatjes', () => {
   it('heeft unieke sleutels en elk dier heeft iets te roepen', () => {
     expect(new Set(DIEREN.map((d) => d.sleutel)).size).toBe(DIEREN.length);
     for (const d of DIEREN) {
@@ -19,7 +19,7 @@ describe('geestdieren', () => {
       expect(css, d.beweging).toContain(`.dier[data-beweging="${d.beweging}"]`);
       expect(css, gangVan(d.beweging)).toContain(`.dierenparade[data-gang="${gangVan(d.beweging)}"]`);
     }
-    for (const stemming of ['feest', 'sip']) expect(css).toContain(`.dier[data-beweging="${stemming}"]`);
+    expect(css).toContain('.dierenparade[data-gang="sip"]');
   });
 
   it('valt zonder geldige sleutel terug op een vast dier per naam', () => {

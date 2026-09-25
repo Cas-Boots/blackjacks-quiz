@@ -360,34 +360,42 @@ komt alleen op een moment dat het mag:
   tromgeroffel, een toeter, "ooooh", een bel, de foute zoemer, de treurige
   trombone en een fanfare. De quizmaster drukt, de televisie speelt.
 
-### De geestdieren
+### De maatjes
 
-Iedereen aan tafel heeft een geestdier: *Liz, de Dramatische Lama*, *Rik, de
-Goudvis met Drie Seconden Geheugen*. Het dier loopt de hele avond mee en telt
-nergens mee; het is er alleen voor de lol.
+Je foto (of selfie) blijft je portret. Daarnaast kiest iedereen een
+**maatje**: een dier dat de avond meegaat, zoals *Liz, het Konijn met een Gat
+in de Tuin* of *Rik, de Goudvis met Drie Seconden Geheugen*. Het telt nergens
+mee; het is er alleen voor de lol.
 
-- **Overal bij je naam.** Zonder foto is het dier je portret, met een foto zit
-  het als figuurtje op de rand: in de lobby, bij de teams, in de inleverrij,
-  bij de antwoorden, in de stand, op het podium en in de cijfers van het jaar.
-- **Elk dier beweegt op zijn eigen manier.** De lama, giraf en hond lopen, de
-  kangoeroe en de eenhoorn springen, de aap en de luiaard slingeren, de
-  goudvis, dolfijn en krokodil zwemmen, en vogels en insecten vliegen. De
-  pinguïn waggelt, want vliegen kan hij niet.
-- **Binnenkomst.** Wie in de lobby binnenkomt, trekt als dier over de
-  televisie: lopend over de vloer, springend, slingerend langs de bovenkant,
-  zwemmend met bubbels of vliegend.
-- **Juichen en afdruipen.** Bij de onthulling danst het dier van wie het goed
-  had en druipt het dier van wie het fout had af. Op de televisie roept één
-  dier iets ("De kip legt van blijdschap een ei."), op je telefoon roept je
-  eigen dier. De koploper danst in de stand, de laatste kijkt sip, en de
-  winnaar krijgt *Hulde aan de Aap die Aan de Lamp Hangt!*
-- **Ander dier.** Op de telefoon staat in de lobby *🎲 Ander dier*, en op het
-  beheerscherm kan de quizmaster er ook een dobbelen. Er zitten nooit twee
-  dezelfde dieren aan tafel, tenzij alle 27 op zijn.
+- **Kiezen.** Op de telefoon staat in de lobby *Kies je maatje*, met alle 31
+  dieren. Een dier dat een ander aan tafel al heeft, is grijs. Wie niets
+  kiest, krijgt er vanzelf een. De quizmaster kan op het beheerscherm een
+  ander dier dobbelen.
+- **Stil op je portret.** Het maatje zit klein en stil op de rand van je
+  portret, op de televisie, de telefoon, het hostscherm en het podium.
+- **Over het scherm op de grote momenten**, en alleen dan:
+  - als je in de lobby binnenkomt;
+  - als je punten pakt bij een vraag: de maatjes van wie het goed had rennen
+    blij over de televisie, en dat van jou over je eigen telefoon;
+  - als iedereen fout zit: de tafel sjokt grijs en met een regenwolkje voorbij
+    (op je telefoon ook als alleen jij het fout had);
+  - bij de tussenstand voor de stijger, en bij de uitslag voor de winnaar.
+
+  Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
+  het leuk blijft en niet druk wordt.
+- **Elk dier beweegt op zijn eigen manier.** Lama, giraf en hond lopen,
+  kangoeroe en kikker springen, aap en luiaard slingeren langs de bovenkant,
+  goudvis, dolfijn en krokodil zwemmen met bubbels, vogels en insecten
+  vliegen, en das, konijn, worm en eekhoorn graven zich onder de grond door.
+  De pinguïn waggelt, want vliegen kan hij niet.
+- **Het roept iets.** Bij de onthulling roept het maatje van de eerste die het
+  goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
+  telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
 
 De dieren, hun titels en wat ze roepen staan in `src/lib/shared/dieren.ts`;
-de bewegingen zijn de `dier-…`-animaties onderaan `src/app.css`. Wie
-*minder beweging* in zijn systeem aanzet, krijgt stilstaande dieren.
+de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-animaties
+onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
+geen optochten.
 
 ### Het hostscherm
 

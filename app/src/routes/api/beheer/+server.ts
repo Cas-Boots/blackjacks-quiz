@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         break;
       case 'speler-dier':
         wisselDier(id);
-        melding = 'Ander geestdier gedobbeld.';
+        melding = 'Ander maatje gedobbeld.';
         break;
       case 'speler-verwijderen':
         verwijderSpeler(id);
