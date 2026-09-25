@@ -14,6 +14,10 @@ export interface Omgeving {
   analyse: Analyse | null;
   /** Hoeveel mensen er vanavond meespelen; null als dat nog niet vaststaat. */
   aantalSpelers: number | null;
+  /** Wie er vanavond meespeelt, zonder de quizmaster. */
+  deelnemers?: string[];
+  /** De naam van de quizmaster. */
+  quizmaster?: string | null;
 }
 
 const normaliseer = (x: string | number | null | undefined) =>
@@ -123,7 +127,29 @@ export function telStand(vragen: VoorspellingUitslag[]): VoorspellerStand[] {
 export function beoordeelVoorspellingen(omgeving: Omgeving): VoorspellingenUitslag {
   const vragen: VoorspellingUitslag[] = [];
   for (const v of VOORSPELLINGEN) vragen.push(beoordeelEen(v, omgeving, vragen));
-  return { vragen, stand: telStand(vragen), open: vragen.filter((v) => v.open).length };
+  const qm = omgeving.quizmaster ? normaliseer(omgeving.quizmaster) : null;
+  const stand = telStand(vragen).map((s) => (qm && normaliseer(s.naam) === qm ? { ...s, quizmaster: true } : s));
+  const voorspellers = new Set<string>(VOORSPELLERS.map(normaliseer));
+  const zitUit = (omgeving.deelnemers ?? []).filter((n) => !voorspellers.has(normaliseer(n)));
+  return { vragen, stand, open: vragen.filter((v) => v.open).length, ...(zitUit.length ? { zitUit } : {}) };
+}
+
+/**
+ * De punten van de afrekening voor de stand van de avond: iedere deelnemer
+ * krijgt wat zijn eigen voorspellingen opleverden. Wie in januari niet
+ * voorspelde (een gast) krijgt niets, en de quizmaster doet niet mee aan de
+ * stand, dus die staat hier ook niet in.
+ */
+export function verdelingUitVoorspellingen(
+  stand: VoorspellerStand[],
+  deelnemers: { id: number; naam: string }[],
+): Record<number, number> {
+  const uit: Record<number, number> = {};
+  for (const d of deelnemers) {
+    const s = stand.find((x) => !x.quizmaster && normaliseer(x.naam) === normaliseer(d.naam));
+    if (s && s.punten > 0) uit[d.id] = s.punten;
+  }
+  return uit;
 }
 
 /* ---- De vragen van de ronde 'De Voorspellingen' ------------------------ */

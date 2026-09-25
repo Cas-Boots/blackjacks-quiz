@@ -1,3 +1,4 @@
+import { api } from './proef';
 import type { PubliekeStaat, Rol, Por } from '$lib/shared/state';
 
 /**
@@ -29,6 +30,8 @@ class Live {
   /** De laatste por van de quizmaster aan deze telefoon; verdwijnt vanzelf. */
   por = $state<Por | null>(null);
   #porTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Het laatste geluid van het geluidsbord. De televisie speelt het af. */
+  geluid = $state<{ id: number; geluid: string } | null>(null);
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -72,7 +75,7 @@ class Live {
 
   #verbind() {
     try {
-      const bron = new EventSource('/api/stream');
+      const bron = new EventSource(api('/api/stream'));
       this.#bron = bron;
 
       bron.addEventListener('staat', (e) => {
@@ -97,6 +100,14 @@ class Live {
           this.reacties = [...this.reacties.slice(-24), r];
           // Na de zweefanimatie mag hij weg.
           setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('geluid', (e) => {
+        try {
+          this.geluid = JSON.parse((e as MessageEvent).data);
         } catch {
           /* kapot pakketje, laat maar */
         }
@@ -144,7 +155,7 @@ class Live {
 
   async #haalOp() {
     try {
-      const r = await fetch('/api/state', { cache: 'no-store' });
+      const r = await fetch(api('/api/state'), { cache: 'no-store' });
       if (!r.ok) return;
       this.#neem(await r.json());
       this.verbonden = true;
@@ -167,7 +178,7 @@ class Live {
   }
 
   async opdracht(opdracht: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/host', {
+    const r = await fetch(api('/api/host'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ opdracht, ...extra }),
@@ -177,7 +188,7 @@ class Live {
   }
 
   async reageer(emoji: string) {
-    await fetch('/api/reactie', {
+    await fetch(api('/api/reactie'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ emoji }),
@@ -185,7 +196,7 @@ class Live {
   }
 
   async meld(rol: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/join', {
+    const r = await fetch(api('/api/join'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ rol, ...extra }),

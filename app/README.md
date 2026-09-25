@@ -194,6 +194,7 @@ oude tekst, en de controle zegt dat de server een oudere bouw draait.
 | Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
 | Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
 | Beheer | `/beheer` | de quizmaster, buiten de avond om; spelers, oude spellen, telefoons, bestanden bij de vragen, back-up |
+| Proefrit | `/proef` (of `/playtest`) | de quizmaster; de hele avond uitproberen met bots, zonder de echte te raken |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
@@ -213,6 +214,10 @@ Staat iemand niet in de lijst? Onder de namen tikt een gast zijn naam in en
 schuift aan, ook midden in een ronde: hij krijgt meteen een plek in de
 teamindeling. De quizmaster kan hetzelfde doen met *+ Gast* op het
 hostscherm. Een gast doet niet vanzelf mee aan het volgende spel.
+
+De vaste groep is vijf man: Liz, Bastiaan, Joris, Rik en Eva. Cas is de
+quizmaster en speelt de vragen niet mee. Een plus-één voeg je toe als gast;
+die speelt elke ronde mee, behalve *De Voorspellingen* (zie hieronder).
 
 Telefoon en televisie houden het scherm wakker zolang de quiz open staat, dus
 een vraag verdwijnt niet achter een slotscherm en de laptop schiet niet in de
@@ -270,8 +275,12 @@ invulling wachten.
    meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld, en bij een
    stemvraag zijn de mensen aan tafel de knoppen. De televisie laat zien wie er
    al heeft ingeleverd, zonder de inhoud. Blijft iemand achter, dan **port** de
-   quizmaster hem: een trilling en een gele balk op die telefoon.
-2. **De onthulling.** De televisie toont het antwoord én wat iedereen had
+   quizmaster hem: een trilling en een gele balk op die telefoon. Heeft
+   iedereen ingeleverd, dan springt de klok naar de laatste vijf seconden:
+   niemand hoeft te wachten op een klok terwijl de tafel al klaar is.
+2. **De onthulling.** Eerst een tromgeroffel; de telefoons wachten mee, zodat
+   niemand het antwoord verklapt. Bij meerkeuze vallen de foute opties één voor
+   één af en klapt de goede om. Dan toont de televisie het antwoord én wat iedereen had
    ingetikt, als kaartjes. Bij dichtstbij wordt dat een getallenlijn met het
    doel erop, bij een stemvraag een telling met balkjes en wie op wie stemde.
    Dichtstbij en stem rekent de server op dit moment meteen uit. Elke telefoon
@@ -279,7 +288,24 @@ invulling wachten.
    en laat zien wat de rest had.
 3. **De quizmaster tikt aan** wie het goed had, of drukt op *Vink aan wat goed
    lijkt* (sneltoets `A`) om in één keer alles te nemen wat de machine met
-   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee.
+   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee, en
+   op elk goed kaartje landt een fiche met de punten.
+
+### Bonuspunten: snelheid en reeksen
+
+- **Snelste vinger, +1.** Het snelst ingeleverde goede antwoord krijgt een punt
+  extra. In een teamronde is dat het snelste team, en elk lid krijgt het punt.
+  Niet bij stemvragen (een mening), dichtstbij (heeft al een eigen bonus) en
+  rondes die de tafel samen speelt.
+- **Op dreef, +1.** Wie drie vragen of meer op rij punten pakt, krijgt vanaf de
+  derde een punt extra per vraag. De reeks is van de persoon en loopt door als
+  de teams wisselen; een vraag waar je geen punten kreeg begint hem opnieuw.
+
+Bonussen worden nergens opgeslagen: de server leidt ze bij elke telling af uit
+de uitdelingen en de antwoordtijden (`src/lib/server/bonus.ts`). Corrigeert de
+quizmaster een eerdere vraag of draait hij iets terug, dan schuiven de bonussen
+vanzelf mee. De televisie laat ze zien bij de onthulling, met een vlammetje in
+de tussenstand; de telefoon noemt ze onder je punten.
 
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
 "Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
@@ -327,6 +353,12 @@ komt alleen op een moment dat het mag:
   Bij dichtstbij krijgt een gok die er hopeloos naast zat een label.
 - **Poedelprijs** voor de laatste op het podium.
 - De vraagkaart ligt nooit precies recht en trilt in de laatste vijf seconden.
+- **Overgangen.** Bij een nieuwe ronde, de tussenstand en de uitslag vliegt er
+  een speelkaart zo groot als het scherm voorbij. De eerste ronde begint met
+  drie-twee-één onder twee zoeklichten.
+- **Het geluidsbord.** Op het hostscherm staan knoppen voor applaus, een
+  tromgeroffel, een toeter, "ooooh", een bel, de foute zoemer, de treurige
+  trombone en een fanfare. De quizmaster drukt, de televisie speelt.
 
 ### Het hostscherm
 
@@ -493,9 +525,21 @@ zelf) en wie de meeste voorspellingen goed had (uit de rest van de lijst).
 Voorspellingen zonder uitkomst staan als *nog open* op de televisie en tellen
 niet mee; de vragen van de ronde zeggen erbij hoeveel er nog open staan.
 
-Na de laatste vraag komt de afrekening op de televisie: de stand (goed, mis,
-open, punten) en dan één voorspelling per dia, met wat iedereen zei, de
-uitkomst en wie er scoorde. Op je telefoon licht je eigen regel op.
+Deze ronde heeft geen vragen op de telefoon. *Start de afrekening* gaat
+meteen naar de televisie: de stand (goed, mis, open, punten) en dan één
+voorspelling per dia, met wat iedereen zei, de uitkomst en wie er scoorde. Op
+je telefoon licht je eigen regel op. De vragen van de ronde staan alleen op
+het hostscherm, als spiekbriefje om bij de dia's te vertellen.
+
+Bij de tussenstand na deze ronde krijgt elke speler de punten van zijn eigen
+voorspellingen in de stand van de avond. Wie er in januari bij was, doet mee:
+de vaste vijf én Cas. De punten van Cas blijven in deze ronde: hij staat op
+de dia's met het etiket *quizmaster*, maar niet in de stand van de avond en
+niet op het podium. Een gast voorspelde in januari niet en zit deze ronde uit;
+de televisie en zijn telefoon zeggen dat erbij. De punten worden niet
+opgeslagen maar afgeleid van waar het spel staat, dus *← Terug* of
+*ongedaan* haalt ze weer weg, en een uitkomst die je later nog invult telt
+vanzelf mee.
 
 ### Foto's, video's en muziek bij vragen
 
@@ -524,6 +568,47 @@ naspelen. Draai eerst `npm run verify` (zie [Komen de vragen goed
 door?](#komen-de-vragen-goed-door)), dan weet je dat de vragen kloppen
 voordat je de bediening oefent.
 
+### De hele avond: `/proef`
+
+Open **`/proef`** (of `/playtest`), meld je aan met de pincode van het
+hostscherm, kies hoe vaak de bots het goed hebben en of er een plus-één aan
+tafel zit, en druk op **Begin de proefrit**.
+
+- **Niets echts wordt geraakt.** Een proefrit is een eigen spel met een eigen
+  database in het geheugen van de server. De echte televisie en telefoons
+  zien er niets van, hij komt niet in de uitslagen of het beheer, en een
+  echte avond kan tegelijk gewoon doorlopen. Elk scherm van een proefrit
+  draagt een geel etiket *Proefrit*. Een proefrit verdwijnt na vier uur
+  zonder gebruik, bij *Stop de proefrit*, en bij een herstart van de server.
+- **Wat je gaat spelen.** De proefrit neemt de spelers (met portret) en de
+  gekozen rondes en vragen van de echte avond over.
+- **Alle schermen naast elkaar.** De televisie, een tot vier telefoons en
+  het hostscherm staan naast elkaar, elk op ware grootte en verkleind. Klik
+  door op het hostscherm en speel mee op de telefoons: elke telefoon is een
+  eigen apparaat en kiest zijn naam zoals een echte. **Opnieuw** zet een
+  telefoon terug bij het kiezen van een naam. *Los openen* opent een scherm
+  in een eigen tabblad.
+- **Bots aan tafel.** Elke naam waar geen telefoon op zit, speelt een bot: hij
+  levert op een geloofwaardig moment in, goed zo vaak als je instelt (70 %
+  standaard), bij een teamronde één keer per team. Zet je een telefoon op
+  een naam, dan stopt die bot; laat je de telefoon een minuut liggen, dan
+  neemt de bot het weer over. Bots uitzetten en een plus-één laten
+  aanschuiven kan ook tijdens de proefrit.
+- **Spring naar.** Elk onderdeel van de avond is één klik verderop: de lobby,
+  de trailer, per ronde de titelkaart, elke vraag **open** (klok loopt) of
+  **antwoord** (onthuld), de cijfers of de voorspellingen, de tussenstand,
+  het podium en de film na afloop. Alles ervoor spelen de bots meteen, zodat
+  de stand eruitziet als bij een echte avond; alles erna wordt gewist, dus
+  een vraag opnieuw openen begint hem leeg.
+- **Op je eigen telefoon.** Scan de QR-code op de proefpagina (of op de
+  televisie van de proefrit) om met een echte telefoon mee te doen. Die zit
+  dan in de proefrit, niet in de echte avond, en houdt zijn naam voor de
+  echte avond gewoon.
+
+Het verschil met de testmodus hieronder: `/tv?test` laat met verzonnen
+vragen zien hoe elke dia van de televisie eruitziet, zonder server. De
+proefrit speelt je echte vragen met de echte spelmotor, op alle schermen.
+
 ### De televisie alleen: `/tv?test`
 
 Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
@@ -546,6 +631,10 @@ iedereen goed, iedereen fout, niemand ingeleverd, de getallenlijn, de
 stemtelling), de cijfers van het jaar, de tussenstand, het podium met de
 prijzen, en een paar randgevallen: een veel te lange vraag, een filmpje dat
 ontbreekt en het scherm vóór de eerste verbinding.
+
+Op een breed scherm schuift de dia naast het paneel, verkleind maar verder
+precies zoals de televisie hem toont. Klap het paneel weg met `T` om hem op
+ware grootte te zien; op een smal scherm ligt het paneel eroverheen.
 
 | Toets | Doet |
 |---|---|

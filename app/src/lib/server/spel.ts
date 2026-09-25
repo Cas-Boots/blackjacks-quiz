@@ -7,7 +7,7 @@
  * die in elke momentopname meekomt.
  */
 import { eq, and, desc } from 'drizzle-orm';
-import { db } from './db/index';
+import { db, huidigeProef } from './db/index';
 import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correcties, apparaten } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
@@ -18,14 +18,17 @@ import {
 import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
-import type { PubliekeStaat, PubliekeInzending, Fase, Rol, Onthulling } from '$lib/shared/state';
+import { isAfrekening, type PubliekeStaat, type PubliekeInzending, type Fase, type Rol, type Onthulling } from '$lib/shared/state';
 import { nieuwjaarRond, leesNieuwjaarOp, type Nieuwjaar } from '$lib/shared/nieuwjaar';
 import { recapAnalyse } from './recap/bron';
 import { verlevendig } from './recap/vragen';
 import { cijfersVoor } from './recap/cijfers';
 import { jaaroverzichtVoor } from './jaaroverzicht';
-import { beoordeelVoorspellingen, type Omgeving } from './recap/voorspellingen';
+import { beoordeelVoorspellingen, verdelingUitVoorspellingen, type Omgeving } from './recap/voorspellingen';
 import type { Analyse } from './recap/analyse';
+import { berekenBonussen, metBonus, type BonusVraag } from './bonus';
+import { ingekort } from './klok';
+import type { Verdeling } from './scoring';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -47,9 +50,19 @@ const levend = new Map<string, { analyse: Analyse; aantalSpelers: number | null;
 export function omgevingVan(spelId: number): Omgeving {
   // De quizmaster speelt niet mee, maar is er wel: 'met hoeveel mensen spelen
   // we de quiz' telt hem gewoon mee.
-  const n = db.select({ id: deelnemers.spelerId }).from(deelnemers).where(eq(deelnemers.spelId, spelId)).all().length;
-  const quizmaster = db.select({ id: spelers.id }).from(spelers).where(eq(spelers.isQuizmaster, true)).all().length;
-  return { analyse: recapAnalyse(), aantalSpelers: n > 0 ? n + quizmaster : null };
+  const namen = deelnemersVan(spelId).map((s) => s.naam);
+  const quizmasters = db.select({ naam: spelers.naam }).from(spelers).where(eq(spelers.isQuizmaster, true)).all();
+  return {
+    analyse: recapAnalyse(),
+    aantalSpelers: namen.length > 0 ? namen.length + quizmasters.length : null,
+    deelnemers: namen,
+    quizmaster: quizmasters[0]?.naam ?? null,
+  };
+}
+
+/** Ruimt de bewaarde pakketten van een opgeruimde proefrit op. */
+export function vergeetProefPakketten(proefId: string) {
+  for (const sleutel of levend.keys()) if (sleutel.startsWith(`${proefId}:`)) levend.delete(sleutel);
 }
 
 export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
@@ -57,7 +70,9 @@ export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
   if (!p) throw new Error(`onbekend pakket: ${spel.pakket}`);
   const analyse = recapAnalyse();
   const omgeving = spel.id !== undefined ? omgevingVan(spel.id) : { analyse, aantalSpelers: null };
-  const bekend = levend.get(spel.pakket);
+  // Een proefrit heeft een eigen database en dus een eigen aantal spelers.
+  const cacheSleutel = `${huidigeProef() ?? ''}:${spel.pakket}`;
+  const bekend = levend.get(cacheSleutel);
   if (bekend && bekend.analyse === analyse && bekend.aantalSpelers === omgeving.aantalSpelers) return bekend.pakket;
   const uitslag = beoordeelVoorspellingen(omgeving);
   const pakket: Pakket = {
@@ -68,7 +83,7 @@ export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
       return { ...r, vragen, teVullen: r.teVullen && vragen.some((v) => v.teVullen) };
     }),
   };
-  levend.set(spel.pakket, { analyse, aantalSpelers: omgeving.aantalSpelers, pakket });
+  levend.set(cacheSleutel, { analyse, aantalSpelers: omgeving.aantalSpelers, pakket });
   return pakket;
 }
 
@@ -180,22 +195,61 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
   return { speler, nieuw: true };
 }
 
-export function standVan(spelId: number) {
-  const rijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spelId)).all();
-  const cor = db.select().from(correcties).where(eq(correcties.spelId, spelId)).all();
-  return telStand(
-    rijen.map((r) => JSON.parse(r.verdeling)),
-    cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
-  );
+/**
+ * De punten van de afrekening van de voorspellingen, zodra die ronde
+ * voorbij is. Ze worden niet opgeslagen maar afgeleid van waar het spel
+ * staat: een stap terug of 'ongedaan' neemt ze vanzelf weer mee terug, en
+ * een uitkomst die je vóór de uitslag nog invult telt gewoon mee.
+ *
+ * Ze staan onder de sleutel van de eerste vraag van die ronde, zodat de
+ * uitslag en de prijzen ze bij de juiste ronde optellen.
+ */
+export function afrekeningVan(spel: { id: number; pakket: string; samenstelling: string; fase: string; rondeIndex: number; geeindigdOp: string | null }) {
+  const ri = samengesteld(spel).findIndex((r) => isAfrekening(r));
+  if (ri < 0) return null;
+  const voorbij =
+    spel.fase === 'einde' ||
+    // De film na de uitslag: de avond is voorbij, ook als dit de laatste ronde was.
+    (spel.fase === 'jaaroverzicht' && spel.geeindigdOp !== null) ||
+    spel.rondeIndex > ri ||
+    (spel.rondeIndex === ri && spel.fase === 'stand');
+  if (!voorbij) return null;
+  const uitslag = beoordeelVoorspellingen(omgevingVan(spel.id));
+  return { rondeIndex: ri, vraagSleutel: sleutelVan(ri, 0), verdeling: verdelingUitVoorspellingen(uitslag.stand, deelnemersVan(spel.id)) };
+}
+
+/** Alle uitdelingen van een spel, met de afrekening van de voorspellingen erbij. */
+export function uitdelingenVan(spel: Parameters<typeof afrekeningVan>[0]): { vraagSleutel: string; verdeling: Record<number, number> }[] {
+  const lijst = db
+    .select()
+    .from(uitdelingen)
+    .where(eq(uitdelingen.spelId, spel.id))
+    .all()
+    .flatMap((r) => {
+      try {
+        return [{ vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> }];
+      } catch {
+        return [];
+      }
+    });
+  const afrekening = afrekeningVan(spel);
+  if (afrekening) lijst.push({ vraagSleutel: afrekening.vraagSleutel, verdeling: afrekening.verdeling });
+  return lijst;
 }
 
 /**
- * De prijzen voor de uitslag. Rekent alleen bij de uitslag zelf, want het
- * leest alle antwoorden van de avond — vaak genoeg, niet bij elke tik.
+ * De bonussen van een spel, afgeleid uit wat er vastligt. Zie bonus.ts.
+ * `verdelingen` geeft per sleutel de punten mét bonus, de afrekening van de
+ * voorspellingen inbegrepen.
  */
-export function prijzenVan(spel: { id: number; pakket: string; samenstelling: string }, lijst: { id: number; naam: string }[]): Prijs[] {
-  const rondes = samengesteld(spel);
-  const uitdelingRijen = db.select().from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).all();
+export function bonussenVan(spel: Parameters<typeof afrekeningVan>[0]) {
+  const verdelingVan = new Map<string, Verdeling>();
+  for (const u of uitdelingenVan(spel)) {
+    // Twee uitdelingen onder één sleutel (een vraag én de afrekening) tellen allebei.
+    const eerder = verdelingVan.get(u.vraagSleutel);
+    verdelingVan.set(u.vraagSleutel, eerder ? telStand([eerder, u.verdeling]) : u.verdeling);
+  }
+  const rondes = PAKKETTEN[spel.pakket] ? samengesteld(spel) : [];
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
   const ledenVan = (rondeIndex: number, inzender: string): number[] => {
@@ -206,19 +260,70 @@ export function prijzenVan(spel: { id: number; pakket: string; samenstelling: st
       return [];
     }
   };
-  const uitdelingLijst = uitdelingRijen.map((r) => {
-    try {
-      return { vraagSleutel: r.vraagSleutel, verdeling: JSON.parse(r.verdeling) as Record<number, number> };
-    } catch {
-      return { vraagSleutel: r.vraagSleutel, verdeling: {} };
-    }
+
+  const vragen: BonusVraag[] = [];
+  rondes.forEach((r, ri) => {
+    // De afrekening van de voorspellingen is geen vraag: die maakt geen reeks en breekt er ook geen.
+    if (isAfrekening(r)) return;
+    r.vragen.forEach((_, vi) => {
+      const sleutel = sleutelVan(ri, vi);
+      vragen.push({
+        sleutel,
+        type: r.type,
+        teamModus: r.teamModus ?? 'individueel',
+        verdeling: verdelingVan.get(sleutel) ?? null,
+        antwoorden: antwoordRijen
+          .filter((a) => a.vraagSleutel === sleutel)
+          .map((a) => ({ inzender: a.inzender, isGoed: a.isGoed, naMs: a.naMs, leden: ledenVan(ri, a.inzender) })),
+      });
+    });
   });
+
+  const bonus = berekenBonussen(vragen);
+  const verdelingen = new Map<string, Verdeling>();
+  // Uitdelingen bij vragen die niet (meer) in de samenstelling staan, tellen
+  // gewoon mee zoals ze zijn, zonder bonus: de stand verliest nooit punten.
+  for (const [sleutel, v] of verdelingVan) verdelingen.set(sleutel, metBonus(v, bonus.perVraag.get(sleutel)));
+  return { verdelingen, bonus };
+}
+
+export function standVan(spelId: number) {
+  const spel = db.select().from(spellen).where(eq(spellen.id, spelId)).get();
+  if (!spel) return {};
+  const cor = db.select().from(correcties).where(eq(correcties.spelId, spelId)).all();
+  return telStand(
+    [...bonussenVan(spel).verdelingen.values()],
+    cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
+  );
+}
+
+/**
+ * De prijzen voor de uitslag. Rekent alleen bij de uitslag zelf, want het
+ * leest alle antwoorden van de avond — vaak genoeg, niet bij elke tik.
+ */
+export function prijzenVan(spel: Parameters<typeof afrekeningVan>[0], lijst: { id: number; naam: string }[]): Prijs[] {
+  const rondes = samengesteld(spel);
+  // Met bonus, zodat 'beste ronde' en 'comeback' kloppen met de stand.
+  const uitdelingLijst = [...bonussenVan(spel).verdelingen].map(([vraagSleutel, verdeling]) => ({ vraagSleutel, verdeling }));
+  const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
+  const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
+  const ledenVan = (rondeIndex: number, inzender: string): number[] => {
+    const t = teamRijen.find((r) => r.rondeIndex === rondeIndex && r.teamKey === inzender);
+    try {
+      return t ? (JSON.parse(t.leden) as number[]) : [];
+    } catch {
+      return [];
+    }
+  };
 
   // Alleen vragen die echt aan bod kwamen tellen mee voor reeksen en de
   // moeilijkste vraag: een avond die vroeg stopt heeft geen "onbeantwoorde" rest.
-  const gespeeld = new Set([...uitdelingRijen.map((r) => r.vraagSleutel), ...antwoordRijen.map((r) => r.vraagSleutel)]);
+  // De afrekening van de voorspellingen had geen vragen; die telt alleen
+  // mee voor de rondeprijzen.
+  const gespeeld = new Set([...uitdelingLijst.map((r) => r.vraagSleutel), ...antwoordRijen.map((r) => r.vraagSleutel)]);
   const vragen: { sleutel: string; tekst: string; inzenders: number }[] = [];
   rondes.forEach((r, ri) => {
+    if (isAfrekening(r)) return;
     r.vragen.forEach((v, vi) => {
       const sleutel = sleutelVan(ri, vi);
       if (!gespeeld.has(sleutel)) return;
@@ -289,7 +394,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const spel = actiefSpel();
   if (!spel) return null;
 
-  const sleutelGeheugen = `${spel.id}:${spel.versie}:${rol}`;
+  // Een proefrit heeft een eigen database, dus spelnummers kunnen samenvallen.
+  const sleutelGeheugen = `${huidigeProef() ?? ''}:${spel.id}:${spel.versie}:${rol}`;
   const nu = Date.now();
   if (geheugen && geheugen.sleutel === sleutelGeheugen && nu - geheugen.op < GEHEUGEN_MS) return geheugen.staat;
 
@@ -298,7 +404,16 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const vraag: Vraag | undefined = ronde?.vragen[spel.vraagIndex];
   const lijst = deelnemersVan(spel.id);
   const teamLijst = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst) : [];
-  const stand = standVan(spel.id);
+  const cor = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
+  const bonussen = bonussenVan(spel);
+  const stand = telStand(
+    [...bonussen.verdelingen.values()],
+    cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
+  );
+
+  const dezeRonde = telStand(
+    [...bonussen.verdelingen.entries()].filter(([k]) => k.startsWith(`${spel.rondeIndex}:`)).map(([, v]) => v),
+  );
 
   const apparaatRijen = db.select().from(apparaten).all();
   const laatsteVan = new Map<number, number>();
@@ -328,14 +443,14 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
         getal: ronde?.type === 'dichtstbij' ? leesGetal(r.tekst) : null,
       }))
     : [];
-  const uitdelingRij = onthuld
-    ? db.select().from(uitdelingen).where(and(eq(uitdelingen.spelId, spel.id), eq(uitdelingen.vraagSleutel, sleutel))).get()
-    : undefined;
-  let uitdeling: Record<number, number> = {};
-  try {
-    uitdeling = uitdelingRij ? JSON.parse(uitdelingRij.verdeling) : {};
-  } catch {
-    uitdeling = {};
+  const uitdeling: Record<number, number> = onthuld ? (bonussen.verdelingen.get(sleutel) ?? {}) : {};
+  const vraagBonus = onthuld ? bonussen.bonus.perVraag.get(sleutel) : undefined;
+  const bonusLijst: PubliekeStaat['bonussen'] = [];
+  if (vraagBonus) {
+    for (const id of Object.keys(vraagBonus.snel)) bonusLijst.push({ spelerId: Number(id), soort: 'snel', punten: vraagBonus.snel[Number(id)] });
+    for (const id of Object.keys(vraagBonus.reeks)) {
+      bonusLijst.push({ spelerId: Number(id), soort: 'reeks', punten: vraagBonus.reeks[Number(id)], opRij: vraagBonus.opRij[Number(id)] });
+    }
   }
 
   // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
@@ -386,7 +501,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       ? {
           naam: ronde.naam, suit: ronde.suit, thema: ronde.thema,
           sfeer: ronde.sfeer ?? 'vilt', uitleg: ronde.uitleg,
-          teamModus: ronde.teamModus, vragenAantal: ronde.vragen.length,
+          teamModus: ronde.teamModus, type: ronde.type, vragenAantal: ronde.vragen.length,
           cijfers: ronde.cijfers ?? null,
         }
       : null,
@@ -416,7 +531,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       };
     }),
     stand: lijst
-      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: stand[s.id] ?? 0 }))
+      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
       .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl')),
     serverTijd: nu,
     klok: {
@@ -435,9 +550,17 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       spel.fase === 'jaaroverzicht'
         ? jaaroverzichtVoor(recapAnalyse(), spel.vraagIndex, spel.geeindigdOp !== null)
         : null,
+    // Bij de afrekening heeft de quizmaster de vragen van die ronde als
+    // spiekbriefje; de televisie en de telefoons krijgen ze nooit.
+    praatpunten:
+      rol === 'quizmaster' && spel.fase === 'cijfers' && ronde && isAfrekening(ronde)
+        ? ronde.vragen.map((v) => ({ v: v.v, a: v.a ?? '', toelichting: v.toelichting }))
+        : undefined,
     ingeleverd,
     inzendingen,
     uitdeling,
+    bonussen: bonusLijst,
+    reeksen: bonussen.bonus.lopend,
   };
   geheugen = { sleutel: sleutelGeheugen, op: nu, staat };
   return staat;
@@ -476,6 +599,79 @@ export function schrijfUitdeling(spelId: number, vraagSleutel: string, verdeling
   } else {
     db.insert(uitdelingen).values({ spelId, vraagSleutel, verdeling: json }).run();
   }
+}
+
+/**
+ * Een speler levert een antwoord in voor zijn team.
+ *
+ * Inleveren mag zolang de quizmaster het antwoord nog niet heeft onthuld, ook
+ * als de klok al op nul staat. De servertijd wordt vastgelegd, zodat te laat
+ * ingeleverde antwoorden zichtbaar zijn op het hostscherm in plaats van
+ * geruisloos te verdwijnen — dat scheelt discussie aan tafel.
+ *
+ * Een telefoon en een bot van een proefrit gaan hier allebei langs.
+ */
+export function leverIn(spel: typeof spellen.$inferSelect, spelerId: number, invoer: string): { inzender: string; teLaat: boolean } | { fout: string } {
+  if (spel.fase !== 'vraag') return { fout: 'er staat nu geen vraag open' };
+  // Tijdens de pauze ligt de vraag onder het pauzescherm en staat de klok stil;
+  // inleveren kan weer zodra de quiz verdergaat.
+  if (spel.pauze) return { fout: 'de quiz staat even op pauze' };
+  const { ronde } = huidige(spel);
+  if (!ronde) return { fout: 'geen ronde' };
+  const tekst = invoer.slice(0, 300);
+
+  const lijst = deelnemersVan(spel.id);
+  const teamLijst = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
+  const mijnTeam = teamLijst.find((t) => t.leden.includes(spelerId));
+  if (!mijnTeam) return { fout: 'je zit niet in een team voor deze ronde' };
+
+  const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
+  const nu = Date.now();
+
+  // Hoe lang na het opengaan van de vraag dit binnenkwam. De klok kan
+  // gepauzeerd of verlengd zijn; verstreken = totale duur min wat er nog
+  // op staat, en dat klopt in alle drie de gevallen.
+  const rest = spel.klokLoopt ? Math.max(0, (spel.klokEindigtOp ?? nu) - nu) : spel.klokRestMs;
+  const naMs = spel.klokDuurMs > 0 ? Math.max(0, spel.klokDuurMs - rest) : null;
+
+  const bestaand = db
+    .select()
+    .from(antwoorden)
+    .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel), eq(antwoorden.inzender, mijnTeam.id)))
+    .get();
+
+  if (bestaand) {
+    db.update(antwoorden)
+      .set({ tekst, ingediendOp: nu, naMs, spelerId, isGoed: null })
+      .where(eq(antwoorden.id, bestaand.id))
+      .run();
+  } else {
+    db.insert(antwoorden)
+      .values({ spelId: spel.id, vraagSleutel: sleutel, inzender: mijnTeam.id, spelerId, tekst, ingediendOp: nu, naMs })
+      .run();
+  }
+
+  // Iedereen is binnen: niemand hoeft nog op de klok te wachten. Er blijven
+  // een paar seconden over, lang genoeg om nog iets te veranderen en voor
+  // de televisie om het te laten horen. Alleen als de klok loopt: een
+  // gepauzeerde klok is een bewuste keuze van de quizmaster.
+  if (spel.klokLoopt && spel.klokEindigtOp != null) {
+    const binnen = new Set(
+      db
+        .select({ inzender: antwoorden.inzender })
+        .from(antwoorden)
+        .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel)))
+        .all()
+        .map((r) => r.inzender),
+    );
+    const eindigtOp = ingekort(spel.klokEindigtOp, nu, teamLijst, binnen);
+    if (eindigtOp !== spel.klokEindigtOp) {
+      db.update(spellen).set({ klokEindigtOp: eindigtOp }).where(eq(spellen.id, spel.id)).run();
+    }
+  }
+
+  const teLaat = spel.klokEindigtOp != null && nu > spel.klokEindigtOp;
+  return { inzender: mijnTeam.id, teLaat };
 }
 
 /** Zet de vinkjes op de antwoorden van één vraag: goed voor de winnaars, fout voor de rest. */

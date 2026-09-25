@@ -210,3 +210,110 @@ export function balkOpen(): void {
   toon(330, 0, 0.5, { vorm: 'sine', volume: 0.22, glijNaar: 660 });
   toon(659.25, 0.16, 0.6, { volume: 0.2 });
 }
+
+/* ---- De showmomenten ----------------------------------------------- */
+
+/** Ruis door een filter dat van laag naar hoog zwiept: een kaart die langs het scherm vliegt. */
+export function zwiep(): void {
+  if (!ctx || !meester || !aan) return;
+  const t = ctx.currentTime;
+  const duur = 0.5;
+  const lengte = Math.floor(ctx.sampleRate * duur);
+  const buffer = ctx.createBuffer(1, lengte, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < lengte; i++) data[i] = Math.random() * 2 - 1;
+  const bron = ctx.createBufferSource();
+  bron.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.value = 1.4;
+  filter.frequency.setValueAtTime(300, t);
+  filter.frequency.exponentialRampToValueAtTime(4200, t + duur * 0.8);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.32, t + duur * 0.45);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + duur);
+  bron.connect(filter);
+  filter.connect(gain);
+  gain.connect(meester);
+  bron.start(t);
+}
+
+/** Een fiche op de stapel: twee harde tikjes vlak na elkaar. */
+export function fiche(vertraging = 0): void {
+  ruis(vertraging, 0.03, 0.32);
+  toon(2600, vertraging, 0.05, { vorm: 'square', volume: 0.08 });
+  ruis(vertraging + 0.045, 0.025, 0.2);
+}
+
+/** Een tromgeroffel dat aanzwelt en eindigt in een bekkenslag. */
+export function tromgeroffel(duur = 1.4): void {
+  const slagen = Math.floor(duur / 0.045);
+  for (let i = 0; i < slagen; i++) ruis(i * 0.045, 0.05, 0.05 + (i / slagen) * 0.22);
+  toon(90, duur, 0.4, { vorm: 'sine', volume: 0.45, glijNaar: 45 });
+  ruis(duur, 0.9, 0.3);
+}
+
+/** Aftellen naar de start: een piep per tel, de laatste hoog. */
+export function aftel(laatste: boolean): void {
+  toon(laatste ? 1046.5 : 523.25, 0, laatste ? 0.6 : 0.22, { vorm: 'square', volume: laatste ? 0.26 : 0.2 });
+}
+
+/** Iedereen heeft ingeleverd: een vrolijk loopje omhoog. */
+export function iedereenBinnen(): void {
+  [659.25, 783.99, 987.77, 1318.5].forEach((hz, i) => toon(hz, i * 0.06, 0.18, { vorm: 'triangle', volume: 0.26 }));
+}
+
+/** Een bonus: een heldere bel met een glinstering erachteraan. */
+export function bonus(): void {
+  toon(1567.98, 0, 0.5, { vorm: 'sine', volume: 0.3 });
+  toon(2093, 0.08, 0.6, { vorm: 'sine', volume: 0.22 });
+  [3136, 3520, 4186].forEach((hz, i) => toon(hz, 0.16 + i * 0.05, 0.12, { vorm: 'sine', volume: 0.08 }));
+}
+
+/* ---- Het geluidsbord van de quizmaster ------------------------------- */
+
+/** Applaus: honderden korte handklapjes, eerst aanzwellend, dan wegstervend. */
+export function applaus(): void {
+  const duur = 2.6;
+  for (let i = 0; i < 240; i++) {
+    const t = Math.random() * duur;
+    const sterkte = Math.min(1, t / 0.4) * Math.min(1, (duur - t) / 1.2);
+    ruis(t, 0.02 + Math.random() * 0.02, 0.05 + sterkte * 0.16);
+  }
+}
+
+/** Een scheepstoeter: drie ruwe tonen in een akkoord. */
+export function toeter(): void {
+  for (const hz of [233.08, 293.66, 349.23]) {
+    toon(hz, 0, 0.26, { vorm: 'sawtooth', volume: 0.2 });
+    toon(hz, 0.32, 0.9, { vorm: 'sawtooth', volume: 0.22 });
+  }
+}
+
+/** Een zaal die "ooooh" zegt: een stem die zakt en weer wat klimt. */
+export function ooh(): void {
+  for (const [hz, v] of [[196, 0.22], [247, 0.14], [294, 0.1]] as const) {
+    toon(hz * 1.2, 0, 1.3, { vorm: 'sine', volume: v, glijNaar: hz * 0.92 });
+  }
+}
+
+/** Een tafelbel. */
+export function ding(): void {
+  toon(1760, 0, 1.2, { vorm: 'sine', volume: 0.3 });
+  toon(4400, 0, 0.4, { vorm: 'sine', volume: 0.08 });
+}
+
+/** De foute zoemer uit een spelshow. */
+export function zoemer(): void {
+  toon(140, 0, 0.7, { vorm: 'square', volume: 0.26 });
+  toon(147, 0, 0.7, { vorm: 'square', volume: 0.2 });
+}
+
+/** Speelt een knop van het geluidsbord af. */
+export function speelBord(sleutel: string): void {
+  const bord: Record<string, () => void> = {
+    applaus, roffel: () => tromgeroffel(1.6), toeter, ooh, ding, zoemer, wahwah, fanfare,
+  };
+  bord[sleutel]?.();
+}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { api, metProef } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
@@ -12,6 +13,7 @@
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
+  import { isAfrekening } from '$lib/shared/state';
   import { kies, kanteling, JUICH, TROOST, NIETS_INGELEVERD, REACTIES } from '$lib/shared/kwinkslagen';
 
   let antwoord = $state('');
@@ -66,10 +68,32 @@
     return 'wacht';
   });
 
+  let mijnBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.spelerId === live.spelerId));
+
+  /* Op de televisie klinkt eerst een tromgeroffel. Zolang die duurt, verklapt
+     de telefoon het antwoord ook niet. Even lang als op de televisie. */
+  const ROFFEL_MS = 1450;
+  let onthulKlaar = $state(true);
+  let vorigeFase = '';
+  let onthulTimer: ReturnType<typeof setTimeout> | null = null;
+  $effect(() => {
+    const fase = staat?.fase ?? '';
+    if (fase === vorigeFase) return;
+    if (onthulTimer) clearTimeout(onthulTimer);
+    onthulTimer = null;
+    if (fase === 'antwoord' && vorigeFase === 'vraag') {
+      onthulKlaar = false;
+      onthulTimer = setTimeout(() => (onthulKlaar = true), ROFFEL_MS);
+    } else {
+      onthulKlaar = true;
+    }
+    vorigeFase = fase;
+  });
+
   // Een trilling bij het oordeel: kort en blij, of één lange voor 'helaas'.
   let vorigeUitslag = $state<string | null>(null);
   $effect(() => {
-    const nu = uitslag;
+    const nu = onthulKlaar ? uitslag : null;
     if (nu !== vorigeUitslag) {
       if (nu === 'goed') tril([40, 60, 40, 60, 80]);
       else if (nu === 'fout') tril([120]);
@@ -134,7 +158,7 @@
     bezig = true;
     melding = '';
     try {
-      const r = await fetch('/api/answer', {
+      const r = await fetch(api('/api/answer'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ tekst: antwoord }),
@@ -169,7 +193,7 @@
     fotoMelding = '';
     try {
       const foto = await maakPortret(bestand);
-      const r = await fetch('/api/foto', {
+      const r = await fetch(api('/api/foto'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ foto }),
@@ -281,6 +305,12 @@
         <p class="etiket">{ronde?.suit} Ronde {staat.rondeIndex + 1}</p>
         <h2 class="groot" style="font-size:1.6rem;margin-top:.4rem">{ronde?.naam}</h2>
         <p class="lood" style="font-size:1rem;margin-top:.6rem">{ronde?.uitleg}</p>
+        {#if isAfrekening(ronde)}
+          <p class="fijn" style="margin-top:.6rem">
+            Deze ronde tik je niets in: wie in januari voorspelde, krijgt de punten van wat er uitkwam.
+            Was je er in januari niet bij, dan kijk je deze ronde mee.
+          </p>
+        {/if}
       </div>
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
@@ -349,6 +379,12 @@
         <p class="fijn" in:fade={{ duration: 220 }}>Je antwoord staat genoteerd.</p>
       {/if}
     {:else if staat.fase === 'antwoord'}
+      {#if !onthulKlaar}
+        <div class="trommel" style="padding:1.4rem">
+          <span class="stokken" aria-hidden="true" style="font-size:3.4rem">🥁</span>
+          <p class="etiket">Kijk naar de televisie…</p>
+        </div>
+      {:else}
       {#key uitslag}
         <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
           {#if uitslag === 'goed'}
@@ -358,6 +394,9 @@
               <strong>{kwinkslag}</strong>
               <span class="plus">+{mijnPunten}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
+              {#each mijnBonussen as b (b.soort)}
+                <span class="bonusregel">{b.soort === 'snel' ? '⚡ Snelste vinger' : `🔥 ${b.opRij} op rij`} · +{b.punten} bonus</span>
+              {/each}
             </span>
           {:else if uitslag === 'fout'}
             <span class="stempel" style="--hoek:-9deg">Mis</span>
@@ -406,6 +445,7 @@
           {/each}
         </div>
       {/if}
+      {/if}
     {:else if staat.fase === 'cijfers' && staat.cijfers}
       {#key staat.cijfers.stap}
         <div class="paneel" in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
@@ -413,6 +453,9 @@
           {#if staat.cijfers.soort !== 'voorspellingen' && !staat.cijfers.personen.some((p) => p.naam === mijnNaam)}
             <p class="fijn" style="margin-top:.5rem">Van jou zijn er geen cijfers bijgehouden. Kijk mee op de televisie.</p>
           {:else}
+            {#if mijnNaam && staat.cijfers.voorspellingen?.zitUit?.includes(mijnNaam)}
+              <p class="fijn" style="margin:.3rem 0 .6rem">Jij voorspelde in januari niet mee, dus deze ronde zit je uit. Kijk mee hoe de rest ervan afkomt.</p>
+            {/if}
             {#if opTv && opTv !== mijnNaam}<p class="fijn" style="margin:.3rem 0 .6rem">Op de televisie: {opTv}. Dit is jouw jaar.</p>{/if}
             <div style="margin-top:.6rem">
               <Cijfers cijfers={staat.cijfers} spelers={staat.spelers} compact alleen={mijnNaam} />
@@ -441,7 +484,7 @@
             {/each}
           </div>
         {/if}
-        <a class="knop vol" href="/uitslag/{staat.spelId}">Bekijk en deel de uitslag</a>
+        <a class="knop vol" href={metProef(`/uitslag/${staat.spelId}`)}>Bekijk en deel de uitslag</a>
       {/if}
       <div class="reactierij" aria-label="Reageer op de televisie">
         {#each REACTIES as emoji (emoji)}

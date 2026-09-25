@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { api, proefSpeelAdres } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fly, fade, scale } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
@@ -16,11 +17,14 @@
   import Pauzescherm from '$lib/client/Pauzescherm.svelte';
   import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
+  import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
+  import { REEKS_VANAF } from '$lib/shared/bonus';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
   import { passend } from '$lib/client/passend';
   import { prijsIcoon } from '$lib/shared/prijzen';
+  import { isAfrekening } from '$lib/shared/state';
   import {
     kies, kanteling, metNaam, BEGROETINGEN, WACHTZINNEN, RONDEZINNEN, NIEMAND,
     IEDEREEN_FOUT, IEDEREEN_GOED, LANTAARN, POEDEL, VER_ERNAAST,
@@ -31,6 +35,15 @@
      plaats van van de server. De televisie meldt zich dan niet aan en er
      verandert niets aan het spel dat klaarstaat. */
   let inTest = $derived(page.url.searchParams.has('test'));
+  /* Het paneel ligt over de linkerkant van het scherm. Op een breed scherm
+     schuift de dia ernaast, verkleind in plaats van anders opgemaakt: zo zie
+     je precies wat de televisie laat zien, alleen kleiner. Op een smal
+     scherm is er geen plek naast; daar klap je het paneel weg met T. */
+  const TESTPANEEL = 360;
+  let vensterBreedte = $state(0);
+  let naastPaneel = $derived(
+    inTest && testmodus.paneelOpen && vensterBreedte >= 900 ? (vensterBreedte - TESTPANEEL) / vensterBreedte : null
+  );
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
@@ -77,11 +90,11 @@
      een televisiescherm op de laptop zelf gewoon werkt; de waarschuwing zegt
      erbij wat er gebeurd is. */
   let netwerkAdressen = $state<{ naam: string; url: string }[]>([]);
-  let qrDoel = $derived(lokaalAdres && netwerkAdressen.length ? netwerkAdressen[0].url : joinAdres);
+  let qrDoel = $derived(lokaalAdres && netwerkAdressen.length ? proefSpeelAdres(netwerkAdressen[0].url) : joinAdres);
   let qrBron = $derived(`/api/qr?doel=${encodeURIComponent(qrDoel)}`);
   $effect(() => {
     if (!lokaalAdres) return;
-    fetch('/api/adressen')
+    fetch(api('/api/adressen'))
       .then((r) => (r.ok ? r.json() : { adressen: [] }))
       .then((d: { adressen: { naam: string; url: string }[] }) => (netwerkAdressen = d.adressen))
       .catch(() => {});
@@ -203,6 +216,51 @@
   );
   let standNu = $derived(toonNieuweVolgorde ? (staat?.stand ?? []) : standOud);
 
+  /* ---- De show ---------------------------------------------------------
+     Een kaart die over het scherm vliegt tussen twee blokken, drie-twee-één
+     aan het begin, en een tromgeroffel voor elke onthulling. */
+  let overgang = $state<OvergangMoment | null>(null);
+  let overgangTeller = 0;
+  /** Tijdens de tromgeroffel staat het antwoord nog niet in beeld. */
+  let onthulKlaar = $state(true);
+  let onthulTimer: ReturnType<typeof setTimeout> | null = null;
+  const ROFFEL_MS = 1450;
+
+  /** Iedereen met een telefoon aan tafel heeft ingeleverd; de klok is al ingekort. */
+  let alleBinnen = $derived.by(() => {
+    if (!staat || staat.fase !== 'vraag') return false;
+    const moeten = staat.teams.filter((t) => t.leden.length > 0);
+    return moeten.length > 0 && moeten.every((t) => staat.ingeleverd.includes(t.id));
+  });
+
+  /* Bij meerkeuze vallen de foute opties één voor één af; --n is de beurt. */
+  let aantalFout = $derived((vraag?.opties ?? []).filter((_, i) => i !== staat?.onthulling?.goedeOptie).length);
+  function beurt(i: number): number {
+    const goed = staat?.onthulling?.goedeOptie;
+    if (i === goed) return aantalFout;
+    return (vraag?.opties ?? []).slice(0, i).filter((_, j) => j !== goed).length;
+  }
+
+  /** De punten die een inzender (speler of team) bij deze vraag kreeg, per persoon. */
+  function puntenVoor(inzender: string): number {
+    const team = staat?.teams.find((t) => t.id === inzender);
+    if (!team) return 0;
+    return Math.max(0, ...team.leden.map((id) => staat?.uitdeling[id] ?? 0));
+  }
+
+  function naamVanSpeler(id: number): string {
+    return staat?.spelers.find((s) => s.id === id)?.naam ?? '?';
+  }
+  /** Wie de snelheidsbonus pakte: in een teamronde het team, anders de speler. */
+  let snelsten = $derived.by(() => {
+    const ids = (staat?.bonussen ?? []).filter((b) => b.soort === 'snel').map((b) => b.spelerId);
+    if (!ids.length) return '';
+    if (!inTeams) return ids.map(naamVanSpeler).join(' & ');
+    const teams = (staat?.teams ?? []).filter((t) => t.leden.some((id) => ids.includes(id)));
+    return teams.map((t) => naamVan(t.id)).join(' & ');
+  });
+  let reeksBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.soort === 'reeks'));
+
   /* ---- Geluidsmomenten -------------------------------------------------
      Elk geluid hangt aan een overgang, niet aan een toestand. Zonder deze
      vergelijking met de vorige waarde zou elke binnenkomende momentopname
@@ -219,8 +277,28 @@
   let vorigAantalReacties = 0;
 
   $effect(() => {
-    if (alleFout && !vorigAlleFout) geluid.wahwah();
-    vorigAlleFout = alleFout;
+    const nu = alleFout && onthulKlaar;
+    if (nu && !vorigAlleFout) geluid.wahwah();
+    vorigAlleFout = nu;
+  });
+  let vorigAlleBinnen = false;
+  $effect(() => {
+    if (alleBinnen && !vorigAlleBinnen) geluid.iedereenBinnen();
+    vorigAlleBinnen = alleBinnen;
+  });
+  let vorigAantalBonussen = 0;
+  $effect(() => {
+    const n = onthulKlaar ? (live.staat?.bonussen.length ?? 0) : 0;
+    if (n > vorigAantalBonussen) setTimeout(() => geluid.bonus(), 1200);
+    vorigAantalBonussen = n;
+  });
+  /* Het geluidsbord van de quizmaster. */
+  let vorigBordgeluid = 0;
+  $effect(() => {
+    const g = live.geluid;
+    if (!g || g.id === vorigBordgeluid) return;
+    vorigBordgeluid = g.id;
+    geluid.speelBord(g.geluid);
   });
   $effect(() => {
     if (tijdOm && !vorigTijdOm) geluid.stempel();
@@ -239,13 +317,44 @@
 
     if (st.fase !== vorigeFase) {
       if (st.fase === 'jaaroverzicht') geluid.projector();
-      if (st.fase === 'ronde') geluid.rondeStart();
-      if (st.fase === 'antwoord') geluid.onthul();
+      const van = vorigeFase;
+      // De overgang speelt alleen bij een echte stap, niet bij het openen van de pagina.
+      let naOvergang = 0;
+      if (van) {
+        const kaart = (suit: string, tekst: string) => {
+          overgang = { id: ++overgangTeller, soort: 'kaart', suit, tekst };
+          naOvergang = 600;
+        };
+        // De eerste ronde, na de lobby of na de trailer van het jaaroverzicht.
+        if (st.fase === 'ronde' && st.rondeIndex === 0 && (van === 'lobby' || van === 'jaaroverzicht')) {
+          overgang = { id: ++overgangTeller, soort: 'aftellen', suit: '♠', tekst: 'Daar gaan we!' };
+          naOvergang = 3300;
+        } else if (st.fase === 'ronde') kaart(st.ronde?.suit ?? '♠', `Ronde ${st.rondeIndex + 1}`);
+        else if (st.fase === 'stand') kaart(st.ronde?.suit ?? '♠', 'Tussenstand');
+        else if (st.fase === 'einde') kaart('♠', 'De uitslag');
+      }
+
+      if (onthulTimer) clearTimeout(onthulTimer);
+      onthulTimer = null;
+      if (st.fase === 'antwoord' && van === 'vraag') {
+        // Eerst de tromgeroffel, dan pas het antwoord.
+        onthulKlaar = false;
+        geluid.tromgeroffel(ROFFEL_MS / 1000);
+        onthulTimer = setTimeout(() => {
+          onthulKlaar = true;
+          geluid.onthul();
+        }, ROFFEL_MS);
+      } else {
+        onthulKlaar = true;
+        if (st.fase === 'antwoord') geluid.onthul();
+      }
+
+      if (st.fase === 'ronde') setTimeout(() => geluid.rondeStart(), naOvergang);
       if (st.fase === 'stand' || st.fase === 'einde') {
         toonNieuweVolgorde = false;
-        geluid.roffel();
+        setTimeout(() => geluid.roffel(), naOvergang);
         // Even de oude volgorde laten staan, dan laten schuiven.
-        setTimeout(() => (toonNieuweVolgorde = true), 900);
+        setTimeout(() => (toonNieuweVolgorde = true), 900 + naOvergang);
         // De fanfare pas als de eerste trede van het podium staat.
         if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), WINNAAR_NA_MS);
       }
@@ -273,7 +382,11 @@
 
     // Punten erbij tijdens de onthulling: een kort signaal.
     const som = st.stand.reduce((n, r) => n + r.punten, 0);
-    if (vorigePuntenSom >= 0 && som > vorigePuntenSom && st.fase === 'antwoord') geluid.juist();
+    if (vorigePuntenSom >= 0 && som > vorigePuntenSom && st.fase === 'antwoord' && onthulKlaar) {
+      geluid.juist();
+      geluid.fiche(0.25);
+      geluid.fiche(0.4);
+    }
     vorigePuntenSom = som;
   });
 
@@ -309,7 +422,8 @@
   let tijdOm = $derived(live.staat?.fase === 'vraag' && live.staat?.klok?.loopt === true && restSec <= 0);
 
   onMount(() => {
-    joinAdres = `${location.origin}/`;
+    // Bij een proefrit brengt de code een telefoon naar die proefrit, niet naar de echte avond.
+    joinAdres = proefSpeelAdres(`${location.origin}/`);
     const wacht = setInterval(() => (wachtTeller += 1), 7000);
     if (inTest) {
       testmodus.start(page.url.searchParams.get('test'));
@@ -335,11 +449,21 @@
 
 <svelte:head><title>{inTest ? 'Testmodus · ' : ''}Blackjack Quiz 26/27</title></svelte:head>
 
+<svelte:window bind:innerWidth={vensterBreedte} />
+
 {#if inTest}
   <Testpaneel />
 {/if}
 
-<div class="scherm televisie" class:spanning data-sfeer={sfeer}>
+<div
+  class="scherm televisie"
+  class:spanning
+  class:roffelt={!onthulKlaar}
+  data-sfeer={sfeer}
+  style:transform={naastPaneel ? `scale(${naastPaneel})` : null}
+  style:transform-origin={naastPaneel ? '100% 50%' : null}
+>
+  <Overgang moment={overgang} />
   <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
   <div class="motief" aria-hidden="true"></div>
   <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->
@@ -480,7 +604,17 @@
             </h1>
             <hr class="rule" style="animation-delay:.3s" />
             <p class="lood" in:fly={{ y: 16, duration: 520, delay: 300, easing: cubicOut }}>{ronde?.uitleg}</p>
-            <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
+            {#if isAfrekening(ronde)}
+              <p class="lood" style="opacity:.8" in:fly={{ y: 16, duration: 520, delay: 450, easing: cubicOut }}>
+                Telefoons mogen weg: wie in januari voorspelde, krijgt de punten van wat er uitkwam.
+              </p>
+            {:else}
+              <p class="fijn" in:fade={{ duration: 500, delay: 700 }} style="font-size:var(--fs-etiket);color:var(--goud-licht)">
+                {#if ronde?.teamModus !== 'samen' && ronde?.type !== 'stem' && ronde?.type !== 'dichtstbij'}⚡ Snelste goede antwoord: +1 ·{/if}
+                🔥 Vanaf {REEKS_VANAF} vragen op rij goed: +1 per vraag
+              </p>
+              <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
+            {/if}
 
             {#if inTeams}
               <div class="raster" style="margin-top:clamp(.5rem,2vh,1.5rem)">
@@ -561,6 +695,9 @@
                 </span>
               {/each}
             </div>
+            {#if alleBinnen && !tijdOm}
+              <p class="iedereen-binnen">Iedereen is binnen! Nog even…</p>
+            {/if}
           </div>
 
           <!-- ══ De onthulling ══════════════════════════════════════════ -->
@@ -578,8 +715,11 @@
                   {#each vraag.opties as optie, i}
                     <div
                       class="keuze"
-                      class:goed={i === staat.onthulling?.goedeOptie}
-                      class:fout={staat.onthulling?.goedeOptie !== undefined && i !== staat.onthulling?.goedeOptie}
+                      class:goed={onthulKlaar && i === staat.onthulling?.goedeOptie}
+                      class:fout={onthulKlaar && staat.onthulling?.goedeOptie !== undefined && i !== staat.onthulling?.goedeOptie}
+                      class:omklappen={i === staat.onthulling?.goedeOptie}
+                      class:afvallen={i !== staat.onthulling?.goedeOptie}
+                      style="--n:{beurt(i)}"
                     >
                       <span class="letter">{String.fromCharCode(65 + i)}</span><span>{optie}</span>
                     </div>
@@ -588,7 +728,17 @@
               {/if}
             </div>
 
-            <div class="onthulling">
+            {#if !onthulKlaar}
+              <div class="trommel">
+                <span class="stokken" aria-hidden="true">🥁</span>
+                <p class="etiket">En het antwoord is…</p>
+              </div>
+            {:else}
+            <div
+              class="onthulling"
+              class:na-keuzes={vraag.opties && staat.onthulling?.goedeOptie !== undefined}
+              style="--n:{aantalFout}"
+            >
               {#if alleFout}
                 <span class="stempel" style="--hoek:-8deg">Iedereen fout</span>
               {:else if alleGoed}
@@ -649,10 +799,27 @@
                       <span class="wie">{naamVan(i.inzender)}</span>
                       <span class="wat">{i.tekst || '—'}</span>
                       <span class="oordeel" aria-hidden="true">{i.isGoed === true ? '✓' : i.isGoed === false ? '✗' : ''}</span>
+                      {#if i.isGoed === true && puntenVoor(i.inzender) > 0}
+                        <span class="fiche" style="--wacht:{0.7 + n * 0.09}s"><span>+{puntenVoor(i.inzender)}</span></span>
+                      {/if}
                     </div>
                   {/each}
                 </div>
               {/if}
+            {/if}
+            {#if snelsten || reeksBonussen.length}
+              <div class="bonusrij">
+                {#if snelsten}
+                  <span class="bonus" style="--wacht:1.1s">⚡ Snelste vinger <strong>{snelsten}</strong> <span class="fiche"><span>+1</span></span></span>
+                {/if}
+                {#each reeksBonussen as b, n (b.spelerId)}
+                  <span class="bonus" style="--wacht:{1.3 + n * 0.18}s">
+                    🔥 <strong>{naamVanSpeler(b.spelerId)}</strong> {b.opRij} op rij
+                    <span class="fiche"><span>+{b.punten}</span></span>
+                  </span>
+                {/each}
+              </div>
+            {/if}
             {/if}
           </div>
 
@@ -683,9 +850,13 @@
                   <span class="naam">
                     {r.naam}
                     {#if toonNieuweVolgorde && r.spelerId === stijgerId}<span class="badge stijger">📈 Stijger</span>{/if}
+                    {#if (staat.reeksen[r.spelerId] ?? 0) >= REEKS_VANAF}<span class="badge vuur">🔥 {staat.reeksen[r.spelerId]} op rij</span>{/if}
                   </span>
                   <span class="standpunten">
                     <Teller naar={r.punten} van={live.vorigePunten[r.spelerId] ?? r.punten} vertraging={250} />
+                    {#if toonNieuweVolgorde && (r.dezeRonde ?? 0) > 0}
+                      <span class="fiche" style="--wacht:{0.2 + i * 0.12}s"><span>+{r.dezeRonde}</span></span>
+                    {/if}
                   </span>
                 </div>
               {/each}

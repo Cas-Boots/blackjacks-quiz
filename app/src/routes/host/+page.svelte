@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { api, metProef } from '$lib/client/proef';
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
   import { live } from '$lib/client/live.svelte';
   import Klok from '$lib/client/Klok.svelte';
   import { houdWakker } from '$lib/client/wakker';
-  import type { LogRegel } from '$lib/shared/state';
+  import { isAfrekening, type LogRegel } from '$lib/shared/state';
+  import { GELUIDSBORD } from '$lib/shared/geluidsbord';
   import { WAARSCHUW_VANAF_MS, DRINGEND_VANAF_MS, aftelTekst, nogTekst } from '$lib/shared/nieuwjaar';
 
   type Voorstel = { automatisch: boolean; goed: boolean; reden: string };
@@ -56,6 +58,8 @@
   let samenstellingVrij = $derived(staat?.fase === 'lobby');
   /** Deze ronde eindigt met de cijfers van het jaar. */
   let metCijfers = $derived(!!staat?.ronde?.cijfers);
+  /** De voorspellingen van januari: geen vragen, alleen de afrekening. */
+  let afrekening = $derived(isAfrekening(staat?.ronde));
   let laatsteVraag = $derived(!!vraag && vraag.index + 1 >= vraag.aantal);
   let cijfersBezig = $state(false);
 
@@ -118,7 +122,7 @@
       return;
     }
     try {
-      const r = await fetch('/api/host/antwoorden', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/antwoorden'), { cache: 'no-store' });
       if (!r.ok) return;
       const uit = await r.json();
       inzendingen = uit.inzendingen;
@@ -128,7 +132,7 @@
 
   async function haalRondes() {
     try {
-      const r = await fetch('/api/host/rondes', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/rondes'), { cache: 'no-store' });
       if (!r.ok) return;
       const uit: RondesAntwoord = await r.json();
       rondesInfo = uit;
@@ -140,7 +144,7 @@
 
   async function haalLogboek() {
     try {
-      const r = await fetch('/api/host/logboek', { cache: 'no-store' });
+      const r = await fetch(api('/api/host/logboek'), { cache: 'no-store' });
       if (!r.ok) return;
       logboek = (await r.json()).regels;
     } catch { /* volgende keer weer */ }
@@ -469,8 +473,12 @@
             🎞 Start de trailer
           </button>
         {/if}
-        <button class="knop" class:hoofd={staat?.fase === 'ronde'} onclick={() => doe('start-ronde')} disabled={bezig || keuzeGewijzigd}>Start de ronde</button>
-        <button class="knop" onclick={() => doe('herverdeel')} disabled={bezig}>Herverdeel teams</button>
+        <button class="knop" class:hoofd={staat?.fase === 'ronde'} onclick={() => doe('start-ronde')} disabled={bezig || keuzeGewijzigd}>
+          {staat?.fase === 'ronde' && afrekening ? 'Start de afrekening' : 'Start de ronde'}
+        </button>
+        {#if !(staat?.fase === 'ronde' && afrekening)}
+          <button class="knop" onclick={() => doe('herverdeel')} disabled={bezig}>Herverdeel teams</button>
+        {/if}
         {#if staat?.fase === 'lobby'}
           <button class="knop" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>Toon ronde 1</button>
         {/if}
@@ -544,7 +552,35 @@
     </div>
     {/if}
     {#if porMelding}<p class="fijn" in:fade={{ duration: 200 }}>{porMelding}</p>{/if}
+    {#if afrekening && (staat?.fase === 'ronde' || staat?.fase === 'cijfers')}
+      <p class="fijn">
+        Geen vragen op de telefoon in deze ronde. Wie in januari voorspelde, krijgt de punten van wat er uitkwam
+        zodra je naar de tussenstand gaat. Jouw eigen punten staan alleen in deze ronde, niet in de stand van de avond{#if staat?.cijfers?.voorspellingen?.zitUit?.length}; {staat.cijfers.voorspellingen.zitUit.join(' en ')} voorspelde niet mee en zit deze ronde uit{/if}.
+      </p>
+    {/if}
+    {#if staat?.praatpunten?.length}
+      <details class="praatpunten" open>
+        <summary>Om te vertellen bij de voorspellingen</summary>
+        <ol>
+          {#each staat.praatpunten as p (p.v)}
+            <li><strong>{p.v}</strong> {p.a}{#if p.toelichting}{' '}<span class="fijn">— {p.toelichting}</span>{/if}</li>
+          {/each}
+        </ol>
+      </details>
+    {/if}
     <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> klok stil · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt · <kbd>Z</kbd> ongedaan</p>
+
+    <!-- Het geluidsbord: de quizmaster drukt, de televisie speelt. -->
+    <details class="paneel">
+      <summary><span class="etiket stil">Geluidsbord</span> <span class="fijn">speelt af op de televisie</span></summary>
+      <div class="geluidsbord">
+        {#each GELUIDSBORD as g (g.sleutel)}
+          <button class="knop" onclick={() => live.opdracht('geluid', { geluid: g.sleutel }).catch(() => {})}>
+            <span aria-hidden="true">{g.emoji}</span> {g.label}
+          </button>
+        {/each}
+      </div>
+    </details>
 
     <!-- Antwoorden beoordelen -->
     {#if staat?.fase === 'vraag' || staat?.fase === 'antwoord'}
@@ -675,7 +711,7 @@
                   <strong>{r.naam}</strong>
                   <span class="fijn">{r.thema} · {typeNaam[r.type] ?? r.type} · {r.teamModus} · {aantal}/{r.vragen.length} vragen</span>
                   {#if r.teVullen || r.vragen.some((v) => v.teVullen)}<span class="badge rood">te vullen</span>{/if}
-                  {#if r.cijfers}<span class="badge">{r.cijfers === 'voorspellingen' ? 'met de voorspellingen' : 'met de cijfers van het jaar'}</span>{/if}
+                  {#if r.cijfers}<span class="badge">{r.cijfers === 'voorspellingen' ? 'afrekening: geen vragen op de telefoon' : 'met de cijfers van het jaar'}</span>{/if}
                   {#if r.optioneel}<span class="badge">optioneel</span>{/if}
                 </summary>
                 <ol class="vragenlijst">
@@ -710,8 +746,8 @@
     {/if}
 
     <div class="knoprij">
-      <a class="knop stil" href="/tv" target="_blank" rel="noreferrer">Televisiescherm openen</a>
-      <a class="knop stil" href="/uitslag" target="_blank" rel="noreferrer">Uitslagen</a>
+      <a class="knop stil" href={metProef('/tv')} target="_blank" rel="noreferrer">Televisiescherm openen</a>
+      <a class="knop stil" href={metProef('/uitslag')} target="_blank" rel="noreferrer">Uitslagen</a>
       <a class="knop stil" href="/beheer">Beheer</a>
       {#if staat?.fase !== 'lobby'}
         <button class="knop stil" onclick={() => doe('naar-lobby')} disabled={bezig}>Terug naar de lobby</button>

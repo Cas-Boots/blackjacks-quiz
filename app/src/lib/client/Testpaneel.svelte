@@ -142,7 +142,7 @@
     left: 0;
     bottom: 0;
     z-index: 55;
-    width: min(360px, 88vw);
+    width: min(360px, 88vw); /* TESTPANEEL in tv/+page.svelte schuift de dia hier naast */
     display: flex;
     flex-direction: column;
     background: rgba(6, 15, 12, 0.92);

@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
 import { mkdirSync, existsSync, accessSync, constants } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 const dbPad = process.env.DATABASE_PATH ?? 'local.db';
 const map = dirname(dbPad);
@@ -25,5 +26,46 @@ const sqlite = new Database(dbPad);
 sqlite.pragma('journal_mode = WAL');
 sqlite.pragma('foreign_keys = ON');
 
-export const db = drizzle(sqlite, { schema });
+type Db = ReturnType<typeof drizzle<typeof schema>>;
+const echteDb: Db = drizzle(sqlite, { schema });
+
+/**
+ * Een proefrit (zie proef.ts) heeft een eigen database in het geheugen. Een
+ * verzoek dat bij een proefrit hoort, draait binnen `binnen()`, en dan wijst
+ * `db` voor alles in dat verzoek naar die database. Zo raakt een proefrit de
+ * echte avond nergens, zonder dat elke query dat hoeft te weten.
+ */
+export interface Context {
+  proefId: string;
+  db: Db;
+}
+const opslag = new AsyncLocalStorage<Context>();
+
+/** Draait fn binnen een proefrit. Alles wat daaruit volgt, ook timers, ziet diens database. */
+export function binnen<T>(context: Context, fn: () => T): T {
+  return opslag.run(context, fn);
+}
+
+/** De proefrit van dit verzoek, of null voor de echte avond. */
+export function huidigeProef(): string | null {
+  return opslag.getStore()?.proefId ?? null;
+}
+
+/** Een nieuwe, lege database in het geheugen, voor een proefrit. */
+export function geheugenDb(): Db {
+  const geheugen = new Database(':memory:');
+  geheugen.pragma('foreign_keys = ON');
+  return drizzle(geheugen, { schema });
+}
+
+/** De echte database, ook vanuit een proefrit. Alleen om spelers over te nemen. */
+export const echte = echteDb;
+
+export const db: Db = new Proxy(echteDb, {
+  get(_, sleutel) {
+    const doel = opslag.getStore()?.db ?? echteDb;
+    const waarde = Reflect.get(doel, sleutel, doel);
+    return typeof waarde === 'function' ? waarde.bind(doel) : waarde;
+  },
+});
 export { sqlite };

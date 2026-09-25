@@ -26,7 +26,13 @@ import type {
 
 /* ---- De tafel ------------------------------------------------------- */
 
+/* De vaste vijf en een plus-één: Tom is de gast van de avond. Cas is de
+   quizmaster en staat dus niet aan tafel, behalve bij de voorspellingen. */
 const NAMEN = ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva', 'Tom'] as const;
+const GAST = 'Tom';
+const QUIZMASTER = 'Cas';
+/** Wie in januari voorspelde: de vaste vijf en de quizmaster, niet de gast. */
+const VOORSPELLERS = [...NAMEN.filter((n) => n !== GAST), QUIZMASTER];
 type Punten = Record<number, number>;
 
 /** Waar iedereen staat als de proefavond begint. */
@@ -204,6 +210,8 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     ingeleverd: [],
     inzendingen: [],
     uitdeling: {},
+    bonussen: [],
+    reeksen: {},
     cijfers: null,
     jaaroverzicht: null,
     ...over,
@@ -320,13 +328,14 @@ interface Profiel {
   taartKans: number;
   landen: [string, string, string, string][];
 }
-const PROFIEL: Record<(typeof NAMEN)[number], Profiel> = {
+/** Wie er in resolution-recap staat: net als bij de voorspellingen Cas wel, de gast niet. */
+const PROFIEL: Record<string, Profiel> = {
   Liz: { emoji: '🏃‍♀️', sportKans: 58, doel: 180, soorten: [['Hardlopen', '🏃‍♀️'], ['Yoga', '🧘‍♀️'], ['Zwemmen', '🏊‍♀️']], taartKans: 6, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['FR', 'Frankrijk', '🇫🇷', '2026-02-14'], ['JP', 'Japan', '🇯🇵', '2026-05-03'], ['IT', 'Italië', '🇮🇹', '2026-08-10']] },
   Bastiaan: { emoji: '🚴', sportKans: 44, doel: 150, soorten: [['Fietsen', '🚴'], ['Padel', '🎾']], taartKans: 9, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['DE', 'Duitsland', '🇩🇪', '2026-04-18']] },
   Joris: { emoji: '🏋️', sportKans: 71, doel: 200, soorten: [['Krachttraining', '🏋️'], ['Hardlopen', '🏃'], ['Klimmen', '🧗']], taartKans: 4, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['ES', 'Spanje', '🇪🇸', '2026-03-22'], ['PT', 'Portugal', '🇵🇹', '2026-03-28'], ['NO', 'Noorwegen', '🇳🇴', '2026-07-05'], ['US', 'de Verenigde Staten', '🇺🇸', '2026-10-02']] },
   Rik: { emoji: '⚽', sportKans: 22, doel: 100, soorten: [['Voetbal', '⚽'], ['Wandelen', '🥾']], taartKans: 14, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01']] },
   Eva: { emoji: '🧘', sportKans: 39, doel: null, soorten: [['Yoga', '🧘'], ['Tennis', '🎾'], ['Boulderen', '🧗‍♀️']], taartKans: 7, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['GR', 'Griekenland', '🇬🇷', '2026-06-12'], ['TR', 'Turkije', '🇹🇷', '2026-06-20']] },
-  Tom: { emoji: '🏓', sportKans: 12, doel: 60, soorten: [['Tafeltennis', '🏓']], taartKans: 3, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['BE', 'België', '🇧🇪', '2026-09-09']] },
+  Cas: { emoji: '🏓', sportKans: 30, doel: 160, soorten: [['Tafeltennis', '🏓'], ['Hardlopen', '🏃']], taartKans: 12, landen: [['NL', 'Nederland', '🇳🇱', '2026-01-01'], ['BE', 'België', '🇧🇪', '2026-09-09']] },
 };
 
 /** Dagen met iets erop, stabiel per naam: dezelfde kaart bij elke herlading. */
@@ -358,7 +367,7 @@ function langsteReeks(dagen: Record<string, number>): number {
 }
 
 function personen(): CijfersPersoon[] {
-  return NAMEN.map((naam) => {
+  return VOORSPELLERS.map((naam) => {
     const p = PROFIEL[naam];
     const sportDagen = dagenVan(naam, p.sportKans, 'sport');
     const totaal = Object.values(sportDagen).reduce((a, b) => a + b, 0);
@@ -393,22 +402,23 @@ function voorspellingen(stap: number): Cijfers {
   });
   const vragen: VoorspellingUitslag[] = [
     zet(1, 'Wordt Nederland in 2026 wereldkampioen voetbal?', 'janee', 'Nee', [
-      ['Liz', 'Nee', 1, true], ['Bastiaan', 'Ja', 3, false], ['Joris', 'Nee', 1, true], ['Rik', 'Ja', 3, false], ['Eva', 'Nee', 1, true], ['Tom', 'Nee', 1, true],
+      ['Liz', 'Nee', 1, true], ['Bastiaan', 'Ja', 3, false], ['Joris', 'Nee', 1, true], ['Rik', 'Ja', 3, false], ['Eva', 'Nee', 1, true], ['Cas', 'Nee', 1, true],
     ], { toelichting: 'Uit in de kwartfinale, na strafschoppen. Natuurlijk.' }),
     zet(2, 'Hoeveel landen bezoekt Joris dit jaar?', 'getal', '5', [
-      ['Liz', '4', 2, false, '5'], ['Bastiaan', '5', 2, true], ['Joris', '6', 2, false, '5'], ['Rik', '3', 2, false, '5'], ['Eva', '5', 2, true], ['Tom', '2', 2, false, '5'],
+      ['Liz', '4', 2, false, '5'], ['Bastiaan', '5', 2, true], ['Joris', '6', 2, false, '5'], ['Rik', '3', 2, false, '5'], ['Eva', '5', 2, true], ['Cas', '7', 2, false, '5'],
     ], { voorlopig: true, toelichting: 'Tot nu toe. December kan er nog een bij doen.' }),
     zet(3, 'Wie haalt als eerste zijn sportdoel?', 'naam', 'Joris', [
-      ['Liz', 'Joris', 2, true], ['Bastiaan', 'Liz', 2, false], ['Joris', 'Joris', 2, true], ['Rik', 'Bastiaan', 2, false], ['Eva', 'Joris', 2, true], ['Tom', 'Eva', 2, false],
+      ['Liz', 'Joris', 2, true], ['Bastiaan', 'Liz', 2, false], ['Joris', 'Joris', 2, true], ['Rik', 'Bastiaan', 2, false], ['Eva', 'Joris', 2, true], ['Cas', 'Eva', 2, false],
     ]),
     zet(4, 'Wat wordt het woord van het jaar?', 'open', null, [
-      ['Liz', 'Slaaptoerisme', 1, null], ['Bastiaan', 'Padelknie', 1, null], ['Joris', 'Doomscrollpauze', 1, null], ['Rik', 'Wintersportspijt', 1, null], ['Eva', 'Prikkelarm', 1, null], ['Tom', 'AI-moe', 1, null],
+      ['Liz', 'Slaaptoerisme', 1, null], ['Bastiaan', 'Padelknie', 1, null], ['Joris', 'Doomscrollpauze', 1, null], ['Rik', 'Wintersportspijt', 1, null], ['Eva', 'Prikkelarm', 1, null], ['Cas', 'AI-moe', 1, null],
     ]),
   ];
-  const standLijst: VoorspellerStand[] = NAMEN.map((naam) => {
+  const standLijst: VoorspellerStand[] = VOORSPELLERS.map((naam) => {
     const mijn = vragen.flatMap((v) => v.antwoorden.filter((a) => a.naam === naam));
     return {
       naam,
+      ...(naam === QUIZMASTER ? { quizmaster: true } : {}),
       goed: mijn.filter((a) => a.goed === true).length,
       fout: mijn.filter((a) => a.goed === false).length,
       open: mijn.filter((a) => a.goed === null).length,
@@ -417,7 +427,7 @@ function voorspellingen(stap: number): Cijfers {
   }).sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl'));
   return {
     soort: 'voorspellingen', stap, stappen: vragen.length, jaar: JAAR, peildatum: PEILDATUM, personen: personen(),
-    voorspellingen: { vragen, stand: standLijst, open: vragen.filter((v) => v.open).length },
+    voorspellingen: { vragen, stand: standLijst, open: vragen.filter((v) => v.open).length, zitUit: [GAST] },
   };
 }
 
@@ -594,6 +604,11 @@ export const DIAS: Dia[] = [
     let: 'Zelfde kaart, andere sfeer (gras). Na deze ronde volgen de cijfers van het jaar.',
     maak: () => metRonde(R.sport, { fase: 'ronde' }),
   },
+  {
+    id: 'ronde-voorspellingen', hoofdstuk: 'Ronde', titel: 'Titelkaart van de voorspellingen',
+    let: 'Geen vragen op de telefoon: met Start gaat het hostscherm meteen naar de voorspellingen van januari. Onder de uitleg staat dat de telefoons weg mogen.',
+    maak: () => metRonde(R.voorspellingen, { fase: 'ronde' }),
+  },
 
   /* ── Vraag ── */
   {
@@ -640,13 +655,21 @@ export const DIAS: Dia[] = [
   /* ── Onthulling ── */
   {
     id: 'antwoord-gemengd', hoofdstuk: 'Onthulling', titel: 'Gemengd: goed en fout',
-    let: 'De goede keuze licht op, de rest dooft. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje. Tom leverde niets in.',
+    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en Joris zit op vier op rij: allebei een bonus. Tom leverde niets in.',
     vorigePunten: START,
     maak: () => antwoord(
       R.waar, V.waar,
       { antwoord: 'Niet waar', toelichting: 'Kwartfinale, strafschoppen. Het is een traditie.', goedeOptie: 1 },
       [inz('s_1', 'Niet waar', true, 3100), inz('s_2', 'Waar', false, 5400), inz('s_3', 'Niet waar', true, 6800), inz('s_4', 'Waar', false, 9900), inz('s_5', 'Niet waar', true, 12000)],
-      { stand: stand(erbij({ 1: 1, 3: 1, 5: 1 })), uitdeling: { 1: 1, 3: 1, 5: 1 } },
+      {
+        stand: stand(erbij({ 1: 2, 3: 2, 5: 1 })),
+        uitdeling: { 1: 2, 3: 2, 5: 1 },
+        bonussen: [
+          { spelerId: 1, soort: 'snel', punten: 1 },
+          { spelerId: 3, soort: 'reeks', punten: 1, opRij: 4 },
+        ],
+        reeksen: { 1: 1, 3: 4, 5: 1 },
+      },
     ),
   },
   {
@@ -750,12 +773,12 @@ export const DIAS: Dia[] = [
   },
   {
     id: 'cijfers-voorspellingen', hoofdstuk: 'Cijfers van het jaar', titel: 'Voorspellingen: de stand',
-    let: 'Goed, mis, open en punten per persoon; één voorspelling staat nog open.',
+    let: 'Goed, mis, open en punten per persoon; één voorspelling staat nog open. Cas staat erin als quizmaster (zijn punten blijven in deze ronde), Tom niet: die was er in januari niet bij en zit deze ronde uit.',
     maak: () => metRonde(R.voorspellingen, { fase: 'cijfers', cijfers: voorspellingen(0) }),
   },
   {
     id: 'cijfers-voorspelling', hoofdstuk: 'Cijfers van het jaar', titel: 'Eén voorspelling',
-    let: 'De uitkomst en wat iedereen in januari zei. Stap verder: een voorlopige uitkomst, en een die nog open staat.',
+    let: 'De uitkomst en wat de vaste vijf en Cas in januari zeiden; Tom, de plus-één, staat er niet bij. Stap verder: een voorlopige uitkomst, en een die nog open staat.',
     maak: () => metRonde(R.voorspellingen, { fase: 'cijfers', cijfers: voorspellingen(1) }),
   },
 
@@ -764,7 +787,12 @@ export const DIAS: Dia[] = [
     id: 'stand', hoofdstuk: 'Stand', titel: 'De tussenstand',
     let: 'Eerst de oude volgorde, dan schuift alles: Joris klimt naar één en krijgt Stijger, de koploper het kroontje, Tom de rode lantaarn met een zin.',
     vorigePunten: START,
-    maak: () => metRonde(R.cijfers, { fase: 'stand', stand: stand(NA_STAND) }),
+    maak: () => metRonde(R.cijfers, {
+      fase: 'stand',
+      // Met een fiche voor de punten van deze ronde, en een vlammetje voor wie op dreef is.
+      stand: stand(NA_STAND).map((r) => ({ ...r, dezeRonde: r.punten - (START[r.spelerId] ?? 0) })),
+      reeksen: { 3: 3 },
+    }),
   },
 
   /* ── Uitslag ── */

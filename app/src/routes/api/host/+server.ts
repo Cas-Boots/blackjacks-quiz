@@ -9,7 +9,8 @@ import {
   scoorAutomatisch, voegDeelnemerToe, MAX_NAAM_TEKENS,
 } from '$lib/server/spel';
 import { momentopname, schrijfLog, draaiTerug, type Momentopname } from '$lib/server/logboek';
-import { meldPor } from '$lib/server/bus';
+import { meldPor, meldGeluid } from '$lib/server/bus';
+import { isBordgeluid } from '$lib/shared/geluidsbord';
 import { geldigeFoto } from '$lib/server/foto';
 import { maakSpel } from '$lib/server/seed';
 import { PAKKETTEN } from '$lib/content/packs';
@@ -17,6 +18,7 @@ import { ververs } from '$lib/server/recap/bron';
 import { aantalStappen } from '$lib/server/recap/cijfers';
 import { aantalDias, jaaroverzichtVoor } from '$lib/server/jaaroverzicht';
 import { recapAnalyse } from '$lib/server/recap/bron';
+import { isAfrekening } from '$lib/shared/state';
 
 /** Opdrachten die de klok of de plek in de quiz veranderen, en dus wachten tot na de pauze. */
 const GEBLOKKEERD_IN_PAUZE = new Set([
@@ -166,6 +168,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
     case 'start-ronde': {
       if (!ronde) error(409, 'geen ronde');
+      if (isAfrekening(ronde)) {
+        // Geen vragen op de telefoon: meteen de voorspellingen van januari.
+        stopKlok();
+        zet({ fase: 'cijfers', vraagIndex: 0 });
+        log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
+        break;
+      }
       zet({ fase: 'vraag', vraagIndex: 0 });
       startKlok(vraagTijd(ronde, ronde.vragen[0]));
       log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
@@ -276,6 +285,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       else if (spel.fase === 'vraag' && spel.vraagIndex > 0) zet({ fase: 'antwoord', vraagIndex: spel.vraagIndex - 1 });
       else if (spel.fase === 'vraag') zet({ fase: 'ronde' });
       else if (spel.fase === 'cijfers' && spel.vraagIndex > 0) zet({ vraagIndex: spel.vraagIndex - 1 });
+      else if (spel.fase === 'cijfers' && isAfrekening(ronde)) zet({ fase: 'ronde', vraagIndex: 0 });
       else if (spel.fase === 'cijfers' && ronde) zet({ fase: 'antwoord', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
       else if (spel.fase === 'stand' && ronde?.cijfers && cijfersStappen() > 0) zet({ fase: 'cijfers', vraagIndex: cijfersStappen() - 1 });
       else if (spel.fase === 'stand' && ronde) zet({ fase: 'antwoord', vraagIndex: ronde.vragen.length - 1 });
@@ -341,6 +351,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       correctieId = rij.id;
       log = { omschrijving: `${punten > 0 ? '+' : ''}${punten} voor ${naamVan(spelerId)}`, terug: true };
       break;
+    }
+    case 'geluid': {
+      // Het geluidsbord: alleen doorgeven aan de televisie, de stand verandert niet.
+      if (!isBordgeluid(body.geluid)) error(400, 'onbekend geluid');
+      meldGeluid(body.geluid);
+      return json({ ok: true });
     }
     case 'por': {
       // Een por naar wie nog niet heeft ingeleverd, of naar één speler.

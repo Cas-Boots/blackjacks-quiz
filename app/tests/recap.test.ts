@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import snapshot from '../src/lib/content/recap-snapshot.json';
 import { analyseer, opsomming, telwoord, datumTekst, landNaam, vlag, zoekSportTag, type RecapExport } from '../src/lib/server/recap/analyse';
 import { beantwoord, LIVE_SLEUTELS, verlevendig } from '../src/lib/server/recap/vragen';
-import { beoordeelVoorspellingen } from '../src/lib/server/recap/voorspellingen';
+import { beoordeelVoorspellingen, verdelingUitVoorspellingen } from '../src/lib/server/recap/voorspellingen';
+import { isAfrekening } from '../src/lib/shared/state';
 import { cijfersVoor } from '../src/lib/server/recap/cijfers';
 import { PAKKETTEN } from '../src/lib/content/packs';
 
@@ -204,6 +205,39 @@ describe('voorspellingen', () => {
     const meta = u.vragen.find((v) => v.nr === 14)!;
     expect(meta.open).toBe(false);
     expect(meta.uitkomst).toBeTruthy();
+  });
+  it('markeert de quizmaster en noemt de gast die niet voorspelde', () => {
+    const u = beoordeelVoorspellingen({
+      analyse, aantalSpelers: 7,
+      deelnemers: ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva', 'Tom'], quizmaster: 'Cas',
+    });
+    expect(u.stand.find((s) => s.naam === 'Cas')?.quizmaster).toBe(true);
+    expect(u.stand.filter((s) => s.quizmaster)).toHaveLength(1);
+    expect(u.zitUit).toEqual(['Tom']);
+    // Zonder gast staat er niemand buiten.
+    expect(beoordeelVoorspellingen({ analyse, aantalSpelers: 6, deelnemers: ['Liz', 'Eva'], quizmaster: 'Cas' }).zitUit).toBeUndefined();
+  });
+  it('geeft de vaste spelers hun voorspellingspunten, de gast en de quizmaster niets', () => {
+    const u = beoordeelVoorspellingen({
+      analyse, aantalSpelers: 7,
+      deelnemers: ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva', 'Tom'], quizmaster: 'Cas',
+    });
+    const deelnemers = [
+      { id: 1, naam: 'Liz' }, { id: 2, naam: 'Bastiaan' }, { id: 3, naam: 'Joris' },
+      { id: 4, naam: 'Rik' }, { id: 5, naam: 'Eva' }, { id: 6, naam: 'Tom' },
+    ];
+    const verdeling = verdelingUitVoorspellingen(u.stand, deelnemers);
+    for (const d of deelnemers.slice(0, 5)) {
+      const punten = u.stand.find((s) => s.naam === d.naam)!.punten;
+      expect(verdeling[d.id] ?? 0).toBe(punten);
+    }
+    expect(verdeling[6]).toBeUndefined();
+    // Cas is geen deelnemer; ook als hij er per ongeluk tussen staat, telt hij niet.
+    expect(verdelingUitVoorspellingen(u.stand, [{ id: 9, naam: 'Cas' }])).toEqual({});
+  });
+  it('speelt alleen de voorspellingenronde als afrekening', () => {
+    const rondes = PAKKETTEN.jaar2026.rondes.filter((r) => isAfrekening(r));
+    expect(rondes.map((r) => r.naam)).toEqual(['De Voorspellingen']);
   });
   it('vult de vragen van de ronde', () => {
     const u = beoordeelVoorspellingen({ analyse, aantalSpelers: 6 });
