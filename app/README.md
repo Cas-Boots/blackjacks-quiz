@@ -383,18 +383,38 @@ mee; het is er alleen voor de lol.
 
   Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
   het leuk blijft en niet druk wordt.
-- **Elk dier beweegt op zijn eigen manier.** Lama, giraf en hond lopen,
-  kangoeroe en kikker springen, aap en luiaard slingeren langs de bovenkant,
-  goudvis, dolfijn en krokodil zwemmen met bubbels, vogels en insecten
-  vliegen, en das, konijn, worm en eekhoorn graven zich onder de grond door.
-  De pinguïn waggelt, want vliegen kan hij niet.
+- **Erin, een kunstje, en weer weg.** Elk dier komt op zijn eigen manier
+  binnen, stopt op zijn eigen plek, doet een kunstje en gaat weer. Met meer
+  dieren staan ze even naast elkaar, elk met een eigen kunstje.
+- **Met lijf en decor.** Emoji kunnen hun poten niet bewegen, dus krijgen ze
+  tekenfilmdelen die met ze meebewegen:
+  - lopers (lama, giraf, hond) rennen op wervelende pootjes, met stofwolkjes;
+  - springers (kangoeroe, kikker, eenhoorn) stuiteren op een springveer;
+  - slingeraars (aap, luiaard) hangen aan een liaan onder een tak die over
+    het scherm loopt;
+  - zwemmers (goudvis, dolfijn, krokodil) gaan half onder de golven, met
+    bubbels en een peddelend vinnetje;
+  - vogels en insecten klapperen met vleugels, met fartlijnen erachter;
+  - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
+    in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
+
+  Ze kijken ook de kant op waar ze heen gaan: de meeste emoji kijken naar
+  links, dus die worden gespiegeld.
+- **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke
+  keer een verrassing. Eigen kunstjes: de lama spuugt, de kip legt een ei, de
+  aap gooit met bananen, de eenhoorn maakt een regenboog, de eekhoorn begraaft
+  een nootje, de luiaard hangt ondersteboven, de egel rolt zich op, de
+  zeehond houdt een bal hoog. Daarnaast kan elk dier een paar van de
+  algemene: een salto, een dansje met muzieknootjes, een pirouette met
+  sterretjes, stuiteren met confetti. Sip: een zucht met een traan, omvallen,
+  mokken met een boos wolkje, of zich klein maken.
 - **Het roept iets.** Bij de onthulling roept het maatje van de eerste die het
   goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
   telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
 
 De dieren, hun titels en wat ze roepen staan in `src/lib/shared/dieren.ts`;
-de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-animaties
-onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
+de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-,
+`kunst-…`- en `ding-…`-animaties onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
 geen optochten.
 
 ### Het hostscherm
