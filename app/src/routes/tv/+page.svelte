@@ -29,6 +29,15 @@
      plaats van van de server. De televisie meldt zich dan niet aan en er
      verandert niets aan het spel dat klaarstaat. */
   let inTest = $derived(page.url.searchParams.has('test'));
+  /* Het paneel ligt over de linkerkant van het scherm. Op een breed scherm
+     schuift de dia ernaast, verkleind in plaats van anders opgemaakt: zo zie
+     je precies wat de televisie laat zien, alleen kleiner. Op een smal
+     scherm is er geen plek naast; daar klap je het paneel weg met T. */
+  const TESTPANEEL = 360;
+  let vensterBreedte = $state(0);
+  let naastPaneel = $derived(
+    inTest && testmodus.paneelOpen && vensterBreedte >= 900 ? (vensterBreedte - TESTPANEEL) / vensterBreedte : null
+  );
 
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
@@ -324,11 +333,19 @@
 
 <svelte:head><title>{inTest ? 'Testmodus · ' : ''}Blackjack Quiz 26/27</title></svelte:head>
 
+<svelte:window bind:innerWidth={vensterBreedte} />
+
 {#if inTest}
   <Testpaneel />
 {/if}
 
-<div class="scherm televisie" class:spanning data-sfeer={sfeer}>
+<div
+  class="scherm televisie"
+  class:spanning
+  data-sfeer={sfeer}
+  style:transform={naastPaneel ? `scale(${naastPaneel})` : null}
+  style:transform-origin={naastPaneel ? '100% 50%' : null}
+>
   <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
   <div class="motief" aria-hidden="true"></div>
   <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->

@@ -516,6 +516,10 @@ stemtelling), de cijfers van het jaar, de tussenstand, het podium met de
 prijzen, en een paar randgevallen: een veel te lange vraag, een filmpje dat
 ontbreekt en het scherm vóór de eerste verbinding.
 
+Op een breed scherm schuift de dia naast het paneel, verkleind maar verder
+precies zoals de televisie hem toont. Klap het paneel weg met `T` om hem op
+ware grootte te zien; op een smal scherm ligt het paneel eroverheen.
+
 | Toets | Doet |
 |---|---|
 | `→`, `spatie` | volgende dia |
