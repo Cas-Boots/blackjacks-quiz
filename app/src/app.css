@@ -2640,6 +2640,17 @@ a.uitslagrij:hover {
 .portret.m .dierbadge { font-size: clamp(1rem, 1.5vw, 1.5rem); }
 .portret.l .dierbadge { font-size: clamp(1.4rem, 2.3vw, 2.3rem); }
 
+/* ---- Een naam voor je maatje, op de telefoon ------------------------ */
+.diernaam {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.diernaam input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 /* ---- De kiezer op de telefoon: alleen het gekozen dier beweegt ------- */
 .dierenkiezer {
   display: grid;

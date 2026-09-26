@@ -4,6 +4,8 @@
     id: number;
     naam: string;
     dier: string | null;
+    /** De naam die de speler zijn maatje gaf. */
+    dierNaam?: string | null;
   }
 
   /** Nooit meer dan dit tegelijk, anders wordt het een kudde. */
@@ -136,7 +138,7 @@
       </span>
     {/key}
     <!-- De naam via CSS: puur versiering, geen tweede "Tom" in de tekst van de pagina. -->
-    <span class="lopernaam" data-naam={l.naam}></span>
+    <span class="lopernaam" data-naam={l.dierNaam ? `${l.dierNaam} · ${l.naam}` : l.naam}></span>
   </div>
 {/each}
 

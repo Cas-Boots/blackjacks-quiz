@@ -18,7 +18,7 @@
     aaibaar = false,
     label = '',
   }: {
-    spelers: { id: number; naam: string; dier: string | null }[];
+    spelers: { id: number; naam: string; dier: string | null; dierNaam?: string | null }[];
     /** Een naambordje onder elk dier. */
     namen?: boolean;
     /** Tikken op een dier geeft een kunstje. */
@@ -31,7 +31,7 @@
   /* Wie erbij komt valt de wei in; wie weggaat verdwijnt; wie van dier
      wisselt, verschijnt als zijn nieuwe dier. */
   $effect(() => {
-    const lijst = spelers.map((s) => ({ id: s.id, naam: s.naam, dier: s.dier }));
+    const lijst = spelers.map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam ?? null }));
     // Alleen de spelers tellen; de wei zelf verandert elk frame.
     untrack(() => {
       const nu = new Map(lijst.map((s) => [s.id, s]));
@@ -39,6 +39,11 @@
         const s = nu.get(b.id);
         return s && dierVan(s.dier, s.naam).sleutel === b.sleutel;
       });
+      // Een nieuwe naam krijgt het dier gewoon waar het staat.
+      for (const b of blijft) {
+        const s = nu.get(b.id)!;
+        if (b.dierNaam !== s.dierNaam || b.naam !== s.naam) Object.assign(b, { dierNaam: s.dierNaam, naam: s.naam });
+      }
       const erbij = lijst.filter((s) => !blijft.some((b) => b.id === s.id)).map((s) => nieuweBewoner(s));
       if (erbij.length || blijft.length !== wei.length) wei = [...blijft, ...erbij];
     });
@@ -78,7 +83,7 @@
         <span class="actie" data-lijf={h.lijf}>
           <span class="kijk" class:links={b.richting === -1}>
             {#if aaibaar}
-              <button class="aai" onclick={() => tik(b)} aria-label="Aai {b.naam}s maatje">
+              <button class="aai" onclick={() => tik(b)} aria-label={b.dierNaam ? `Aai ${b.dierNaam}` : 'Aai je maatje'}>
                 <Pixeldier sleutel={b.sleutel} pose={h.pose} vlieg={h.vlieg} />
               </button>
             {:else}
@@ -92,7 +97,7 @@
           {/if}
         </span>
       {/key}
-      {#if namen}<span class="weinaam" data-naam={b.naam}></span>{/if}
+      {#if namen}<span class="weinaam" data-naam={b.dierNaam ?? b.naam}></span>{/if}
     </div>
   {/each}
 </div>

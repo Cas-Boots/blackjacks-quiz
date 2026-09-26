@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
-  vrijDier, dierenroep, gangVan, isDier,
+  vrijDier, dierenroep, gangVan, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM,
 } from '../src/lib/shared/dieren';
 
 describe('maatjes', () => {
@@ -91,5 +91,16 @@ describe('maatjes', () => {
     expect(dierenroep('kip', 'Rik', 'goed', '1:2')).toBe(dierenroep('kip', 'Rik', 'goed', '1:2'));
     expect(dierVan('kip').goed).toContain(dierenroep('kip', 'Rik', 'goed', '1:2'));
     expect(dierVan('kip').fout).toContain(dierenroep('kip', 'Rik', 'fout', '1:2'));
+  });
+
+  it('maakt de naam van een maatje netjes: getrimd, kort, zonder stuurtekens', () => {
+    expect(schoneDierNaam('  Knabbel ')).toBe('Knabbel');
+    expect(schoneDierNaam('Sir\u0000  Tok\tTok')).toBe('Sir Tok Tok');
+    expect(schoneDierNaam('x'.repeat(50))).toHaveLength(MAX_DIERNAAM);
+    expect(schoneDierNaam('🦙'.repeat(30))).toBe('🦙'.repeat(MAX_DIERNAAM));
+    expect(schoneDierNaam('   ')).toBeNull();
+    expect(schoneDierNaam(42)).toBeNull();
+    expect(maatjeVoluit(dierVan('kip'), 'Knabbel')).toBe('Knabbel, de Paniekkip');
+    expect(maatjeVoluit(dierVan('kip'), null)).toBe('de Paniekkip');
   });
 });

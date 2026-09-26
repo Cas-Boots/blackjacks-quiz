@@ -22,6 +22,8 @@ export type Soort = 'grond' | 'lucht' | 'water' | 'graaf';
 export interface Bewoner {
   id: number;
   naam: string;
+  /** De naam die de speler zijn maatje gaf, of null. */
+  dierNaam: string | null;
   sleutel: string;
   soort: Soort;
   /** Waar hij staat, in procenten van de breedte. */
@@ -64,13 +66,14 @@ function greep<T>(lijst: readonly T[], toeval: () => number): T {
 
 /** Een nieuw dier in de wei. Het valt erin, schrikt even, en gaat dan zijns weegs. */
 export function nieuweBewoner(
-  speler: { id: number; naam: string; dier: string | null },
+  speler: { id: number; naam: string; dier: string | null; dierNaam?: string | null },
   toeval: () => number = Math.random,
 ): Bewoner {
   const sleutel = dierVan(speler.dier, speler.naam).sleutel;
   return {
     id: speler.id,
     naam: speler.naam,
+    dierNaam: speler.dierNaam ?? null,
     sleutel,
     soort: soortVan(sleutel),
     x: tussen(toeval, 12, 88),

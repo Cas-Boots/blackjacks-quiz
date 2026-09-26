@@ -395,6 +395,13 @@ mee; het is er alleen voor de lol.
   dieren. Een dier dat een ander aan tafel al heeft, is grijs. Wie niets
   kiest, krijgt er vanzelf een. De quizmaster kan op het beheerscherm een
   ander dier dobbelen.
+- **Een eigen naam.** Onder de kiezer kun je je maatje een naam geven
+  (hooguit 20 tekens), dan heet het bijvoorbeeld *Knabbel, de Paniekkip*. De
+  naam staat op het naambordje in de wei, bij de optocht (*Knabbel · Liz*),
+  in het welkom op de televisie en bij *Hulde aan…!*. Wissel je van dier, dan
+  gaat de naam mee. Leegmaken en op *Naam weg* tikken haalt hem weg; de
+  quizmaster kan op het beheerscherm een flauwe naam weghalen met *Naam
+  maatje weg*.
 - **Stil op je portret.** Het maatje zit klein en stil op de rand van je
   portret, op de televisie, de telefoon, het hostscherm en het podium.
 - **Over het scherm op de grote momenten**, en alleen dan:

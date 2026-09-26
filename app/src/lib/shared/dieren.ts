@@ -395,6 +395,27 @@ export const DIEREN: readonly Maatje[] = [
   },
 ];
 
+/** Hoe lang de naam van een maatje mag zijn: past op een naambordje op de televisie. */
+export const MAX_DIERNAAM = 20;
+
+/**
+ * Een naam voor je maatje, netjes gemaakt: geen stuurtekens, geen dubbele
+ * spaties, niet te lang. Leeg (of geen tekst) wordt null: dan heet het dier
+ * weer gewoon naar zijn soort.
+ */
+export function schoneDierNaam(naam: unknown): string | null {
+  if (typeof naam !== 'string') return null;
+  // Eerst wit (ook tabs en regeleinden) tot één spatie; dan weg met stuurtekens
+  // en tekens die tekst omkeren. Emoji met een verbinder (🏳️‍🌈) blijven heel.
+  const schoon = naam.replace(/\s+/g, ' ').replace(/[\p{Cc}\u202A-\u202E\u2066-\u2069]/gu, '').trim();
+  return [...schoon].slice(0, MAX_DIERNAAM).join('').trim() || null;
+}
+
+/** Het maatje voluit: "Knabbel, de Paniekkip", of zonder naam gewoon "de Paniekkip". */
+export function maatjeVoluit(dier: Maatje, dierNaam?: string | null): string {
+  return dierNaam ? `${dierNaam}, ${dier.titel}` : dier.titel;
+}
+
 const PER_SLEUTEL = new Map(DIEREN.map((d) => [d.sleutel, d]));
 
 export function isDier(sleutel: unknown): sleutel is string {
