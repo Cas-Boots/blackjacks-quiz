@@ -11,7 +11,10 @@
   import Podium from '$lib/client/Podium.svelte';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade from '$lib/client/Dierenparade.svelte';
-  import { DIEREN, dierVan, dierenroep } from '$lib/shared/dieren';
+  import Dierenwei from '$lib/client/Dierenwei.svelte';
+  import Pixeldier from '$lib/client/Pixeldier.svelte';
+  import Karakterkaart from '$lib/client/Karakterkaart.svelte';
+  import { DIEREN, MAX_DIERNAAM, dierVan, dierenroep, maatjeVoluit, schoneDierNaam } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
@@ -147,7 +150,9 @@
   let roep = $derived(
     ik && (uitslag === 'goed' || uitslag === 'fout') ? dierenroep(ik.dier, ik.naam, uitslag, sleutel) : '',
   );
-  let optocht = $state<{ id: number; stemming: 'blij' | 'sip' } | null>(null);
+  /* Wie net een ander dier koos, ziet meteen dat nieuwe dier lopen, ook als de
+     server het nog niet heeft teruggemeld. */
+  let optocht = $state<{ id: number; stemming: 'blij' | 'sip'; dier?: string; dierNaam?: string | null } | null>(null);
   let optochtTeller = 0;
   /** Welke dieren al door een ander aan tafel gekozen zijn, met wie. */
   let bezetDoor = $derived(
@@ -170,11 +175,39 @@
       });
       if (!r.ok) throw new Error(await r.text());
       // Even laten zien hoe hij loopt.
-      optocht = { id: ++optochtTeller, stemming: 'blij' };
+      optocht = { id: ++optochtTeller, stemming: 'blij', dier: sleutel };
     } catch {
       dierMelding = 'Die is net door een ander gekozen. Kies een ander dier.';
     } finally {
       dierBezig = false;
+    }
+  }
+
+  /* Een naam voor je maatje. Het invulveld volgt de server tot je zelf typt. */
+  let dierNaamInvoer = $state<string | null>(null);
+  let dierNaamBezig = $state(false);
+  let dierNaamNu = $derived(dierNaamInvoer ?? ik?.dierNaam ?? '');
+  let dierNaamGewijzigd = $derived(schoneDierNaam(dierNaamNu) !== (ik?.dierNaam ?? null));
+  async function noemDier(e?: SubmitEvent) {
+    e?.preventDefault();
+    if (dierNaamBezig || !dierNaamGewijzigd) return;
+    dierNaamBezig = true;
+    dierMelding = '';
+    try {
+      const r = await fetch('/api/dier', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ naam: dierNaamNu }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      const { naam } = await r.json();
+      dierNaamInvoer = null;
+      // Het maatje is er blij mee, en loopt meteen onder zijn nieuwe naam.
+      optocht = { id: ++optochtTeller, stemming: 'blij', dierNaam: naam };
+    } catch {
+      dierMelding = 'De naam kwam niet aan. Probeer het nog eens.';
+    } finally {
+      dierNaamBezig = false;
     }
   }
 
@@ -271,7 +304,7 @@
   <div class="motief" aria-hidden="true"></div>
   {#if optocht && ik}
     {#key optocht.id}
-      <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: ik.dier }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />
+      <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: optocht.dier ?? ik.dier, dierNaam: optocht.dierNaam !== undefined ? optocht.dierNaam : ik.dierNaam }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
   <div class="romp" style="max-width:560px">
@@ -279,7 +312,7 @@
     <div style="display:flex;align-items:center;gap:.9rem">
       {#if ik}
         <button class="portretknop" onclick={() => fotoInvoer?.click()} disabled={fotoBezig} aria-label="Foto kiezen">
-          <Portret naam={ik.naam} foto={ik.foto} dier={ik.dier} />
+          <Portret naam={ik.naam} foto={ik.foto} dier={ik.dier} dierNaam={ik.dierNaam} />
         </button>
       {/if}
       <span style="flex:1 1 auto;min-width:0">
@@ -339,9 +372,32 @@
         <div class="paneel" in:fly={{ y: 16, duration: 420, delay: 160, easing: cubicOut }}>
           <p class="etiket stil">Kies je maatje</p>
           <p class="lood" style="font-size:1.05rem;margin-top:.3rem">
-            <span aria-hidden="true">{mijnDier.emoji}</span> {ik?.naam}, {mijnDier.titel}
+            <Pixeldier sleutel={mijnDier.sleutel} /> {ik?.dierNaam ? maatjeVoluit(mijnDier, ik.dierNaam) : `${ik?.naam}, ${mijnDier.titel}`}
           </p>
-          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook.</p>
+          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook. Tik erop, dan doet het een kunstje.</p>
+          {#key mijnDier.sleutel}
+            <Karakterkaart dier={mijnDier} />
+          {/key}
+          <form class="diernaam" onsubmit={noemDier}>
+            <input
+              type="text"
+              value={dierNaamNu}
+              oninput={(e) => (dierNaamInvoer = e.currentTarget.value)}
+              maxlength={MAX_DIERNAAM}
+              placeholder="Geef je maatje een naam"
+              aria-label="Naam van je maatje"
+              autocomplete="off"
+              enterkeyhint="done"
+            />
+            <button class="knop" type="submit" disabled={dierNaamBezig || !dierNaamGewijzigd}>
+              {dierNaamBezig ? 'Bezig…' : schoneDierNaam(dierNaamNu) || !ik?.dierNaam ? 'Noem' : 'Naam weg'}
+            </button>
+          </form>
+          {#if ik}
+            <div class="telefoonwei">
+              <Dierenwei spelers={[{ id: ik.id, naam: ik.naam, dier: ik.dier, dierNaam: ik.dierNaam }]} namen={false} aaibaar label="Je maatje" />
+            </div>
+          {/if}
           <div class="dierenkiezer" role="radiogroup" aria-label="Kies je maatje">
             {#each DIEREN as d (d.sleutel)}
               {@const van = bezetDoor.get(d.sleutel)}
@@ -350,11 +406,13 @@
                 aria-checked={d.sleutel === mijnDier.sleutel}
                 class:gekozen={d.sleutel === mijnDier.sleutel}
                 disabled={dierBezig || !!van}
-                title={van ? `${d.titel} — al gekozen door ${van}` : d.titel}
+                title={van ? `${d.titel} — al gekozen door ${van}` : `${d.titel} — ${d.specialiteit}`}
                 aria-label={van ? `${d.titel}, al gekozen door ${van}` : d.titel}
                 onclick={() => kiesDier(d.sleutel)}
               >
-                <span class="dier" data-beweging={d.sleutel === mijnDier.sleutel ? d.beweging : null}>{d.emoji}</span>
+                <span class="dier" data-beweging={d.sleutel === mijnDier.sleutel ? d.beweging : null}>
+                  <Pixeldier sleutel={d.sleutel} pose={d.sleutel === mijnDier.sleutel ? 'blij' : 'staan'} />
+                </span>
               </button>
             {/each}
           </div>
@@ -480,7 +538,7 @@
             <span class="teken">✓</span>
             <span>
               <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /> {roep}</span>{/if}
               <span class="plus">+{fmt(mijnPunten)}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
               {#each mijnBonussen as b (b.soort)}
@@ -492,7 +550,7 @@
             <span class="teken">✗</span>
             <span>
               <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="sip" /> {roep}</span>{/if}
               <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span>
             </span>
           {:else if uitslag === 'wacht'}

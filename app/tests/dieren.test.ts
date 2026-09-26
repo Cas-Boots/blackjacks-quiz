@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, actiesVan, kiesActie, dierVan, vrijDier, dierenroep, gangVan, isDier,
+  DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
+  vrijDier, dierenroep, gangVan, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM, EIGENSCHAPPEN,
 } from '../src/lib/shared/dieren';
 
 describe('maatjes', () => {
@@ -26,7 +27,7 @@ describe('maatjes', () => {
 
   it('geeft elk dier een handvol kunstjes, blij en sip, en elk kunstje bestaat in app.css', () => {
     const css = readFileSync(resolve(__dirname, '../src/app.css'), 'utf8');
-    const alle = [...ALGEMEEN_BLIJ, ...ALGEMEEN_SIP];
+    const alle = [...ALGEMEEN_BLIJ, ...ALGEMEEN_SIP, ...OPWARMERS.blij, ...OPWARMERS.sip, EINDE_SIP];
     for (const d of DIEREN) {
       const blij = actiesVan(d, 'blij');
       const sip = actiesVan(d, 'sip');
@@ -46,6 +47,22 @@ describe('maatjes', () => {
     for (const t of [0, 0.3, 0.7, 0.999]) {
       expect(actiesVan(lama, 'blij')).toContain(kiesActie(lama, 'blij', () => t));
       expect(actiesVan(lama, 'sip')).toContain(kiesActie(lama, 'sip', () => t));
+    }
+  });
+
+  it('geeft een optreden van drie tellen: opwarmen en twee verschillende kunstjes', () => {
+    for (const d of DIEREN) {
+      for (const t of [0, 0.25, 0.5, 0.75, 0.999]) {
+        const blij = kiesRoutine(d, 'blij', () => t);
+        expect(blij).toHaveLength(3);
+        expect(OPWARMERS.blij).toContain(blij[0]);
+        expect(actiesVan(d, 'blij')).toContain(blij[1]);
+        expect(actiesVan(d, 'blij')).toContain(blij[2]);
+        expect(blij[2]).not.toBe(blij[1]);
+        const sip = kiesRoutine(d, 'sip', () => t);
+        expect([...actiesVan(d, 'sip'), EINDE_SIP]).toContain(sip[2]);
+        for (const a of sip) expect(poseVan(a.lijf, 'sip')).not.toBe('blij');
+      }
     }
   });
 
@@ -74,5 +91,32 @@ describe('maatjes', () => {
     expect(dierenroep('kip', 'Rik', 'goed', '1:2')).toBe(dierenroep('kip', 'Rik', 'goed', '1:2'));
     expect(dierVan('kip').goed).toContain(dierenroep('kip', 'Rik', 'goed', '1:2'));
     expect(dierVan('kip').fout).toContain(dierenroep('kip', 'Rik', 'fout', '1:2'));
+  });
+
+  it('maakt de naam van een maatje netjes: getrimd, kort, zonder stuurtekens', () => {
+    expect(schoneDierNaam('  Knabbel ')).toBe('Knabbel');
+    expect(schoneDierNaam('Sir\u0000  Tok\tTok')).toBe('Sir Tok Tok');
+    expect(schoneDierNaam('x'.repeat(50))).toHaveLength(MAX_DIERNAAM);
+    expect(schoneDierNaam('🦙'.repeat(30))).toBe('🦙'.repeat(MAX_DIERNAAM));
+    expect(schoneDierNaam('   ')).toBeNull();
+    expect(schoneDierNaam(42)).toBeNull();
+    expect(maatjeVoluit(dierVan('kip'), 'Knabbel')).toBe('Knabbel, de Paniekkip');
+    expect(maatjeVoluit(dierVan('kip'), null)).toBe('de Paniekkip');
+  });
+
+  it('geeft elk dier een karakter van 1 tot 5, een hapje en een specialiteit', () => {
+    for (const d of DIEREN) {
+      for (const e of EIGENSCHAPPEN) {
+        const w = d.karakter[e.sleutel];
+        expect(Number.isInteger(w) && w >= 1 && w <= 5, `${d.sleutel} ${e.sleutel}`).toBe(true);
+      }
+      expect(d.hapje.ding, d.sleutel).not.toBe('');
+      expect(d.hapje.naam, d.sleutel).not.toBe('');
+      expect(d.specialiteit, d.sleutel).not.toBe('');
+    }
+    // Het moet wel kloppen: de slak is traag, de luiaard slaperig, de wasbeer ondeugend.
+    expect(dierVan('slak').karakter.snel).toBe(1);
+    expect(dierVan('luiaard').karakter.slaperig).toBe(5);
+    expect(dierVan('wasbeer').karakter.ondeugend).toBe(5);
   });
 });

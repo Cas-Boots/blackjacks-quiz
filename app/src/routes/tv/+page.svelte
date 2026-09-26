@@ -19,7 +19,9 @@
   import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
-  import { dierVan, dierenroep } from '$lib/shared/dieren';
+  import Dierenwei from '$lib/client/Dierenwei.svelte';
+  import Pixeldier from '$lib/client/Pixeldier.svelte';
+  import { dierVan, dierenroep, maatjeVoluit } from '$lib/shared/dieren';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -145,7 +147,7 @@
     return ids
       .map((id) => staat?.spelers.find((s) => s.id === id))
       .filter((s) => !!s)
-      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier }));
+      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam }));
   }
   // Boekhouding, geen toestand voor het scherm: bewust niet reactief, anders
   // zou het effect zichzelf bij elke schrijfactie opnieuw aanzwengelen.
@@ -160,9 +162,11 @@
       begroetingTeller += 1;
       const d = dierVan(nieuw.dier, nieuw.naam);
       begroeting = begroetingTeller % 2
-        ? `${d.emoji} ${nieuw.naam}, ${d.titel}, ${d.entree}.`
+        ? nieuw.dierNaam
+          ? `${d.emoji} ${nieuw.dierNaam}, ${d.titel} van ${nieuw.naam}, ${d.entree}.`
+          : `${d.emoji} ${nieuw.naam}, ${d.titel}, ${d.entree}.`
         : metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
-      laatLopen([{ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier }]);
+      laatLopen([{ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam }]);
       geluid.boing();
     }
     // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
@@ -207,7 +211,12 @@
     if (!sp) return null;
     return { dier: dierVan(sp.dier, sp.naam), zin: dierenroep(sp.dier, sp.naam, 'goed', vraagSleutelNu) };
   });
-  let winDier = $derived(winnaars.length === 1 ? dierVan(winnaars[0].dier, winnaars[0].naam) : null);
+  let winDier = $derived.by(() => {
+    if (winnaars.length !== 1) return null;
+    const w = winnaars[0];
+    const dierNaam = staat?.spelers.find((s) => s.id === w.spelerId)?.dierNaam;
+    return { ...dierVan(w.dier, w.naam), voluit: maatjeVoluit(dierVan(w.dier, w.naam), dierNaam) };
+  });
 
   /* Zodra een vraag beoordeeld is: wie punten pakte rent blij over het
      scherm; zat iedereen fout, dan sjokt de hele tafel eronderdoor. Eén keer
@@ -514,6 +523,12 @@
       <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
+  <!-- In de lobby scharrelen de maatjes van wie er al is onderaan rond. -->
+  {#if staat?.fase === 'lobby'}
+    <div class="tvwei" out:fade={{ duration: 400 }}>
+      <Dierenwei spelers={staat.spelers.filter((s) => s.verbonden)} />
+    </div>
+  {/if}
 
   <button
     class="geluidsknop"
@@ -570,7 +585,7 @@
                 {#each staat.spelers as s, i (s.id)}
                   <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
                     <span class="stip" class:aan={s.verbonden}></span>
-                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} />
+                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} dierNaam={s.dierNaam} />
                     <strong>{s.naam}</strong>
                   </span>
                 {/each}
@@ -786,7 +801,7 @@
               <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
             {:else if roeper}
               <p class="kwinkslag dierenroep" style="animation-delay:.8s">
-                <span aria-hidden="true">{roeper.dier.emoji}</span>{roeper.zin}
+                <Pixeldier sleutel={roeper.dier.sleutel} pose="blij" />{roeper.zin}
               </p>
             {/if}
             {#if staat.inzendingen.length}
@@ -896,7 +911,7 @@
             </h1>
             <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
               Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
-              {#if winDier}<br /><span class="dierenroep"><span aria-hidden="true">{winDier.emoji}</span> Hulde aan {winDier.titel}!</span>{/if}
+              {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
             </p>
 
             <Podium {top3} vorigePunten={live.vorigePunten} />

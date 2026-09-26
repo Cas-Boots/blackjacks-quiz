@@ -6,12 +6,14 @@
    * stil figuurtje op de rand, zodat je ziet bij wie het hoort als het op de
    * grote momenten over het scherm rent (Dierenparade.svelte).
    */
-  import { dierVan } from '$lib/shared/dieren';
+  import { dierVan, maatjeVoluit } from '$lib/shared/dieren';
+  import Pixeldier from './Pixeldier.svelte';
 
   let {
     naam,
     foto = null,
     dier = null,
+    dierNaam = null,
     maat = '',
     goud = false,
     stijl = '',
@@ -19,6 +21,8 @@
     naam: string;
     foto?: string | null;
     dier?: string | null;
+    /** De naam die de speler zijn maatje gaf. */
+    dierNaam?: string | null;
     maat?: '' | 'm' | 'l';
     goud?: boolean;
     /** Extra stijl voor het rondje zelf, voor de plekken die het kleiner willen. */
@@ -34,5 +38,5 @@
   {:else}
     <span class="avatar {maat}" class:goud style={stijl}>{naam.slice(0, 2)}</span>
   {/if}
-  <span class="dierbadge" title={d.titel} aria-hidden="true">{d.emoji}</span>
+  <span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>
 </span>

@@ -53,4 +53,15 @@ describe('maatjes op de server', () => {
     const nieuw = dieren.dobbelDier(a.id, () => 0.5);
     expect(nieuw).not.toBe(a.dier);
   });
+
+  it('laat je je maatje een naam geven, die blijft als je van dier wisselt', () => {
+    const a = spelersNu().find((s) => !s.isQuizmaster)!;
+    expect(dieren.noemDier(a.id, '  Knabbel\n  de   Derde ')).toBe('Knabbel de Derde');
+    expect(spelersNu().find((s) => s.id === a.id)!.dierNaam).toBe('Knabbel de Derde');
+    dieren.dobbelDier(a.id, () => 0.3);
+    expect(spelersNu().find((s) => s.id === a.id)!.dierNaam).toBe('Knabbel de Derde');
+    // Leeg haalt de naam weg.
+    expect(dieren.noemDier(a.id, '   ')).toBeNull();
+    expect(spelersNu().find((s) => s.id === a.id)!.dierNaam).toBeNull();
+  });
 });

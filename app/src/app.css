@@ -2636,8 +2636,70 @@ a.uitslagrij:hover {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
   pointer-events: none;
 }
+.dierbadge .pixeldier { width: 1.2em; height: 1.2em; }
 .portret.m .dierbadge { font-size: clamp(1rem, 1.5vw, 1.5rem); }
 .portret.l .dierbadge { font-size: clamp(1.4rem, 2.3vw, 2.3rem); }
+
+/* ---- Het karakter van je maatje (Karakterkaart.svelte) ---------------- */
+.karakterkaart {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.8rem;
+  background: rgba(8, 21, 17, 0.45);
+}
+.karakterkaart .specialiteit {
+  font-style: italic;
+  color: var(--goud-licht);
+  margin-bottom: 0.5rem;
+}
+.karakterkaart dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+.eigenschap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.eigenschap dt { color: var(--ivoor); }
+.eigenschap dd {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+}
+/* Pixelblokjes: vol goud, leeg een schaduw. Ze vullen zich een voor een. */
+.eigenschap i {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+}
+.eigenschap i.vol {
+  background: var(--goud);
+  box-shadow: inset -2px -2px 0 var(--goud-diep), inset 2px 2px 0 var(--goud-licht);
+  animation: blokje-vol 0.25s steps(2, jump-none) calc(var(--n) * 70ms) both;
+}
+@keyframes blokje-vol { from { transform: scale(0); } to { transform: scale(1); } }
+.karakterkaart .hapje { margin-top: 0.5rem; }
+@media (max-width: 360px) {
+  .karakterkaart dl { grid-template-columns: 1fr; }
+}
+
+/* ---- Een naam voor je maatje, op de telefoon ------------------------ */
+.diernaam {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.diernaam input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* ---- De kiezer op de telefoon: alleen het gekozen dier beweegt ------- */
 .dierenkiezer {
@@ -2650,7 +2712,7 @@ a.uitslagrij:hover {
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  font-size: 1.7rem;
+  font-size: 2rem;
   line-height: 1;
   border-radius: 0.8rem;
   border: 1px solid var(--rand);
@@ -2723,7 +2785,7 @@ a.uitslagrij:hover {
   line-height: 1;
   transform-origin: 50% 85%;
 }
-.actie[data-lijf] { animation: 2.2s ease-in-out both; }
+.actie[data-lijf] { animation: var(--tel, 2.2s) ease-in-out both; }
 .actie[data-lijf="salto"] { animation-name: kunst-salto; transform-origin: 50% 50%; }
 .actie[data-lijf="dans"] { animation-name: kunst-dans; }
 .actie[data-lijf="pirouette"] { animation-name: kunst-pirouette; }
@@ -2885,6 +2947,113 @@ a.uitslagrij:hover {
   88% { transform: scale(1.1); opacity: 1; }
 }
 
+.actie[data-lijf="kijkrond"] { animation-name: kunst-kijkrond; }
+.actie[data-lijf="snuffel"] { animation-name: kunst-snuffel; transform-origin: 80% 100%; }
+.actie[data-lijf="trappel"] { animation-name: kunst-trappel; }
+.actie[data-lijf="schrik"] { animation-name: kunst-schrik; transform-origin: 50% 100%; }
+.actie[data-lijf="hik"] { animation-name: kunst-hik; transform-origin: 50% 100%; }
+.actie[data-lijf="zwaai"] { animation-name: kunst-zwaai; transform-origin: 50% 100%; }
+.actie[data-lijf="slaap"] { animation-name: kunst-slaap; transform-origin: 50% 100%; }
+@keyframes kunst-kijkrond {
+  0%, 22% { transform: none; }
+  23%, 45% { transform: scaleX(-1); }
+  46%, 68% { transform: none; }
+  69%, 88% { transform: scaleX(-1) translateY(-4%); }
+  89%, 100% { transform: none; }
+}
+@keyframes kunst-snuffel {
+  0%, 100% { transform: none; }
+  15%, 35%, 55%, 75% { transform: rotate(14deg) translateY(4%); }
+  25%, 45%, 65%, 85% { transform: rotate(9deg) translateY(2%); }
+}
+@keyframes kunst-trappel {
+  0%, 20%, 40%, 60%, 80%, 100% { transform: translateY(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(-8%); }
+}
+@keyframes kunst-schrik {
+  0% { transform: none; }
+  12% { transform: translateY(-45%) scale(0.9, 1.2); }
+  35% { transform: translateY(0) scale(1.2, 0.8); }
+  50% { transform: translateX(-3%) scale(1); }
+  60% { transform: translateX(3%); }
+  70%, 100% { transform: none; }
+}
+@keyframes kunst-hik {
+  0%, 25%, 50%, 75%, 100% { transform: none; }
+  8%, 58% { transform: translateY(-14%) scale(1.05, 0.95); }
+  33% { transform: translateY(-20%) scale(0.95, 1.08); }
+}
+@keyframes kunst-zwaai {
+  0%, 100% { transform: none; }
+  15%, 55% { transform: rotate(-12deg) translateY(-6%); }
+  35%, 75% { transform: rotate(12deg) translateY(-6%); }
+}
+@keyframes kunst-slaap {
+  0% { transform: none; }
+  15% { transform: translateY(10%) scale(1.08, 0.82) rotate(-4deg); }
+  40% { transform: translateY(10%) scale(1.1, 0.78) rotate(-4deg); }
+  65% { transform: translateY(10%) scale(1.06, 0.84) rotate(-4deg); }
+  90% { transform: translateY(10%) scale(1.1, 0.78) rotate(-4deg); }
+  100% { transform: translateY(10%) scale(1.08, 0.82) rotate(-4deg); }
+}
+
+/* ---- Het pixeldier (Pixeldier.svelte) -----------------------------------
+   Lagen die per pose aan of uit gaan. Een verplaatsing van 1px is binnen
+   het SVG precies één pixel van het dier. */
+.pixeldier {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  overflow: visible;
+}
+.px-poten.a,
+.px-poten.b,
+.px-vleugel.op,
+.px-blos { display: none; }
+/* Knipperen, elk dier op zijn eigen ritme. */
+.px-open { animation: px-knipper 4.3s linear infinite; animation-delay: calc(var(--knipper, 0ms) * -4); }
+@keyframes px-knipper {
+  0%, 94% { visibility: visible; }
+  95%, 98% { visibility: hidden; }
+  99%, 100% { visibility: visible; }
+}
+/* Blij: ogen tevreden dicht, een blos op de wangen. Slapen: ogen dicht. */
+.pixeldier[data-pose="blij"] .px-open,
+.pixeldier[data-pose="slaap"] .px-open { display: none; }
+.pixeldier[data-pose="blij"] .px-blos { display: inline; opacity: 0.85; }
+/* Lopen: om en om de helft van de poten van de grond. */
+.pixeldier[data-pose="loop"] .px-poten.rust { display: none; }
+.pixeldier[data-pose="loop"] .px-poten.a { display: inline; animation: px-stap 0.34s linear infinite; }
+.pixeldier[data-pose="loop"] .px-poten.b { display: inline; animation: px-stap 0.34s linear infinite reverse; }
+@keyframes px-stap {
+  0%, 49% { visibility: visible; }
+  50%, 100% { visibility: hidden; }
+}
+/* Vliegen: de vleugel om en om neer en op. Zonder vleugels (de vlinder)
+   klapt het hele lijf. */
+.pixeldier[data-vlieg][data-vleugels] .px-vleugel.neer { animation: px-stap 0.24s linear infinite; }
+.pixeldier[data-vlieg][data-vleugels] .px-vleugel.op { display: inline; animation: px-stap 0.24s linear infinite reverse; }
+.pixeldier[data-vlieg]:not([data-vleugels]) .px-lijf {
+  transform-origin: 16px 16px;
+  animation: px-fladder 0.3s steps(2, jump-none) infinite alternate;
+}
+@keyframes px-fladder { from { transform: scaleX(1); } to { transform: scaleX(0.45); } }
+/* Sip: een traan die uit het oog valt. */
+.px-traan { animation: px-traan 1.1s steps(6, jump-none) infinite; }
+@keyframes px-traan {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(6px); opacity: 0.2; }
+}
+/* Slapen: een z die opstijgt en weer opnieuw begint. */
+.px-zzz { animation: px-zzz 1.6s steps(4, jump-none) infinite; }
+@keyframes px-zzz {
+  from { transform: translate(-2px, 3px); opacity: 0.3; }
+  to { transform: translate(1px, -2px); opacity: 1; }
+}
+/* Schrikken: een knipperende uitroep. */
+.px-uitroep { animation: px-stap 0.3s linear infinite; }
+
 /* ---- De kunstjes: wat erbij komt -------------------------------------- */
 .ding {
   position: absolute;
@@ -2945,47 +3114,23 @@ a.uitslagrij:hover {
 .dierenparade[data-gang="graaf"] { flex-direction: column-reverse; }
 
 /* ---- Lijf en ledematen ---------------------------------------------------
-   Emoji kunnen hun eigen poten niet bewegen, dus krijgen ze er tekenfilmdelen
-   bij die met ze meebewegen: vleugels, rennende pootjes, een springveer,
-   graafklauwen, een liaan. In .kijk staat alles zoals de emoji zelf: met de
-   kop naar links. Links is dus voor, rechts is achter. */
-.kijk {
-  display: inline-block;
-  transform: scaleX(-1);
-}
-.kijk.rechts { transform: none; }
+   De pixeldieren lopen op hun eigen poten en klapperen met hun eigen
+   vleugels (zie het pixeldier hieronder). Erbij komen alleen nog de dingen
+   die niet aan het dier vastzitten: stofwolkjes, fartlijnen, graafklauwen,
+   een liaan. De kop wijst naar rechts: rechts is voor, links is achter. */
 .dierenparade .dier { position: relative; }
-.dierenparade .emoji {
+.dierenparade .dier > .pixeldier {
   position: relative;
   z-index: 1;
-  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
 }
 
-/* Vleugels: achter het lijf, klapperend vanuit de schouders. */
-.vleugel {
-  position: absolute;
-  z-index: 0;
-  top: 0.02em;
-  width: 0.5em;
-  height: 0.34em;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(210, 228, 240, 0.8));
-  border: 0.025em solid rgba(70, 90, 110, 0.55);
-  border-radius: 70% 70% 15% 70%;
-  animation: vleugel-klap 0.18s ease-in-out infinite alternate;
-}
-.vleugel.links { left: 0.08em; transform-origin: 100% 100%; }
-.vleugel.rechts {
-  right: 0.08em;
-  transform-origin: 0% 100%;
-  border-radius: 70% 70% 70% 15%;
-  animation-name: vleugel-klap-r;
-}
-@keyframes vleugel-klap { from { transform: rotate(-40deg); } to { transform: rotate(25deg) scaleY(0.7); } }
-@keyframes vleugel-klap-r { from { transform: rotate(40deg); } to { transform: rotate(-25deg) scaleY(0.7); } }
+/* Fartlijnen achter een vlieger. */
 .fartlijnen {
   position: absolute;
   z-index: 0;
-  right: -0.45em;
+  left: -0.45em;
   top: 0.3em;
   width: 0.4em;
   height: 0.32em;
@@ -2995,84 +3140,30 @@ a.uitslagrij:hover {
 }
 @keyframes fartlijnen {
   0%, 100% { opacity: 0.3; transform: translateX(0) scaleX(0.7); }
-  50% { opacity: 0.9; transform: translateX(0.08em) scaleX(1); }
+  50% { opacity: 0.9; transform: translateX(-0.08em) scaleX(1); }
 }
 
-/* Rennende pootjes: een wervel van benen onder de buik, als in een tekenfilm. */
-.pootjes {
+/* Stofwolkjes achter wie rent. */
+.stof {
   position: absolute;
   z-index: 0;
-  left: 30%;
-  width: 40%;
-  bottom: -0.16em;
-  height: 0.3em;
-}
-.pootjes i {
-  position: absolute;
-  top: 0;
-  width: 0.075em;
-  height: 0.3em;
-  border-radius: 0.04em;
-  background: #4a3524;
-  transform-origin: 50% 0;
-  animation: poot 0.22s ease-in-out infinite alternate;
-}
-.pootjes i:first-child { left: 20%; }
-.pootjes i:last-child { left: 65%; animation-direction: alternate-reverse; }
-@keyframes poot { from { transform: rotate(40deg); } to { transform: rotate(-40deg); } }
-/* Stofwolkjes achter de rennende pootjes. */
-.pootjes::after {
-  content: "💨";
-  position: absolute;
-  right: -0.9em;
+  left: -0.35em;
   bottom: 0;
   font-size: 0.4em;
   animation: stofje 0.44s ease-out infinite;
 }
+.stof::after { content: "💨"; display: inline-block; transform: scaleX(-1); }
 @keyframes stofje {
   from { opacity: 0.9; transform: translateX(0) scale(0.6); }
-  to { opacity: 0; transform: translateX(0.6em) scale(1.2); }
+  to { opacity: 0; transform: translateX(-0.6em) scale(1.2); }
 }
-
-/* De springveer onder de voeten: ingedrukt bij de landing, lang in de lucht. */
-.veer {
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  top: 92%;
-  width: 0.28em;
-  height: 0.36em;
-  margin-left: -0.14em;
-  border-radius: 0.05em;
-  background: repeating-linear-gradient(to bottom, #b8bec4 0 0.045em, #5f666d 0.045em 0.075em, transparent 0.075em 0.1em);
-  transform-origin: 50% 0;
-  animation: veer 1.05s cubic-bezier(0.3, 0, 0.5, 1) infinite;
-}
-@keyframes veer {
-  0%, 100% { transform: scaleY(0.35); }
-  50% { transform: scaleY(1.4); }
-}
-
-/* Zwemvinnetje dat peddelt. */
-.vin {
-  position: absolute;
-  z-index: 2;
-  left: 0.25em;
-  top: 0.55em;
-  width: 0.26em;
-  height: 0.14em;
-  border-radius: 50% 10% 50% 50%;
-  background: rgba(120, 190, 235, 0.9);
-  transform-origin: 100% 50%;
-  animation: peddel 0.35s ease-in-out infinite alternate;
-}
-@keyframes peddel { from { transform: rotate(-35deg); } to { transform: rotate(30deg); } }
 
 /* Graafklauwen voor het lijf, om en om krabbend. */
 .klauwen {
   position: absolute;
   z-index: 2;
-  left: -0.08em;
+  right: -0.08em;
+  transform: scaleX(-1);
   bottom: 0.02em;
   width: 0.45em;
   height: 0.2em;
@@ -3331,14 +3422,109 @@ a.uitslagrij:hover {
   justify-content: center;
 }
 
+/* ---- De wei: de maatjes scharrelen rond (Dierenwei.svelte) -------------- */
+.wei {
+  position: relative;
+  overflow: hidden;
+  height: 2.3em;
+  font-size: 3rem;
+  /* Een pixelgrasmat met sprietjes. */
+  background:
+    linear-gradient(to top, #2f5a2a 0 0.14em, transparent 0.14em),
+    repeating-linear-gradient(90deg, #4c8a3c 0 0.0625em, #3d7532 0.0625em 0.125em, transparent 0.125em 0.25em) 0 100% / 100% 0.22em no-repeat;
+}
+.bewoner {
+  position: absolute;
+  bottom: 0.1em;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  transform: translateX(-50%);
+}
+.bewoner .actie { transform-origin: 50% 100%; }
+.bewoner .kijk { display: inline-block; }
+.bewoner .kijk.links { transform: scaleX(-1); }
+.bewoner .ding { font-size: 0.36em; }
+/* Hoe het lijf meebeweegt; via `translate`, zodat het niet botst met het kunstje. */
+.bewoner[data-doen="loop"] .kijk { animation: wei-hup 0.34s steps(2, jump-none) infinite; }
+.bewoner[data-doen="ren"] .kijk,
+.bewoner[data-doen="jaag"] .kijk,
+.bewoner[data-doen="vlucht"] .kijk { animation: wei-hup 0.2s steps(2, jump-none) infinite; }
+@keyframes wei-hup { from { translate: 0 0; } to { translate: 0 -0.0625em; } }
+.bewoner[data-soort="lucht"] { bottom: 1em; }
+.bewoner[data-soort="lucht"] .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
+.bewoner[data-soort="lucht"][data-doen="slaap"] { bottom: 0.14em; }
+.bewoner[data-soort="water"] { bottom: 0.35em; }
+.bewoner[data-soort="water"] .actie:not([data-lijf]) { animation: wei-zwem 1.4s ease-in-out infinite; }
+@keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
+@keyframes wei-zwem { 0%, 100% { translate: 0 0; rotate: 6deg; } 50% { translate: 0 -0.15em; rotate: -6deg; } }
+/* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */
+.bewoner[data-doen="graaf"] .kijk { animation: wei-zak var(--tel) ease-in both; }
+@keyframes wei-zak {
+  0%, 55% { translate: 0 0; clip-path: inset(0 0 0 0); }
+  100% { translate: 0 1em; clip-path: inset(0 0 100% 0); }
+}
+.bewoner[data-doen="onder"] { visibility: hidden; }
+.weinaam {
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: max(0.7rem, 0.2em);
+  line-height: 1.2;
+  color: var(--goud-licht);
+  background: rgba(8, 21, 17, 0.82);
+  border: 1px solid var(--goud-diep);
+  border-radius: 999px;
+  padding: 0.05em 0.55em;
+  white-space: nowrap;
+  margin-bottom: 0.15em;
+}
+.weinaam::before { content: attr(data-naam); }
+.aai {
+  display: inline-block;
+  font: inherit;
+  line-height: 1;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* Op de televisie: over de hele breedte onderaan, onder de optocht. */
+.tvwei {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.tvwei .wei {
+  height: 19vh;
+  font-size: clamp(2.6rem, 8vh, 6.5rem);
+}
+/* Op de telefoon: je eigen dier in een eigen weitje. */
+.telefoonwei .wei {
+  margin-top: 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--rand);
+  height: 6.5rem;
+  font-size: 3.4rem;
+  background-color: rgba(8, 21, 17, 0.45);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dier,
   .dier[data-beweging],
   .dierenparade .dier,
   .dierenparade::before,
   .actie,
-  .ding {
-    animation: none;
+  .ding,
+  .pixeldier *,
+  .bewoner .kijk,
+  .eigenschap i.vol {
+    animation: none !important;
   }
   .dierenparade,
   .parade-tak,

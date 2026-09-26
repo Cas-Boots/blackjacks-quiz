@@ -23,7 +23,7 @@ import type { Pakketten } from '$lib/content/types';
 import { actiefSpel, bumpVersie, deelnemersVan, standVan, voegDeelnemerToe, MAX_NAAM_TEKENS } from './spel';
 import { maakSpel } from './seed';
 import { geldigeFoto } from './foto';
-import { zorgVoorDieren, dobbelDier } from './dieren';
+import { zorgVoorDieren, dobbelDier, noemDier } from './dieren';
 import { dierVan } from '$lib/shared/dieren';
 import { aantalLuisteraars } from './bus';
 import { inProductie, omgevingsFouten, omgevingsWaarschuwingen } from './omgeving';
@@ -38,6 +38,8 @@ export interface BeheerSpeler {
   foto: string | null;
   /** Het maatje, een sleutel uit shared/dieren.ts. */
   dier: string;
+  /** De naam van het maatje, of null. */
+  dierNaam: string | null;
   isQuizmaster: boolean;
   isGast: boolean;
   aangemaaktOp: string;
@@ -273,6 +275,7 @@ export function beheerSpelers(): BeheerSpeler[] {
       naam: s.naam,
       foto: s.foto,
       dier: dierVan(s.dier, s.naam).sleutel,
+      dierNaam: s.dierNaam,
       isQuizmaster: s.isQuizmaster,
       isGast: s.isGast,
       aangemaaktOp: s.aangemaaktOp,
@@ -415,6 +418,13 @@ export function zetFoto(id: number, foto: unknown) {
 export function wisselDier(id: number) {
   spelerOfFout(id);
   dobbelDier(id);
+  meld();
+}
+
+/** De naam van een maatje weghalen, voor als er iets flauws op de televisie staat. */
+export function wisDierNaam(id: number) {
+  spelerOfFout(id);
+  noemDier(id, null);
   meld();
 }
 

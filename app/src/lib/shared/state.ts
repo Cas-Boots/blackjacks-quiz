@@ -10,6 +10,8 @@ export interface PubliekeSpeler {
   foto: string | null;
   /** Het maatje, een sleutel uit shared/dieren.ts. */
   dier: string;
+  /** De naam die de speler zijn maatje gaf, of null. */
+  dierNaam: string | null;
   /** Aantal seconden sinds dit apparaat zich voor het laatst meldde. */
   stilSinds: number | null;
   verbonden: boolean;
