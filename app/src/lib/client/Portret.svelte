@@ -7,6 +7,7 @@
    * grote momenten over het scherm rent (Dierenparade.svelte).
    */
   import { dierVan } from '$lib/shared/dieren';
+  import Pixeldier from './Pixeldier.svelte';
 
   let {
     naam,
@@ -34,5 +35,5 @@
   {:else}
     <span class="avatar {maat}" class:goud style={stijl}>{naam.slice(0, 2)}</span>
   {/if}
-  <span class="dierbadge" title={d.titel} aria-hidden="true">{d.emoji}</span>
+  <span class="dierbadge" title={d.titel} aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>
 </span>

@@ -19,6 +19,8 @@
   import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
+  import Dierenwei from '$lib/client/Dierenwei.svelte';
+  import Pixeldier from '$lib/client/Pixeldier.svelte';
   import { dierVan, dierenroep } from '$lib/shared/dieren';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
@@ -514,6 +516,12 @@
       <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
+  <!-- In de lobby scharrelen de maatjes van wie er al is onderaan rond. -->
+  {#if staat?.fase === 'lobby'}
+    <div class="tvwei" out:fade={{ duration: 400 }}>
+      <Dierenwei spelers={staat.spelers.filter((s) => s.verbonden)} />
+    </div>
+  {/if}
 
   <button
     class="geluidsknop"
@@ -786,7 +794,7 @@
               <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
             {:else if roeper}
               <p class="kwinkslag dierenroep" style="animation-delay:.8s">
-                <span aria-hidden="true">{roeper.dier.emoji}</span>{roeper.zin}
+                <Pixeldier sleutel={roeper.dier.sleutel} pose="blij" />{roeper.zin}
               </p>
             {/if}
             {#if staat.inzendingen.length}
@@ -896,7 +904,7 @@
             </h1>
             <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
               Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
-              {#if winDier}<br /><span class="dierenroep"><span aria-hidden="true">{winDier.emoji}</span> Hulde aan {winDier.titel}!</span>{/if}
+              {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.titel}!</span>{/if}
             </p>
 
             <Podium {top3} vorigePunten={live.vorigePunten} />

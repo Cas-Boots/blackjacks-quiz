@@ -25,11 +25,6 @@ export interface Maatje {
   entree: string;
   /** Hoe het dier over het scherm gaat; zie gangVan en de `dier-…`-animaties in app.css. */
   beweging: Beweging;
-  /**
-   * De meeste dier-emoji kijken naar links; die spiegelen we als ze naar
-   * rechts over het scherm gaan. Kijkt hij al naar rechts, dan niet.
-   */
-  kijktRechts?: boolean;
   /** Zijn eigen kunstjes, naast de algemene; zie actiesVan. */
   acties: { blij: readonly Actie[]; sip: readonly Actie[] };
 }
@@ -48,7 +43,8 @@ export interface Actie {
 export type Lijf =
   | 'salto' | 'dans' | 'pirouette' | 'boing' | 'rol' | 'rek' | 'opblaas' | 'schud' | 'acht'
   | 'ondersteboven' | 'balans' | 'glij' | 'graaf' | 'kronkel'
-  | 'zak' | 'omval' | 'mok' | 'verstop';
+  | 'zak' | 'omval' | 'mok' | 'verstop'
+  | 'kijkrond' | 'snuffel' | 'trappel' | 'schrik' | 'hik' | 'zwaai' | 'slaap';
 export type DingGaat = 'op' | 'gooi' | 'val' | 'rond';
 
 /** Wat elk dier kan als het blij is, bovenop zijn eigen kunstjes. */
@@ -83,6 +79,54 @@ export function actiesVan(dier: Maatje, stemming: 'blij' | 'sip'): Actie[] {
 export function kiesActie(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => number = Math.random): Actie {
   const lijst = actiesVan(dier, stemming);
   return lijst[Math.min(lijst.length - 1, Math.floor(toeval() * lijst.length))];
+}
+
+/**
+ * Hoe het pixeldier kijkt en staat tijdens een kunstje (Pixeldier.svelte):
+ * ogen open of dicht, blosjes, poten die trappelen, een traan, zzz.
+ */
+export type Pose = 'staan' | 'loop' | 'blij' | 'sip' | 'slaap' | 'schrik';
+const POSE: Record<Lijf, Pose> = {
+  salto: 'blij', dans: 'blij', pirouette: 'blij', boing: 'blij', rol: 'staan', rek: 'staan',
+  opblaas: 'blij', schud: 'schrik', acht: 'loop', ondersteboven: 'staan', balans: 'staan',
+  glij: 'blij', graaf: 'loop', kronkel: 'loop', zak: 'sip', omval: 'schrik', mok: 'sip',
+  verstop: 'sip', kijkrond: 'staan', snuffel: 'loop', trappel: 'loop', schrik: 'schrik',
+  hik: 'schrik', zwaai: 'blij', slaap: 'slaap',
+};
+export function poseVan(lijf: Lijf, stemming: 'blij' | 'sip'): Pose {
+  const pose = POSE[lijf];
+  return stemming === 'sip' && pose !== 'slaap' && pose !== 'schrik' ? 'sip' : pose;
+}
+
+/** Waarmee een dier begint voor het echte kunstje: even rondkijken, snuffelen, schrikken. */
+export const OPWARMERS: { blij: readonly Actie[]; sip: readonly Actie[] } = {
+  blij: [
+    { lijf: 'kijkrond' },
+    { lijf: 'snuffel' },
+    { lijf: 'trappel', ding: '💨', dingGaat: 'op' },
+    { lijf: 'schrik', ding: '❗', dingGaat: 'op' },
+    { lijf: 'zwaai', ding: '👋', dingGaat: 'op' },
+  ],
+  sip: [
+    { lijf: 'kijkrond', ding: '❓', dingGaat: 'op' },
+    { lijf: 'hik', ding: '💧', dingGaat: 'val' },
+    { lijf: 'schrik', ding: '❗', dingGaat: 'op' },
+  ],
+};
+/** Waarmee een sip dier soms afsluit: gewoon maar gaan slapen. */
+export const EINDE_SIP: Actie = { lijf: 'slaap', ding: '💤', dingGaat: 'op' };
+
+/**
+ * Een heel optreden in drie tellen: een opwarmer, en dan twee verschillende
+ * kunstjes van dit dier (sip soms eindigend in slaap). Zo doet een dier
+ * zelden twee keer precies hetzelfde.
+ */
+export function kiesRoutine(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => number = Math.random): Actie[] {
+  const greep = <T>(lijst: readonly T[]) => lijst[Math.min(lijst.length - 1, Math.floor(toeval() * lijst.length))];
+  const eerste = kiesActie(dier, stemming, toeval);
+  const rest = actiesVan(dier, stemming).filter((a) => a.lijf !== eerste.lijf || a.ding !== eerste.ding);
+  const tweede = stemming === 'sip' && toeval() < 0.4 ? EINDE_SIP : greep(rest.length ? rest : [eerste]);
+  return [greep(OPWARMERS[stemming]), eerste, tweede];
 }
 
 /** De manieren waarop een dier beweegt; `.dier[data-beweging=…]` in app.css. */
@@ -131,7 +175,6 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De pinguïn glijdt uit op het ijs.', 'Pak aan, hoofd koud, antwoord fout.'],
     entree: 'waggelt binnen in smoking',
     beweging: 'waggel',
-    kijktRechts: true,
     acties: { blij: [{ lijf: 'glij', ding: '❄️', dingGaat: 'op' }, { lijf: 'dans', ding: '🎩', dingGaat: 'rond' }], sip: [{ lijf: 'omval', ding: '🧊', dingGaat: 'val' }] },
   },
   {

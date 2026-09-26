@@ -11,6 +11,8 @@
   import Podium from '$lib/client/Podium.svelte';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade from '$lib/client/Dierenparade.svelte';
+  import Dierenwei from '$lib/client/Dierenwei.svelte';
+  import Pixeldier from '$lib/client/Pixeldier.svelte';
   import { DIEREN, dierVan, dierenroep } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
@@ -147,7 +149,9 @@
   let roep = $derived(
     ik && (uitslag === 'goed' || uitslag === 'fout') ? dierenroep(ik.dier, ik.naam, uitslag, sleutel) : '',
   );
-  let optocht = $state<{ id: number; stemming: 'blij' | 'sip' } | null>(null);
+  /* Wie net een ander dier koos, ziet meteen dat nieuwe dier lopen, ook als de
+     server het nog niet heeft teruggemeld. */
+  let optocht = $state<{ id: number; stemming: 'blij' | 'sip'; dier?: string } | null>(null);
   let optochtTeller = 0;
   /** Welke dieren al door een ander aan tafel gekozen zijn, met wie. */
   let bezetDoor = $derived(
@@ -170,7 +174,7 @@
       });
       if (!r.ok) throw new Error(await r.text());
       // Even laten zien hoe hij loopt.
-      optocht = { id: ++optochtTeller, stemming: 'blij' };
+      optocht = { id: ++optochtTeller, stemming: 'blij', dier: sleutel };
     } catch {
       dierMelding = 'Die is net door een ander gekozen. Kies een ander dier.';
     } finally {
@@ -271,7 +275,7 @@
   <div class="motief" aria-hidden="true"></div>
   {#if optocht && ik}
     {#key optocht.id}
-      <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: ik.dier }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />
+      <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: optocht.dier ?? ik.dier }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
   <div class="romp" style="max-width:560px">
@@ -339,9 +343,14 @@
         <div class="paneel" in:fly={{ y: 16, duration: 420, delay: 160, easing: cubicOut }}>
           <p class="etiket stil">Kies je maatje</p>
           <p class="lood" style="font-size:1.05rem;margin-top:.3rem">
-            <span aria-hidden="true">{mijnDier.emoji}</span> {ik?.naam}, {mijnDier.titel}
+            <Pixeldier sleutel={mijnDier.sleutel} /> {ik?.naam}, {mijnDier.titel}
           </p>
-          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook.</p>
+          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook. Tik erop, dan doet het een kunstje.</p>
+          {#if ik}
+            <div class="telefoonwei">
+              <Dierenwei spelers={[{ id: ik.id, naam: ik.naam, dier: ik.dier }]} namen={false} aaibaar label="Je maatje" />
+            </div>
+          {/if}
           <div class="dierenkiezer" role="radiogroup" aria-label="Kies je maatje">
             {#each DIEREN as d (d.sleutel)}
               {@const van = bezetDoor.get(d.sleutel)}
@@ -354,7 +363,9 @@
                 aria-label={van ? `${d.titel}, al gekozen door ${van}` : d.titel}
                 onclick={() => kiesDier(d.sleutel)}
               >
-                <span class="dier" data-beweging={d.sleutel === mijnDier.sleutel ? d.beweging : null}>{d.emoji}</span>
+                <span class="dier" data-beweging={d.sleutel === mijnDier.sleutel ? d.beweging : null}>
+                  <Pixeldier sleutel={d.sleutel} pose={d.sleutel === mijnDier.sleutel ? 'blij' : 'staan'} />
+                </span>
               </button>
             {/each}
           </div>
@@ -480,7 +491,7 @@
             <span class="teken">✓</span>
             <span>
               <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /> {roep}</span>{/if}
               <span class="plus">+{fmt(mijnPunten)}</span>
               <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
               {#each mijnBonussen as b (b.soort)}
@@ -492,7 +503,7 @@
             <span class="teken">✗</span>
             <span>
               <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
+              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="sip" /> {roep}</span>{/if}
               <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span>
             </span>
           {:else if uitslag === 'wacht'}

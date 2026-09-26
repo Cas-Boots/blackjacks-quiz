@@ -407,23 +407,37 @@ mee; het is er alleen voor de lol.
 
   Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
   het leuk blijft en niet druk wordt.
-- **Erin, een kunstje, en weer weg.** Elk dier komt op zijn eigen manier
-  binnen, stopt op zijn eigen plek, doet een kunstje en gaat weer. Met meer
-  dieren staan ze even naast elkaar, elk met een eigen kunstje.
-- **Met lijf en decor.** Emoji kunnen hun poten niet bewegen, dus krijgen ze
-  tekenfilmdelen die met ze meebewegen:
-  - lopers (lama, giraf, hond) rennen op wervelende pootjes, met stofwolkjes;
-  - springers (kangoeroe, kikker, eenhoorn) stuiteren op een springveer;
+- **Pixelkunst.** Elk dier is met de hand getekend in een raster van 16 bij
+  16, met de kop naar rechts. Het is geen plaatje maar losse lagen, zodat het
+  dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
+  ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
+  vleugels als het vliegt, knijpt blij zijn ogen dicht met een blos op de
+  wangen, laat sip een traan vallen, slaapt met zzz en schrikt met een
+  uitroepteken.
+- **Erin, een optreden, en weer weg.** Elk dier komt op zijn eigen manier
+  binnen, stopt op zijn eigen plek, doet een optreden van drie tellen en gaat
+  weer: eerst opwarmen (rondkijken, snuffelen, trappelen, schrikken,
+  zwaaien), en dan twee verschillende kunstjes. Sip valt hij soms gewoon in
+  slaap. Met meer dieren staan ze even naast elkaar, elk met een eigen
+  optreden.
+- **Met decor.** Wat niet aan het dier vastzit komt erbij:
+  - lopers en springers laten stofwolkjes achter;
   - slingeraars (aap, luiaard) hangen aan een liaan onder een tak die over
     het scherm loopt;
   - zwemmers (goudvis, dolfijn, krokodil) gaan half onder de golven, met
-    bubbels en een peddelend vinnetje;
-  - vogels en insecten klapperen met vleugels, met fartlijnen erachter;
+    bubbels;
+  - vliegers hebben fartlijnen erachter;
   - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
     in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
-
-  Ze kijken ook de kant op waar ze heen gaan: de meeste emoji kijken naar
-  links, dus die worden gespiegeld.
+- **De wei.** In de lobby scharrelen de maatjes van iedereen die er al is
+  onderaan de televisie rond, elk met een eigen willetje: lopen, stilstaan en
+  rondkijken, snuffelen, in slaap vallen, springen, een kunstje, ineens een
+  eind rennen, of een ander achterna zitten (die schrikt en rent weg; gepakt
+  is vrienden). Komen twee dieren elkaar tegen, dan draaien ze zich naar
+  elkaar toe en groeten ze, met een hartje. Gravers duiken onder de grond en
+  komen ergens anders boven; vliegers zweven erboven. Op je telefoon staat je
+  eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
+  (en slaapt het, dan schrikt het wakker).
 - **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke
   keer een verrassing. Eigen kunstjes: de lama spuugt, de kip legt een ei, de
   aap gooit met bananen, de eenhoorn maakt een regenboog, de eekhoorn begraaft
@@ -436,10 +450,15 @@ mee; het is er alleen voor de lol.
   goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
   telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
 
-De dieren, hun titels en wat ze roepen staan in `src/lib/shared/dieren.ts`;
-de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-,
-`kunst-…`- en `ding-…`-animaties onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
-geen optochten.
+De dieren, hun titels, wat ze roepen en hun kunstjes staan in
+`src/lib/shared/dieren.ts`; de tekeningen in `src/lib/shared/pixeldieren.ts`
+(een letter per pixel, met uitleg bovenaan) en het dier zelf in
+`src/lib/client/Pixeldier.svelte`. De optocht is
+`src/lib/client/Dierenparade.svelte`, de wei `src/lib/client/Dierenwei.svelte`
+met het brein in `src/lib/client/wei.ts`. De `px-…`-, `dier-…`-, `kunst-…`-,
+`ding-…`- en `wei-…`-animaties staan onderaan `src/app.css`. Wie *minder
+beweging* in zijn systeem aanzet, krijgt geen optochten en een wei die
+stilstaat.
 
 ### Het hostscherm
 
