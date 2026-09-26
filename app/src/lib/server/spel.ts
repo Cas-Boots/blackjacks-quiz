@@ -26,7 +26,8 @@ import { cijfersVoor } from './recap/cijfers';
 import { jaaroverzichtVoor } from './jaaroverzicht';
 import { beoordeelVoorspellingen, verdelingUitVoorspellingen, type Omgeving } from './recap/voorspellingen';
 import type { Analyse } from './recap/analyse';
-import { berekenBonussen, metBonus, type BonusVraag } from './bonus';
+import { berekenBonussen, opScorebord, PUNT_WAARDE, type BonusVraag } from './bonus';
+import { vermenigvuldigers, vermenigvuldigerVan } from './vermenigvuldiger';
 import { ingekort } from './klok';
 import type { Verdeling } from './scoring';
 import { dierVan } from '$lib/shared/dieren';
@@ -252,6 +253,7 @@ export function bonussenVan(spel: Parameters<typeof afrekeningVan>[0]) {
     verdelingVan.set(u.vraagSleutel, eerder ? telStand([eerder, u.verdeling]) : u.verdeling);
   }
   const rondes = PAKKETTEN[spel.pakket] ? samengesteld(spel) : [];
+  const dubbel = vermenigvuldigers(spel.id, rondes);
   const antwoordRijen = db.select().from(antwoorden).where(eq(antwoorden.spelId, spel.id)).all();
   const teamRijen = db.select().from(teams).where(eq(teams.spelId, spel.id)).all();
   const ledenVan = (rondeIndex: number, inzender: string): number[] => {
@@ -267,12 +269,14 @@ export function bonussenVan(spel: Parameters<typeof afrekeningVan>[0]) {
   rondes.forEach((r, ri) => {
     // De afrekening van de voorspellingen is geen vraag: die maakt geen reeks en breekt er ook geen.
     if (isAfrekening(r)) return;
-    r.vragen.forEach((_, vi) => {
+    r.vragen.forEach((v, vi) => {
       const sleutel = sleutelVan(ri, vi);
       vragen.push({
         sleutel,
         type: r.type,
         teamModus: r.teamModus ?? 'individueel',
+        duurMs: vraagTijd(r, v) * 1000,
+        vermenigvuldiger: vermenigvuldigerVan(dubbel[ri], vi),
         verdeling: verdelingVan.get(sleutel) ?? null,
         antwoorden: antwoordRijen
           .filter((a) => a.vraagSleutel === sleutel)
@@ -283,10 +287,11 @@ export function bonussenVan(spel: Parameters<typeof afrekeningVan>[0]) {
 
   const bonus = berekenBonussen(vragen);
   const verdelingen = new Map<string, Verdeling>();
-  // Uitdelingen bij vragen die niet (meer) in de samenstelling staan, tellen
-  // gewoon mee zoals ze zijn, zonder bonus: de stand verliest nooit punten.
-  for (const [sleutel, v] of verdelingVan) verdelingen.set(sleutel, metBonus(v, bonus.perVraag.get(sleutel)));
-  return { verdelingen, bonus };
+  // De afrekening en uitdelingen bij vragen die niet (meer) in de
+  // samenstelling staan, tellen gewoon mee tegen de puntwaarde, zonder
+  // snelheid of bonus: de stand verliest nooit punten.
+  for (const [sleutel, v] of verdelingVan) verdelingen.set(sleutel, bonus.perVraag.get(sleutel)?.punten ?? opScorebord(v));
+  return { verdelingen, bonus, dubbel };
 }
 
 export function standVan(spelId: number) {
@@ -449,7 +454,6 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const vraagBonus = onthuld ? bonussen.bonus.perVraag.get(sleutel) : undefined;
   const bonusLijst: PubliekeStaat['bonussen'] = [];
   if (vraagBonus) {
-    for (const id of Object.keys(vraagBonus.snel)) bonusLijst.push({ spelerId: Number(id), soort: 'snel', punten: vraagBonus.snel[Number(id)] });
     for (const id of Object.keys(vraagBonus.reeks)) {
       bonusLijst.push({ spelerId: Number(id), soort: 'reeks', punten: vraagBonus.reeks[Number(id)], opRij: vraagBonus.opRij[Number(id)] });
     }
@@ -505,6 +509,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
           sfeer: ronde.sfeer ?? 'vilt', uitleg: ronde.uitleg,
           teamModus: ronde.teamModus, type: ronde.type, vragenAantal: ronde.vragen.length,
           cijfers: ronde.cijfers ?? null,
+          dubbel: bonussen.dubbel[spel.rondeIndex]?.dubbel ?? false,
         }
       : null,
     vraag:
@@ -520,6 +525,9 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
             eenheid: vraag.eenheid,
             media: vraag.media,
             punten: vraagPunten(ronde, vraag),
+            maximaal: vraagPunten(ronde, vraag) * PUNT_WAARDE * vermenigvuldigerVan(bonussen.dubbel[spel.rondeIndex], spel.vraagIndex),
+            vermenigvuldiger: vermenigvuldigerVan(bonussen.dubbel[spel.rondeIndex], spel.vraagIndex),
+            goud: bonussen.dubbel[spel.rondeIndex]?.goud === spel.vraagIndex,
           }
         : null,
     onthulling,

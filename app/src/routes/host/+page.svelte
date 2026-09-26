@@ -9,6 +9,9 @@
   import { GELUIDSBORD } from '$lib/shared/geluidsbord';
   import { dierVan } from '$lib/shared/dieren';
 
+  /** Een correctie met de hand: op de schaal van het scorebord, niet van één vraagpunt. */
+  const CORRECTIE = 100;
+
   type Voorstel = { automatisch: boolean; goed: boolean; reden: string };
   type Inzending = { inzender: string; tekst: string; ingediendOp: number; isGoed: boolean | null; voorstel: Voorstel | null };
   type RondeInfo = {
@@ -372,7 +375,7 @@
     <!-- De vraag die nu open staat, met een spiekbriefje dat je zelf openklapt -->
     {#if vraag && (staat?.fase === 'vraag' || staat?.fase === 'antwoord')}
       <div class="paneel host-vraag">
-        <p class="etiket stil">Vraag {vraag.index + 1} van {vraag.aantal} · {typeNaam[vraag.type] ?? vraag.type} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
+        <p class="etiket stil">Vraag {vraag.index + 1} van {vraag.aantal} · {typeNaam[vraag.type] ?? vraag.type} · tot {vraag.maximaal.toLocaleString('nl-NL')} punten{#if vraag.goud} · 🃏 gouden kaart{/if}{#if staat?.ronde?.dubbel} · ×2 slotronde{/if}</p>
         {#if vraag.lyric}<p class="fijn" style="font-style:italic;margin-top:.4rem">“{vraag.lyric}”</p>{/if}
         <p class="host-vraagtekst">{vraag.emoji ? vraag.emoji + ' ' : ''}{vraag.tekst}</p>
         {#if vraag.opties}
@@ -588,9 +591,9 @@
             <span class="dier" aria-hidden="true" title={dierVan(r.dier, r.naam).titel}>{dierVan(r.dier, r.naam).emoji}</span>
             <span class="naam" style="font-size:1.1rem">{r.naam}</span>
             <span style="display:flex;gap:.4rem;align-items:center">
-              <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: -1 })} aria-label="Een punt eraf voor {r.naam}">−</button>
+              <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: -CORRECTIE })} aria-label="{CORRECTIE} punten eraf voor {r.naam}">−{CORRECTIE}</button>
               <span class="standpunten" style="font-size:1.1rem">{r.punten}</span>
-              <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: 1 })} aria-label="Een punt erbij voor {r.naam}">+</button>
+              <button class="knop stil" onclick={() => doe('corrigeer', { spelerId: r.spelerId, punten: CORRECTIE })} aria-label="{CORRECTIE} punten erbij voor {r.naam}">+{CORRECTIE}</button>
             </span>
           </div>
         {/each}

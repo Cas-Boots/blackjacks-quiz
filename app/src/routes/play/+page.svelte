@@ -73,6 +73,21 @@
 
   let mijnBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.spelerId === live.spelerId));
 
+  /* Zoals bij Kahoot: na elke vraag je plek, en hoe ver de volgende boven je
+     staat. De stand is al bijgewerkt zodra de quizmaster punten gaf. */
+  let naVraag = $derived.by(() => {
+    const stand = staat?.stand ?? [];
+    const i = stand.findIndex((r) => r.spelerId === live.spelerId);
+    if (i < 0 || stand.length < 2) return null;
+    const ik = stand[i];
+    // Gelijke punten, gelijke plek.
+    const plek = stand.findIndex((r) => r.punten === ik.punten) + 1;
+    const boven = stand.slice(0, i).reverse().find((r) => r.punten > ik.punten) ?? null;
+    const onder = stand.slice(i + 1).find((r) => r.punten < ik.punten) ?? null;
+    return { plek, punten: ik.punten, boven, onder };
+  });
+  const fmt = (n: number) => n.toLocaleString('nl-NL');
+
   /* Op de televisie klinkt eerst een tromgeroffel. Zolang die duurt, verklapt
      de telefoon het antwoord ook niet. Even lang als op de televisie. */
   const ROFFEL_MS = 1450;
@@ -383,7 +398,12 @@
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
         <div class="tafelkaart" data-suit={ronde?.suit} style="padding:1.2rem;--kanteling:{kantelingNu}deg">
-          <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
+          <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · tot {fmt(vraag.maximaal)} punten</p>
+          {#if vraag.goud}
+            <p class="gouden-kaart">🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
+          {:else if vraag.vermenigvuldiger > 1}
+            <p class="gouden-kaart dubbel">×{vraag.vermenigvuldiger} · Dubbele punten</p>
+          {/if}
           {#if vraag.emoji}<div class="emoji" style="font-size:2.6rem">{vraag.emoji}</div>{/if}
           {#if vraag.lyric}<p class="lyric" style="font-size:1.25rem">“{vraag.lyric}”</p>{/if}
           <p class="vraagtekst" style="font-size:1.35rem">{vraag.tekst}</p>
@@ -461,10 +481,10 @@
             <span>
               <strong>{kwinkslag}</strong>
               {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><span aria-hidden="true">{mijnDier.emoji}</span> {roep}</span>{/if}
-              <span class="plus">+{mijnPunten}</span>
-              <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}</span>
+              <span class="plus">+{fmt(mijnPunten)}</span>
+              <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
               {#each mijnBonussen as b (b.soort)}
-                <span class="bonusregel">{b.soort === 'snel' ? '⚡ Snelste vinger' : `🔥 ${b.opRij} op rij`} · +{b.punten} bonus</span>
+                <span class="bonusregel">🔥 {b.opRij} op rij · +{b.punten} bonus</span>
               {/each}
             </span>
           {:else if uitslag === 'fout'}
@@ -484,6 +504,18 @@
           {/if}
         </div>
       {/key}
+      {#if naVraag}
+        <p class="mijnplek" in:fade={{ duration: 300, delay: 250 }}>
+          <strong>{naVraag.plek}e</strong> met {fmt(naVraag.punten)} ·
+          {#if naVraag.boven}
+            {fmt(naVraag.boven.punten - naVraag.punten)} achter {naVraag.boven.naam}
+          {:else if naVraag.onder}
+            {fmt(naVraag.punten - naVraag.onder.punten)} voor {naVraag.onder.naam}
+          {:else}
+            iedereen staat gelijk
+          {/if}
+        </p>
+      {/if}
       <div class="onthulling" style="padding:1.2rem">
         <p class="etiket stil">Het antwoord</p>
         <p class="antwoordtekst" style="font-size:1.6rem">{staat.onthulling?.antwoord}</p>
