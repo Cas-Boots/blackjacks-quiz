@@ -27,7 +27,38 @@ export interface Maatje {
   beweging: Beweging;
   /** Zijn eigen kunstjes, naast de algemene; zie actiesVan. */
   acties: { blij: readonly Actie[]; sip: readonly Actie[] };
+  /**
+   * Zijn karakter, elk van 1 tot 5. Het staat op de telefoon als je hem
+   * kiest, en het bepaalt hoe hij zich in de wei gedraagt (wei.ts): een snel
+   * dier rent vaker en harder, een slaperig dier dut vaker in, een gezellig
+   * dier groet vaker, een ondeugend dier zit anderen vaker achterna, een
+   * dramatisch dier doet vaker een kunstje.
+   */
+  karakter: Karakter;
+  /** Wat hij het liefst eet; in de wei vindt hij het soms. */
+  hapje: { ding: string; naam: string };
+  /** Waar hij om bekend staat, in één zin. */
+  specialiteit: string;
 }
+
+export interface Karakter {
+  snel: number;
+  slim: number;
+  slaperig: number;
+  gezellig: number;
+  ondeugend: number;
+  drama: number;
+}
+
+/** De eigenschappen in de volgorde en met de namen van het kaartje op de telefoon. */
+export const EIGENSCHAPPEN: readonly { sleutel: keyof Karakter; naam: string }[] = [
+  { sleutel: 'snel', naam: 'Snelheid' },
+  { sleutel: 'slim', naam: 'Slimheid' },
+  { sleutel: 'slaperig', naam: 'Slaperigheid' },
+  { sleutel: 'gezellig', naam: 'Gezelligheid' },
+  { sleutel: 'ondeugend', naam: 'Ondeugd' },
+  { sleutel: 'drama', naam: 'Drama' },
+];
 
 /**
  * Een kunstje dat het dier halverwege het scherm doet: iets met zijn lijf,
@@ -151,6 +182,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De lama spuugt. Op zichzelf.', 'Lama draait zich beledigd om.'],
     entree: 'schrijdt binnen met veel te veel drama',
     beweging: 'loop',
+    karakter: { snel: 3, slim: 3, slaperig: 2, gezellig: 2, ondeugend: 4, drama: 5 },
+    hapje: { ding: '🌾', naam: 'hooi' },
+    specialiteit: 'Spuugt precies op het verkeerde moment',
     acties: { blij: [{ lijf: 'opblaas', ding: '💦', dingGaat: 'gooi' }, { lijf: 'dans' }], sip: [{ lijf: 'zak', ding: '💦', dingGaat: 'val' }] },
   },
   {
@@ -159,6 +193,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De luiaard was er nog niet aan toe.', 'Luiaard doet een dutje. Morgen beter.'],
     entree: 'komt aan. Over een kwartiertje',
     beweging: 'schommel',
+    karakter: { snel: 1, slim: 3, slaperig: 5, gezellig: 4, ondeugend: 1, drama: 1 },
+    hapje: { ding: '🍃', naam: 'verse blaadjes' },
+    specialiteit: 'Hangt alles uit, ook de spanning',
     acties: { blij: [{ lijf: 'ondersteboven' }, { lijf: 'boing', ding: '🍃', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '💤', dingGaat: 'op' }] },
   },
   {
@@ -167,6 +204,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De flamingo valt om. Sierlijk, dat wel.', 'Even op twee benen staan, flamingo.'],
     entree: 'staat al een uur op één been te wachten',
     beweging: 'vlieg',
+    karakter: { snel: 3, slim: 2, slaperig: 2, gezellig: 4, ondeugend: 1, drama: 4 },
+    hapje: { ding: '🦐', naam: 'garnaaltjes' },
+    specialiteit: 'Staat uren op één been',
     acties: { blij: [{ lijf: 'balans' }, { lijf: 'pirouette', ding: '🌸', dingGaat: 'rond' }], sip: [{ lijf: 'omval' }] },
   },
   {
@@ -175,6 +215,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De pinguïn glijdt uit op het ijs.', 'Pak aan, hoofd koud, antwoord fout.'],
     entree: 'waggelt binnen in smoking',
     beweging: 'waggel',
+    karakter: { snel: 2, slim: 4, slaperig: 2, gezellig: 5, ondeugend: 2, drama: 2 },
+    hapje: { ding: '🐟', naam: 'een visje' },
+    specialiteit: 'Altijd netjes in pak, ook op het ijs',
     acties: { blij: [{ lijf: 'glij', ding: '❄️', dingGaat: 'op' }, { lijf: 'dans', ding: '🎩', dingGaat: 'rond' }], sip: [{ lijf: 'omval', ding: '🧊', dingGaat: 'val' }] },
   },
   {
@@ -183,6 +226,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Acht armen, nul goede antwoorden.', 'De octopus spuit inkt en verdwijnt.'],
     entree: 'zwaait met alle acht armen tegelijk',
     beweging: 'zwem',
+    karakter: { snel: 3, slim: 5, slaperig: 2, gezellig: 3, ondeugend: 4, drama: 3 },
+    hapje: { ding: '🦀', naam: 'krabbetjes' },
+    specialiteit: 'Acht antwoorden tegelijk',
     acties: { blij: [{ lijf: 'acht', ding: '🐚', dingGaat: 'gooi' }, { lijf: 'dans', ding: '🎵', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '🖤', dingGaat: 'op' }] },
   },
   {
@@ -191,6 +237,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De kip rent zonder kop in het rond.', 'Tok… tok… nee.'],
     entree: 'fladdert binnen in volle paniek',
     beweging: 'vlieg',
+    karakter: { snel: 4, slim: 1, slaperig: 2, gezellig: 3, ondeugend: 3, drama: 5 },
+    hapje: { ding: '🌽', naam: 'maïskorrels' },
+    specialiteit: 'Paniek als levensstijl',
     acties: { blij: [{ lijf: 'boing', ding: '🥚', dingGaat: 'val' }, { lijf: 'schud', ding: '🪶', dingGaat: 'op' }], sip: [{ lijf: 'schud', ding: '🪶', dingGaat: 'val' }] },
   },
   {
@@ -199,6 +248,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De hoorn staat vandaag een beetje scheef.', 'Zelfs magie heeft een vrije avond.'],
     entree: 'galoppeert binnen in een wolk van glitter',
     beweging: 'stuiter',
+    karakter: { snel: 4, slim: 3, slaperig: 3, gezellig: 4, ondeugend: 2, drama: 5 },
+    hapje: { ding: '🧁', naam: 'cupcakes' },
+    specialiteit: 'Laat overal glitter achter',
     acties: { blij: [{ lijf: 'boing', ding: '🌈', dingGaat: 'op' }, { lijf: 'salto', ding: '✨', dingGaat: 'rond' }], sip: [{ lijf: 'zak', ding: '💫', dingGaat: 'rond' }] },
   },
   {
@@ -207,6 +259,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De uil deed maar alsof. Nu weet iedereen het.', 'Oehoe… oei.'],
     entree: 'kijkt heel wijs, maar weet eigenlijk niks',
     beweging: 'vlieg',
+    karakter: { snel: 2, slim: 4, slaperig: 4, gezellig: 2, ondeugend: 1, drama: 2 },
+    hapje: { ding: '🐭', naam: 'muisjes' },
+    specialiteit: 'Kijkt heel wijs, weet het eigenlijk niet',
     acties: { blij: [{ lijf: 'pirouette', ding: '🎓', dingGaat: 'op' }, { lijf: 'dans', ding: '📚', dingGaat: 'gooi' }], sip: [{ lijf: 'mok', ding: '❓', dingGaat: 'op' }] },
   },
   {
@@ -215,6 +270,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Fout. Gelukkig is de goudvis het zo vergeten.', 'Blub.'],
     entree: 'zwemt rondjes. Waar was hij ook alweer?',
     beweging: 'zwem',
+    karakter: { snel: 3, slim: 1, slaperig: 2, gezellig: 4, ondeugend: 2, drama: 2 },
+    hapje: { ding: '🍞', naam: 'broodkruimels' },
+    specialiteit: 'Vergeet alles na drie seconden',
     acties: { blij: [{ lijf: 'salto', ding: '🫧', dingGaat: 'op' }, { lijf: 'acht', ding: '🫧', dingGaat: 'op' }], sip: [{ lijf: 'zak', ding: '❓', dingGaat: 'op' }] },
   },
   {
@@ -223,6 +281,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De wasbeer greep mis in de vuilnisbak.', 'Wasbeer wast zijn handen in onschuld.'],
     entree: 'sluipt binnen met iets in zijn wangen',
     beweging: 'loop',
+    karakter: { snel: 4, slim: 4, slaperig: 2, gezellig: 2, ondeugend: 5, drama: 2 },
+    hapje: { ding: '🍕', naam: 'pizzakorstjes' },
+    specialiteit: 'Jat alles wat los ligt',
     acties: { blij: [{ lijf: 'opblaas', ding: '💰', dingGaat: 'op' }, { lijf: 'dans', ding: '🍕', dingGaat: 'gooi' }], sip: [{ lijf: 'verstop', ding: '🗑️', dingGaat: 'val' }] },
   },
   {
@@ -231,6 +292,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Kwaak. Kwaak kwaak. Nee.', 'De kikker plonst het water in.'],
     entree: 'springt binnen en kwaakt iets onverstaanbaars',
     beweging: 'spring',
+    karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 3, ondeugend: 3, drama: 3 },
+    hapje: { ding: '🪰', naam: 'vliegjes' },
+    specialiteit: 'Springt eerst, denkt later',
     acties: { blij: [{ lijf: 'boing', ding: '🪰', dingGaat: 'rond' }, { lijf: 'salto', ding: '💦', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '💦', dingGaat: 'op' }] },
   },
   {
@@ -239,6 +303,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Au. De egel prikt zichzelf.', 'De egel rolt zich op en doet alsof hij er niet is.'],
     entree: 'rolt binnen als een stekelig balletje',
     beweging: 'draai',
+    karakter: { snel: 2, slim: 3, slaperig: 4, gezellig: 1, ondeugend: 2, drama: 2 },
+    hapje: { ding: '🍎', naam: 'appeltjes' },
+    specialiteit: 'Rolt zich op bij de eerste moeilijke vraag',
     acties: { blij: [{ lijf: 'rol' }, { lijf: 'dans', ding: '🍎', dingGaat: 'op' }], sip: [{ lijf: 'rol', ding: '💥', dingGaat: 'op' }] },
   },
   {
@@ -247,6 +314,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De zeehond klapt toch maar. Uit gewoonte.', 'Geen vis vandaag.'],
     entree: 'glijdt op zijn buik naar binnen',
     beweging: 'zwem',
+    karakter: { snel: 2, slim: 3, slaperig: 3, gezellig: 5, ondeugend: 2, drama: 4 },
+    hapje: { ding: '🐟', naam: 'haring' },
+    specialiteit: 'Applaudisseert voor alles',
     acties: { blij: [{ lijf: 'balans', ding: '⚽', dingGaat: 'rond' }, { lijf: 'boing', ding: '👏', dingGaat: 'op' }], sip: [{ lijf: 'zak', ding: '🐟', dingGaat: 'val' }] },
   },
   {
@@ -255,6 +325,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De kreeft liep weer de verkeerde kant op.', 'Knip knip. Mis mis.'],
     entree: 'schuifelt zijwaarts naar binnen',
     beweging: 'loop',
+    karakter: { snel: 2, slim: 3, slaperig: 2, gezellig: 2, ondeugend: 3, drama: 3 },
+    hapje: { ding: '🌿', naam: 'zeewier' },
+    specialiteit: 'Denkt zijwaarts',
     acties: { blij: [{ lijf: 'schud', ding: '✂️', dingGaat: 'op' }, { lijf: 'dans', ding: '🦀', dingGaat: 'rond' }], sip: [{ lijf: 'mok', ding: '💢', dingGaat: 'op' }] },
   },
   {
@@ -263,6 +336,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De wangen blijven leeg.', 'De hamster rent verder in zijn wiel.'],
     entree: 'komt binnen met volle wangen',
     beweging: 'stuiter',
+    karakter: { snel: 4, slim: 2, slaperig: 3, gezellig: 4, ondeugend: 3, drama: 2 },
+    hapje: { ding: '🌻', naam: 'zonnepitten' },
+    specialiteit: 'Hamstert punten voor later',
     acties: { blij: [{ lijf: 'opblaas', ding: '🌻', dingGaat: 'op' }, { lijf: 'rol' }], sip: [{ lijf: 'zak', ding: '🌰', dingGaat: 'val' }] },
   },
   {
@@ -271,6 +347,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Krak. Daar gaat het servies.', 'Het nijlpaard zakt beteuterd onder water.'],
     entree: 'stampt binnen. Er valt iets om',
     beweging: 'loop',
+    karakter: { snel: 2, slim: 2, slaperig: 4, gezellig: 3, ondeugend: 3, drama: 4 },
+    hapje: { ding: '🍉', naam: 'watermeloen' },
+    specialiteit: 'Past nergens, gaat overal',
     acties: { blij: [{ lijf: 'boing', ding: '💥', dingGaat: 'op' }, { lijf: 'dans', ding: '🩰', dingGaat: 'rond' }], sip: [{ lijf: 'verstop', ding: '💦', dingGaat: 'op' }] },
   },
   {
@@ -279,6 +358,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De giraf keek over het antwoord heen.', 'Te hoog gegrepen.'],
     entree: 'bukt nét op tijd voor de deurpost',
     beweging: 'loop',
+    karakter: { snel: 3, slim: 4, slaperig: 2, gezellig: 3, ondeugend: 1, drama: 2 },
+    hapje: { ding: '🌿', naam: 'acaciablaadjes' },
+    specialiteit: 'Ziet alles van bovenaf',
     acties: { blij: [{ lijf: 'rek', ding: '🍃', dingGaat: 'op' }, { lijf: 'dans', ding: '🎵', dingGaat: 'op' }], sip: [{ lijf: 'zak', ding: '💧', dingGaat: 'val' }] },
   },
   {
@@ -287,6 +369,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Het huisje is er, het antwoord niet.', 'De slak trekt zich terug in zijn huisje.'],
     entree: 'is onderweg sinds vorige week',
     beweging: 'kruip',
+    karakter: { snel: 1, slim: 3, slaperig: 3, gezellig: 3, ondeugend: 1, drama: 2 },
+    hapje: { ding: '🥬', naam: 'sla' },
+    specialiteit: 'Op turbo: twee meter per uur',
     acties: { blij: [{ lijf: 'schud', ding: '💨', dingGaat: 'op' }, { lijf: 'rol' }], sip: [{ lijf: 'verstop', ding: '🐚', dingGaat: 'op' }] },
   },
   {
@@ -295,6 +380,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Krokodillentranen. Heel overtuigend.', 'De krokodil hapte in de lucht.'],
     entree: 'glimlacht met heel veel tanden',
     beweging: 'zwem',
+    karakter: { snel: 3, slim: 3, slaperig: 4, gezellig: 1, ondeugend: 4, drama: 3 },
+    hapje: { ding: '🍗', naam: 'kippenpootjes' },
+    specialiteit: 'Glimlacht met heel veel tanden',
     acties: { blij: [{ lijf: 'opblaas', ding: '🦷', dingGaat: 'gooi' }, { lijf: 'salto', ding: '💦', dingGaat: 'op' }], sip: [{ lijf: 'zak', ding: '💧', dingGaat: 'val' }] },
   },
   {
@@ -303,6 +391,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Een fata morgana van een antwoord.', 'De kameel kauwt er nog even op.'],
     entree: 'sjokt binnen uit de woestijn',
     beweging: 'loop',
+    karakter: { snel: 2, slim: 3, slaperig: 3, gezellig: 2, ondeugend: 2, drama: 1 },
+    hapje: { ding: '🌵', naam: 'cactus' },
+    specialiteit: 'Heeft nooit dorst, nooit haast',
     acties: { blij: [{ lijf: 'dans', ding: '🌴', dingGaat: 'op' }, { lijf: 'rek', ding: '☀️', dingGaat: 'rond' }], sip: [{ lijf: 'zak', ding: '🏜️', dingGaat: 'val' }] },
   },
   {
@@ -311,6 +402,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De aap mist de tak en valt in de bananen.', 'Apenstreken. Maar fout.'],
     entree: 'slingert binnen aan de lamp',
     beweging: 'schommel',
+    karakter: { snel: 5, slim: 3, slaperig: 1, gezellig: 4, ondeugend: 5, drama: 4 },
+    hapje: { ding: '🍌', naam: 'bananen' },
+    specialiteit: 'Slingert aan alles wat hangt',
     acties: { blij: [{ lijf: 'acht', ding: '🍌', dingGaat: 'gooi' }, { lijf: 'ondersteboven', ding: '🍌', dingGaat: 'rond' }], sip: [{ lijf: 'omval', ding: '🍌', dingGaat: 'val' }] },
   },
   {
@@ -319,6 +413,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Te vroeg gesprongen.', 'De kangoeroe verstopt zich in zijn eigen buidel.'],
     entree: 'springt in drie sprongen de kamer door',
     beweging: 'spring',
+    karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 3, ondeugend: 3, drama: 3 },
+    hapje: { ding: '🌿', naam: 'gras' },
+    specialiteit: 'Springt over elk probleem heen',
     acties: { blij: [{ lijf: 'boing', ding: '🥊', dingGaat: 'gooi' }, { lijf: 'salto' }], sip: [{ lijf: 'verstop', ding: '👜', dingGaat: 'op' }] },
   },
   {
@@ -327,6 +424,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De hond rende achter het verkeerde balletje aan.', 'Zielige hondenogen. Helpt niet.'],
     entree: 'rent kwispelend drie rondjes om de tafel',
     beweging: 'loop',
+    karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 5, ondeugend: 3, drama: 3 },
+    hapje: { ding: '🦴', naam: 'botjes' },
+    specialiteit: 'Rent achter alles aan',
     acties: { blij: [{ lijf: 'dans', ding: '🦴', dingGaat: 'gooi' }, { lijf: 'rol', ding: '🎾', dingGaat: 'rond' }], sip: [{ lijf: 'zak', ding: '🥺', dingGaat: 'op' }] },
   },
   {
@@ -335,6 +435,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De dolfijn lacht toch maar. Een beetje schaapachtig.', 'Plons. Mis.'],
     entree: 'zwemt binnen door de gang. Niemand weet hoe',
     beweging: 'zwem',
+    karakter: { snel: 5, slim: 5, slaperig: 1, gezellig: 5, ondeugend: 2, drama: 3 },
+    hapje: { ding: '🐟', naam: 'makreel' },
+    specialiteit: 'Lacht altijd, ook als het fout is',
     acties: { blij: [{ lijf: 'salto', ding: '💦', dingGaat: 'op' }, { lijf: 'acht', ding: '🫧', dingGaat: 'op' }], sip: [{ lijf: 'zak', ding: '💦', dingGaat: 'val' }] },
   },
   {
@@ -343,6 +446,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Bzzz… bzz… nee.', 'De bij vloog tegen het raam.'],
     entree: 'zoemt drie keer om je hoofd',
     beweging: 'vlieg',
+    karakter: { snel: 5, slim: 3, slaperig: 1, gezellig: 4, ondeugend: 2, drama: 2 },
+    hapje: { ding: '🌼', naam: 'nectar' },
+    specialiteit: 'Zoemt overal tegelijk',
     acties: { blij: [{ lijf: 'acht', ding: '🌼', dingGaat: 'op' }, { lijf: 'dans', ding: '🍯', dingGaat: 'gooi' }], sip: [{ lijf: 'omval', ding: '🌧️', dingGaat: 'rond' }] },
   },
   {
@@ -351,6 +457,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De vlinder fladderde de verkeerde kant op.', 'Vlinders in de buik. Antwoord in de prullenbak.'],
     entree: 'fladdert binnen door het open raam',
     beweging: 'vlieg',
+    karakter: { snel: 3, slim: 1, slaperig: 2, gezellig: 3, ondeugend: 1, drama: 4 },
+    hapje: { ding: '🌸', naam: 'bloemennectar' },
+    specialiteit: 'Fladdert alle kanten op behalve de goede',
     acties: { blij: [{ lijf: 'acht', ding: '🌸', dingGaat: 'op' }, { lijf: 'pirouette', ding: '✨', dingGaat: 'rond' }], sip: [{ lijf: 'zak', ding: '🍂', dingGaat: 'val' }] },
   },
   {
@@ -359,6 +468,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De papegaai praatte de verkeerde na.', 'Rrrrr… fout. Fout. Fout.'],
     entree: 'landt op de lamp en roept iedereens naam',
     beweging: 'vlieg',
+    karakter: { snel: 4, slim: 3, slaperig: 1, gezellig: 4, ondeugend: 3, drama: 5 },
+    hapje: { ding: '🍒', naam: 'kersen' },
+    specialiteit: 'Praat iedereen na',
     acties: { blij: [{ lijf: 'schud', ding: '💬', dingGaat: 'op' }, { lijf: 'salto', ding: '🎶', dingGaat: 'op' }], sip: [{ lijf: 'mok', ding: '💬', dingGaat: 'op' }] },
   },
   {
@@ -367,6 +479,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De das groef een gat. En viel erin.', 'Te diep gegraven. Niks gevonden.'],
     entree: 'komt dwars door de vloer omhoog',
     beweging: 'graaf',
+    karakter: { snel: 3, slim: 3, slaperig: 4, gezellig: 1, ondeugend: 3, drama: 1 },
+    hapje: { ding: '🍄', naam: 'paddenstoelen' },
+    specialiteit: 'Graaft dwars door alles heen',
     acties: { blij: [{ lijf: 'graaf', ding: '🪨', dingGaat: 'gooi' }, { lijf: 'dans', ding: '🍄', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '🕳️', dingGaat: 'val' }] },
   },
   {
@@ -375,6 +490,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['Het konijn verdwijnt beschaamd in zijn hol.', 'Verkeerde afslag in de konijnenpijp.'],
     entree: 'duikt uit een hol op dat er net nog niet was',
     beweging: 'graaf',
+    karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 4, ondeugend: 3, drama: 2 },
+    hapje: { ding: '🥕', naam: 'worteltjes' },
+    specialiteit: 'Verdwijnt in een hol als het spannend wordt',
     acties: { blij: [{ lijf: 'boing', ding: '🥕', dingGaat: 'gooi' }, { lijf: 'graaf', ding: '🌷', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '🕳️', dingGaat: 'val' }] },
   },
   {
@@ -383,6 +501,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De worm kruipt terug de aarde in.', 'Kronkel. Mis.'],
     entree: 'kronkelt omhoog uit de bloempot',
     beweging: 'graaf',
+    karakter: { snel: 1, slim: 1, slaperig: 3, gezellig: 3, ondeugend: 1, drama: 1 },
+    hapje: { ding: '🍂', naam: 'dode blaadjes' },
+    specialiteit: 'Gaat altijd de diepte in',
     acties: { blij: [{ lijf: 'kronkel', ding: '🍎', dingGaat: 'op' }, { lijf: 'graaf', ding: '🌱', dingGaat: 'op' }], sip: [{ lijf: 'kronkel', ding: '💧', dingGaat: 'val' }] },
   },
   {
@@ -391,6 +512,9 @@ export const DIEREN: readonly Maatje[] = [
     fout: ['De eekhoorn weet niet meer waar hij het antwoord begroef.', 'Geen nootje vandaag.'],
     entree: 'graaft eerst even een nootje in in de bank',
     beweging: 'graaf',
+    karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 2, ondeugend: 3, drama: 3 },
+    hapje: { ding: '🌰', naam: 'nootjes' },
+    specialiteit: 'Begraaft alles voor later',
     acties: { blij: [{ lijf: 'graaf', ding: '🌰', dingGaat: 'val' }, { lijf: 'rol', ding: '🌰', dingGaat: 'gooi' }], sip: [{ lijf: 'zak', ding: '🌰', dingGaat: 'val' }] },
   },
 ];

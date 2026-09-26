@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { DIEREN } from '../src/lib/shared/dieren';
-import { MAAT, SPRITES, lagenVan } from '../src/lib/shared/pixeldieren';
+import { BRON, SPRITES, lagenVan } from '../src/lib/shared/pixeldieren';
 
 describe('pixeldieren', () => {
   it('heeft voor elk dier een sprite van 16 bij 16, met alleen kleuren uit het palet', () => {
     for (const d of DIEREN) {
       const s = SPRITES[d.sleutel];
       expect(s, d.sleutel).toBeDefined();
-      expect(s.rijen, d.sleutel).toHaveLength(MAAT);
-      s.rijen.forEach((r, i) => expect(r.length, `${d.sleutel} rij ${i}`).toBe(MAAT));
+      expect(s.rijen, d.sleutel).toHaveLength(BRON);
+      s.rijen.forEach((r, i) => expect(r.length, `${d.sleutel} rij ${i}`).toBe(BRON));
       for (const t of new Set(s.rijen.join(''))) {
         expect('.kwo'.includes(t) || t in s.palet, `${d.sleutel}: ${t}`).toBe(true);
       }

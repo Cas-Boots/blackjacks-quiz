@@ -12,12 +12,19 @@
  * De onderste `poten` rijen zijn de poten: elke losse kolom daarin is een poot,
  * en om en om tilt het dier er de helft van op. Zo lopen ze echt.
  *
- * Wat eruit komt (pixelsVan) zijn lagen: het lijf, de ogen open en dicht, de
+ * Op het scherm komt hij twee keer zo fijn (lagenVan): Scale2x maakt de trapjes
+ * schuin, en dan komen er licht, schaduw, een getinte omlijning en glans in de
+ * ogen bij. Wat eruit komt zijn lagen: het lijf, de ogen open en dicht, de
  * wangen, de vleugels op en neer, de poten in rust en in twee stappen.
  * Pixeldier.svelte zet die lagen als SVG neer; app.css wisselt ze.
  */
 
-export const MAAT = 16;
+/** De tekening: 16 bij 16. */
+export const BRON = 16;
+/** Hoeveel keer groter hij op het scherm komt, na het gladmaken. */
+export const SCHAAL = 2;
+/** Het dier zoals het getekend wordt: 32 bij 32. */
+export const MAAT = BRON * SCHAAL;
 
 export interface Sprite {
   rijen: readonly string[];
@@ -742,6 +749,57 @@ export interface Lagen {
   potenRust: Laag;
   potenA: Laag;
   potenB: Laag;
+  /** Waar de pupil zit, in de maat van de tekening (16): voor de traan en het uitroepteken. */
+  oog: { x: number; y: number };
+}
+
+/* ---- Kleur ------------------------------------------------------------- */
+
+function rgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function hexVan([r, g, b]: number[]): string {
+  return '#' + [r, g, b].map((c) => Math.round(Math.min(255, Math.max(0, c))).toString(16).padStart(2, '0')).join('');
+}
+/** Mengt `hex` met `naar` (0 is niets, 1 is helemaal). */
+function meng(hex: string, naar: string, hoeveel: number): string {
+  const a = rgb(hex);
+  const b = rgb(naar);
+  return hexVan(a.map((c, i) => c + (b[i] - c) * hoeveel));
+}
+/** Lichter naar een warm licht, donkerder naar een koele schaduw: dat oogt levendiger dan wit en zwart. */
+const licht = (hex: string, n: number) => meng(hex, '#fff6dc', n);
+const schaduw = (hex: string, n: number) => meng(hex, '#1b1030', n);
+
+/* ---- Opschalen --------------------------------------------------------- */
+
+/**
+ * Scale2x (EPX): elke pixel wordt er vier, en waar twee buren schuin
+ * hetzelfde zijn wordt de trap een schuine lijn. Omdat het op de letters werkt
+ * en niet op kleuren, blijven ogen ogen en poten poten.
+ */
+export function scale2x(rijen: readonly string[]): string[] {
+  const h = rijen.length;
+  const w = rijen[0].length;
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x >= w || y >= h ? '.' : rijen[y][x]);
+  const uit: string[][] = Array.from({ length: h * 2 }, () => Array(w * 2).fill('.'));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = at(x, y);
+      const a = at(x, y - 1);
+      const b = at(x + 1, y);
+      const c = at(x - 1, y);
+      const d = at(x, y + 1);
+      // Alleen randen gladmaken die niet door ogen of poten snijden.
+      const mag = (t: string) => t !== 'w' && t !== 'o' && p !== 'w' && p !== 'o';
+      uit[y * 2][x * 2] = c === a && c !== d && a !== b && mag(a) ? a : p;
+      uit[y * 2][x * 2 + 1] = a === b && a !== c && b !== d && mag(b) ? b : p;
+      uit[y * 2 + 1][x * 2] = d === c && d !== b && c !== a && mag(c) ? c : p;
+      uit[y * 2 + 1][x * 2 + 1] = b === d && b !== a && d !== c && mag(d) ? d : p;
+    }
+  }
+  return uit.map((r) => r.join(''));
 }
 
 function alsLaag(pixels: Pixel[]): Laag {
@@ -766,9 +824,39 @@ function potenGroepen(pixels: Pixel[]): Pixel[][] {
   return groepen.map((xs) => pixels.filter((p) => xs.includes(p.x)));
 }
 
+/** Groepjes pixels die aan elkaar vastzitten (vier richtingen). */
+function klonten(punten: { x: number; y: number }[]): { x: number; y: number }[][] {
+  const over = new Map(punten.map((p) => [`${p.x},${p.y}`, p]));
+  const uit: { x: number; y: number }[][] = [];
+  for (const start of punten) {
+    if (!over.has(`${start.x},${start.y}`)) continue;
+    const klont = [start];
+    over.delete(`${start.x},${start.y}`);
+    for (let i = 0; i < klont.length; i++) {
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const k = `${klont[i].x + dx},${klont[i].y + dy}`;
+        const buur = over.get(k);
+        if (buur) {
+          over.delete(k);
+          klont.push(buur);
+        }
+      }
+    }
+    uit.push(klont);
+  }
+  return uit;
+}
+
 const cache = new Map<string, Lagen>();
 
-/** De lagen van een sprite: wat vast is, en wat beweegt. */
+/**
+ * De lagen van een sprite: wat vast is, en wat beweegt.
+ *
+ * De tekening (16×16) gaat eerst door Scale2x naar 32×32. Dan krijgt hij
+ * licht van linksboven (een warme rand bovenaan, een koele schaduw onderaan),
+ * een omlijning in een donkere tint van wat erbinnen zit in plaats van overal
+ * zwart, en een glinstering in elk oog.
+ */
 export function lagenVan(sleutel: string): Lagen {
   const klaar = cache.get(sleutel);
   if (klaar) return klaar;
@@ -776,33 +864,90 @@ export function lagenVan(sleutel: string): Lagen {
   const palet = { ...BASIS, ...sprite.palet };
   const kleur = (t: string) => palet[t] ?? palet.a;
 
+  const raster = scale2x(sprite.rijen);
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x >= MAAT || y >= MAAT ? '.' : raster[y][x]);
+  const rand = (t: string) => t === '.' || t === 'k';
+  const oogLetter = (t: string) => t === 'w' || t === 'o';
+
+  /** De kleur van een vulpixel, met licht en schaduw naar hoe hij aan de rand ligt. */
+  function vul(x: number, y: number, t: string): string {
+    const basis = t === 'v' ? kleur('v') : kleur(t);
+    if (rand(at(x, y + 1))) return schaduw(basis, 0.22);
+    if (rand(at(x, y - 1))) return licht(basis, 0.28);
+    if (rand(at(x + 1, y))) return schaduw(basis, 0.12);
+    if (rand(at(x - 1, y))) return licht(basis, 0.14);
+    if (rand(at(x, y + 2))) return schaduw(basis, 0.08);
+    return basis;
+  }
+  /** De omlijning: een donkere tint van de buur binnenin, anders gewoon donker. */
+  function lijn(x: number, y: number): string {
+    for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
+      const t = at(x + dx, y + dy);
+      if (!rand(t) && !oogLetter(t) && t !== 'c') return schaduw(kleur(t === 'v' ? 'a' : t), 0.72);
+    }
+    return palet.k;
+  }
+
   const lijf: Pixel[] = [];
-  const ogenOpen: Pixel[] = [];
-  const ogenDicht: Pixel[] = [];
+  const ogen: { x: number; y: number; t: string }[] = [];
   const wangen: Pixel[] = [];
   const vleugel: Pixel[] = [];
   const poten: Pixel[] = [];
-  const potenVanaf = MAAT - sprite.poten;
+  const potenVanaf = MAAT - sprite.poten * SCHAAL;
 
-  sprite.rijen.forEach((rij, y) => {
+  raster.forEach((rij, y) => {
     [...rij].forEach((t, x) => {
       if (t === '.') return;
-      if (y >= potenVanaf) return void poten.push({ x, y, kleur: kleur(t) });
-      if (t === 'w' || t === 'o') {
-        ogenOpen.push({ x, y, kleur: kleur(t) });
-        ogenDicht.push({ x, y, kleur: palet.k });
-        return;
-      }
+      const px = { x, y, kleur: t === 'k' ? lijn(x, y) : oogLetter(t) ? kleur(t) : vul(x, y, t) };
+      if (y >= potenVanaf) return void poten.push(px);
+      if (oogLetter(t)) return void ogen.push({ x, y, t });
       if (t === 'c') wangen.push({ x, y, kleur: BLOS });
       if (t === 'v') {
         // Onder de vleugel zit gewoon lijf: klapt hij op, dan zie je dat.
-        lijf.push({ x, y, kleur: palet.a });
-        vleugel.push({ x, y, kleur: kleur('v') });
+        lijf.push({ x, y, kleur: vul(x, y, 'a') });
+        vleugel.push(px);
         return;
       }
-      lijf.push({ x, y, kleur: kleur(t) });
+      lijf.push(px);
     });
   });
+
+  // De ogen: open met een glinstering linksboven in de pupil; dicht een
+  // streepje onderaan, met daarboven het ooglid in de kleur van de kop.
+  const ogenOpen: Pixel[] = [];
+  const ogenDicht: Pixel[] = [];
+  let oog = { x: 11, y: 4 };
+  const letterVan = new Map(ogen.map((p) => [`${p.x},${p.y}`, p.t]));
+  for (const kaal of klonten(ogen)) {
+    // Een oog van twee pixels hoog kijkt boos; een rij erbij maakt het rond en
+    // vriendelijk. Alleen waar erboven lijf zit, niet over de omlijning heen.
+    const boven0 = Math.min(...kaal.map((p) => p.y));
+    const klont = [...kaal];
+    for (const p of kaal) {
+      const t = at(p.x, boven0 - 1);
+      if (p.y === boven0 && !rand(t) && !oogLetter(t)) {
+        const erbij = { x: p.x, y: boven0 - 1 };
+        letterVan.set(`${erbij.x},${erbij.y}`, letterVan.get(`${p.x},${p.y}`)!);
+        klont.push(erbij);
+      }
+    }
+    const letter = (p: { x: number; y: number }) => letterVan.get(`${p.x},${p.y}`)!;
+    const pupil = klont.filter((p) => letter(p) === 'o').sort((a, b) => a.y - b.y || a.x - b.x);
+    const glans = pupil.length >= 3 ? pupil[0] : null;
+    for (const p of klont) {
+      const t = letter(p);
+      ogenOpen.push({ ...p, kleur: p === glans ? '#ffffff' : t === 'w' ? '#f4f1ea' : kleur('o') });
+    }
+    const onder = Math.max(...klont.map((p) => p.y));
+    const boven = Math.min(...klont.map((p) => p.y));
+    for (const p of klont) {
+      const erboven = at(p.x, boven - 1);
+      const lid = rand(erboven) || oogLetter(erboven) ? kleur('a') : kleur(erboven);
+      ogenDicht.push({ ...p, kleur: p.y === onder ? palet.k : lid });
+    }
+    const laatste = pupil.at(-1);
+    if (laatste) oog = { x: Math.floor(laatste.x / SCHAAL), y: Math.floor(laatste.y / SCHAAL) };
+  }
 
   // Vleugel op: gespiegeld over zijn bovenste rij, zodat hij omhoog wijst,
   // met een eigen randje waar hij boven het lijf uitsteekt.
@@ -815,16 +960,16 @@ export function lagenVan(sleutel: string): Lagen {
       const x = p.x + dx;
       const y = p.y + dy;
       if (x < 0 || y < 0 || x >= MAAT || bezet.has(`${x},${y}`)) continue;
-      randje.set(`${x},${y}`, { x, y, kleur: palet.k });
+      randje.set(`${x},${y}`, { x, y, kleur: schaduw(kleur('v'), 0.72) });
     }
   }
   vleugelOp.unshift(...randje.values());
 
-  // Lopen: om en om de helft van de poten optillen (de onderste pixel weg).
+  // Lopen: om en om de helft van de poten optillen (de onderste rij weg).
   const groepen = potenGroepen(poten);
-  const bodem = MAAT - 1;
+  const bodem = MAAT - SCHAAL;
   const stap = (even: boolean) =>
-    groepen.flatMap((g, i) => ((i % 2 === 0) === even ? g.filter((p) => p.y !== bodem) : g));
+    groepen.flatMap((g, i) => ((i % 2 === 0) === even ? g.filter((p) => p.y < bodem) : g));
 
   const lagen: Lagen = {
     lijf: alsLaag(lijf),
@@ -836,6 +981,7 @@ export function lagenVan(sleutel: string): Lagen {
     potenRust: alsLaag(poten),
     potenA: alsLaag(stap(true)),
     potenB: alsLaag(stap(false)),
+    oog,
   };
   cache.set(sleutel, lagen);
   return lagen;

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
-  vrijDier, dierenroep, gangVan, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM,
+  vrijDier, dierenroep, gangVan, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM, EIGENSCHAPPEN,
 } from '../src/lib/shared/dieren';
 
 describe('maatjes', () => {
@@ -102,5 +102,21 @@ describe('maatjes', () => {
     expect(schoneDierNaam(42)).toBeNull();
     expect(maatjeVoluit(dierVan('kip'), 'Knabbel')).toBe('Knabbel, de Paniekkip');
     expect(maatjeVoluit(dierVan('kip'), null)).toBe('de Paniekkip');
+  });
+
+  it('geeft elk dier een karakter van 1 tot 5, een hapje en een specialiteit', () => {
+    for (const d of DIEREN) {
+      for (const e of EIGENSCHAPPEN) {
+        const w = d.karakter[e.sleutel];
+        expect(Number.isInteger(w) && w >= 1 && w <= 5, `${d.sleutel} ${e.sleutel}`).toBe(true);
+      }
+      expect(d.hapje.ding, d.sleutel).not.toBe('');
+      expect(d.hapje.naam, d.sleutel).not.toBe('');
+      expect(d.specialiteit, d.sleutel).not.toBe('');
+    }
+    // Het moet wel kloppen: de slak is traag, de luiaard slaperig, de wasbeer ondeugend.
+    expect(dierVan('slak').karakter.snel).toBe(1);
+    expect(dierVan('luiaard').karakter.slaperig).toBe(5);
+    expect(dierVan('wasbeer').karakter.ondeugend).toBe(5);
   });
 });

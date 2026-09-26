@@ -8,6 +8,12 @@
  * vliegers en zwemmers zweven erboven. En wie op zijn eigen dier tikt,
  * krijgt een kunstje.
  *
+ * Hoe vaak een dier wat doet hangt af van zijn karakter (shared/dieren.ts):
+ * een snel dier rent vaker en harder, een slaperig dier dut vaker en langer,
+ * een gezellig dier groet sneller opnieuw, een ondeugend dier zit vaker een
+ * ander achterna, een dramatisch dier doet vaker een kunstje, en een slim
+ * dier snuffelt meer rond. Soms vindt het zijn lievelingshapje.
+ *
  * Dit is alleen het brein: `stapWei` schuift de tijd een stukje op.
  * Dierenwei.svelte tekent het, met Pixeldier.svelte.
  */
@@ -15,7 +21,7 @@ import { actiesVan, dierVan, gangVan, poseVan, type Actie, type Lijf, type Pose 
 
 export type Doen =
   | 'loop' | 'ren' | 'staan' | 'snuffel' | 'slaap' | 'spring' | 'kunstje' | 'groet'
-  | 'jaag' | 'vlucht' | 'graaf' | 'onder' | 'op' | 'schrik';
+  | 'jaag' | 'vlucht' | 'graaf' | 'onder' | 'op' | 'schrik' | 'eet';
 
 export type Soort = 'grond' | 'lucht' | 'water' | 'graaf';
 
@@ -46,6 +52,13 @@ export interface Bewoner {
 
 export const RAND = 5;
 const SNEL = { loop: 7, ren: 20, lucht: 10 } as const;
+
+/** Het karakter van dit dier. */
+const karakter = (b: Bewoner) => dierVan(b.sleutel).karakter;
+/** Hoe hard dit dier gaat: een 1 voor snelheid kruipt, een 5 vliegt. */
+export const tempo = (b: Bewoner) => 0.55 + 0.2 * karakter(b).snel;
+/** Hoe lang het duurt voor dit dier weer iemand groet: een gezellig dier doet het zo weer. */
+const groetRust = (b: Bewoner, toeval: () => number) => tussen(toeval, 9000, 15000) * ((6 - karakter(b).gezellig) / 3);
 const DICHTBIJ = 7;
 
 export function soortVan(sleutel: string): Soort {
@@ -108,10 +121,11 @@ function bedenk(b: Bewoner, wei: Bewoner[], toeval: () => number) {
   if (b.doen === 'slaap' && toeval() < 0.5) return begin(b, 'schrik', 700, { lijf: 'schrik', ding: '❗', dingGaat: 'op' });
 
   const anderen = wei.filter((a) => a.id !== b.id && a.doen !== 'onder');
+  const k = karakter(b);
   const keuzes: [Doen, number][] = [
-    ['loop', 34], ['staan', 12], ['snuffel', b.soort === 'lucht' ? 0 : 9], ['slaap', 6],
-    ['spring', 8], ['kunstje', 12], ['ren', 7], ['graaf', b.soort === 'graaf' ? 12 : 0],
-    ['jaag', anderen.length ? 8 : 0],
+    ['loop', 34], ['staan', 12], ['snuffel', b.soort === 'lucht' ? 0 : 3 * k.slim], ['slaap', 2.5 * k.slaperig],
+    ['spring', 8], ['kunstje', 4 * k.drama], ['ren', 2.5 * k.snel], ['graaf', b.soort === 'graaf' ? 12 : 0],
+    ['jaag', anderen.length ? 2.5 * k.ondeugend : 0], ['eet', 6],
   ];
   let worp = toeval() * keuzes.reduce((s, [, w]) => s + w, 0);
   const [doen] = keuzes.find(([, w]) => (worp -= w) < 0) ?? ['loop'];
@@ -127,7 +141,10 @@ function bedenk(b: Bewoner, wei: Bewoner[], toeval: () => number) {
     case 'snuffel':
       return begin(b, 'snuffel', tussen(toeval, 1300, 2200), { lijf: 'snuffel' });
     case 'slaap':
-      return begin(b, 'slaap', tussen(toeval, 3000, 5500), { lijf: 'slaap', ding: '💤', dingGaat: 'op' });
+      return begin(b, 'slaap', tussen(toeval, 3000, 5500) * (k.slaperig / 3), { lijf: 'slaap', ding: '💤', dingGaat: 'op' });
+    case 'eet':
+      // Zijn lievelingshapje valt uit de lucht, en hij snuffelt het op.
+      return begin(b, 'eet', 1800, { lijf: 'snuffel', ding: dierVan(b.sleutel).hapje.ding, dingGaat: 'val' });
     case 'spring':
       return begin(b, 'spring', 1100, { lijf: 'boing' });
     case 'kunstje':
@@ -172,7 +189,8 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
         // Gepakt! Allebei een sprongetje, en vrienden.
         begin(b, 'groet', 1500, { lijf: 'boing', ding: '✨', dingGaat: 'rond' }, ander.id);
         begin(ander, 'groet', 1500, { lijf: 'zwaai', ding: '❤️', dingGaat: 'op' }, b.id);
-        b.groetPauze = ander.groetPauze = 10000;
+        b.groetPauze = groetRust(b, toeval);
+        ander.groetPauze = groetRust(ander, toeval);
         continue;
       }
     }
@@ -183,7 +201,7 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
           : b.doen === 'vlucht' ? SNEL.ren * 0.9
             : 0;
     if (snelheid) {
-      b.x += (b.richting * snelheid * dt) / 1000;
+      b.x += (b.richting * snelheid * tempo(b) * dt) / 1000;
       if (b.x < RAND || b.x > 100 - RAND) {
         b.x = Math.min(100 - RAND, Math.max(RAND, b.x));
         b.richting = b.richting === 1 ? -1 : 1;
@@ -202,7 +220,8 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
     b.richting = a.x > b.x ? 1 : -1;
     begin(a, 'groet', 1500, { lijf: 'zwaai', ding: '❤️', dingGaat: 'op' }, b.id);
     begin(b, 'groet', 1500, { lijf: toeval() < 0.5 ? 'boing' : 'dans', ding: '🎵', dingGaat: 'op' }, a.id);
-    a.groetPauze = b.groetPauze = tussen(toeval, 9000, 15000);
+    a.groetPauze = groetRust(a, toeval);
+    b.groetPauze = groetRust(b, toeval);
   }
 }
 

@@ -415,7 +415,10 @@ mee; het is er alleen voor de lol.
   Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
   het leuk blijft en niet druk wordt.
 - **Pixelkunst.** Elk dier is met de hand getekend in een raster van 16 bij
-  16, met de kop naar rechts. Het is geen plaatje maar losse lagen, zodat het
+  16, met de kop naar rechts, en komt twee keer zo fijn op het scherm: de
+  trapjes worden schuine lijnen (Scale2x), met licht van linksboven, een
+  schaduw onderaan, een omlijning in een donkere tint van het dier zelf, en
+  ronde ogen met een glinstering. Het is geen plaatje maar losse lagen, zodat het
   dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
   ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
   vleugels als het vliegt, knijpt blij zijn ogen dicht met een blos op de
@@ -436,13 +439,25 @@ mee; het is er alleen voor de lol.
   - vliegers hebben fartlijnen erachter;
   - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
     in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
+- **Een eigen karakter.** Elk dier heeft zes eigenschappen van 1 tot 5
+  (snelheid, slimheid, slaperigheid, gezelligheid, ondeugd en drama), een
+  lievelingshapje en iets waar hij om bekend staat: de slak is traag, de
+  luiaard slaperig, de wasbeer ondeugend en dol op pizzakorstjes, de kip
+  een en al drama. Op de telefoon staat het als kaartje bij je maatje. Het
+  karakter is niet alleen voor de sier: het bepaalt hoe het dier zich in de
+  wei gedraagt (zie hieronder).
 - **De wei.** In de lobby scharrelen de maatjes van iedereen die er al is
   onderaan de televisie rond, elk met een eigen willetje: lopen, stilstaan en
   rondkijken, snuffelen, in slaap vallen, springen, een kunstje, ineens een
   eind rennen, of een ander achterna zitten (die schrikt en rent weg; gepakt
   is vrienden). Komen twee dieren elkaar tegen, dan draaien ze zich naar
   elkaar toe en groeten ze, met een hartje. Gravers duiken onder de grond en
-  komen ergens anders boven; vliegers zweven erboven. Op je telefoon staat je
+  komen ergens anders boven; vliegers zweven erboven. Soms valt er een
+  lievelingshapje uit de lucht, en dat wordt meteen opgesnuffeld. Hoe vaak
+  wat gebeurt volgt het karakter: een snel dier rent vaker en harder, een
+  slaperig dier dut vaker en langer, een gezellig dier groet zo weer, een
+  ondeugend dier zit vaker een ander achterna, een dramatisch dier doet
+  vaker een kunstje. Op je telefoon staat je
   eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
   (en slaapt het, dan schrikt het wakker).
 - **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke

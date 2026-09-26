@@ -13,6 +13,7 @@
   import Dierenparade from '$lib/client/Dierenparade.svelte';
   import Dierenwei from '$lib/client/Dierenwei.svelte';
   import Pixeldier from '$lib/client/Pixeldier.svelte';
+  import Karakterkaart from '$lib/client/Karakterkaart.svelte';
   import { DIEREN, MAX_DIERNAAM, dierVan, dierenroep, maatjeVoluit, schoneDierNaam } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
@@ -374,6 +375,9 @@
             <Pixeldier sleutel={mijnDier.sleutel} /> {ik?.dierNaam ? maatjeVoluit(mijnDier, ik.dierNaam) : `${ik?.naam}, ${mijnDier.titel}`}
           </p>
           <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook. Tik erop, dan doet het een kunstje.</p>
+          {#key mijnDier.sleutel}
+            <Karakterkaart dier={mijnDier} />
+          {/key}
           <form class="diernaam" onsubmit={noemDier}>
             <input
               type="text"
@@ -402,7 +406,7 @@
                 aria-checked={d.sleutel === mijnDier.sleutel}
                 class:gekozen={d.sleutel === mijnDier.sleutel}
                 disabled={dierBezig || !!van}
-                title={van ? `${d.titel} — al gekozen door ${van}` : d.titel}
+                title={van ? `${d.titel} — al gekozen door ${van}` : `${d.titel} — ${d.specialiteit}`}
                 aria-label={van ? `${d.titel}, al gekozen door ${van}` : d.titel}
                 onclick={() => kiesDier(d.sleutel)}
               >

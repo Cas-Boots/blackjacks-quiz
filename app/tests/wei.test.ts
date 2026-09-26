@@ -22,7 +22,7 @@ describe('de wei', () => {
         expect(h.pose).toBeTruthy();
       }
     }
-    for (const doen of ['loop', 'ren', 'staan', 'snuffel', 'slaap', 'spring', 'kunstje', 'groet', 'jaag', 'vlucht', 'graaf', 'onder', 'op'] as Doen[]) {
+    for (const doen of ['loop', 'ren', 'staan', 'snuffel', 'slaap', 'spring', 'kunstje', 'groet', 'jaag', 'vlucht', 'graaf', 'onder', 'op', 'eet'] as Doen[]) {
       expect(gezien, doen).toContain(doen);
     }
   });
@@ -51,5 +51,26 @@ describe('de wei', () => {
     b.doen = 'slaap';
     aai(b);
     expect(b.doen).toBe('schrik');
+  });
+
+  it('laat het karakter tellen: de snelle haas, de trage slak, de luiaard die vaker slaapt', () => {
+    const kijk = (dier: string) => {
+      const toeval = zaadje(7);
+      const b = nieuweBewoner({ id: 1, naam: 'A', dier }, toeval);
+      let slaap = 0;
+      let afstand = 0;
+      for (let t = 0; t < 10 * 60_000; t += 50) {
+        const x = b.x;
+        stapWei([b], 50, toeval);
+        afstand += Math.abs(b.x - x);
+        if (b.doen === 'slaap') slaap += 50;
+      }
+      return { slaap, afstand };
+    };
+    const hond = kijk('hond');
+    const slak = kijk('slak');
+    const luiaard = kijk('luiaard');
+    expect(hond.afstand).toBeGreaterThan(slak.afstand * 1.5);
+    expect(luiaard.slaap).toBeGreaterThan(hond.slaap * 2);
   });
 });

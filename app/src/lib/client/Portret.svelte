@@ -38,5 +38,5 @@
   {:else}
     <span class="avatar {maat}" class:goud style={stijl}>{naam.slice(0, 2)}</span>
   {/if}
-  <span class="dierbadge" title={maatjeVoluit(d, dierNaam)} aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>
+  <span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>
 </span>

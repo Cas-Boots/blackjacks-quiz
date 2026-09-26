@@ -2640,6 +2640,56 @@ a.uitslagrij:hover {
 .portret.m .dierbadge { font-size: clamp(1rem, 1.5vw, 1.5rem); }
 .portret.l .dierbadge { font-size: clamp(1.4rem, 2.3vw, 2.3rem); }
 
+/* ---- Het karakter van je maatje (Karakterkaart.svelte) ---------------- */
+.karakterkaart {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.8rem;
+  background: rgba(8, 21, 17, 0.45);
+}
+.karakterkaart .specialiteit {
+  font-style: italic;
+  color: var(--goud-licht);
+  margin-bottom: 0.5rem;
+}
+.karakterkaart dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+.eigenschap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.eigenschap dt { color: var(--ivoor); }
+.eigenschap dd {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+}
+/* Pixelblokjes: vol goud, leeg een schaduw. Ze vullen zich een voor een. */
+.eigenschap i {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+}
+.eigenschap i.vol {
+  background: var(--goud);
+  box-shadow: inset -2px -2px 0 var(--goud-diep), inset 2px 2px 0 var(--goud-licht);
+  animation: blokje-vol 0.25s steps(2, jump-none) calc(var(--n) * 70ms) both;
+}
+@keyframes blokje-vol { from { transform: scale(0); } to { transform: scale(1); } }
+.karakterkaart .hapje { margin-top: 0.5rem; }
+@media (max-width: 360px) {
+  .karakterkaart dl { grid-template-columns: 1fr; }
+}
+
 /* ---- Een naam voor je maatje, op de telefoon ------------------------ */
 .diernaam {
   display: flex;
@@ -2985,7 +3035,7 @@ a.uitslagrij:hover {
 .pixeldier[data-vlieg][data-vleugels] .px-vleugel.neer { animation: px-stap 0.24s linear infinite; }
 .pixeldier[data-vlieg][data-vleugels] .px-vleugel.op { display: inline; animation: px-stap 0.24s linear infinite reverse; }
 .pixeldier[data-vlieg]:not([data-vleugels]) .px-lijf {
-  transform-origin: 8px 8px;
+  transform-origin: 16px 16px;
   animation: px-fladder 0.3s steps(2, jump-none) infinite alternate;
 }
 @keyframes px-fladder { from { transform: scaleX(1); } to { transform: scaleX(0.45); } }
@@ -3472,7 +3522,8 @@ a.uitslagrij:hover {
   .actie,
   .ding,
   .pixeldier *,
-  .bewoner .kijk {
+  .bewoner .kijk,
+  .eigenschap i.vol {
     animation: none !important;
   }
   .dierenparade,

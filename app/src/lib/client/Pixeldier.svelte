@@ -8,7 +8,7 @@
    * blos, sip laat een traan vallen, slapen geeft zzz, schrikken een uitroep.
    * Een vliegend dier klappert met zijn vleugels.
    */
-  import { lagenVan, MAAT } from '$lib/shared/pixeldieren';
+  import { lagenVan, MAAT, SCHAAL } from '$lib/shared/pixeldieren';
   import { hash } from '$lib/shared/kwinkslagen';
   import type { Pose } from '$lib/shared/dieren';
 
@@ -28,11 +28,8 @@
   let l = $derived(lagenVan(sleutel));
   /* Niet alle dieren knipperen tegelijk: elk zijn eigen ritme. */
   let ritme = $derived(hash(`knipper:${sleutel}`) % 1000);
-  /* De traan valt uit het oog: de eerste pupil. */
-  let oog = $derived.by(() => {
-    const m = /M(\d+) (\d+)/.exec(l.ogenOpen.at(-1)?.d ?? '');
-    return m ? { x: +m[1], y: +m[2] } : { x: 11, y: 4 };
-  });
+  /* De traan valt uit het oog. */
+  let oog = $derived(l.oog);
 </script>
 
 <svg
@@ -56,11 +53,14 @@
   <g class="px-poten rust">{#each l.potenRust as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
   <g class="px-poten a">{#each l.potenA as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
   <g class="px-poten b">{#each l.potenB as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
-  {#if pose === 'sip'}
-    <rect class="px-traan" x={oog.x} y={oog.y + 1} width="1" height="1" fill="#7cc8ff" />
-  {:else if pose === 'slaap'}
-    <path class="px-zzz" fill="#dfe8ff" d="M12 -3h3v1h-1v1h-1v1h2v1h-3v-1h1v-1h1v-1h-2z" />
-  {:else if pose === 'schrik'}
-    <path class="px-uitroep" fill="#ffd23f" d="M{oog.x} -5h1v3h-1zM{oog.x} -1h1v1h-1z" />
-  {/if}
+  <!-- Traan, zzz en uitroep in de maat van de tekening: grove pixels, net als het dier zelf. -->
+  <g transform="scale({SCHAAL})">
+    {#if pose === 'sip'}
+      <rect class="px-traan" x={oog.x} y={oog.y + 1} width="1" height="1" fill="#7cc8ff" />
+    {:else if pose === 'slaap'}
+      <path class="px-zzz" fill="#dfe8ff" d="M12 -3h3v1h-1v1h-1v1h2v1h-3v-1h1v-1h1v-1h-2z" />
+    {:else if pose === 'schrik'}
+      <path class="px-uitroep" fill="#ffd23f" d="M{oog.x} -5h1v3h-1zM{oog.x} -1h1v1h-1z" />
+    {/if}
+  </g>
 </svg>
