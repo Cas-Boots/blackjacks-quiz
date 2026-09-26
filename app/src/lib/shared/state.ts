@@ -3,6 +3,8 @@
 
 export type Rol = 'gast' | 'speler' | 'quizmaster';
 export type Fase = 'lobby' | 'jaaroverzicht' | 'ronde' | 'vraag' | 'antwoord' | 'cijfers' | 'stand' | 'einde';
+/** Een pauze ligt over de fase heen: na het hervatten staat alles weer waar het was. */
+export type Pauze = 'pauze' | 'nieuwjaar';
 
 export interface PubliekeSpeler {
   id: number;
@@ -127,6 +129,10 @@ export interface PubliekeStaat {
   klok: { eindigtOp: number | null; duurMs: number; loopt: boolean } | null;
   /** Of het fragment (video of muziek) bij deze vraag hoort te spelen. */
   mediaSpeelt: boolean;
+  /** De quiz staat even stil. 'nieuwjaar': de televisie telt af naar middernacht. */
+  pauze: Pauze | null;
+  /** Middernacht waar het vanavond om draait, Nederlandse tijd. Zie nieuwjaar.ts. */
+  nieuwjaar: { op: number; jaar: number };
   /** De prijzen van de avond. Alleen gevuld in de fase 'einde'. */
   prijzen: { sleutel: string; titel: string; namen: string[]; detail: string }[];
   /** Antwoorden die al binnen zijn, per speler- of team-id. Alleen namen, geen inhoud. */

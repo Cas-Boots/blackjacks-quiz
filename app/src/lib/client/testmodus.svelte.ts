@@ -207,6 +207,9 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     serverTijd: Date.now(),
     klok: null,
     mediaSpeelt: false,
+    pauze: null,
+    // Ver weg, zodat gewone dia's niets van middernacht merken.
+    nieuwjaar: { op: Date.now() + 30 * 24 * 3_600_000, jaar: 2027 },
     prijzen: [],
     ingeleverd: [],
     inzendingen: [],
@@ -253,6 +256,11 @@ function vraag(r: Rondekop, v: Vraagdeel, over: Partial<PubliekeStaat> = {}): Pu
     klok: { eindigtOp: Date.now() + duur, duurMs: duur, loopt: true },
     ...over,
   });
+}
+
+/** Middernacht over zoveel seconden (negatief: zoveel seconden geleden). */
+function middernachtOver(seconden: number): PubliekeStaat['nieuwjaar'] {
+  return { op: Date.now() + seconden * 1000, jaar: 2027 };
 }
 
 /** De onthulling van een vraag, met wat er was ingeleverd. */
@@ -820,6 +828,28 @@ export const DIAS: Dia[] = [
     maak: () => basis({ fase: 'einde', rondeIndex: RONDE_AANTAL - 1, stand: stand({ ...EIND, 1: 21 }), prijzen: PRIJZEN.slice(0, 3) }),
   },
 
+  /* ── Pauze en middernacht ── */
+  {
+    id: 'middernacht-nadert', hoofdstuk: 'Pauze en middernacht', titel: 'Middernacht komt eraan',
+    let: 'Linksonder, rustig pulserend: hoe lang het nog is tot twaalf uur. Staat er alleen in de laatste tien minuten, zolang de quiz doorloopt.',
+    maak: () => vraag(R.muziek, V.muziek, { nieuwjaar: middernachtOver(8 * 60) }),
+  },
+  {
+    id: 'pauze', hoofdstuk: 'Pauze en middernacht', titel: 'Even pauze',
+    let: 'Het pauzescherm over de vraag heen. De klok eronder staat stil; na het hervatten staat alles weer waar het was.',
+    maak: () => vraag(R.muziek, V.muziek, { pauze: 'pauze', klok: { eindigtOp: null, duurMs: 45000, loopt: false }, nieuwjaar: middernachtOver(25 * 60) }),
+  },
+  {
+    id: 'nieuwjaar-aftellen', hoofdstuk: 'Pauze en middernacht', titel: 'Aftellen naar middernacht',
+    let: 'De aftelklok. De laatste tien seconden in het groot, met een tik per seconde, en om twaalf uur de fanfare en de confetti.',
+    maak: () => basis({ fase: 'stand', rondeIndex: 4, pauze: 'nieuwjaar', nieuwjaar: middernachtOver(25) }),
+  },
+  {
+    id: 'nieuwjaar', hoofdstuk: 'Pauze en middernacht', titel: 'Gelukkig nieuwjaar',
+    let: 'Wat er blijft staan na twaalf uur, tot de quizmaster de quiz laat verdergaan.',
+    maak: () => basis({ fase: 'stand', rondeIndex: 4, pauze: 'nieuwjaar', nieuwjaar: middernachtOver(-5) }),
+  },
+
   /* ── Randgevallen ── */
   {
     id: 'vraag-lang', hoofdstuk: 'Randgevallen', titel: 'Een veel te lange vraag',
@@ -949,6 +979,9 @@ export class Testmodus {
       uit.push({ label: 'Stap terug', doe: () => this.cijfersStap(-1) });
       uit.push({ label: `Stap verder (${st.cijfers.stap} / ${st.cijfers.stappen})`, toets: 'N', doe: () => this.cijfersStap(1) });
     }
+    if (st.pauze === 'nieuwjaar') {
+      uit.push({ label: 'Nog 12 seconden tot middernacht', toets: 'K', doe: () => this.middernachtNaar(12) });
+    }
     if (st.fase !== 'lobby') {
       uit.push({ label: 'Reactie van een telefoon', toets: 'E', doe: () => this.reactie() });
     }
@@ -998,6 +1031,12 @@ export class Testmodus {
       } else {
         st.klok = { ...st.klok, eindigtOp: Date.now() + (this.#restMs || st.klok.duurMs), loopt: true };
       }
+    });
+  }
+
+  middernachtNaar(seconden: number) {
+    this.#wijzig((st) => {
+      st.nieuwjaar = middernachtOver(seconden);
     });
   }
 

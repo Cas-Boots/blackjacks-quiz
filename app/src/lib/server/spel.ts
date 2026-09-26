@@ -20,6 +20,7 @@ import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
 import { meldWijziging } from './bus';
 import { isAfrekening, type PubliekeStaat, type PubliekeInzending, type Fase, type Rol, type Onthulling } from '$lib/shared/state';
+import { nieuwjaarRond, leesNieuwjaarOp, type Nieuwjaar } from '$lib/shared/nieuwjaar';
 import { recapAnalyse } from './recap/bron';
 import { verlevendig } from './recap/vragen';
 import { cijfersVoor } from './recap/cijfers';
@@ -550,6 +551,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       loopt: spel.klokLoopt,
     },
     mediaSpeelt: spel.mediaSpeelt,
+    pauze: spel.pauze === 'pauze' || spel.pauze === 'nieuwjaar' ? spel.pauze : null,
+    nieuwjaar: nieuwjaarVoor(nu),
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],
     cijfers: spel.fase === 'cijfers' && ronde?.cijfers ? cijfersVoor(ronde.cijfers, recapAnalyse(), spel.vraagIndex, omgevingVan(spel.id)) : null,
     // De balken gaan eraf zodra de avond voorbij is: dan is alles gevraagd,
@@ -572,6 +575,18 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   };
   geheugen = { sleutel: sleutelGeheugen, op: nu, staat };
   return staat;
+}
+
+/* Voor een generale repetitie kan middernacht verzet worden met NIEUWJAAR_OP
+   (zie nieuwjaar.ts). '+10' telt vanaf de eerste keer dat de server het leest,
+   niet bij elke momentopname opnieuw — anders schuift middernacht mee. */
+let repetitie: { waarde: string; op: number | null } | null = null;
+
+export function nieuwjaarVoor(nu: number): Nieuwjaar {
+  const waarde = process.env.NIEUWJAAR_OP ?? '';
+  if (!repetitie || repetitie.waarde !== waarde) repetitie = { waarde, op: leesNieuwjaarOp(waarde, nu) };
+  if (repetitie.op === null) return nieuwjaarRond(nu);
+  return { op: repetitie.op, jaar: nieuwjaarRond(nu).jaar };
 }
 
 /** De huidige ronde en vraag, of null als het spel daar niet staat. */
@@ -609,6 +624,9 @@ export function schrijfUitdeling(spelId: number, vraagSleutel: string, verdeling
  */
 export function leverIn(spel: typeof spellen.$inferSelect, spelerId: number, invoer: string): { inzender: string; teLaat: boolean } | { fout: string } {
   if (spel.fase !== 'vraag') return { fout: 'er staat nu geen vraag open' };
+  // Tijdens de pauze ligt de vraag onder het pauzescherm en staat de klok stil;
+  // inleveren kan weer zodra de quiz verdergaat.
+  if (spel.pauze) return { fout: 'de quiz staat even op pauze' };
   const { ronde } = huidige(spel);
   if (!ronde) return { fout: 'geen ronde' };
   const tekst = invoer.slice(0, 300);

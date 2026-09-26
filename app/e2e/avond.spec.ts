@@ -87,6 +87,55 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
   for (const x of [a, b, tv, qm]) await x.ctx.close();
 });
 
+test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij was', async ({ browser }) => {
+  const qm = await quizmaster(browser);
+  await nieuwSpel(qm, { '5': [0, 1] }); // Dichtstbij Wint: een getal intikken, met twee vragen
+  const tv = await nieuwApparaat(browser, '/tv');
+  await qm.doe('naar-ronde', { ronde: 0 });
+  const st = await qm.staat();
+  const a = await telefoon(browser, st.spelers.find((s: { id: number }) => s.id === st.teams[0].leden[0]).naam);
+
+  await qm.doe('start-ronde');
+  await expect(a.pagina.getByPlaceholder('Jullie getal')).toBeVisible({ timeout: 15_000 });
+  // Half getikt, nog niet verstuurd: dat moet de pauze overleven.
+  await a.pagina.getByPlaceholder('Jullie getal').fill('300');
+
+  await qm.pagina.getByRole('button', { name: '☕ Pauze' }).click();
+  await expect(tv.pagina.getByRole('heading', { name: 'Even pauze' })).toBeVisible({ timeout: 15_000 });
+  await expect(a.pagina.getByRole('heading', { name: 'Even pauze' })).toBeVisible({ timeout: 15_000 });
+  const gepauzeerd = await qm.staat();
+  expect(gepauzeerd.pauze).toBe('pauze');
+  expect(gepauzeerd.klok.loopt).toBe(false);
+  expect(gepauzeerd.fase).toBe('vraag');
+
+  // Inleveren en doorklikken wachten tot na de pauze.
+  const inleveren = await a.pagina.request.post('/api/answer', { data: { tekst: '300' } });
+  expect(inleveren.status()).toBe(409);
+  const verder = await qm.pagina.request.post('/api/host', { data: { opdracht: 'toon-antwoord' } });
+  expect(verder.status()).toBe(409);
+  // Punten bijstellen mag wel.
+  await qm.doe('corrigeer', { spelerId: st.spelers[0].id, punten: 1 });
+
+  // Omschakelen naar het aftellen, en weer verder.
+  await qm.pagina.getByRole('button', { name: '🎆 Toon het aftellen' }).click();
+  await expect(tv.pagina.locator('.aftel')).toBeVisible({ timeout: 15_000 });
+  await qm.pagina.getByRole('button', { name: '▶ Hervat de quiz' }).click();
+
+  await expect(tv.pagina.locator('.pauzelaag')).toHaveCount(0, { timeout: 15_000 });
+  await expect(a.pagina.locator('.pauzelaag')).toHaveCount(0, { timeout: 15_000 });
+  const hervat = await qm.staat();
+  expect(hervat.pauze).toBeNull();
+  expect(hervat.klok.loopt).toBe(true);
+  expect(hervat.fase).toBe('vraag');
+  expect(hervat.vraag.index).toBe(0);
+  // Het half getikte antwoord staat er nog, en kan nu weg.
+  await expect(a.pagina.getByPlaceholder('Jullie getal')).toHaveValue('300');
+  await a.pagina.getByRole('button', { name: 'Versturen' }).click();
+  await expect(qm.pagina.getByText(/Ingeleverd — 1 van/)).toBeVisible({ timeout: 15_000 });
+
+  for (const x of [a, tv, qm]) await x.ctx.close();
+});
+
 test('teamronde: één telefoon levert in voor het hele team', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await nieuwSpel(qm, { '13': [0] }); // 2027, in teams

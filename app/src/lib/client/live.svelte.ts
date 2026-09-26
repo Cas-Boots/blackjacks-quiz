@@ -164,6 +164,12 @@ class Live {
     }
   }
 
+  /** Milliseconden tot middernacht (negatief als die al geweest is), volgens de servertijd. */
+  totMiddernachtMs(): number | null {
+    const op = this.staat?.nieuwjaar?.op;
+    return op == null ? null : op - (Date.now() + this.afwijking);
+  }
+
   /** Milliseconden die er nog op de klok staan, gecorrigeerd voor de servertijd. */
   resterendMs(): number {
     const klok = this.staat?.klok;
