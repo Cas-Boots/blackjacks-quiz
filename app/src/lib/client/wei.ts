@@ -53,6 +53,14 @@ export interface Bewoner {
 export const RAND = 5;
 const SNEL = { loop: 7, ren: 20, lucht: 10 } as const;
 
+/**
+ * Wat opvalt. Er doen er hooguit MAX_DRUK tegelijk iets geks; de rest
+ * scharrelt, snuffelt of dut. Zo blijft de wei levendig maar nooit een kermis.
+ */
+const OPVALLEND: ReadonlySet<Doen> = new Set<Doen>(['kunstje', 'groet', 'jaag', 'vlucht', 'eet', 'spring', 'ren', 'schrik']);
+export const MAX_DRUK = 3;
+export const drukte = (wei: readonly Bewoner[]) => wei.filter((b) => OPVALLEND.has(b.doen)).length;
+
 /** Het karakter van dit dier. */
 const karakter = (b: Bewoner) => dierVan(b.sleutel).karakter;
 /** Hoe hard dit dier gaat: een 1 voor snelheid kruipt, een 5 vliegt. */
@@ -118,14 +126,17 @@ function bedenk(b: Bewoner, wei: Bewoner[], toeval: () => number) {
     b.x = tussen(toeval, 10, 90);
     return begin(b, 'op', 900, { lijf: 'boing', ding: '🌱', dingGaat: 'op' });
   }
-  if (b.doen === 'slaap' && toeval() < 0.5) return begin(b, 'schrik', 700, { lijf: 'schrik', ding: '❗', dingGaat: 'op' });
+  // Hoeveel ruimte er nog is voor iets geks (dit dier zelf telt niet mee).
+  const ruimte = MAX_DRUK - drukte(wei.filter((a) => a !== b));
+  if (b.doen === 'slaap' && ruimte > 0 && toeval() < 0.5) return begin(b, 'schrik', 700, { lijf: 'schrik', ding: '❗', dingGaat: 'op' });
 
-  const anderen = wei.filter((a) => a.id !== b.id && a.doen !== 'onder');
+  const anderen = wei.filter((a) => a.id !== b.id && a.doen !== 'onder' && !OPVALLEND.has(a.doen));
   const k = karakter(b);
+  const mag = ruimte > 0 ? 1 : 0;
   const keuzes: [Doen, number][] = [
-    ['loop', 34], ['staan', 12], ['snuffel', b.soort === 'lucht' ? 0 : 3 * k.slim], ['slaap', 2.5 * k.slaperig],
-    ['spring', 8], ['kunstje', 4 * k.drama], ['ren', 2.5 * k.snel], ['graaf', b.soort === 'graaf' ? 12 : 0],
-    ['jaag', anderen.length ? 2.5 * k.ondeugend : 0], ['eet', 6],
+    ['loop', 34], ['staan', 16], ['snuffel', b.soort === 'lucht' ? 0 : 3 * k.slim], ['slaap', 2.5 * k.slaperig],
+    ['spring', 6 * mag], ['kunstje', 3.5 * k.drama * mag], ['ren', 2 * k.snel * mag], ['graaf', b.soort === 'graaf' ? 10 : 0],
+    ['jaag', anderen.length && ruimte >= 2 ? 2 * k.ondeugend : 0], ['eet', 5 * mag],
   ];
   let worp = toeval() * keuzes.reduce((s, [, w]) => s + w, 0);
   const [doen] = keuzes.find(([, w]) => (worp -= w) < 0) ?? ['loop'];
@@ -137,7 +148,7 @@ function bedenk(b: Bewoner, wei: Bewoner[], toeval: () => number) {
     case 'ren':
       return begin(b, 'ren', tussen(toeval, 800, 1600), { lijf: 'trappel', ding: '💨', dingGaat: 'op' });
     case 'staan':
-      return begin(b, 'staan', tussen(toeval, 1200, 2600), toeval() < 0.5 ? { lijf: 'kijkrond' } : null);
+      return begin(b, 'staan', tussen(toeval, 1200, 4200), toeval() < 0.4 ? { lijf: 'kijkrond' } : null);
     case 'snuffel':
       return begin(b, 'snuffel', tussen(toeval, 1300, 2200), { lijf: 'snuffel' });
     case 'slaap':
@@ -213,7 +224,7 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
   // Wie elkaar tegenkomt, groet elkaar: omdraaien, zwaaien, een hartje.
   const vrij = (b: Bewoner) => (b.doen === 'loop' || b.doen === 'staan' || b.doen === 'snuffel') && b.groetPauze <= 0;
   for (const a of wei) {
-    if (!vrij(a)) continue;
+    if (!vrij(a) || drukte(wei) + 2 > MAX_DRUK) continue;
     const b = wei.find((c) => c !== a && vrij(c) && Math.abs(c.x - a.x) < DICHTBIJ);
     if (!b) continue;
     a.richting = b.x > a.x ? 1 : -1;

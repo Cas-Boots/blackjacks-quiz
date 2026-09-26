@@ -463,7 +463,15 @@ mee; het is er alleen voor de lol.
   wat gebeurt volgt het karakter: een snel dier rent vaker en harder, een
   slaperig dier dut vaker en langer, een gezellig dier groet zo weer, een
   ondeugend dier zit vaker een ander achterna, een dramatisch dier doet
-  vaker een kunstje. Op je telefoon staat je
+  vaker een kunstje. Het blijft wel rustig: hooguit drie dieren tegelijk doen
+  iets geks, de rest scharrelt, snuffelt of dut. Een naambordje verschijnt
+  pas als een dier iets doet, en de lobby maakt onderaan plaats voor de wei,
+  zodat er geen dier door de tekst loopt.
+- **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
+  uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
+  dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,
+  een banaan of pizza blijven emoji. In de optocht stopt elk dier net niet
+  in het gelid, een tikje links, rechts, hoger of lager. Op je telefoon staat je
   eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
   (en slaapt het, dan schrikt het wakker).
 - **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke

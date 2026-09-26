@@ -10,6 +10,7 @@
   import { onMount, untrack } from 'svelte';
   import { dierVan } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
+  import Ding from './Ding.svelte';
   import { aai, houdingVan, nieuweBewoner, stapWei, type Bewoner } from './wei';
 
   let {
@@ -91,8 +92,8 @@
             {/if}
           </span>
           {#if b.actie?.ding}
-            {#each b.actie.dingGaat === 'op' || b.actie.dingGaat === 'val' ? [0, 1, 2] : [0] as n (n)}
-              <span class="ding" data-gaat={b.actie.dingGaat} style="--n:{n}">{b.actie.ding}</span>
+            {#each b.actie.dingGaat === 'op' || b.actie.dingGaat === 'val' ? [0, 1] : [0] as n (n)}
+              <span class="ding" data-gaat={b.actie.dingGaat} style="--n:{n}"><Ding teken={b.actie.ding} /></span>
             {/each}
           {/if}
         </span>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DIEREN } from '../src/lib/shared/dieren';
-import { RAND, aai, houdingVan, nieuweBewoner, stapWei, type Bewoner, type Doen } from '../src/lib/client/wei';
+import { MAX_DRUK, RAND, aai, drukte, houdingVan, nieuweBewoner, stapWei, type Bewoner, type Doen } from '../src/lib/client/wei';
 
 /** Een vaste toevalsbron, zodat de test elke keer hetzelfde ziet. */
 function zaadje(n = 42) {
@@ -72,5 +72,24 @@ describe('de wei', () => {
     const luiaard = kijk('luiaard');
     expect(hond.afstand).toBeGreaterThan(slak.afstand * 1.5);
     expect(luiaard.slaap).toBeGreaterThan(hond.slaap * 2);
+  });
+
+  it('houdt het rustig: hooguit een paar dieren tegelijk doen iets geks', () => {
+    const toeval = zaadje(3);
+    const wei: Bewoner[] = DIEREN.slice(0, 12).map((d, i) => nieuweBewoner({ id: i, naam: `s${i}`, dier: d.sleutel }, toeval));
+    let meest = 0;
+    let rustig = 0;
+    let tellen = 0;
+    for (let t = 0; t < 5 * 60_000; t += 50) {
+      stapWei(wei, 50, toeval);
+      if (t < 2000) continue; // de binnenkomst telt niet
+      const nu = drukte(wei);
+      meest = Math.max(meest, nu);
+      rustig += wei.length - nu;
+      tellen += wei.length;
+    }
+    expect(meest).toBeLessThanOrEqual(MAX_DRUK);
+    // De meeste tijd scharrelt de kudde gewoon wat rond.
+    expect(rustig / tellen).toBeGreaterThan(0.75);
   });
 });

@@ -3072,9 +3072,9 @@ a.uitslagrij:hover {
 .ding[data-gaat="val"] { animation-name: ding-val; animation-timing-function: ease-in; }
 .ding[data-gaat="rond"] { animation-name: ding-rond; animation-timing-function: linear; }
 @keyframes ding-op {
-  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 70%), 0) scale(0.5); }
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 70%), 0) scale(0.5); }
   20% { opacity: 1; }
-  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 110%), -260%) scale(1.2); }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 110%), -260%) scale(1.2); }
 }
 @keyframes ding-gooi {
   0% { opacity: 1; transform: translate(0, 0) rotate(0); }
@@ -3082,9 +3082,9 @@ a.uitslagrij:hover {
   100% { opacity: 0; transform: translate(300%, 120%) rotate(720deg); }
 }
 @keyframes ding-val {
-  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 60%), -60%); }
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), -60%); }
   15% { opacity: 1; }
-  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 1) * 60%), 260%); }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), 260%); }
 }
 @keyframes ding-rond {
   0% { opacity: 0; transform: rotate(0) translateY(-180%) rotate(0); }
@@ -3451,7 +3451,7 @@ a.uitslagrij:hover {
 .bewoner[data-doen="jaag"] .kijk,
 .bewoner[data-doen="vlucht"] .kijk { animation: wei-hup 0.2s steps(2, jump-none) infinite; }
 @keyframes wei-hup { from { translate: 0 0; } to { translate: 0 -0.0625em; } }
-.bewoner[data-soort="lucht"] { bottom: 1em; }
+.bewoner[data-soort="lucht"] { bottom: 0.7em; }
 .bewoner[data-soort="lucht"] .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
 .bewoner[data-soort="lucht"][data-doen="slaap"] { bottom: 0.14em; }
 .bewoner[data-soort="water"] { bottom: 0.35em; }
@@ -3479,6 +3479,24 @@ a.uitslagrij:hover {
   margin-bottom: 0.15em;
 }
 .weinaam::before { content: attr(data-naam); }
+/* Het naambordje komt pas als het dier iets doet (of net binnenkomt): anders
+   hangt er boven elk dier een bordje en wordt het een drukte van jewelste. */
+.weinaam {
+  opacity: 0;
+  transform: translateY(0.2em);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.bewoner:is([data-doen="groet"], [data-doen="kunstje"], [data-doen="op"], [data-doen="eet"], [data-doen="jaag"]) .weinaam {
+  opacity: 1;
+  transform: none;
+}
+/* Pixelplaatjes rond de dieren: net zo scherp als de dieren zelf. */
+.pixelicoon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  margin: 0 auto;
+}
 .aai {
   display: inline-block;
   font: inherit;
@@ -3501,9 +3519,12 @@ a.uitslagrij:hover {
   pointer-events: none;
 }
 .tvwei .wei {
-  height: 19vh;
-  font-size: clamp(2.6rem, 8vh, 6.5rem);
+  height: 14vh;
+  font-size: clamp(2.2rem, 6.5vh, 5.5rem);
 }
+/* De lobby maakt plaats voor de wei, zodat geen dier door de tekst loopt:
+   het vlak krimpt dan een tikje mee (passend.ts). */
+.tvwei ~ .romp.midden { padding-bottom: calc(14vh + 1rem); }
 /* Op de telefoon: je eigen dier in een eigen weitje. */
 .telefoonwei .wei {
   margin-top: 0.8rem;

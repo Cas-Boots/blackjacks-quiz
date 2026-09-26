@@ -26,6 +26,7 @@
   import { onMount, untrack } from 'svelte';
   import { dierVan, gangVan, kiesRoutine, poseVan } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
+  import Ding from './Ding.svelte';
 
   let {
     lopers,
@@ -51,9 +52,12 @@
 
   const rij = untrack(() => lopers).slice(0, MAX_LOPERS).map((l, i, alle) => {
     const d = dierVan(l.dier, l.naam);
-    const stop = alle.length === 1 ? 50 : 20 + (60 * (alle.length - 1 - i)) / (alle.length - 1);
+    // Net niet in het gelid: elk stopt een tikje links of rechts van zijn plek, en een tikje hoger of lager.
+    const plek = alle.length === 1 ? 50 : 20 + (60 * (alle.length - 1 - i)) / (alle.length - 1);
+    const stop = plek + (Math.random() - 0.5) * (alle.length === 1 ? 16 : 7);
+    const hoogte = Math.random() * 2.5;
     const gang = sip ? 'sip' : gangVan(d.beweging);
-    return { ...l, d, gang, routine: kiesRoutine(d, sip ? 'sip' : 'blij'), stop, start: i * ZETJE_MS };
+    return { ...l, d, gang, routine: kiesRoutine(d, sip ? 'sip' : 'blij'), stop, hoogte, start: i * ZETJE_MS + Math.random() * 150 };
   });
   /* Het decor dat bij de gang hoort: een tak om aan te slingeren, water om
      in te zwemmen. Eén keer over de hele breedte, voor wie het nodig heeft. */
@@ -107,7 +111,7 @@
     class="dierenparade"
     data-gang={l.gang}
     data-fase={fase}
-    style="--stop:{l.stop}vw;--heen:{HEEN_MS}ms;--weg:{WEG_MS}ms;--tel:{TEL_MS}ms"
+    style="--stop:{l.stop}vw;--heen:{HEEN_MS}ms;--weg:{WEG_MS}ms;--tel:{TEL_MS}ms;translate:0 -{l.hoogte}vh"
     aria-hidden="true"
   >
     <!-- Per tel een nieuw kunstje; de sleutel start de animatie opnieuw, ook als hij twee keer hetzelfde doet. -->
@@ -131,8 +135,8 @@
           <span class="kluiten"><i></i><i></i><i></i></span>
         {/if}
         {#if actie?.ding}
-          {#each actie.dingGaat === 'op' || actie.dingGaat === 'val' ? [0, 1, 2] : [0] as n (n)}
-            <span class="ding" data-gaat={actie.dingGaat} style="--n:{n}">{actie.ding}</span>
+          {#each actie.dingGaat === 'op' || actie.dingGaat === 'val' ? [0, 1] : [0] as n (n)}
+            <span class="ding" data-gaat={actie.dingGaat} style="--n:{n}"><Ding teken={actie.ding} /></span>
           {/each}
         {/if}
       </span>
