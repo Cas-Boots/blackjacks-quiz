@@ -1,14 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { DIEREN } from '../src/lib/shared/dieren';
-import { BRON, SPRITES, lagenVan } from '../src/lib/shared/pixeldieren';
+import { BRON, MAAT, SPRITES, lagenVan } from '../src/lib/shared/pixeldieren';
 
 describe('pixeldieren', () => {
-  it('heeft voor elk dier een sprite van 16 bij 16, met alleen kleuren uit het palet', () => {
+  it('heeft voor elk dier een vierkante sprite (16 of 32), met alleen kleuren uit het palet', () => {
     for (const d of DIEREN) {
       const s = SPRITES[d.sleutel];
       expect(s, d.sleutel).toBeDefined();
-      expect(s.rijen, d.sleutel).toHaveLength(BRON);
-      s.rijen.forEach((r, i) => expect(r.length, `${d.sleutel} rij ${i}`).toBe(BRON));
+      // Grof (16×16, wordt opgeschaald) of fijn (32×32, al op maat), maar altijd vierkant.
+      expect([BRON, MAAT], d.sleutel).toContain(s.rijen.length);
+      s.rijen.forEach((r, i) => expect(r.length, `${d.sleutel} rij ${i}`).toBe(s.rijen.length));
       for (const t of new Set(s.rijen.join(''))) {
         expect('.kwo'.includes(t) || t in s.palet, `${d.sleutel}: ${t}`).toBe(true);
       }
