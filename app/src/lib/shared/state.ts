@@ -32,7 +32,14 @@ export interface PubliekeVraag {
   lyric?: string;
   eenheid?: string;
   media?: { soort: string; bron: string; bijschrift?: string };
+  /** De punten van de vraag zelf (1, 2, 3); op het scorebord maal PUNT_WAARDE. */
   punten: number;
+  /** Het meeste dat deze vraag op het scorebord kan opleveren, zonder reeks. */
+  maximaal: number;
+  /** 1, 2 of 4: de slotronde en de gouden kaart tellen dubbel. */
+  vermenigvuldiger: number;
+  /** Deze vraag draagt de gouden kaart. */
+  goud: boolean;
 }
 
 export interface Onthulling {
@@ -98,6 +105,8 @@ export interface PubliekeStaat {
     /** Na de laatste vraag volgen de cijfers van het jaar. Bij 'voorspellingen'
         zijn er geen vragen op de telefoon: zie isAfrekening. */
     cijfers: 'sport' | 'taart' | 'voorspellingen' | null;
+    /** Een slotronde: alle punten tellen dubbel. */
+    dubbel: boolean;
   } | null;
   vraag: PubliekeVraag | null;
   onthulling: Onthulling | null;
@@ -126,8 +135,8 @@ export interface PubliekeStaat {
   inzendingen: PubliekeInzending[];
   /** Punten die bij de huidige vraag zijn uitgedeeld, per speler. Alleen in de fase 'antwoord'. */
   uitdeling: Record<number, number>;
-  /** De bonuspunten bij de huidige vraag, al inbegrepen in `uitdeling`. Alleen in de fase 'antwoord'. */
-  bonussen: { spelerId: number; soort: 'snel' | 'reeks'; punten: number; opRij?: number }[];
+  /** De reeksbonussen bij de huidige vraag, al inbegrepen in `uitdeling`. Alleen in de fase 'antwoord'. */
+  bonussen: { spelerId: number; soort: 'reeks'; punten: number; opRij?: number }[];
   /** Per speler: hoeveel vragen op rij goed, tot en met de laatst gespeelde vraag. */
   reeksen: Record<number, number>;
   /** De cijfers van het jaar. Alleen gevuld in de fase 'cijfers'. */

@@ -18,6 +18,7 @@
  */
 import { replaceState } from '$app/navigation';
 import { live } from './live.svelte';
+import { PUNT_WAARDE } from '$lib/shared/bonus';
 import { REACTIES, hash } from '$lib/shared/kwinkslagen';
 import type {
   Cijfers, CijfersPersoon, Fase, JaarDia, JaarRegel, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat,
@@ -36,7 +37,7 @@ const VOORSPELLERS = [...NAMEN.filter((n) => n !== GAST), QUIZMASTER];
 type Punten = Record<number, number>;
 
 /** Waar iedereen staat als de proefavond begint. */
-const START: Punten = { 1: 12, 2: 11, 3: 9, 4: 8, 5: 8, 6: 3 };
+const START: Punten = { 1: 5640, 2: 5170, 3: 4230, 4: 3760, 5: 3760, 6: 1410 };
 
 /** Een silhouet als portret, zodat ook de weg met een foto te zien is. */
 function portret(kleur: string): string {
@@ -224,6 +225,7 @@ function metRonde(r: Rondekop, over: Partial<PubliekeStaat> = {}): PubliekeStaat
     ronde: {
       naam: r.naam, suit: r.suit, thema: r.thema, sfeer: r.sfeer, uitleg: r.uitleg,
       teamModus: r.teamModus, vragenAantal: r.vragenAantal, cijfers: r.cijfers,
+      dubbel: r.index >= RONDE_AANTAL - 2,
     },
     teams: r.teamModus === 'teams' ? TEAMS : los(r.suit),
     klok: { eindigtOp: null, duurMs: r.tijd * 1000, loopt: false },
@@ -234,7 +236,12 @@ function metRonde(r: Rondekop, over: Partial<PubliekeStaat> = {}): PubliekeStaat
 type Vraagdeel = Pick<PubliekeVraag, 'index' | 'tekst'> & Partial<PubliekeVraag>;
 
 function vraagVan(r: Rondekop, v: Vraagdeel): PubliekeVraag {
-  return { aantal: r.vragenAantal, type: r.type, punten: r.punten, ...v };
+  const vermenigvuldiger = r.index >= RONDE_AANTAL - 2 ? 2 : 1;
+  return {
+    aantal: r.vragenAantal, type: r.type, punten: r.punten,
+    maximaal: r.punten * PUNT_WAARDE * vermenigvuldiger, vermenigvuldiger, goud: false,
+    ...v,
+  };
 }
 
 /** Een open vraag met een lopende klok. */
@@ -531,13 +538,13 @@ export interface Dia {
   vorigePunten?: Punten;
 }
 
-const NA_STAND: Punten = { 1: 13, 2: 11, 3: 15, 4: 8, 5: 10, 6: 3 };
+const NA_STAND: Punten = { 1: 6110, 2: 5170, 3: 7050, 4: 3760, 5: 4700, 6: 1410 };
 const EIND: Punten = { 1: 19, 2: 16, 3: 21, 4: 10, 5: 12, 6: 4 };
 
 const PRIJZEN: PubliekeStaat['prijzen'] = [
   { sleutel: 'scherpschutter', titel: 'Scherpschutter', namen: ['Joris'], detail: '11 van de 14 vragen goed' },
   { sleutel: 'snelste', titel: 'Snelste vinger', namen: ['Eva'], detail: 'In 2,4 seconden goed bij Vier Kaarten' },
-  { sleutel: 'beste-ronde', titel: 'Beste ronde', namen: ['Liz'], detail: '6 punten in De Cijfers' },
+  { sleutel: 'beste-ronde', titel: 'Beste ronde', namen: ['Liz'], detail: '2.940 punten in De Cijfers' },
   { sleutel: 'reeks', titel: 'Langste reeks', namen: ['Joris'], detail: 'Vijf op rij goed' },
   { sleutel: 'comeback', titel: 'Comeback van de avond', namen: ['Eva'], detail: 'Van de vijfde naar de vierde plek' },
   { sleutel: 'moeilijkste-vraag', titel: 'Moeilijkste vraag', namen: [], detail: '“Hoeveel kilometer fietste Bastiaan in 2026?” — niemand had hem goed' },
@@ -604,6 +611,11 @@ export const DIAS: Dia[] = [
     let: 'Geen vragen op de telefoon: met Start gaat het hostscherm meteen naar de voorspellingen van januari. Onder de uitleg staat dat de telefoons weg mogen.',
     maak: () => metRonde(R.voorspellingen, { fase: 'ronde' }),
   },
+  {
+    id: 'ronde-dubbel', hoofdstuk: 'Ronde', titel: 'Titelkaart van een slotronde',
+    let: 'De laatste twee rondes tellen dubbel. Onder de uitleg van de punten gloeit de gouden banier “×2 · Slotronde”.',
+    maak: () => metRonde(R.stem, { fase: 'ronde' }),
+  },
 
   /* ── Vraag ── */
   {
@@ -620,6 +632,11 @@ export const DIAS: Dia[] = [
     id: 'vraag-open', hoofdstuk: 'Vraag', titel: 'Open vraag met songtekst',
     let: 'De regel tussen aanhalingstekens boven de vraag, in de nachtsfeer.',
     maak: () => vraag(R.muziek, V.muziek),
+  },
+  {
+    id: 'vraag-goud', hoofdstuk: 'Vraag', titel: 'De gouden kaart',
+    let: 'Eén vraag per ronde telt dubbel. Onder “tot 2.000 punten” gloeit het gouden label.',
+    maak: () => vraag(R.muziek, { ...V.muziek, goud: true, vermenigvuldiger: 2, maximaal: 2 * PUNT_WAARDE * 2 }),
   },
   {
     id: 'vraag-dichtstbij', hoofdstuk: 'Vraag', titel: 'Dichtstbij',
@@ -650,18 +667,17 @@ export const DIAS: Dia[] = [
   /* ── Onthulling ── */
   {
     id: 'antwoord-gemengd', hoofdstuk: 'Onthulling', titel: 'Gemengd: goed en fout',
-    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en Joris zit op vier op rij: allebei een bonus. Tom leverde niets in.',
+    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en pakt de meeste punten; Joris zit op vier op rij en krijgt een reeksbonus. Tom leverde niets in.',
     vorigePunten: START,
     maak: () => antwoord(
       R.waar, V.waar,
       { antwoord: 'Niet waar', toelichting: 'Kwartfinale, strafschoppen. Het is een traditie.', goedeOptie: 1 },
       [inz('s_1', 'Niet waar', true, 3100), inz('s_2', 'Waar', false, 5400), inz('s_3', 'Niet waar', true, 6800), inz('s_4', 'Waar', false, 9900), inz('s_5', 'Niet waar', true, 12000)],
       {
-        stand: stand(erbij({ 1: 2, 3: 2, 5: 1 })),
-        uitdeling: { 1: 2, 3: 2, 5: 1 },
+        stand: stand(erbij({ 1: 474, 3: 743, 5: 400 })),
+        uitdeling: { 1: 474, 3: 743, 5: 400 },
         bonussen: [
-          { spelerId: 1, soort: 'snel', punten: 1 },
-          { spelerId: 3, soort: 'reeks', punten: 1, opRij: 4 },
+          { spelerId: 3, soort: 'reeks', punten: 300, opRij: 4 },
         ],
         reeksen: { 1: 1, 3: 4, 5: 1 },
       },
@@ -685,7 +701,7 @@ export const DIAS: Dia[] = [
       R.meerkeuze, V.meerkeuze,
       { antwoord: 'A — Milaan & Cortina d’Ampezzo', toelichting: 'Twee steden, één Spelen, driehonderd kilometer ertussen.', goedeOptie: 0 },
       [inz('t0', 'A', true, 7000), inz('t1', 'B', false, 12000), inz('t2', 'A', true, 15500)],
-      { stand: stand(erbij({ 1: 2, 4: 2, 3: 2, 6: 2 })), uitdeling: { 1: 2, 4: 2, 3: 2, 6: 2 } },
+      { stand: stand(erbij({ 1: 870, 4: 870, 3: 870, 6: 870 })), uitdeling: { 1: 870, 4: 870, 3: 870, 6: 870 } },
     ),
   },
   {
@@ -696,7 +712,7 @@ export const DIAS: Dia[] = [
       R.bliksem, V.bliksem,
       { antwoord: 'Niet waar', toelichting: 'Tweeënvijftig weken en een dag. Dit jaar zelfs.', goedeOptie: 1 },
       NAMEN.map((_, i) => inz(`s_${i + 1}`, 'Niet waar', true, 1500 + i * 700)),
-      { stand: stand(erbij({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 })), uitdeling: { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 } },
+      { stand: stand(erbij({ 1: 430, 2: 430, 3: 430, 4: 430, 5: 430, 6: 430 })), uitdeling: { 1: 430, 2: 430, 3: 430, 4: 430, 5: 430, 6: 430 } },
     ),
   },
   {
@@ -723,7 +739,7 @@ export const DIAS: Dia[] = [
       R.cijfers, V.dichtstbij,
       { antwoord: '3.140 km', toelichting: 'Zeg maar Amsterdam–Rome, en dan nog een stukje.', getal: 3140, eenheid: 'km' },
       [inz('s_1', '3000', true, 9000, 3000), inz('s_2', '2500', false, 12000, 2500), inz('s_3', '4100', false, 6000, 4100), inz('s_4', '9000', false, 20000, 9000), inz('s_5', '3300', false, 15000, 3300), inz('s_6', 'geen idee', false, 25000, null)],
-      { stand: stand(erbij({ 1: 2 })), uitdeling: { 1: 2 } },
+      { stand: stand(erbij({ 1: 870 })), uitdeling: { 1: 870 } },
     ),
   },
   {
@@ -741,7 +757,7 @@ export const DIAS: Dia[] = [
         ],
       },
       [inz('s_1', 'Rik', true, 4000), inz('s_2', 'Joris', false, 6000), inz('s_3', 'Rik', true, 5000), inz('s_4', 'Joris', false, 9000), inz('s_5', 'Rik', true, 3000), inz('s_6', 'Liz', false, 12000)],
-      { stand: stand(erbij({ 1: 2, 3: 2, 5: 2 })), uitdeling: { 1: 2, 3: 2, 5: 2 } },
+      { stand: stand(erbij({ 1: 870, 3: 870, 5: 870 })), uitdeling: { 1: 870, 3: 870, 5: 870 } },
     ),
   },
 
@@ -994,7 +1010,8 @@ export class Testmodus {
       const goed = norm(i.tekst) !== '' && norm(i.tekst) === norm(st.onthulling.antwoord);
       i.isGoed = goed;
       if (!goed) return;
-      const punten = st.vraag?.punten ?? 1;
+      // Zoals een antwoord halverwege de klok: driekwart van het maximum.
+      const punten = Math.round((st.vraag?.maximaal ?? PUNT_WAARDE) * 0.75);
       const team = st.teams.find((t) => t.id === i.inzender);
       const nu = puntenVan(st);
       live.vorigePunten = nu;

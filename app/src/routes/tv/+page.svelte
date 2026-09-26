@@ -16,7 +16,7 @@
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
-  import { REEKS_VANAF } from '$lib/shared/bonus';
+  import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
   import { dierVan, dierenroep } from '$lib/shared/dieren';
@@ -296,14 +296,6 @@
   function naamVanSpeler(id: number): string {
     return staat?.spelers.find((s) => s.id === id)?.naam ?? '?';
   }
-  /** Wie de snelheidsbonus pakte: in een teamronde het team, anders de speler. */
-  let snelsten = $derived.by(() => {
-    const ids = (staat?.bonussen ?? []).filter((b) => b.soort === 'snel').map((b) => b.spelerId);
-    if (!ids.length) return '';
-    if (!inTeams) return ids.map(naamVanSpeler).join(' & ');
-    const teams = (staat?.teams ?? []).filter((t) => t.leden.some((id) => ids.includes(id)));
-    return teams.map((t) => naamVan(t.id)).join(' & ');
-  });
   let reeksBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.soort === 'reeks'));
 
   /* ---- Geluidsmomenten -------------------------------------------------
@@ -643,9 +635,13 @@
               </p>
             {:else}
               <p class="fijn" in:fade={{ duration: 500, delay: 700 }} style="font-size:var(--fs-etiket);color:var(--goud-licht)">
-                {#if ronde?.teamModus !== 'samen' && ronde?.type !== 'stem' && ronde?.type !== 'dichtstbij'}⚡ Snelste goede antwoord: +1 ·{/if}
-                🔥 Vanaf {REEKS_VANAF} vragen op rij goed: +1 per vraag
+                {#if ronde?.type !== 'stem'}⚡ Hoe sneller goed, hoe meer punten ·{/if}
+                🔥 Op dreef: +{REEKS_STAP} per vraag op rij, tot +{REEKS_MAX} ·
+                🃏 Eén vraag is de gouden kaart: dubbele punten
               </p>
+              {#if ronde?.dubbel}
+                <p class="dubbel-banier" in:scale={{ start: 0.7, duration: 620, delay: 900, easing: cubicOut }}>×2 · Slotronde: alles telt dubbel</p>
+              {/if}
               <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
             {/if}
 
@@ -691,7 +687,12 @@
               {#if tijdOm}
                 <span class="stempel rechtsboven" style="--hoek:-11deg">Tijd!</span>
               {/if}
-              <p class="etiket">Vraag {vraag.index + 1} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
+              <p class="etiket">Vraag {vraag.index + 1} · tot {vraag.maximaal.toLocaleString('nl-NL')} punten</p>
+              {#if vraag.goud}
+                <p class="gouden-kaart" in:scale={{ start: 0.6, duration: 560, easing: cubicOut }}>🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
+              {:else if vraag.vermenigvuldiger > 1}
+                <p class="gouden-kaart dubbel">×{vraag.vermenigvuldiger} · Dubbele punten</p>
+              {/if}
               {#if vraag.emoji}<div class="emoji">{vraag.emoji}</div>{/if}
               {#if vraag.lyric}<p class="lyric">“{vraag.lyric}”</p>{/if}
               <p class="vraagtekst">{vraag.tekst}</p>
@@ -836,11 +837,8 @@
                 </div>
               {/if}
             {/if}
-            {#if snelsten || reeksBonussen.length}
+            {#if reeksBonussen.length}
               <div class="bonusrij">
-                {#if snelsten}
-                  <span class="bonus" style="--wacht:1.1s">⚡ Snelste vinger <strong>{snelsten}</strong> <span class="fiche"><span>+1</span></span></span>
-                {/if}
                 {#each reeksBonussen as b, n (b.spelerId)}
                   <span class="bonus" style="--wacht:{1.3 + n * 0.18}s">
                     🔥 <strong>{naamVanSpeler(b.spelerId)}</strong> {b.opRij} op rij

@@ -77,9 +77,10 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
 
   // Zonder een extra knop: precies goed is 3 + 2 punten, voor het hele team.
+  // Op het scorebord is dat 5 × 500, en snel geantwoord houdt daar bijna alles van over.
   await expect(tv.pagina.locator('.getallenlijn')).toBeVisible({ timeout: 15_000 });
   await expect(tv.pagina.locator('.getallenlijn .gok.wint')).toHaveCount(1);
-  await expect(a.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+5', { timeout: 15_000 });
+  await expect(a.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText(/\+2\.\d{3}/, { timeout: 15_000 });
   await expect(b.pagina.locator('.uitslag[data-uitslag="fout"]')).toBeVisible({ timeout: 15_000 });
   await expect(qm.pagina.getByRole('button', { name: 'Opnieuw berekenen' })).toBeVisible();
 
@@ -115,7 +116,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
   for (const x of [a, b, qm]) await x.ctx.close();
 });
 
-test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bonuspunt', async ({ browser }) => {
+test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de meeste punten', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await nieuwSpel(qm, { '13': [0] }); // 2027, twee teams
   const tv = await nieuwApparaat(browser, '/tv');
@@ -143,12 +144,20 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt een bo
 
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
   await qm.pagina.getByRole('button', { name: /Vink de 2 aan/ }).click();
-  // Beide teams goed, twee punten per persoon; het snelste team één extra.
-  await expect(snel.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+3', { timeout: 15_000 });
-  await expect(snel.pagina.locator('.uitslag .bonusregel')).toContainText('Snelste vinger');
-  await expect(traag.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+2', { timeout: 15_000 });
-  await expect(traag.pagina.locator('.uitslag .bonusregel')).toHaveCount(0);
-  await expect(tv.pagina.locator('.bonus')).toContainText('Snelste vinger', { timeout: 15_000 });
+  // Beide teams goed, twee punten per persoon: tot 1000 op het scorebord,
+  // en het team dat eerder inleverde houdt daar meer van over.
+  const plus = async (t: typeof snel) => {
+    const tekst = await t.pagina.locator('.uitslag[data-uitslag="goed"] .plus').textContent({ timeout: 15_000 });
+    return Number((tekst ?? '').replace(/\D/g, ''));
+  };
+  await expect(snel.pagina.locator('.uitslag[data-uitslag="goed"]')).toBeVisible({ timeout: 15_000 });
+  await expect(traag.pagina.locator('.uitslag[data-uitslag="goed"]')).toBeVisible({ timeout: 15_000 });
+  const [a, b] = [await plus(snel), await plus(traag)];
+  expect(a).toBeLessThanOrEqual(1000);
+  expect(b).toBeGreaterThanOrEqual(500);
+  expect(a).toBeGreaterThan(b);
+  // Na de onthulling ziet elke telefoon zijn plek, zoals bij Kahoot.
+  await expect(traag.pagina.locator('.mijnplek')).toContainText(/achter/);
 
   for (const x of [snel, traag, tv, qm]) await x.ctx.close();
 });
@@ -210,7 +219,8 @@ test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ b
   await expect(tv.pagina.locator('.stemrij')).toHaveCount(2, { timeout: 15_000 });
   await expect(tv.pagina.locator('.stemrij.wint .naam')).toHaveText('Rik');
   await expect(tv.pagina.locator('.antwoordtekst')).toHaveText('Rik');
-  await expect(liz.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+3', { timeout: 15_000 });
+  // Bij een stemvraag telt snelheid niet: 3 punten is 1500 op het scorebord.
+  await expect(liz.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText('+1.500', { timeout: 15_000 });
   await expect(gast.pagina.locator('.uitslag[data-uitslag="fout"]')).toBeVisible({ timeout: 15_000 });
 
   // Ongedaan: terug naar de open vraag, en de punten zijn weer weg.
@@ -222,7 +232,7 @@ test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ b
 
   // Opnieuw onthullen, naar de uitslag: podium, prijzen, uitslagpagina.
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
-  await expect(qm.pagina.locator('.standpunten').first()).toHaveText('3', { timeout: 15_000 });
+  await expect(qm.pagina.locator('.standpunten').first()).toHaveText('1500', { timeout: 15_000 });
   await qm.doe('naar-einde');
   await expect(tv.pagina.locator('.podium .trede')).toHaveCount(3, { timeout: 15_000 });
   await expect(tv.pagina.locator('.prijs').first()).toBeVisible({ timeout: 15_000 });
