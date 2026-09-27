@@ -18,10 +18,13 @@
   import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
-  import { REEKS_VANAF } from '$lib/shared/bonus';
+  import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
-  import { dierVan, dierenroep } from '$lib/shared/dieren';
+  import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
+  import Spotlight, { type Binnenkomer } from '$lib/client/Spotlight.svelte';
+  import Pixeldier from '$lib/client/Pixeldier.svelte';
+  import { dierVan, dierenroep, kiesActie, maatjeVoluit, type Actie } from '$lib/shared/dieren';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -147,7 +150,7 @@
     return ids
       .map((id) => staat?.spelers.find((s) => s.id === id))
       .filter((s) => !!s)
-      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier }));
+      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam }));
   }
   // Boekhouding, geen toestand voor het scherm: bewust niet reactief, anders
   // zou het effect zichzelf bij elke schrijfactie opnieuw aanzwengelen.
@@ -160,16 +163,54 @@
     const nieuw = st.spelers.find((s) => nu.has(s.id) && !eerderVerbonden.has(s.id) && eerderVerbonden.size > 0);
     if (nieuw && st.fase === 'lobby') {
       begroetingTeller += 1;
-      const d = dierVan(nieuw.dier, nieuw.naam);
-      begroeting = begroetingTeller % 2
-        ? `${d.emoji} ${nieuw.naam}, ${d.titel}, ${d.entree}.`
-        : metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
-      laatLopen([{ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier }]);
+      // Het maatje stelt zichzelf voor in de spotlight; hier alleen een welkom voor de speler.
+      begroeting = metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
+      laatBinnen({ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam });
       geluid.boing();
     }
     // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
     eerderVerbonden = nu;
   });
+
+  /* ---- De maatjes in de lobby ----------------------------------------
+     Ieders maatje staat op zijn naambordje. Heel af en toe doet er één een
+     kunstje, nooit twee tegelijk, zodat de kamer het ziet en het rustig
+     blijft. Wie binnenkomt krijgt eerst even het podium (Spotlight). */
+  let plaatKunstje = $state<{ spelerId: number; actie: Actie; nr: number } | null>(null);
+  let kunstjeNr = 0;
+  let vorigeKunstenaar = -1;
+  $effect(() => {
+    if (staat?.fase !== 'lobby') return;
+    let wacht: ReturnType<typeof setTimeout>;
+    const volgende = () => {
+      wacht = setTimeout(() => {
+        const aan = (live.staat?.spelers ?? []).filter((s) => s.verbonden && s.id !== vorigeKunstenaar);
+        if (aan.length && !spot) {
+          const s = aan[Math.floor(Math.random() * aan.length)];
+          vorigeKunstenaar = s.id;
+          plaatKunstje = { spelerId: s.id, actie: kiesActie(dierVan(s.dier, s.naam), 'blij'), nr: ++kunstjeNr };
+          setTimeout(() => {
+            if (plaatKunstje?.nr === kunstjeNr) plaatKunstje = null;
+          }, 2300);
+        }
+        volgende();
+      }, 5000 + Math.random() * 5000);
+    };
+    volgende();
+    return () => clearTimeout(wacht);
+  });
+
+  let spot = $state<{ nr: number; wie: Binnenkomer } | null>(null);
+  let spotRij: Binnenkomer[] = [];
+  let spotNr = 0;
+  function laatBinnen(wie: Binnenkomer) {
+    if (spot) spotRij.push(wie);
+    else spot = { nr: ++spotNr, wie };
+  }
+  function volgendeSpot() {
+    const wie = spotRij.shift();
+    spot = wie ? { nr: ++spotNr, wie } : null;
+  }
 
   /* Wie is er het meest gestegen sinds de vorige stand. */
   let stijgerId = $derived.by(() => {
@@ -209,7 +250,12 @@
     if (!sp) return null;
     return { dier: dierVan(sp.dier, sp.naam), zin: dierenroep(sp.dier, sp.naam, 'goed', vraagSleutelNu) };
   });
-  let winDier = $derived(winnaars.length === 1 ? dierVan(winnaars[0].dier, winnaars[0].naam) : null);
+  let winDier = $derived.by(() => {
+    if (winnaars.length !== 1) return null;
+    const w = winnaars[0];
+    const dierNaam = staat?.spelers.find((s) => s.id === w.spelerId)?.dierNaam;
+    return { ...dierVan(w.dier, w.naam), voluit: maatjeVoluit(dierVan(w.dier, w.naam), dierNaam) };
+  });
 
   /* Zodra een vraag beoordeeld is: wie punten pakte rent blij over het
      scherm; zat iedereen fout, dan sjokt de hele tafel eronderdoor. Eén keer
@@ -298,14 +344,6 @@
   function naamVanSpeler(id: number): string {
     return staat?.spelers.find((s) => s.id === id)?.naam ?? '?';
   }
-  /** Wie de snelheidsbonus pakte: in een teamronde het team, anders de speler. */
-  let snelsten = $derived.by(() => {
-    const ids = (staat?.bonussen ?? []).filter((b) => b.soort === 'snel').map((b) => b.spelerId);
-    if (!ids.length) return '';
-    if (!inTeams) return ids.map(naamVanSpeler).join(' & ');
-    const teams = (staat?.teams ?? []).filter((t) => t.leden.some((id) => ids.includes(id)));
-    return teams.map((t) => naamVan(t.id)).join(' & ');
-  });
   let reeksBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.soort === 'reeks'));
 
   /* ---- Geluidsmomenten -------------------------------------------------
@@ -533,6 +571,13 @@
       <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
+  <!-- Wie binnenkomt krijgt even het podium, één tegelijk. -->
+  {#if spot}
+    {#key spot.nr}
+      <!-- Het dier van nu: wie net binnen is, kiest vaak meteen een ander. -->
+      <Spotlight wie={staat?.spelers.find((s) => s.id === spot?.wie.id) ?? spot.wie} klaar={volgendeSpot} />
+    {/key}
+  {/if}
 
   <button
     class="geluidsknop"
@@ -593,12 +638,18 @@
               <hr class="rule" style="width:min(620px,70vw)" />
               <p class="lood">Scan de code met je telefoon, kies je naam, en je hebt je antwoordblad in handen.</p>
 
-              <div class="knoprij" style="margin-top:.5rem">
+              <div class="knoprij maatjesrij" style="margin-top:.5rem">
                 {#each staat.spelers as s, i (s.id)}
-                  <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
+                  <span class="naamplaat metmaatje" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
                     <span class="stip" class:aan={s.verbonden}></span>
-                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} />
+                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} dierNaam={s.dierNaam} zonderDier />
                     <strong>{s.naam}</strong>
+                    <Plaatmaatje
+                      sleutel={dierVan(s.dier, s.naam).sleutel}
+                      kunstje={plaatKunstje?.spelerId === s.id ? plaatKunstje.actie : null}
+                      beurt={plaatKunstje?.spelerId === s.id ? plaatKunstje.nr : 0}
+                      slaapt={!s.verbonden}
+                    />
                   </span>
                 {/each}
               </div>
@@ -662,9 +713,13 @@
               </p>
             {:else}
               <p class="fijn" in:fade={{ duration: 500, delay: 700 }} style="font-size:var(--fs-etiket);color:var(--goud-licht)">
-                {#if ronde?.teamModus !== 'samen' && ronde?.type !== 'stem' && ronde?.type !== 'dichtstbij'}⚡ Snelste goede antwoord: +1 ·{/if}
-                🔥 Vanaf {REEKS_VANAF} vragen op rij goed: +1 per vraag
+                {#if ronde?.type !== 'stem'}⚡ Hoe sneller goed, hoe meer punten ·{/if}
+                🔥 Op dreef: +{REEKS_STAP} per vraag op rij, tot +{REEKS_MAX} ·
+                🃏 Eén vraag is de gouden kaart: dubbele punten
               </p>
+              {#if ronde?.dubbel}
+                <p class="dubbel-banier" in:scale={{ start: 0.7, duration: 620, delay: 900, easing: cubicOut }}>×2 · Slotronde: alles telt dubbel</p>
+              {/if}
               <p class="kwinkslag" style="animation-delay:.9s">{kies(RONDEZINNEN, `ronde:${staat.rondeIndex}`)}</p>
             {/if}
 
@@ -710,7 +765,12 @@
               {#if tijdOm}
                 <span class="stempel rechtsboven" style="--hoek:-11deg">Tijd!</span>
               {/if}
-              <p class="etiket">Vraag {vraag.index + 1} · {vraag.punten} {vraag.punten === 1 ? 'punt' : 'punten'}</p>
+              <p class="etiket">Vraag {vraag.index + 1} · tot {vraag.maximaal.toLocaleString('nl-NL')} punten</p>
+              {#if vraag.goud}
+                <p class="gouden-kaart" in:scale={{ start: 0.6, duration: 560, easing: cubicOut }}>🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
+              {:else if vraag.vermenigvuldiger > 1}
+                <p class="gouden-kaart dubbel">×{vraag.vermenigvuldiger} · Dubbele punten</p>
+              {/if}
               {#if vraag.emoji}<div class="emoji">{vraag.emoji}</div>{/if}
               {#if vraag.lyric}<p class="lyric">“{vraag.lyric}”</p>{/if}
               <p class="vraagtekst">{vraag.tekst}</p>
@@ -804,7 +864,7 @@
               <p class="kwinkslag" style="text-align:center">{kies(IEDEREEN_GOED, vraagSleutelNu)}</p>
             {:else if roeper}
               <p class="kwinkslag dierenroep" style="animation-delay:.8s">
-                <span aria-hidden="true">{roeper.dier.emoji}</span>{roeper.zin}
+                <Pixeldier sleutel={roeper.dier.sleutel} pose="blij" />{roeper.zin}
               </p>
             {/if}
             {#if staat.inzendingen.length}
@@ -855,11 +915,8 @@
                 </div>
               {/if}
             {/if}
-            {#if snelsten || reeksBonussen.length}
+            {#if reeksBonussen.length}
               <div class="bonusrij">
-                {#if snelsten}
-                  <span class="bonus" style="--wacht:1.1s">⚡ Snelste vinger <strong>{snelsten}</strong> <span class="fiche"><span>+1</span></span></span>
-                {/if}
                 {#each reeksBonussen as b, n (b.spelerId)}
                   <span class="bonus" style="--wacht:{1.3 + n * 0.18}s">
                     🔥 <strong>{naamVanSpeler(b.spelerId)}</strong> {b.opRij} op rij
@@ -917,7 +974,7 @@
             </h1>
             <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
               Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
-              {#if winDier}<br /><span class="dierenroep"><span aria-hidden="true">{winDier.emoji}</span> Hulde aan {winDier.titel}!</span>{/if}
+              {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
             </p>
 
             <Podium {top3} vorigePunten={live.vorigePunten} />

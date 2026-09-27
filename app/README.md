@@ -291,21 +291,45 @@ invulling wachten.
    zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee, en
    op elk goed kaartje landt een fiche met de punten.
 
-### Bonuspunten: snelheid en reeksen
+### De telling: zoals Kahoot
 
-- **Snelste vinger, +1.** Het snelst ingeleverde goede antwoord krijgt een punt
-  extra. In een teamronde is dat het snelste team, en elk lid krijgt het punt.
-  Niet bij stemvragen (een mening), dichtstbij (heeft al een eigen bonus) en
-  rondes die de tafel samen speelt.
-- **Op dreef, +1.** Wie drie vragen of meer op rij punten pakt, krijgt vanaf de
-  derde een punt extra per vraag. De reeks is van de persoon en loopt door als
-  de teams wisselen; een vraag waar je geen punten kreeg begint hem opnieuw.
+Het scorebord telt in grote getallen, en wie sneller goed zit krijgt meer. De
+bedoeling: het blijft tot de laatste vraag spannend wie er wint.
 
-Bonussen worden nergens opgeslagen: de server leidt ze bij elke telling af uit
-de uitdelingen en de antwoordtijden (`src/lib/server/bonus.ts`). Corrigeert de
-quizmaster een eerdere vraag of draait hij iets terug, dan schuiven de bonussen
-vanzelf mee. De televisie laat ze zien bij de onthulling, met een vlammetje in
-de tussenstand; de telefoon noemt ze onder je punten.
+- **Snelheid.** Elk punt van een vraag is 500 waard op het scorebord, maal
+  het deel van de klok dat nog over was: meteen goed is alles, op de valreep
+  de helft. Een vraag van 2 punten levert dus 500 tot 1000 op. In een
+  teamronde telt de tijd van het team. Bij een stemvraag telt snelheid niet
+  (dat is een mening), en wat de quizmaster met de hand toekent zonder
+  antwoord van een telefoon telt als op de valreep.
+- **Op dreef.** Vanaf de tweede vraag op rij met punten komt er +100 bij, dan
+  +200, en zo verder tot +500 per vraag. De reeks is van de persoon en loopt
+  door als de teams wisselen; een vraag zonder punten begint hem opnieuw.
+- **De gouden kaart.** In elke ronde van drie vragen of meer telt één
+  willekeurige vraag dubbel. Televisie en telefoons laten het zien zodra de
+  vraag opengaat. De kaart ligt vast per avond: dezelfde avond geeft steeds
+  dezelfde kaarten.
+- **Dubbele slotrondes.** De laatste twee rondes tellen dubbel (de afrekening
+  van de voorspellingen niet meegerekend). Een gouden kaart in een slotronde
+  telt vier keer.
+- **Je plek na elke vraag.** Zoals bij Kahoot ziet elke telefoon na de
+  onthulling je plek, en hoeveel je achter de volgende staat.
+
+De vragen zelf houden hun kleine punten (1, 2, 3); pas op het scorebord gaan
+er snelheid, reeks en vermenigvuldigers overheen. De afrekening van de
+voorspellingen telt 500 per punt, zonder snelheid. De knoppen bij de stand op
+het hostscherm corrigeren met 100 tegelijk.
+
+Niets hiervan wordt opgeslagen: de server leidt het bij elke telling af uit
+de uitdelingen, de antwoordtijden en de samenstelling
+(`src/lib/server/bonus.ts` en `src/lib/server/vermenigvuldiger.ts`).
+Corrigeert de quizmaster een eerdere vraag of draait hij iets terug, dan
+schuiven de reeksen vanzelf mee. De televisie laat de reeksen zien bij de
+onthulling, met een vlammetje in de tussenstand; de telefoon noemt ze onder
+je punten.
+
+De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
+manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.
 
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
 "Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
@@ -371,6 +395,13 @@ mee; het is er alleen voor de lol.
   dieren. Een dier dat een ander aan tafel al heeft, is grijs. Wie niets
   kiest, krijgt er vanzelf een. De quizmaster kan op het beheerscherm een
   ander dier dobbelen.
+- **Een eigen naam.** Onder de kiezer kun je je maatje een naam geven
+  (hooguit 20 tekens), dan heet het bijvoorbeeld *Knabbel, de Paniekkip*. De
+  naam staat in de spotlight als je binnenkomt, bij de optocht (*Knabbel ·
+  Liz*) en bij *Hulde aan…!*. Wissel je van dier, dan
+  gaat de naam mee. Leegmaken en op *Naam weg* tikken haalt hem weg; de
+  quizmaster kan op het beheerscherm een flauwe naam weghalen met *Naam
+  maatje weg*.
 - **Stil op je portret.** Het maatje zit klein en stil op de rand van je
   portret, op de televisie, de telefoon, het hostscherm en het podium.
 - **Over het scherm op de grote momenten**, en alleen dan:
@@ -383,23 +414,70 @@ mee; het is er alleen voor de lol.
 
   Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
   het leuk blijft en niet druk wordt.
-- **Erin, een kunstje, en weer weg.** Elk dier komt op zijn eigen manier
-  binnen, stopt op zijn eigen plek, doet een kunstje en gaat weer. Met meer
-  dieren staan ze even naast elkaar, elk met een eigen kunstje.
-- **Met lijf en decor.** Emoji kunnen hun poten niet bewegen, dus krijgen ze
-  tekenfilmdelen die met ze meebewegen:
-  - lopers (lama, giraf, hond) rennen op wervelende pootjes, met stofwolkjes;
-  - springers (kangoeroe, kikker, eenhoorn) stuiteren op een springveer;
-  - slingeraars (aap, luiaard) hangen aan een liaan onder een tak die over
-    het scherm loopt;
-  - zwemmers (goudvis, dolfijn, krokodil) gaan half onder de golven, met
-    bubbels en een peddelend vinnetje;
-  - vogels en insecten klapperen met vleugels, met fartlijnen erachter;
-  - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
-    in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
-
-  Ze kijken ook de kant op waar ze heen gaan: de meeste emoji kijken naar
-  links, dus die worden gespiegeld.
+- **Pixelkunst.** Elk dier is met de hand getekend, met de kop naar rechts.
+  De meeste in een raster van 16 bij 16; de dieren die daarin niet te
+  herkennen waren (luiaard, das, aap, kreeft, wasbeer, nijlpaard, hamster,
+  zeehond, uil, bij, krokodil, dolfijn, flamingo, hond, konijn, kikker,
+  kangoeroe, slak, vlinder) in 32 bij 32, met ruimte voor wat ze herkenbaar
+  maakt: het masker en de haakklauwen van de luiaard, de witte streep van neus
+  tot kruin bij de das, de knoerten van tanden van het nijlpaard, de S-hals en
+  de bananensnavel van de flamingo, de krokodillentraan, de flaporen en de
+  wapperende tong van de hond, de hangoor en de konijnentanden, het jong in
+  de buidel van de kangoeroe, de spiraal op het huisje van de slak, het
+  rechtop staande aapje met grote oren en krulstaart, de geringde staart van
+  de wasbeer, de schaar van de kreeft, de gele ogen van de uil, de dolfijn
+  midden in een sprong. Chique mag, maar gek hoort erbij: grote koppen,
+  kraalogen die net een beetje scheel kijken, en een grijns. Alles komt op 32 bij 32 op het scherm: bij
+  de grove worden de trapjes schuine lijnen (Scale2x), met licht van linksboven, een
+  schaduw onderaan, een omlijning in een donkere tint van het dier zelf, en
+  ronde ogen met een glinstering. Het is geen plaatje maar losse lagen, zodat het
+  dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
+  ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
+  vleugels als het vliegt, knijpt blij zijn ogen dicht met een blos op de
+  wangen, laat sip een traan vallen, slaapt met zzz en schrikt met een
+  uitroepteken.
+- **Erin, een optreden, en weer weg.** Elk dier komt op zijn eigen manier
+  binnen, stopt op zijn eigen plek, doet een optreden van drie tellen en gaat
+  weer: eerst opwarmen (rondkijken, snuffelen, trappelen, schrikken,
+  zwaaien), en dan twee verschillende kunstjes. Sip valt hij soms gewoon in
+  slaap. Met meer dieren staan ze even naast elkaar, elk met een eigen
+  optreden.
+- **Zonder decor.** Lopers en springers laten stofwolkjes achter, vliegers
+  fartlijnen, zwemmers zwemmen gewoon door de lucht, slingeraars huppen,
+  gravers lopen. Elk dier staat op een zacht gouden schijnsel.
+- **Een eigen karakter.** Elk dier heeft zes eigenschappen van 1 tot 5
+  (snelheid, slimheid, slaperigheid, gezelligheid, ondeugd en drama), een
+  lievelingshapje en iets waar hij om bekend staat: de slak is traag, de
+  luiaard slaperig, de wasbeer ondeugend en dol op pizzakorstjes, de kip
+  een en al drama. Op de telefoon staat het als kaartje bij je maatje. Het
+  karakter is niet alleen voor de sier: het bepaalt hoe het dier zich op je
+  telefoon gedraagt (zie hieronder).
+- **Op je naambordje.** In de lobby op de televisie staat ieders maatje op
+  zijn eigen naambordje: het knippert en ademt, en heel af en toe doet er
+  één een kunstje (nooit twee tegelijk), zodat de kamer het ziet en het
+  scherm verder rustig en chique blijft. Wie er nog niet is, heeft een
+  maatje dat ligt te slapen.
+- **De entree.** Wie binnenkomt, krijgt even het podium: de zaal wordt
+  donkerder, er valt een zacht gouden spotlicht, het maatje rent groot het
+  beeld in, doet een kunstje en buigt, met eronder wie het is (*Joris · Koko,
+  de Aap die Aan de Lamp Hangt*) en hoe het binnenkomt. Komen er meer
+  tegelijk binnen, dan krijgt ieder zijn beurt.
+- **Geen decor.** Het scherm is van de quiz: groen vilt, goud en mooie
+  letters. De pixeldieren zijn het enige grappige erop; in de optocht staan
+  ze op een zacht gouden schijnsel in plaats van in een landschap.
+- **Op de telefoon** staat je eigen maatje op een eigen vilten podiumpje,
+  met een eigen willetje: lopen, rondkijken, snuffelen, slapen, springen,
+  een kunstje, of zijn lievelingshapje opeten. Hoe vaak wat gebeurt volgt
+  het karakter: een snel dier rent vaker en harder, een slaperig dier dut
+  vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
+  wakker).
+- **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
+  uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
+  dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,
+  een banaan of pizza blijven emoji. In de optocht stopt elk dier net niet
+  in het gelid, een tikje links, rechts, hoger of lager. Op je telefoon staat je
+  eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
+  (en slaapt het, dan schrikt het wakker).
 - **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke
   keer een verrassing. Eigen kunstjes: de lama spuugt, de kip legt een ei, de
   aap gooit met bananen, de eenhoorn maakt een regenboog, de eekhoorn begraaft
@@ -412,10 +490,17 @@ mee; het is er alleen voor de lol.
   goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
   telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
 
-De dieren, hun titels en wat ze roepen staan in `src/lib/shared/dieren.ts`;
-de optocht is `src/lib/client/Dierenparade.svelte` met de `dier-…`-,
-`kunst-…`- en `ding-…`-animaties onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet, krijgt
-geen optochten.
+De dieren, hun titels, wat ze roepen en hun kunstjes staan in
+`src/lib/shared/dieren.ts`; de tekeningen in `src/lib/shared/pixeldieren.ts`
+(een letter per pixel, met uitleg bovenaan) en het dier zelf in
+`src/lib/client/Pixeldier.svelte`. De optocht is
+`src/lib/client/Dierenparade.svelte`, de entree `src/lib/client/Spotlight.svelte`,
+het maatje op het naambordje `src/lib/client/Plaatmaatje.svelte` (de tv-pagina
+kiest wie er een kunstje doet), en het podiumpje op de telefoon
+`src/lib/client/Dierenwei.svelte` met het brein in `src/lib/client/wei.ts`.
+De `px-…`-, `dier-…`-, `kunst-…`-, `ding-…`-, `spot-…`- en `wei-…`-animaties
+staan onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet,
+krijgt geen optochten en geen entree, en dieren die stilstaan.
 
 ### Het hostscherm
 

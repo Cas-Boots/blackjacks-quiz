@@ -1,0 +1,1 @@
+ALTER TABLE `spelers` ADD `dier_naam` text;

@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b2367c70-0788-49fb-847f-2b8a4074d198",
-  "prevId": "3af4db74-3cce-4384-852c-1665bbbe6a42",
+  "id": "13d11aa4-f864-4935-bd86-0ff2580d33b0",
+  "prevId": "b2367c70-0788-49fb-847f-2b8a4074d198",
   "tables": {
     "antwoorden": {
       "name": "antwoorden",
@@ -584,6 +584,21 @@
         },
         "media_speelt": {
           "name": "media_speelt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "pauze": {
+          "name": "pauze",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pauze_klok_liep": {
+          "name": "pauze_klok_liep",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

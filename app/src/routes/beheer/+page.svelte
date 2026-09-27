@@ -329,7 +329,7 @@
                   {#if s.doetNuMee}<span class="badge" style="border-color:var(--groen);color:var(--groen-licht)">doet nu mee</span>{/if}
                 {/if}
                 <br />
-                <span class="fijn">{s.avonden} {s.avonden === 1 ? 'avond' : 'avonden'} · telefoon {geleden(s.stilSinds)}</span>
+                <span class="fijn">{s.avonden} {s.avonden === 1 ? 'avond' : 'avonden'} · telefoon {geleden(s.stilSinds)}{s.dierNaam ? ` · maatje: ${s.dierNaam}` : ''}</span>
               </div>
               <div class="knoprij" style="gap:.3rem;justify-content:flex-end">
                 <button class="knop stil" onclick={() => beginHernoem('speler', s.id, s.naam)} disabled={bezig}>Hernoem</button>
@@ -340,6 +340,9 @@
                 {/if}
                 {#if !s.isQuizmaster}
                   <button class="knop stil" onclick={() => doe('speler-dier', { id: s.id })} disabled={bezig} title="Nu: {dierVan(s.dier, s.naam).titel}">🎲 Ander dier</button>
+                {/if}
+                {#if s.dierNaam}
+                  <button class="knop stil" onclick={() => doe('speler-dier-naam', { id: s.id })} disabled={bezig} title="Het maatje heet nu {s.dierNaam}">Naam maatje weg</button>
                 {/if}
                 {#if s.foto}
                   <button class="knop stil" onclick={() => doe('speler-foto', { id: s.id, foto: null })} disabled={bezig}>Portret weg</button>
