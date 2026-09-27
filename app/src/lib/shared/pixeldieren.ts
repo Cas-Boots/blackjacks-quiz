@@ -1268,6 +1268,17 @@ function meng(hex: string, naar: string, hoeveel: number): string {
 /** Lichter naar een warm licht, donkerder naar een koele schaduw: dat oogt levendiger dan wit en zwart. */
 const licht = (hex: string, n: number) => meng(hex, '#fff6dc', n);
 const schaduw = (hex: string, n: number) => meng(hex, '#1b1030', n);
+/** Hoe licht een kleur oogt, van 0 tot 1. */
+function helderheid(hex: string): number {
+  const [r, g, b] = rgb(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+/**
+ * De omlijning bij een vulkleur: een donkere tint ervan. Een licht dier (de
+ * eenhoorn, de kip) krijgt er meer donker bij, anders wordt zijn rand grijs en
+ * valt hij weg tegen het vilt.
+ */
+const randKleur = (hex: string) => schaduw(hex, Math.min(0.86, 0.72 + 0.3 * Math.max(0, helderheid(hex) - 0.5)));
 
 function alsLaag(pixels: Pixel[]): Laag {
   const perKleur = new Map<string, string[]>();
@@ -1349,7 +1360,7 @@ export function lagenVan(sleutel: string): Lagen {
   function lijn(x: number, y: number): string {
     for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
       const t = at(x + dx, y + dy);
-      if (!rand(t) && !oogLetter(t) && t !== 'c') return schaduw(kleur(t === 'v' ? 'a' : t), 0.72);
+      if (!rand(t) && !oogLetter(t) && t !== 'c') return randKleur(kleur(t === 'v' ? 'a' : t));
     }
     return palet.k;
   }
@@ -1414,7 +1425,7 @@ export function lagenVan(sleutel: string): Lagen {
       const x = p.x + dx;
       const y = p.y + dy;
       if (x < 0 || y < 0 || x >= MAAT || bezet.has(`${x},${y}`)) continue;
-      randje.set(`${x},${y}`, { x, y, kleur: schaduw(kleur('v'), 0.72) });
+      randje.set(`${x},${y}`, { x, y, kleur: randKleur(kleur('v')) });
     }
   }
   vleugelOp.unshift(...randje.values());
