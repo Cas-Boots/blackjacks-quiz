@@ -2760,6 +2760,7 @@ a.uitslagrij:hover {
   align-items: center;
   gap: 0.2rem;
   font-size: clamp(3rem, 7vw, 6rem);
+  font-size: max(64px, round(clamp(3rem, 7vw, 6rem), 32px));
   transform: translateX(-20vw);
 }
 .dierenparade[data-fase="wacht"],
@@ -2999,7 +3000,13 @@ a.uitslagrij:hover {
 
 /* ---- Het pixeldier (Pixeldier.svelte) -----------------------------------
    Lagen die per pose aan of uit gaan. Een verplaatsing van 1px is binnen
-   het SVG precies één pixel van het dier. */
+   het SVG precies één pixel van het dier.
+
+   Waar een dier groot staat (de wei, de optocht, het naambordje, de
+   spotlight), rondt de lettergrootte af op een veelvoud van 32px: dan is
+   elke pixel van het dier een heel aantal schermpixels. Bij 48px werd dat
+   anderhalf, en dan zijn de pixels om en om 1 en 2 breed en flikkeren ze als
+   het dier loopt. Een browser zonder round() houdt de regel ervoor. */
 .pixeldier {
   display: inline-block;
   width: 1em;
@@ -3062,7 +3069,8 @@ a.uitslagrij:hover {
   width: 1em;
   margin-left: -0.5em;
   text-align: center;
-  font-size: 0.42em;
+  /* Hoe groot een emoji is naast het dier (het dier is 1em). */
+  font-size: calc(var(--ding, 0.42) * 1em);
   line-height: 1;
   opacity: 0;
   animation: 1.8s ease-out calc(0.2s + var(--n, 0) * 0.35s) both;
@@ -3287,7 +3295,7 @@ a.uitslagrij:hover {
 .bewoner .actie { transform-origin: 50% 100%; }
 .bewoner .kijk { display: inline-block; }
 .bewoner .kijk.links { transform: scaleX(-1); }
-.bewoner .ding { font-size: 0.36em; }
+.bewoner .ding { --ding: 0.36; }
 /* Hoe het lijf meebeweegt; via `translate`, zodat het niet botst met het kunstje. */
 .bewoner[data-doen="loop"] .kijk { animation: wei-hup 0.34s steps(2, jump-none) infinite; }
 .bewoner[data-doen="ren"] .kijk,
@@ -3333,11 +3341,14 @@ a.uitslagrij:hover {
   opacity: 1;
   transform: none;
 }
-/* Pixelplaatjes rond de dieren: net zo scherp als de dieren zelf. */
+/* Pixelplaatjes rond de dieren: net zo scherp als de dieren zelf, en met
+   pixels van dezelfde maat. Het plaatje is 9 pixels breed (7 plus de
+   omlijning), het dier 32, en `--ding` is hoe groot de emoji naast het dier
+   staat. */
 .pixelicoon {
   display: block;
-  width: 1em;
-  height: 1em;
+  width: calc(9em / 32 / var(--ding, 0.42));
+  height: calc(9em / 32 / var(--ding, 0.42));
   margin: 0 auto;
 }
 .aai {
@@ -3357,8 +3368,9 @@ a.uitslagrij:hover {
   margin-top: 0.8rem;
   border-radius: 0.8rem;
   border: 1px solid var(--rand);
-  height: 6.5rem;
+  height: 1.9em;
   font-size: 3.4rem;
+  font-size: round(3.4rem, 32px);
 }
 
 /* ---- Het maatje op het naambordje (Plaatmaatje.svelte) -----------------
@@ -3375,13 +3387,14 @@ a.uitslagrij:hover {
   right: 0.5em;
   bottom: calc(100% - 0.14em);
   font-size: 2.2em;
+  font-size: max(32px, round(2.2em, 32px));
   line-height: 0;
   pointer-events: none;
   filter: drop-shadow(0 0.05em 0.04em rgba(0, 0, 0, 0.55));
   transition: opacity 0.6s ease, filter 0.6s ease;
 }
 .plaatmaatje .actie { transform-origin: 50% 100%; }
-.plaatmaatje .ding { font-size: 0.42em; }
+.plaatmaatje .ding { --ding: 0.42; }
 /* Slapen zonder zzz: dat zou bij een hele rij slapers te druk worden. */
 .plaatmaatje .px-zzz { display: none; }
 .plaatmaatje .adem {
@@ -3447,11 +3460,12 @@ a.uitslagrij:hover {
 .spotdier {
   position: relative;
   font-size: 22vh;
+  font-size: max(64px, round(22vh, 32px));
   line-height: 0;
 }
 .spotdier .pixeldier { filter: drop-shadow(0 1vh 1.2vh rgba(0, 0, 0, 0.5)); }
 .spotdier .actie { transform-origin: 50% 100%; }
-.spotdier .ding { font-size: 0.3em; }
+.spotdier .ding { --ding: 0.3; }
 .spotlight[data-fase="in"] .spotdier { animation: spot-in var(--in) cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 .spotlight[data-fase="uit"] { animation: spot-uit var(--uit) ease-in both; }
 .spotnaam {
