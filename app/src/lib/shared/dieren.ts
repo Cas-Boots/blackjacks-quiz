@@ -175,6 +175,18 @@ export function gangVan(beweging: Beweging): 'stap' | 'spring' | 'schommel' | 'z
   return 'stap';
 }
 
+/**
+ * Hoe het dier in een optocht over de televisie gaat. Zonder decor (geen tak,
+ * geen water, geen grond): slingeraars huppen, gravers lopen, zwemmers
+ * zwemmen door de lucht, vliegers vliegen.
+ */
+export function paradeGang(beweging: Beweging): 'stap' | 'spring' | 'zwem' | 'vlieg' {
+  const gang = gangVan(beweging);
+  if (gang === 'schommel') return 'spring';
+  if (gang === 'graaf') return 'stap';
+  return gang;
+}
+
 export const DIEREN: readonly Maatje[] = [
   {
     sleutel: 'lama', emoji: '🦙', titel: 'de Dramatische Lama',

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
-  vrijDier, dierenroep, gangVan, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM, EIGENSCHAPPEN,
+  vrijDier, dierenroep, paradeGang, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM, EIGENSCHAPPEN,
 } from '../src/lib/shared/dieren';
 
 describe('maatjes', () => {
@@ -20,7 +20,7 @@ describe('maatjes', () => {
     const css = readFileSync(resolve(__dirname, '../src/app.css'), 'utf8');
     for (const d of DIEREN) {
       expect(css, d.beweging).toContain(`.dier[data-beweging="${d.beweging}"]`);
-      expect(css, gangVan(d.beweging)).toContain(`.dierenparade[data-gang="${gangVan(d.beweging)}"]`);
+      expect(css, paradeGang(d.beweging)).toContain(`.dierenparade[data-gang="${paradeGang(d.beweging)}"]`);
     }
     expect(css).toContain('.dierenparade[data-gang="sip"]');
   });

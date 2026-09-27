@@ -14,6 +14,7 @@
     foto = null,
     dier = null,
     dierNaam = null,
+    zonderDier = false,
     maat = '',
     goud = false,
     stijl = '',
@@ -23,6 +24,8 @@
     dier?: string | null;
     /** De naam die de speler zijn maatje gaf. */
     dierNaam?: string | null;
+    /** Zonder het maatje op de rand: waar het dier al ergens anders staat (het naambordje in de lobby). */
+    zonderDier?: boolean;
     maat?: '' | 'm' | 'l';
     goud?: boolean;
     /** Extra stijl voor het rondje zelf, voor de plekken die het kleiner willen. */
@@ -38,5 +41,5 @@
   {:else}
     <span class="avatar {maat}" class:goud style={stijl}>{naam.slice(0, 2)}</span>
   {/if}
-  <span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>
+  {#if !zonderDier}<span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>{/if}
 </span>

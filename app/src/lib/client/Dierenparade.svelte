@@ -16,15 +16,16 @@
   /**
    * De maatjes die over het scherm trekken op de grote momenten.
    *
-   * Elk dier komt op zijn eigen manier binnen (lopen, springen, slingeren,
-   * zwemmen, vliegen, graven), stopt op zijn eigen plek, doet een heel
-   * optreden van drie tellen en gaat weer. Met meer dieren staan ze even
+   * Elk dier komt op zijn eigen manier binnen (lopen, springen, zwemmen door
+   * de lucht, vliegen), stopt op zijn eigen plek in een zacht gouden licht,
+   * doet een heel optreden van drie tellen en gaat weer. Geen decor: het
+   * scherm blijft van de quiz, het dier is het enige grappige erop. Met meer dieren staan ze even
    * naast elkaar. Blij: opwarmen en twee van zijn blije kunstjes. Sip:
    * sjokkend, grijs, onder een regenwolkje, en soms valt hij gewoon in slaap.
    * Wat hij doet is elke keer een verrassing (zie kiesRoutine).
    */
   import { onMount, untrack } from 'svelte';
-  import { dierVan, gangVan, kiesRoutine, poseVan } from '$lib/shared/dieren';
+  import { dierVan, kiesRoutine, paradeGang, poseVan } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
   import Ding from './Ding.svelte';
 
@@ -56,15 +57,9 @@
     const plek = alle.length === 1 ? 50 : 20 + (60 * (alle.length - 1 - i)) / (alle.length - 1);
     const stop = plek + (Math.random() - 0.5) * (alle.length === 1 ? 16 : 7);
     const hoogte = Math.random() * 2.5;
-    const gang = sip ? 'sip' : gangVan(d.beweging);
+    const gang = sip ? 'sip' : paradeGang(d.beweging);
     return { ...l, d, gang, routine: kiesRoutine(d, sip ? 'sip' : 'blij'), stop, hoogte, start: i * ZETJE_MS + Math.random() * 150 };
   });
-  /* Het decor dat bij de gang hoort: een tak om aan te slingeren, water om
-     in te zwemmen. Eén keer over de hele breedte, voor wie het nodig heeft. */
-  const metTak = rij.some((l) => l.gang === 'schommel');
-  const metWater = rij.some((l) => l.gang === 'zwem');
-  const metGrond = rij.some((l) => l.gang === 'graaf');
-
   let verstreken = $state(0);
   onMount(() => {
     const begin = performance.now();
@@ -92,19 +87,12 @@
   }
 </script>
 
-{#if metTak}
-  <div class="parade-tak" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-{/if}
-{#if metWater}
-  <div class="parade-water achter" aria-hidden="true"></div>
-{/if}
 
 {#each rij as l (l.id)}
   {@const fase = faseVan(l.start)}
   {@const onderweg = fase === 'heen' || fase === 'weg'}
   {@const tel = telVan(l.start)}
   {@const actie = fase === 'actie' ? l.routine[tel] : null}
-  {@const gravend = l.gang === 'graaf' && (onderweg || actie?.lijf === 'graaf')}
   {@const vliegt = l.gang === 'vlieg' && (onderweg || actie?.lijf !== 'slaap')}
   {@const pose = actie ? poseVan(actie.lijf, sip ? 'sip' : 'blij') : onderweg && l.gang !== 'vlieg' && l.gang !== 'zwem' ? 'loop' : sip ? 'sip' : 'staan'}
   <div
@@ -118,22 +106,14 @@
     {#key tel}
       <span class="actie" data-lijf={actie?.lijf ?? null}>
         <span class="dier">
-          <!-- Wat er om het dier heen hoort bij zijn gang. -->
+          <!-- Alleen wat bij de beweging hoort: fartlijnen achter een vlieger, stof achter een renner. -->
           {#if l.gang === 'vlieg'}
             <span class="fartlijnen"></span>
-          {:else if l.gang === 'schommel'}
-            <span class="liaan"></span>
           {:else if (l.gang === 'stap' || l.gang === 'spring') && onderweg}
             <span class="stof"></span>
           {/if}
-          {#if gravend}
-            <span class="klauwen"><i></i><i></i></span>
-          {/if}
           <Pixeldier sleutel={l.d.sleutel} {pose} vlieg={vliegt} />
         </span>
-        {#if gravend}
-          <span class="kluiten"><i></i><i></i><i></i></span>
-        {/if}
         {#if actie?.ding}
           {#each actie.dingGaat === 'op' || actie.dingGaat === 'val' ? [0, 1] : [0] as n (n)}
             <span class="ding" data-gaat={actie.dingGaat} style="--n:{n}"><Ding teken={actie.ding} /></span>
@@ -146,9 +126,3 @@
   </div>
 {/each}
 
-{#if metWater}
-  <div class="parade-water voor" aria-hidden="true"></div>
-{/if}
-{#if metGrond}
-  <div class="parade-grond" aria-hidden="true"></div>
-{/if}

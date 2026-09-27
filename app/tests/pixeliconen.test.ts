@@ -4,7 +4,7 @@ import { ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP } from '../src/lib/sh
 
 describe('pixeliconen', () => {
   it('geeft de algemene tekens een pixelplaatje met omlijning, binnen de maat', () => {
-    for (const teken of ['❤️', '🎵', '✨', '💧', '💦', '💤', '❗', '❓', '💨', '🫧', '💢']) {
+    for (const teken of ['❤️', '🎵', '✨', '💧', '💦', '💤', '❗', '❓', '💨', '🫧', '💢', '🎉']) {
       const paden = icoonVan(teken);
       expect(paden, teken).not.toBeNull();
       expect(paden!.length, teken).toBeGreaterThan(1);
@@ -22,7 +22,7 @@ describe('pixeliconen', () => {
   });
 
   it('heeft een plaatje voor alles wat elk dier algemeen kan laten verschijnen, behalve voorwerpen', () => {
-    const voorwerpen = new Set(['🎉', '👋']);
+    const voorwerpen = new Set(['👋']);
     for (const a of [...ALGEMEEN_BLIJ, ...ALGEMEEN_SIP, ...OPWARMERS.blij, ...OPWARMERS.sip, EINDE_SIP]) {
       if (a.ding && !voorwerpen.has(a.ding)) expect(icoonVan(a.ding), a.ding).not.toBeNull();
     }

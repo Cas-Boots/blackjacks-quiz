@@ -19,9 +19,10 @@
   import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
-  import Dierenwei from '$lib/client/Dierenwei.svelte';
+  import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
+  import Spotlight, { type Binnenkomer } from '$lib/client/Spotlight.svelte';
   import Pixeldier from '$lib/client/Pixeldier.svelte';
-  import { dierVan, dierenroep, maatjeVoluit } from '$lib/shared/dieren';
+  import { dierVan, dierenroep, kiesActie, maatjeVoluit, type Actie } from '$lib/shared/dieren';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -160,18 +161,54 @@
     const nieuw = st.spelers.find((s) => nu.has(s.id) && !eerderVerbonden.has(s.id) && eerderVerbonden.size > 0);
     if (nieuw && st.fase === 'lobby') {
       begroetingTeller += 1;
-      const d = dierVan(nieuw.dier, nieuw.naam);
-      begroeting = begroetingTeller % 2
-        ? nieuw.dierNaam
-          ? `${d.emoji} ${nieuw.dierNaam}, ${d.titel} van ${nieuw.naam}, ${d.entree}.`
-          : `${d.emoji} ${nieuw.naam}, ${d.titel}, ${d.entree}.`
-        : metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
-      laatLopen([{ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam }]);
+      // Het maatje stelt zichzelf voor in de spotlight; hier alleen een welkom voor de speler.
+      begroeting = metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
+      laatBinnen({ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam });
       geluid.boing();
     }
     // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
     eerderVerbonden = nu;
   });
+
+  /* ---- De maatjes in de lobby ----------------------------------------
+     Ieders maatje staat op zijn naambordje. Heel af en toe doet er één een
+     kunstje, nooit twee tegelijk, zodat de kamer het ziet en het rustig
+     blijft. Wie binnenkomt krijgt eerst even het podium (Spotlight). */
+  let plaatKunstje = $state<{ spelerId: number; actie: Actie; nr: number } | null>(null);
+  let kunstjeNr = 0;
+  let vorigeKunstenaar = -1;
+  $effect(() => {
+    if (staat?.fase !== 'lobby') return;
+    let wacht: ReturnType<typeof setTimeout>;
+    const volgende = () => {
+      wacht = setTimeout(() => {
+        const aan = (live.staat?.spelers ?? []).filter((s) => s.verbonden && s.id !== vorigeKunstenaar);
+        if (aan.length && !spot) {
+          const s = aan[Math.floor(Math.random() * aan.length)];
+          vorigeKunstenaar = s.id;
+          plaatKunstje = { spelerId: s.id, actie: kiesActie(dierVan(s.dier, s.naam), 'blij'), nr: ++kunstjeNr };
+          setTimeout(() => {
+            if (plaatKunstje?.nr === kunstjeNr) plaatKunstje = null;
+          }, 2300);
+        }
+        volgende();
+      }, 5000 + Math.random() * 5000);
+    };
+    volgende();
+    return () => clearTimeout(wacht);
+  });
+
+  let spot = $state<{ nr: number; wie: Binnenkomer } | null>(null);
+  let spotRij: Binnenkomer[] = [];
+  let spotNr = 0;
+  function laatBinnen(wie: Binnenkomer) {
+    if (spot) spotRij.push(wie);
+    else spot = { nr: ++spotNr, wie };
+  }
+  function volgendeSpot() {
+    const wie = spotRij.shift();
+    spot = wie ? { nr: ++spotNr, wie } : null;
+  }
 
   /* Wie is er het meest gestegen sinds de vorige stand. */
   let stijgerId = $derived.by(() => {
@@ -523,11 +560,12 @@
       <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
   {/if}
-  <!-- In de lobby scharrelen de maatjes van wie er al is onderaan rond. -->
-  {#if staat?.fase === 'lobby'}
-    <div class="tvwei" out:fade={{ duration: 400 }}>
-      <Dierenwei spelers={staat.spelers.filter((s) => s.verbonden)} />
-    </div>
+  <!-- Wie binnenkomt krijgt even het podium, één tegelijk. -->
+  {#if spot}
+    {#key spot.nr}
+      <!-- Het dier van nu: wie net binnen is, kiest vaak meteen een ander. -->
+      <Spotlight wie={staat?.spelers.find((s) => s.id === spot?.wie.id) ?? spot.wie} klaar={volgendeSpot} />
+    {/key}
   {/if}
 
   <button
@@ -581,12 +619,18 @@
               <hr class="rule" style="width:min(620px,70vw)" />
               <p class="lood">Scan de code met je telefoon, kies je naam, en je hebt je antwoordblad in handen.</p>
 
-              <div class="knoprij" style="margin-top:.5rem">
+              <div class="knoprij maatjesrij" style="margin-top:.5rem">
                 {#each staat.spelers as s, i (s.id)}
-                  <span class="naamplaat" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
+                  <span class="naamplaat metmaatje" class:aan={s.verbonden} in:fly={{ y: 18, duration: 420, delay: 120 + i * 90, easing: cubicOut }}>
                     <span class="stip" class:aan={s.verbonden}></span>
-                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} dierNaam={s.dierNaam} />
+                    <Portret naam={s.naam} foto={s.foto} dier={s.dier} dierNaam={s.dierNaam} zonderDier />
                     <strong>{s.naam}</strong>
+                    <Plaatmaatje
+                      sleutel={dierVan(s.dier, s.naam).sleutel}
+                      kunstje={plaatKunstje?.spelerId === s.id ? plaatKunstje.actie : null}
+                      beurt={plaatKunstje?.spelerId === s.id ? plaatKunstje.nr : 0}
+                      slaapt={!s.verbonden}
+                    />
                   </span>
                 {/each}
               </div>

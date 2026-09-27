@@ -397,8 +397,8 @@ mee; het is er alleen voor de lol.
   ander dier dobbelen.
 - **Een eigen naam.** Onder de kiezer kun je je maatje een naam geven
   (hooguit 20 tekens), dan heet het bijvoorbeeld *Knabbel, de Paniekkip*. De
-  naam staat op het naambordje in de wei, bij de optocht (*Knabbel · Liz*),
-  in het welkom op de televisie en bij *Hulde aan…!*. Wissel je van dier, dan
+  naam staat in de spotlight als je binnenkomt, bij de optocht (*Knabbel ·
+  Liz*) en bij *Hulde aan…!*. Wissel je van dier, dan
   gaat de naam mee. Leegmaken en op *Naam weg* tikken haalt hem weg; de
   quizmaster kan op het beheerscherm een flauwe naam weghalen met *Naam
   maatje weg*.
@@ -436,64 +436,35 @@ mee; het is er alleen voor de lol.
   zwaaien), en dan twee verschillende kunstjes. Sip valt hij soms gewoon in
   slaap. Met meer dieren staan ze even naast elkaar, elk met een eigen
   optreden.
-- **Met decor.** Wat niet aan het dier vastzit komt erbij:
-  - lopers en springers laten stofwolkjes achter;
-  - slingeraars (aap, luiaard) hangen aan een liaan onder een tak die over
-    het scherm loopt;
-  - zwemmers (goudvis, dolfijn, krokodil) gaan half onder de golven, met
-    bubbels;
-  - vliegers hebben fartlijnen erachter;
-  - gravers (das, konijn, worm, eekhoorn) krabben met hun klauwen, verdwijnen
-    in de grond en ploppen weer op, en de kluiten vliegen erachteraan.
+- **Zonder decor.** Lopers en springers laten stofwolkjes achter, vliegers
+  fartlijnen, zwemmers zwemmen gewoon door de lucht, slingeraars huppen,
+  gravers lopen. Elk dier staat op een zacht gouden schijnsel.
 - **Een eigen karakter.** Elk dier heeft zes eigenschappen van 1 tot 5
   (snelheid, slimheid, slaperigheid, gezelligheid, ondeugd en drama), een
   lievelingshapje en iets waar hij om bekend staat: de slak is traag, de
   luiaard slaperig, de wasbeer ondeugend en dol op pizzakorstjes, de kip
   een en al drama. Op de telefoon staat het als kaartje bij je maatje. Het
-  karakter is niet alleen voor de sier: het bepaalt hoe het dier zich in de
-  wei gedraagt (zie hieronder).
-- **De wei.** In de lobby scharrelen de maatjes van iedereen die er al is
-  onderaan de televisie rond, elk met een eigen willetje: lopen, stilstaan en
-  rondkijken, snuffelen, in slaap vallen, springen, een kunstje, ineens een
-  eind rennen, of een ander achterna zitten (die schrikt en rent weg; gepakt
-  is vrienden). Komen twee dieren elkaar tegen, dan draaien ze zich naar
-  elkaar toe en groeten ze, met een hartje. Gravers duiken onder de grond en
-  komen ergens anders boven; vliegers zweven erboven. Soms valt er een
-  lievelingshapje uit de lucht, en dat wordt meteen opgesnuffeld. Hoe vaak
-  wat gebeurt volgt het karakter: een snel dier rent vaker en harder, een
-  slaperig dier dut vaker en langer, een gezellig dier groet zo weer, een
-  ondeugend dier zit vaker een ander achterna, een dramatisch dier doet
-  vaker een kunstje. Het blijft wel rustig: hooguit drie dieren tegelijk doen
-  iets geks, de rest scharrelt, snuffelt of dut. Een naambordje verschijnt
-  pas als een dier iets doet, en de lobby maakt onderaan plaats voor de wei,
-  zodat er geen dier door de tekst loopt.
-- **Een eigen stukje wereld.** Elk dier heeft iets dat bij hem hoort, maar
-  het staat er niet de hele tijd: het verschijnt pas als een dier het nodig
-  heeft, vlak bij hem, en verdwijnt weer als hij klaar is. Er staan er
-  hooguit twee tegelijk, en na een halve minuut komt er niemand nieuw meer
-  bij, zodat iets anders een beurt krijgt. Zo blijft de wei rustig:
-  - de aap krijgt een bananenboom: hij klimt erin en eet een banaan;
-  - de luiaard, eekhoorn, uil, papegaai, giraf en egel een boom: de luiaard
-    hangt er ondersteboven in te dutten, de eekhoorn eet er een nootje, de
-    uil en papegaai strijken erin neer, de giraf eet van de blaadjes, de egel
-    vindt er appels onder;
-  - krokodil, nijlpaard, zeehond en pinguïn een vijver om in te baden, de
-    kikker om in te plonzen, de flamingo om op één been in te staan, de
-    wasbeer om zijn pizza in te wassen; wie dorst heeft drinkt aan de kant.
-    Vissen, dolfijn en octopus wonen erin, dus zolang zij er zijn blijft
-    de vijver staan;
-  - de bij en de vlinder bloemen om boven te zweven;
-  - konijn, hamster, kip en slak een moestuin om van te knabbelen, de kameel
-    een cactus;
-  - das, worm, konijn en eekhoorn een hol: ze duiken erin en komen ergens
-    anders boven.
-
-  Grond, water en lucht werken samen: wie langs de vijver loopt, loopt
-  erachter over de oever met het water ervoor, zwemmers liggen er half in,
-  vliegers zweven erboven en strijken neer in de boom. Het decor
-  (`src/lib/shared/pixeldecor.ts`) is pixelkunst met hetzelfde licht,
-  dezelfde schaduw en dezelfde getinte omlijning als de dieren, en komt en
-  gaat met een zachte overgang. Onder de wei ligt alleen een rustige grasrand.
+  karakter is niet alleen voor de sier: het bepaalt hoe het dier zich op je
+  telefoon gedraagt (zie hieronder).
+- **Op je naambordje.** In de lobby op de televisie staat ieders maatje op
+  zijn eigen naambordje: het knippert en ademt, en heel af en toe doet er
+  één een kunstje (nooit twee tegelijk), zodat de kamer het ziet en het
+  scherm verder rustig en chique blijft. Wie er nog niet is, heeft een
+  maatje dat ligt te slapen.
+- **De entree.** Wie binnenkomt, krijgt even het podium: de zaal wordt
+  donkerder, er valt een zacht gouden spotlicht, het maatje rent groot het
+  beeld in, doet een kunstje en buigt, met eronder wie het is (*Joris · Koko,
+  de Aap die Aan de Lamp Hangt*) en hoe het binnenkomt. Komen er meer
+  tegelijk binnen, dan krijgt ieder zijn beurt.
+- **Geen decor.** Het scherm is van de quiz: groen vilt, goud en mooie
+  letters. De pixeldieren zijn het enige grappige erop; in de optocht staan
+  ze op een zacht gouden schijnsel in plaats van in een landschap.
+- **Op de telefoon** staat je eigen maatje op een eigen vilten podiumpje,
+  met een eigen willetje: lopen, rondkijken, snuffelen, slapen, springen,
+  een kunstje, of zijn lievelingshapje opeten. Hoe vaak wat gebeurt volgt
+  het karakter: een snel dier rent vaker en harder, een slaperig dier dut
+  vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
+  wakker).
 - **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
   uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
   dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,
@@ -517,11 +488,13 @@ De dieren, hun titels, wat ze roepen en hun kunstjes staan in
 `src/lib/shared/dieren.ts`; de tekeningen in `src/lib/shared/pixeldieren.ts`
 (een letter per pixel, met uitleg bovenaan) en het dier zelf in
 `src/lib/client/Pixeldier.svelte`. De optocht is
-`src/lib/client/Dierenparade.svelte`, de wei `src/lib/client/Dierenwei.svelte`
-met het brein in `src/lib/client/wei.ts`. De `px-…`-, `dier-…`-, `kunst-…`-,
-`ding-…`- en `wei-…`-animaties staan onderaan `src/app.css`. Wie *minder
-beweging* in zijn systeem aanzet, krijgt geen optochten en een wei die
-stilstaat.
+`src/lib/client/Dierenparade.svelte`, de entree `src/lib/client/Spotlight.svelte`,
+het maatje op het naambordje `src/lib/client/Plaatmaatje.svelte` (de tv-pagina
+kiest wie er een kunstje doet), en het podiumpje op de telefoon
+`src/lib/client/Dierenwei.svelte` met het brein in `src/lib/client/wei.ts`.
+De `px-…`-, `dier-…`-, `kunst-…`-, `ding-…`-, `spot-…`- en `wei-…`-animaties
+staan onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet,
+krijgt geen optochten en geen entree, en dieren die stilstaan.
 
 ### Het hostscherm
 

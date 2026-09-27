@@ -56,9 +56,14 @@ const BOOS: Icoon = {
   rijen: ['rr...rr', 'r.....r', '.......', 'r.....r', 'rr...rr', '.......', '.......'],
 };
 
+const CONFETTI: Icoon = {
+  palet: { r: '#ff5a7a', y: '#ffd23f', b: '#62b6ff', g: '#6cd46c' },
+  rijen: ['r...y..', '..b...g', '.y..r..', 'g...b.y', '..r....', 'b..g..r', '...y...'],
+};
+
 const PER_TEKEN: Record<string, Icoon> = {
   '❤️': HART, '🎵': NOOT, '🎶': NOOT, '✨': STER, '💫': STER, '💧': DRUPPEL, '💦': DRUPPEL,
-  '💤': ZZZ, '❗': UITROEP, '❓': VRAAG, '💨': WOLKJE, '🫧': BEL, '💢': BOOS,
+  '💤': ZZZ, '❗': UITROEP, '❓': VRAAG, '💨': WOLKJE, '🫧': BEL, '💢': BOOS, '🎉': CONFETTI,
 };
 
 export type IcoonPaden = { kleur: string; d: string }[];
