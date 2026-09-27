@@ -26,6 +26,7 @@
  * Dierenwei.svelte tekent het, met Pixeldier.svelte.
  */
 import { actiesVan, dierVan, gangVan, poseVan, type Actie, type Lijf, type Pose } from '$lib/shared/dieren';
+import { DECOR } from '$lib/shared/pixeldecor';
 
 export type Doen =
   | 'loop' | 'ren' | 'staan' | 'snuffel' | 'slaap' | 'spring' | 'kunstje' | 'groet'
@@ -46,12 +47,11 @@ export interface Decor {
   breed: number;
 }
 
-/** Hoe breed elk stuk decor is, in em: een dier is 1em breed. Zie shared/pixeldecor.ts (32 pixels per em). */
-export const DECOR_EM: Readonly<Record<DecorSoort, number>> = {
-  boom: 50 / 32, bananenboom: 50 / 32, vijver: 108 / 32, bloemen: 44 / 32, moestuin: 44 / 32, hol: 22 / 32, cactus: 22 / 32,
-};
-/** Waar je in de boom zit, in em boven de grond: net onder de kruin. */
-const TAK: Partial<Record<DecorSoort, number>> = { boom: 1.1, bananenboom: 1.2 };
+const SOORTEN: readonly DecorSoort[] = ['boom', 'bananenboom', 'vijver', 'bloemen', 'moestuin', 'hol', 'cactus'];
+/** Hoe breed elk stuk decor is, in em: een dier is 1em breed (shared/pixeldecor.ts, 32 pixels per em). */
+export const DECOR_EM = Object.fromEntries(SOORTEN.map((s) => [s, DECOR[s].rijen[0].length / 32])) as Readonly<Record<DecorSoort, number>>;
+/** Waar je in de boom zit, in em boven de grond: tussen de onderste bladeren. */
+const TAK: Partial<Record<DecorSoort, number>> = { boom: 1.0, bananenboom: 1.25 };
 
 /** Wat elk dier meeneemt naar de wei. Wie hier niet staat, gebruikt gewoon wat er al is. */
 export const THUIS: Readonly<Record<string, readonly DecorSoort[]>> = {

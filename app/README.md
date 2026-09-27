@@ -488,8 +488,11 @@ mee; het is er alleen voor de lol.
   Grond, water en lucht werken samen: wie langs de vijver loopt, loopt
   erachter over de oever met het water ervoor, zwemmers liggen er half in,
   vliegers zweven erboven en strijken neer in de boom. Het decor
-  (`src/lib/shared/pixeldecor.ts`) is pixelkunst in dezelfde stijl, staat
-  elke avond ergens anders, en komt en gaat met de dieren.
+  (`src/lib/shared/pixeldecor.ts`) is pixelkunst met hetzelfde licht,
+  dezelfde schaduw en dezelfde getinte omlijning als de dieren, staat elke
+  avond ergens anders, en komt en gaat met de dieren. Eronder ligt een strook
+  pixelgrond (gras op aarde met steentjes), in de verte heuvels, en hier en
+  daar een graspol, een bloempje of een steentje, zodat het één landschap is.
 - **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
   uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
   dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,

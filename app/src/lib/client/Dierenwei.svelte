@@ -17,6 +17,21 @@
   import Pixeldier from './Pixeldier.svelte';
   import Ding from './Ding.svelte';
   import Decorplaatje from './Decorplaatje.svelte';
+  import { TEGELS, type Decorplaatje as Plaatje } from '$lib/shared/pixeldecor';
+
+  /** Een tegel als achtergrondplaatje: de grond en de heuvels herhalen zich over de hele breedte. */
+  function tegel(p: Plaatje) {
+    const w = p.rijen[0].length;
+    const h = p.rijen.length;
+    let d = '';
+    p.rijen.forEach((rij, y) => [...rij].forEach((t, x) => {
+      if (t !== '.') d += `<rect x='${x}' y='${y}' width='1.02' height='1.02' fill='${p.palet[t]}'/>`;
+    }));
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}' shape-rendering='crispEdges'>${d}</svg>`;
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  }
+  const GROND = tegel(TEGELS.grond);
+  const HEUVELS = tegel(TEGELS.heuvels);
   import { aai, houdingVan, maakWereld, nieuweBewoner, stapWei, type Bewoner, type Decor } from './wei';
 
   let {
@@ -38,6 +53,12 @@
   let vak = $state<HTMLDivElement>();
   /** Hoe breed de wei is, in em (een dier is 1em): zo weten we wat er past. */
   let breedteEm = $state(20);
+  /* Wat kleins voor de sfeer: een paar graspollen, een bloempje, een steentje. Per avond ergens anders. */
+  const polletjes = Array.from({ length: 7 }, (_, i) => ({
+    id: i,
+    x: 2 + Math.random() * 94,
+    soort: ['pol', 'pol', 'pol', 'bloempje', 'steentje'][Math.floor(Math.random() * 5)],
+  }));
 
   /* Het decor volgt de dieren: komt er een aap bij, dan komt er een bananenboom. */
   $effect(() => {
@@ -101,7 +122,10 @@
   }
 </script>
 
-<div class="wei" bind:this={vak} class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
+<div class="wei" bind:this={vak} style="--grond:{GROND};--heuvels:{HEUVELS}" class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
+  {#each polletjes as p (p.id)}
+    <div class="decor klein" style="left:{p.x}%"><Decorplaatje soort={p.soort} /></div>
+  {/each}
   {#each wereld as d (d.soort + d.x)}
     <div class="decor" data-soort={d.soort} style="left:{d.x}%" transition:fade={{ duration: 700 }}>
       <Decorplaatje soort={d.soort} />

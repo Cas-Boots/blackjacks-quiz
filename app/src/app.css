@@ -3428,16 +3428,16 @@ a.uitslagrij:hover {
   overflow: hidden;
   height: 2.3em;
   font-size: 3rem;
-  /* Een pixelgrasmat met sprietjes. */
+  /* Pixelgrond met gras erop, en in de verte heuvels (tegels uit shared/pixeldecor.ts). */
   background:
-    linear-gradient(to top, #2f5a2a 0 0.14em, transparent 0.14em),
-    repeating-linear-gradient(90deg, #4c8a3c 0 0.0625em, #3d7532 0.0625em 0.125em, transparent 0.125em 0.25em) 0 100% / 100% 0.22em no-repeat;
+    var(--grond) left bottom / 1em 0.3125em repeat-x,
+    var(--heuvels) left 0 bottom 0.26em / 5em 0.8125em repeat-x;
 }
 .bewoner {
   position: absolute;
   z-index: 1;
   /* Hoogte uit wei.ts: in een boom, boven de bloemen, of half onder water. */
-  bottom: calc(0.1em + var(--hoog, 0em));
+  bottom: calc(0.2em + var(--hoog, 0em));
   transition: bottom 0.9s ease-in-out;
   display: flex;
   flex-direction: column-reverse;
@@ -3462,16 +3462,19 @@ a.uitslagrij:hover {
 .decor {
   position: absolute;
   z-index: 0;
-  bottom: 0.06em;
+  bottom: 0.2em;
   line-height: 0;
   pointer-events: none;
 }
 .decorplaatje { display: block; }
+.decor[data-soort="vijver"] { bottom: 0; }
 .decor.water {
   z-index: 2;
-  clip-path: inset(40% 0 0 0);
-  opacity: 0.85;
+  bottom: 0;
+  clip-path: inset(56% 0 0 0);
+  opacity: 0.88;
 }
+.decor.klein { bottom: 0.2em; }
 @keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
 @keyframes wei-zwem { 0%, 100% { translate: 0 0; rotate: 6deg; } 50% { translate: 0 -0.15em; rotate: -6deg; } }
 /* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */
@@ -3535,18 +3538,18 @@ a.uitslagrij:hover {
   pointer-events: none;
 }
 .tvwei .wei {
-  height: 14vh;
+  height: 16vh;
   font-size: clamp(2.2rem, 6.5vh, 5.5rem);
 }
 /* De lobby maakt plaats voor de wei, zodat geen dier door de tekst loopt:
    het vlak krimpt dan een tikje mee (passend.ts). */
-.tvwei ~ .romp.midden { padding-bottom: calc(14vh + 1rem); }
+.tvwei ~ .romp.midden { padding-bottom: calc(16vh + 1rem); }
 /* Op de telefoon: je eigen dier in een eigen weitje. */
 .telefoonwei .wei {
   margin-top: 0.8rem;
   border-radius: 0.8rem;
   border: 1px solid var(--rand);
-  height: 6.5rem;
+  height: 8.5rem;
   font-size: 3.4rem;
   background-color: rgba(8, 21, 17, 0.45);
 }
