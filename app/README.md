@@ -414,15 +414,14 @@ mee; het is er alleen voor de lol.
 
   Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
   het leuk blijft en niet druk wordt.
-- **Pixelkunst.** Elk dier is met de hand getekend, met de kop naar rechts.
-  De meeste in een raster van 16 bij 16; de dieren die daarin niet te
-  herkennen waren (luiaard, das, aap, kreeft, wasbeer, nijlpaard, hamster,
-  zeehond, uil, bij, krokodil, dolfijn) meteen in 32 bij 32, met ruimte voor
-  wat ze herkenbaar maakt: het masker en de klauwen van de luiaard, de streep
-  over de kop van de das, het rechtop staande aapje met grote oren en
-  krulstaart, de geringde staart van de wasbeer, de schaar van de kreeft, de
-  gele ogen van de uil, de dolfijn midden in een sprong. Alles komt op 32 bij 32 op het scherm: bij
-  de grove worden de trapjes schuine lijnen (Scale2x), met licht van linksboven, een
+- **Pixelkunst.** Elk dier is met de hand getekend, met de kop naar rechts,
+  allemaal in een raster van 32 bij 32 en in dezelfde hand: een omlijning van
+  één pixel, poten met een eigen randje en een voet eronder. Zo is er ruimte
+  voor wat ze herkenbaar maakt: het masker en de klauwen van de luiaard, de
+  witte streep van neus tot kruin bij de das, de brede snuit met neusgaten van
+  het nijlpaard, het rechtop staande aapje met grote oren en krulstaart, de
+  geringde staart van de wasbeer, de schaar van de kreeft, de gele ogen van de
+  uil, de dolfijn midden in een sprong. Op het scherm krijgt elk dier licht van linksboven, een
   schaduw onderaan, een omlijning in een donkere tint van het dier zelf, en
   ronde ogen met een glinstering. Het is geen plaatje maar losse lagen, zodat het
   dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
