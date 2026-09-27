@@ -3435,7 +3435,10 @@ a.uitslagrij:hover {
 }
 .bewoner {
   position: absolute;
-  bottom: 0.1em;
+  z-index: 1;
+  /* Hoogte uit wei.ts: in een boom, boven de bloemen, of half onder water. */
+  bottom: calc(0.1em + var(--hoog, 0em));
+  transition: bottom 0.9s ease-in-out;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
@@ -3451,11 +3454,24 @@ a.uitslagrij:hover {
 .bewoner[data-doen="jaag"] .kijk,
 .bewoner[data-doen="vlucht"] .kijk { animation: wei-hup 0.2s steps(2, jump-none) infinite; }
 @keyframes wei-hup { from { translate: 0 0; } to { translate: 0 -0.0625em; } }
-.bewoner[data-soort="lucht"] { bottom: 0.7em; }
-.bewoner[data-soort="lucht"] .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
-.bewoner[data-soort="lucht"][data-doen="slaap"] { bottom: 0.14em; }
-.bewoner[data-soort="water"] { bottom: 0.35em; }
-.bewoner[data-soort="water"] .actie:not([data-lijf]) { animation: wei-zwem 1.4s ease-in-out infinite; }
+.bewoner[data-soort="lucht"]:not([data-doen="inboom"], [data-doen="slaap"]) .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
+.bewoner[data-soort="water"]:not([data-nat]) { bottom: 0.35em; }
+.bewoner:is([data-soort="water"], [data-nat]) .actie:not([data-lijf]) { animation: wei-zwem 1.4s ease-in-out infinite; }
+/* Het decor: achter de dieren, op het gras. Het water van de vijver ligt er
+   nog een keer vóór, alleen het onderste deel, zodat zwemmers erin liggen. */
+.decor {
+  position: absolute;
+  z-index: 0;
+  bottom: 0.06em;
+  line-height: 0;
+  pointer-events: none;
+}
+.decorplaatje { display: block; }
+.decor.water {
+  z-index: 2;
+  clip-path: inset(40% 0 0 0);
+  opacity: 0.85;
+}
 @keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
 @keyframes wei-zwem { 0%, 100% { translate: 0 0; rotate: 6deg; } 50% { translate: 0 -0.15em; rotate: -6deg; } }
 /* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */

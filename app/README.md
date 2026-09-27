@@ -467,6 +467,29 @@ mee; het is er alleen voor de lol.
   iets geks, de rest scharrelt, snuffelt of dut. Een naambordje verschijnt
   pas als een dier iets doet, en de lobby maakt onderaan plaats voor de wei,
   zodat er geen dier door de tekst loopt.
+- **Een eigen stukje wereld.** Elk dier neemt mee wat bij hem hoort, en
+  alleen wat er voor de dieren van vanavond nodig is staat in de wei, zodat
+  het nooit vol wordt:
+  - de aap een bananenboom: hij klimt erin en eet een banaan;
+  - de luiaard, eekhoorn, uil, papegaai, giraf en egel een boom: de luiaard
+    hangt er ondersteboven in te dutten, de eekhoorn eet er een nootje, de
+    uil en papegaai strijken erin neer, de giraf eet van de blaadjes, de egel
+    vindt er appels onder;
+  - vissen, dolfijn en octopus een vijver waar ze in blijven; krokodil,
+    nijlpaard, zeehond en pinguïn nemen er een bad, de kikker springt erin
+    met een plons, de flamingo staat erin op één been, de wasbeer wast er
+    zijn pizza, en wie dorst heeft drinkt aan de kant;
+  - de bij en de vlinder bloemen om boven te zweven;
+  - konijn, hamster, kip en slak een moestuin om van te knabbelen, de kameel
+    een cactus;
+  - das, worm, konijn en eekhoorn holen: ze duiken het ene in en komen uit
+    het andere boven.
+
+  Grond, water en lucht werken samen: wie langs de vijver loopt, loopt
+  erachter over de oever met het water ervoor, zwemmers liggen er half in,
+  vliegers zweven erboven en strijken neer in de boom. Het decor
+  (`src/lib/shared/pixeldecor.ts`) is pixelkunst in dezelfde stijl, staat
+  elke avond ergens anders, en komt en gaat met de dieren.
 - **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
   uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
   dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,

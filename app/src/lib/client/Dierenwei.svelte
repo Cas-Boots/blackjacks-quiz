@@ -6,12 +6,18 @@
    * telefoon alleen dat van jezelf, en daar kun je erop tikken voor een
    * kunstje. Wie van beweging houdt: zonder beweging (prefers-reduced-motion)
    * staan ze gewoon stil naast elkaar.
+   *
+   * Het decor (bomen, een vijver, bloemen, holen) komt mee met de dieren die
+   * het nodig hebben (THUIS in wei.ts). Het staat achter de dieren; alleen het
+   * water van de vijver ligt ervoor, zodat wie zwemt er half in ligt.
    */
   import { onMount, untrack } from 'svelte';
+  import { fade } from 'svelte/transition';
   import { dierVan } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
   import Ding from './Ding.svelte';
-  import { aai, houdingVan, nieuweBewoner, stapWei, type Bewoner } from './wei';
+  import Decorplaatje from './Decorplaatje.svelte';
+  import { aai, houdingVan, maakWereld, nieuweBewoner, stapWei, type Bewoner, type Decor } from './wei';
 
   let {
     spelers,
@@ -28,6 +34,19 @@
   } = $props();
 
   let wei = $state<Bewoner[]>([]);
+  let wereld = $state<Decor[]>([]);
+  let vak = $state<HTMLDivElement>();
+  /** Hoe breed de wei is, in em (een dier is 1em): zo weten we wat er past. */
+  let breedteEm = $state(20);
+
+  /* Het decor volgt de dieren: komt er een aap bij, dan komt er een bananenboom. */
+  $effect(() => {
+    const sleutels = wei.map((b) => b.sleutel).sort().join(',');
+    const breed = Math.round(breedteEm);
+    untrack(() => {
+      wereld = maakWereld(sleutels ? sleutels.split(',') : [], breed, wereld);
+    });
+  });
 
   /* Wie erbij komt valt de wei in; wie weggaat verdwijnt; wie van dier
      wisselt, verschijnt als zijn nieuwe dier. */
@@ -51,15 +70,26 @@
   });
 
   onMount(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const meet = () => {
+      if (!vak) return;
+      const em = parseFloat(getComputedStyle(vak).fontSize) || 16;
+      breedteEm = vak.clientWidth / em;
+    };
+    meet();
+    const kijker = new ResizeObserver(meet);
+    if (vak) kijker.observe(vak);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => kijker.disconnect();
     let vorige = performance.now();
     let frame = requestAnimationFrame(function tik(nu) {
       // Een tabblad op de achtergrond slaat seconden over; niet alles in één keer inhalen.
-      stapWei(wei, Math.min(100, nu - vorige));
+      stapWei(wei, Math.min(100, nu - vorige), Math.random, wereld);
       vorige = nu;
       frame = requestAnimationFrame(tik);
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      kijker.disconnect();
+    };
   });
 
   function tik(b: Bewoner) {
@@ -71,14 +101,20 @@
   }
 </script>
 
-<div class="wei" class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
+<div class="wei" bind:this={vak} class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
+  {#each wereld as d (d.soort + d.x)}
+    <div class="decor" data-soort={d.soort} style="left:{d.x}%" transition:fade={{ duration: 700 }}>
+      <Decorplaatje soort={d.soort} />
+    </div>
+  {/each}
   {#each wei as b (b.id)}
     {@const h = houdingVan(b)}
     <div
       class="bewoner"
       data-soort={b.soort}
       data-doen={b.doen}
-      style="left:clamp(0.6em, {b.x}%, calc(100% - 0.6em));--tel:{b.duur}ms"
+      data-nat={b.nat || null}
+      style="left:clamp(0.6em, {b.x}%, calc(100% - 0.6em));--tel:{b.duur}ms;--hoog:{b.hoog}em"
     >
       {#key b.beurt}
         <span class="actie" data-lijf={h.lijf}>
@@ -99,6 +135,12 @@
         </span>
       {/key}
       {#if namen}<span class="weinaam" data-naam={b.dierNaam ?? b.naam}></span>{/if}
+    </div>
+  {/each}
+  <!-- Het wateroppervlak ligt vóór de dieren: wie zwemt, ligt er half in. -->
+  {#each wereld.filter((d) => d.soort === 'vijver') as d (d.x)}
+    <div class="decor water" style="left:{d.x}%" transition:fade={{ duration: 700 }}>
+      <Decorplaatje soort="vijver" />
     </div>
   {/each}
 </div>

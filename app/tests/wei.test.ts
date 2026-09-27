@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DIEREN } from '../src/lib/shared/dieren';
-import { MAX_DRUK, RAND, aai, drukte, houdingVan, nieuweBewoner, stapWei, type Bewoner, type Doen } from '../src/lib/client/wei';
+import { MAX_DRUK, RAND, aai, drukte, maakWereld, houdingVan, nieuweBewoner, stapWei, type Bewoner, type Doen } from '../src/lib/client/wei';
 
 /** Een vaste toevalsbron, zodat de test elke keer hetzelfde ziet. */
 function zaadje(n = 42) {
@@ -91,5 +91,58 @@ describe('de wei', () => {
     expect(meest).toBeLessThanOrEqual(MAX_DRUK);
     // De meeste tijd scharrelt de kudde gewoon wat rond.
     expect(rustig / tellen).toBeGreaterThan(0.75);
+  });
+});
+
+describe('de wereld in de wei', () => {
+  const kudde = (sleutels: string[], toeval: () => number) =>
+    sleutels.map((dier, i) => nieuweBewoner({ id: i, naam: `s${i}`, dier }, toeval));
+
+  it('zet alleen het decor neer dat de dieren van nu nodig hebben, zonder overlap, en laat staan wat er al stond', () => {
+    const toeval = zaadje(11);
+    const w1 = maakWereld(['aap', 'goudvis', 'bij', 'das', 'hond'], 30, [], toeval);
+    expect(w1.map((d) => d.soort).sort()).toEqual(['bananenboom', 'bloemen', 'hol', 'hol', 'vijver']);
+    for (const a of w1) for (const b of w1) if (a !== b) expect(a.x + a.breed <= b.x || b.x + b.breed <= a.x).toBe(true);
+    // Een luiaard erbij: de boom komt erbij, de rest blijft op zijn plek.
+    const w2 = maakWereld(['aap', 'goudvis', 'bij', 'das', 'hond', 'luiaard'], 30, w1, toeval);
+    for (const d of w1) expect(w2).toContainEqual(d);
+    expect(w2.some((d) => d.soort === 'boom')).toBe(true);
+    // Zonder dieren die iets meenemen: een lege wei.
+    expect(maakWereld(['hond', 'lama'], 30, w2, toeval)).toEqual([]);
+  });
+
+  it('laat grond, water en lucht samenwerken: vissen in de vijver, de aap in de bananenboom, de bij bij de bloemen', () => {
+    const toeval = zaadje(5);
+    const sleutels = ['aap', 'goudvis', 'bij', 'das', 'hond', 'krokodil', 'kikker', 'luiaard', 'uil'];
+    const wereld = maakWereld(sleutels, 34, [], toeval);
+    const wei = kudde(sleutels, toeval);
+    const vijver = wereld.find((d) => d.soort === 'vijver')!;
+    const gezien = new Set<string>();
+    for (let t = 0; t < 8 * 60_000; t += 50) {
+      stapWei(wei, 50, toeval, wereld);
+      for (const b of wei) {
+        if (b.sleutel === 'goudvis' && t > 100) {
+          expect(b.nat).toBe(true);
+          expect(b.x).toBeGreaterThanOrEqual(vijver.x);
+          expect(b.x).toBeLessThanOrEqual(vijver.x + vijver.breed);
+        }
+        // Wie niet vliegt of zwemt en toch bij de vijver is, loopt erachter langs, over de oever.
+        if (b.soort !== 'lucht' && !b.nat && b.x > vijver.x + 1 && b.x < vijver.x + vijver.breed - 1 && b.hoog < 1) {
+          expect(b.hoog, `${b.sleutel} ${b.doen}`).toBeGreaterThan(0);
+        }
+        if (b.sleutel === 'aap' && b.doen === 'inboom') gezien.add('aap in de boom');
+        if (b.sleutel === 'aap' && b.actie?.ding === '🍌') gezien.add('banaan');
+        if (b.sleutel === 'luiaard' && b.doen === 'inboom' && b.actie?.lijf === 'ondersteboven') gezien.add('luiaard hangt');
+        if (b.sleutel === 'uil' && b.doen === 'inboom') gezien.add('uil in de boom');
+        if (b.sleutel === 'bij' && b.doen === 'bestuif') gezien.add('bij bij de bloemen');
+        if (b.sleutel === 'krokodil' && b.doen === 'bad' && b.nat) gezien.add('krokodil in bad');
+        if (b.sleutel === 'kikker' && b.doen === 'plons') gezien.add('plons');
+        if (b.sleutel === 'hond' && b.doen === 'drink') gezien.add('hond drinkt');
+        if (b.sleutel === 'das' && b.doen === 'op' && wereld.some((d) => d.soort === 'hol' && Math.abs(d.x + d.breed / 2 - b.x) < 0.01)) gezien.add('das uit een hol');
+      }
+    }
+    for (const iets of ['aap in de boom', 'banaan', 'luiaard hangt', 'uil in de boom', 'bij bij de bloemen', 'krokodil in bad', 'plons', 'hond drinkt', 'das uit een hol']) {
+      expect(gezien, iets).toContain(iets);
+    }
   });
 });
