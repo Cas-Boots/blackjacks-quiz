@@ -49,11 +49,13 @@ function portret(kleur: string): string {
 
 /** Elk een dier met een andere gang: lopen, springen, slingeren, zwemmen, vliegen, graven. */
 const TESTDIEREN = ['lama', 'kangoeroe', 'aap', 'goudvis', 'bij', 'das', 'pinguin', 'slak'];
+/** Een paar maatjes met een eigen naam, een paar zonder: allebei moet er goed uitzien. */
+const TESTNAMEN: Record<string, string> = { Liz: 'Dolly', Joris: 'Bubbels', Tom: 'Turbo' };
 
 function spelers(verbonden: number | boolean = true): PubliekeSpeler[] {
   return NAMEN.map((naam, i) => {
     const aan = typeof verbonden === 'boolean' ? verbonden : i < verbonden;
-    return { id: i + 1, naam, foto: naam === 'Eva' ? portret('#7d6312') : null, dier: TESTDIEREN[i % TESTDIEREN.length], stilSinds: aan ? 2 : null, verbonden: aan };
+    return { id: i + 1, naam, foto: naam === 'Eva' ? portret('#7d6312') : null, dier: TESTDIEREN[i % TESTDIEREN.length], dierNaam: TESTNAMEN[naam] ?? null, stilSinds: aan ? 2 : null, verbonden: aan };
   });
 }
 

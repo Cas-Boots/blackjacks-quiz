@@ -9,6 +9,8 @@ export const spelers = sqliteTable('spelers', {
   foto: text('foto'),
   /** Het maatje, een sleutel uit shared/dieren.ts. Alleen voor de lol. */
   dier: text('dier'),
+  /** De naam die je je maatje gaf ("Knabbel"). Leeg: het heet gewoon naar zijn soort. */
+  dierNaam: text('dier_naam'),
   isQuizmaster: integer('is_quizmaster', { mode: 'boolean' }).notNull().default(false),
   /** Een gast van één avond: doet niet vanzelf mee aan het volgende spel. */
   isGast: integer('is_gast', { mode: 'boolean' }).notNull().default(false),

@@ -36,6 +36,13 @@
       "when": 1790342523623,
       "tag": "0004_geestdieren",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790443452227,
+      "tag": "0005_maatjesnaam",
+      "breakpoints": true
     }
   ]
 }

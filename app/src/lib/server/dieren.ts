@@ -8,7 +8,7 @@
 import { and, eq, isNull, ne } from 'drizzle-orm';
 import { db } from './db/index';
 import { spelers, deelnemers } from './db/schema';
-import { isDier, vrijDier } from '$lib/shared/dieren';
+import { isDier, schoneDierNaam, vrijDier } from '$lib/shared/dieren';
 
 /** Geeft iedereen zonder dier een vrij dier. Idempotent en goedkoop. */
 export function zorgVoorDieren() {
@@ -32,6 +32,16 @@ export function dobbelDier(spelerId: number, toeval: () => number = Math.random)
   const dier = vrijDier(bezet, speler.naam, toeval, speler.dier);
   db.update(spelers).set({ dier }).where(eq(spelers.id, spelerId)).run();
   return dier;
+}
+
+/**
+ * Een speler geeft zijn maatje een naam (of haalt hem weg met een lege).
+ * De naam blijft bij je als je van dier wisselt: het is jouw maatje.
+ */
+export function noemDier(spelerId: number, naam: unknown): string | null {
+  const schoon = schoneDierNaam(naam);
+  db.update(spelers).set({ dierNaam: schoon }).where(eq(spelers.id, spelerId)).run();
+  return schoon;
 }
 
 /**

@@ -141,7 +141,7 @@ export function schrijfTeams(spelId: number, rondeIndex: number, lijst: Team[]) 
 
 export function deelnemersVan(spelId: number) {
   return db
-    .select({ id: spelers.id, naam: spelers.naam, foto: spelers.foto, dier: spelers.dier })
+    .select({ id: spelers.id, naam: spelers.naam, foto: spelers.foto, dier: spelers.dier, dierNaam: spelers.dierNaam })
     .from(deelnemers)
     .innerJoin(spelers, eq(deelnemers.spelerId, spelers.id))
     .where(eq(deelnemers.spelId, spelId))
@@ -535,7 +535,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     spelers: lijst.map((s) => {
       const laatste = laatsteVan.get(s.id) ?? null;
       return {
-        id: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel,
+        id: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel, dierNaam: s.dierNaam,
         stilSinds: laatste ? Math.round((nu - laatste) / 1000) : null,
         verbonden: laatste != null && nu - laatste < STIL_DREMPEL_MS,
       };
