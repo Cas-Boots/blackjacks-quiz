@@ -6,15 +6,17 @@
  * zit een ander achterna. Komen twee dieren elkaar tegen, dan groeten ze
  * elkaar. En wie op zijn eigen dier tikt, krijgt een kunstje.
  *
- * Elk dier neemt ook zijn eigen stukje wereld mee (THUIS): de aap een
+ * Elk dier heeft ook zijn eigen stukje wereld (THUIS): de aap een
  * bananenboom, de luiaard een boom om in te hangen, de vissen een vijver,
- * de bij bloemen, het konijn een moestuin, de das een paar holen, de kameel
- * een cactus. Alleen wat er voor de dieren van vanavond nodig is staat in de
- * wei, zodat het nooit vol raakt. Grond, water en lucht werken samen: vissen
+ * de bij bloemen, het konijn een moestuin, de das een hol, de kameel een
+ * cactus. Dat decor staat er niet de hele tijd: het verschijnt pas als een
+ * dier het nodig heeft, vlak bij hem, en verdwijnt weer als niemand het meer
+ * gebruikt; hooguit twee stukken tegelijk (MAX_DECOR). Alleen de vijver
+ * blijft zolang er vissen zijn. Grond, water en lucht werken samen: vissen
  * blijven in de vijver, landdieren lopen erachter langs over de oever of gaan
  * een bad nemen of drinken, de kikker springt erin met een plons, vogels strijken neer in de
- * boom, de bij zweeft boven de bloemen, gravers verdwijnen in het ene hol en
- * komen uit het andere boven.
+ * boom, de bij zweeft boven de bloemen, gravers verdwijnen in een hol en
+ * komen ergens anders boven.
  *
  * Hoe vaak een dier wat doet hangt af van zijn karakter (shared/dieren.ts):
  * een snel dier rent vaker en harder, een slaperig dier dut vaker en langer,
@@ -45,6 +47,11 @@ export interface Decor {
   soort: DecorSoort;
   x: number;
   breed: number;
+  id: number;
+  /** Hoe lang niemand het al gebruikt, in ms: na een tijdje verdwijnt het. */
+  rust: number;
+  /** Hoe lang het er al staat, in ms: na een tijdje komt er niemand nieuw meer bij, zodat iets anders een beurt krijgt. */
+  leeftijd: number;
 }
 
 const SOORTEN: readonly DecorSoort[] = ['boom', 'bananenboom', 'vijver', 'bloemen', 'moestuin', 'hol', 'cactus'];
@@ -70,46 +77,51 @@ const BADERS = new Set(['krokodil', 'nijlpaard', 'zeehond', 'pinguin']);
 const KLIMMERS = new Set(['aap', 'luiaard', 'eekhoorn']);
 const GRAVERS = new Set(['das', 'worm', 'konijn', 'eekhoorn']);
 
-/** Welk decor de dieren van nu nodig hebben: elk soort één keer, holen twee keer (je moet ergens anders boven kunnen komen). */
-export function decorVoor(sleutels: readonly string[]): DecorSoort[] {
-  const nodig = new Set(sleutels.flatMap((s) => THUIS[s] ?? []));
-  return [...nodig].flatMap((d) => (d === 'hol' ? ['hol', 'hol'] : [d]) as DecorSoort[]);
+/** Hooguit zoveel stukken decor tegelijk: de wei is een wei, geen dierentuin. */
+export const MAX_DECOR = 2;
+/** Na zo lang (ms) sluit een stuk decor: wie er is maakt het af, maar er komt niemand nieuw bij. De vijver van de vissen sluit niet. */
+const OPEN_MS = 25_000;
+const open = (d: Decor) => d.soort === 'vijver' || d.leeftijd < OPEN_MS;
+
+/** De wereld van de wei: het decor dat er nu staat, en hoe breed de wei is (in em). */
+export interface Wereld {
+  decor: Decor[];
+  breedteEm: number;
+  teller: number;
+}
+export function nieuweWereld(breedteEm = 30): Wereld {
+  return { decor: [], breedteEm, teller: 0 };
+}
+/** Een wei zonder decor: voor wie het brein zonder wereld wil (en de oude tests). */
+const GEEN: Wereld = { decor: [], breedteEm: 0, teller: 0 };
+
+const breedteVan = (w: Wereld, soort: DecorSoort) => (DECOR_EM[soort] * 100) / Math.max(1, w.breedteEm);
+/** Of dit decor er is, of erbij kan. */
+function kan(w: Wereld, soort: DecorSoort) {
+  const er = w.decor.find((d) => d.soort === soort);
+  if (er) return open(er);
+  return w.breedteEm > 0 && w.decor.length < MAX_DECOR && breedteVan(w, soort) <= 60;
 }
 
 /**
- * Zet het decor neer: wat er al stond blijft staan, wat erbij moet krijgt een
- * vrije plek (per avond anders), en wat niet meer nodig is verdwijnt. Past
- * iets niet (op een smalle telefoon), dan komt het er niet.
+ * Het decor komt pas als een dier het nodig heeft: dan verschijnt het vlak bij
+ * hem, en als niemand het meer gebruikt verdwijnt het weer. Staat het er al,
+ * dan gebruikt hij dat. Is er geen plek, of staat er al genoeg, dan niet.
  */
-export function maakWereld(
-  sleutels: readonly string[],
-  breedteEm: number,
-  oud: readonly Decor[] = [],
-  toeval: () => number = Math.random,
-): Decor[] {
-  const nodig = decorVoor(sleutels);
-  const wereld: Decor[] = [];
-  const over = [...oud];
-  const vrij: DecorSoort[] = [];
-  for (const soort of nodig) {
-    const i = over.findIndex((d) => d.soort === soort);
-    if (i >= 0) wereld.push(over.splice(i, 1)[0]);
-    else vrij.push(soort);
-  }
-  // Grote stukken eerst, dan is er nog ruimte voor de kleine.
-  vrij.sort((a, b) => DECOR_EM[b] - DECOR_EM[a]);
-  for (const soort of vrij) {
-    const breed = (DECOR_EM[soort] * 100) / Math.max(1, breedteEm);
-    if (breed > 60) continue;
-    for (let poging = 0; poging < 80; poging++) {
-      const x = tussen(toeval, 2, 98 - breed);
-      if (wereld.every((d) => x + breed + 2 < d.x || x > d.x + d.breed + 2)) {
-        wereld.push({ soort, x, breed });
-        break;
-      }
+function plaats(w: Wereld, soort: DecorSoort, bijX: number, toeval: () => number): Decor | null {
+  const er = w.decor.find((d) => d.soort === soort);
+  if (er) return open(er) ? er : null;
+  if (!kan(w, soort)) return null;
+  const breed = breedteVan(w, soort);
+  for (let poging = 0; poging < 40; poging++) {
+    const x = Math.min(98 - breed, Math.max(2, bijX - breed / 2 + tussen(toeval, -14, 14)));
+    if (w.decor.every((d) => x + breed + 3 < d.x || x > d.x + d.breed + 3)) {
+      const nieuw: Decor = { soort, x, breed, id: ++w.teller, rust: 0, leeftijd: 0 };
+      w.decor.push(nieuw);
+      return nieuw;
     }
   }
-  return wereld.sort((a, b) => a.x - b.x);
+  return null;
 }
 
 const midden = (d: Decor) => d.x + d.breed / 2;
@@ -147,6 +159,8 @@ export interface Bewoner {
   /** Waar hij heen loopt, en wat hij daar gaat doen. */
   doel: number | null;
   klus: Klus | null;
+  /** Het decor dat hij nu gebruikt (zolang iemand het gebruikt, blijft het staan). */
+  plek: number | null;
   /** Hoe lang hij niet opnieuw gaat groeten. */
   groetPauze: number;
   /** Telt op bij elke nieuwe bezigheid, zodat de animatie opnieuw begint. */
@@ -216,6 +230,7 @@ export function nieuweBewoner(
     ander: null,
     doel: null,
     klus: null,
+    plek: null,
     groetPauze: 4000,
     beurt: 0,
   };
@@ -239,10 +254,10 @@ function opPad(b: Bewoner, doel: number, klus: Klus) {
 }
 
 /** Wat dit dier in deze wereld graag gaat doen, met hoe graag. */
-function klussen(b: Bewoner, wereld: readonly Decor[]): [Klus, number][] {
+function klussen(b: Bewoner, w: Wereld): [Klus, number][] {
   const s = b.sleutel;
   const uit: [Klus, number][] = [];
-  const heeft = (d: DecorSoort) => !!zoek(wereld, d);
+  const heeft = (d: DecorSoort) => kan(w, d);
   if (s === 'aap' && heeft('bananenboom')) uit.push(['klim', 16]);
   else if (KLIMMERS.has(s) && heeft('boom')) uit.push(['klim', s === 'luiaard' ? 22 : 12]);
   if ((s === 'uil' || s === 'papegaai') && heeft('boom')) uit.push(['strijkneer', 16]);
@@ -262,44 +277,51 @@ function klussen(b: Bewoner, wereld: readonly Decor[]): [Klus, number][] {
   return uit;
 }
 
-/** Waar een klus je heen stuurt. */
-function doelVan(klus: Klus, b: Bewoner, wereld: readonly Decor[], toeval: () => number): number | null {
-  const s = b.sleutel;
-  const boom = zoek(wereld, s === 'aap' ? 'bananenboom' : 'boom');
-  const vijver = zoek(wereld, 'vijver');
+/** Welk decor een klus nodig heeft. */
+function decorVoorKlus(klus: Klus, sleutel: string): DecorSoort {
+  switch (klus) {
+    case 'klim': return sleutel === 'aap' ? 'bananenboom' : 'boom';
+    case 'strijkneer': case 'blad': case 'appel': return 'boom';
+    case 'bad': case 'plons': case 'waad': case 'drink': case 'was': return 'vijver';
+    case 'bestuif': return 'bloemen';
+    case 'knabbel': return sleutel === 'kameel' ? 'cactus' : 'moestuin';
+    case 'holgraaf': return 'hol';
+  }
+}
+
+/** Waar een klus je heen stuurt; zet het decor neer als het er nog niet stond. */
+function doelVan(klus: Klus, b: Bewoner, w: Wereld, toeval: () => number): number | null {
+  const d = plaats(w, decorVoorKlus(klus, b.sleutel), b.x, toeval);
+  if (!d) return null;
+  b.plek = d.id;
   switch (klus) {
     case 'klim':
     case 'strijkneer':
-      return boom ? midden(boom) + tussen(toeval, -1, 1) : null;
+      return midden(d) + tussen(toeval, -1, 1);
     case 'blad':
     case 'appel':
-      return boom ? midden(boom) + (toeval() < 0.5 ? -1 : 1) * boom.breed * 0.3 : null;
+      return midden(d) + (toeval() < 0.5 ? -1 : 1) * d.breed * 0.3;
     case 'bad':
     case 'plons':
-      return vijver ? tussen(toeval, vijver.x + vijver.breed * 0.25, vijver.x + vijver.breed * 0.75) : null;
+      return tussen(toeval, d.x + d.breed * 0.25, d.x + d.breed * 0.75);
     case 'waad':
-      return vijver ? (toeval() < 0.5 ? vijver.x + vijver.breed * 0.12 : vijver.x + vijver.breed * 0.88) : null;
+      return toeval() < 0.5 ? d.x + d.breed * 0.12 : d.x + d.breed * 0.88;
     case 'drink':
     case 'was':
       // Aan de kant, met je snuit naar het water.
-      return vijver ? (b.x < midden(vijver) ? vijver.x - 1 : vijver.x + vijver.breed + 1) : null;
-    case 'bestuif': {
-      const bloemen = zoek(wereld, 'bloemen');
-      return bloemen ? tussen(toeval, bloemen.x + 1, bloemen.x + bloemen.breed - 1) : null;
-    }
-    case 'knabbel': {
-      const plek = zoek(wereld, s === 'kameel' ? 'cactus' : 'moestuin');
-      return plek ? midden(plek) + (s === 'kameel' ? (toeval() < 0.5 ? -2 : 2) : tussen(toeval, -2, 2)) : null;
-    }
-    case 'holgraaf': {
-      const holen = wereld.filter((d) => d.soort === 'hol');
-      return holen.length ? midden(greep(holen, toeval)) : null;
-    }
+      return b.x < midden(d) ? d.x - 1 : d.x + d.breed + 1;
+    case 'bestuif':
+      return tussen(toeval, d.x + 1, d.x + d.breed - 1);
+    case 'knabbel':
+      return midden(d) + (b.sleutel === 'kameel' ? (toeval() < 0.5 ? -2 : 2) : tussen(toeval, -2, 2));
+    case 'holgraaf':
+      return midden(d);
   }
 }
 
 /** Aangekomen: nu doen waarvoor je kwam. */
-function aankomst(b: Bewoner, wereld: readonly Decor[], toeval: () => number) {
+function aankomst(b: Bewoner, w: Wereld, toeval: () => number) {
+  const wereld = w.decor;
   const klus = b.klus;
   const s = b.sleutel;
   const hapje = dierVan(s).hapje.ding;
@@ -352,14 +374,15 @@ function aankomst(b: Bewoner, wereld: readonly Decor[], toeval: () => number) {
 }
 
 /** Iets nieuws verzinnen, nu de vorige bezigheid klaar is. */
-function bedenk(b: Bewoner, wei: Bewoner[], wereld: readonly Decor[], toeval: () => number) {
-  const vijver = zoek(wereld, 'vijver');
-  const holen = wereld.filter((d) => d.soort === 'hol');
+function bedenk(b: Bewoner, wei: Bewoner[], w: Wereld, toeval: () => number) {
+  const vijver = zoek(w.decor, 'vijver');
 
   // Na het graven: onder de grond door naar een nieuwe plek (een ander hol, als die er is), en weer op.
   if (b.doen === 'graaf') return begin(b, 'onder', tussen(toeval, 900, 1600));
   if (b.doen === 'onder') {
-    b.x = holen.length ? midden(greep(holen, toeval)) : tussen(toeval, 10, 90);
+    // Ergens anders weer boven: het hol mag weer weg.
+    b.plek = null;
+    b.x = tussen(toeval, 10, 90);
     return begin(b, 'op', 900, { lijf: 'boing', ding: '🌱', dingGaat: 'op' });
   }
   // Uit de boom: eerst omhoog, dan wat doen, dan weer omlaag.
@@ -404,14 +427,16 @@ function bedenk(b: Bewoner, wei: Bewoner[], wereld: readonly Decor[], toeval: ()
   }
 
   if (b.doen === 'slaap' && ruimte > 0 && toeval() < 0.5) return begin(b, 'schrik', 700, { lijf: 'schrik', ding: '❗', dingGaat: 'op' });
+  // Klaar met wat hij deed: zijn decor mag weer weg (als niemand anders het gebruikt).
+  b.plek = null;
 
   // Achterna zitten doe je iemand die gewoon wat rondscharrelt, niet wie op pad is, zwemt of in een boom zit.
   const anderen = wei.filter((a) => a.id !== b.id && ['loop', 'staan', 'snuffel', 'slaap'].includes(a.doen) && !a.nat && a.hoog <= VLIEGHOOGTE);
   const keuzes: [Doen | Klus, number][] = [
     ['loop', 30], ['staan', 14], ['snuffel', b.soort === 'lucht' ? 0 : 3 * k.slim], ['slaap', 2.5 * k.slaperig],
-    ['spring', 6 * mag], ['kunstje', 3.5 * k.drama * mag], ['ren', 2 * k.snel * mag], ['graaf', b.soort === 'graaf' && !holen.length ? 10 : 0],
+    ['spring', 6 * mag], ['kunstje', 3.5 * k.drama * mag], ['ren', 2 * k.snel * mag], ['graaf', b.soort === 'graaf' && !kan(w, 'hol') ? 10 : 0],
     ['jaag', anderen.length && ruimte >= 2 ? 2 * k.ondeugend : 0], ['eet', 4 * mag],
-    ...klussen(b, wereld),
+    ...klussen(b, w),
   ];
   let worp = toeval() * keuzes.reduce((t, [, w]) => t + w, 0);
   const [keus] = keuzes.find(([, w]) => (worp -= w) < 0) ?? ['loop'];
@@ -448,7 +473,7 @@ function bedenk(b: Bewoner, wei: Bewoner[], wereld: readonly Decor[], toeval: ()
     }
     default: {
       const klus = keus as Klus;
-      const doel = doelVan(klus, b, wereld, toeval);
+      const doel = doelVan(klus, b, w, toeval);
       if (doel === null) return begin(b, 'staan', 1500);
       return opPad(b, doel, klus);
     }
@@ -465,9 +490,11 @@ export function aai(b: Bewoner, toeval: () => number = Math.random) {
 }
 
 /** De tijd `dt` ms verder. Past de dieren aan; geeft niets terug. */
-export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.random, wereld: readonly Decor[] = []) {
+export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.random, w: Wereld = GEEN) {
   const perId = new Map(wei.map((b) => [b.id, b]));
-  const vijver = zoek(wereld, 'vijver');
+  // Vissen hebben water nodig: is er plek voor een vijver, dan komt die er.
+  for (const b of wei) if (b.soort === 'water' && !b.nat) plaats(w, 'vijver', b.x, toeval);
+  const vijver = zoek(w.decor, 'vijver');
   const inVijver = (x: number) => !!vijver && x > vijver.x + 0.5 && x < vijver.x + vijver.breed - 0.5;
 
   for (const b of wei) {
@@ -480,6 +507,7 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
       b.nat = true;
       b.hoog = -0.3;
     }
+    if (b.soort === 'water' && vijver && b.nat) b.plek = vijver.id;
     if (b.soort === 'water' && !vijver && b.nat) {
       b.nat = false;
       b.hoog = 0;
@@ -522,7 +550,7 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
           b.hoog = 0;
           b.doel = null;
           begin(b, 'staan', 1200, { lijf: 'schud', ding: '💦', dingGaat: 'op' });
-        } else aankomst(b, wereld, toeval);
+        } else aankomst(b, w, toeval);
         continue;
       }
       // Vissen blijven in de vijver.
@@ -541,8 +569,15 @@ export function stapWei(wei: Bewoner[], dt: number, toeval: () => number = Math.
     }
     // Landdieren lopen langs de vijver over de oever erachter.
     if (!lucht && !b.nat && b.hoog >= 0 && b.hoog <= ACHTEROEVER) b.hoog = inVijver(b.x) ? ACHTEROEVER : 0;
-    if (b.tot <= 0) bedenk(b, wei, wereld, toeval);
+    if (b.tot <= 0) bedenk(b, wei, w, toeval);
   }
+
+  // Decor dat niemand meer gebruikt, verdwijnt na een tijdje weer.
+  for (const d of w.decor) {
+    d.rust = wei.some((b) => b.plek === d.id) ? 0 : d.rust + dt;
+    d.leeftijd += dt;
+  }
+  if (w.decor.some((d) => d.rust >= 1800)) w.decor = w.decor.filter((d) => d.rust < 1800);
 
   // Wie elkaar tegenkomt, groet elkaar: omdraaien, zwaaien, een hartje.
   const vrij = (b: Bewoner) =>

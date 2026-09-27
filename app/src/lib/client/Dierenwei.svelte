@@ -7,9 +7,10 @@
    * kunstje. Wie van beweging houdt: zonder beweging (prefers-reduced-motion)
    * staan ze gewoon stil naast elkaar.
    *
-   * Het decor (bomen, een vijver, bloemen, holen) komt mee met de dieren die
-   * het nodig hebben (THUIS in wei.ts). Het staat achter de dieren; alleen het
-   * water van de vijver ligt ervoor, zodat wie zwemt er half in ligt.
+   * Het decor (een boom, een vijver, bloemen, een hol) verschijnt pas als een
+   * dier het nodig heeft, en verdwijnt weer als het klaar is; hooguit twee
+   * stukken tegelijk (wei.ts). Het staat achter de dieren; alleen het water
+   * van de vijver ligt ervoor, zodat wie zwemt er half in ligt.
    */
   import { onMount, untrack } from 'svelte';
   import { fade } from 'svelte/transition';
@@ -19,7 +20,7 @@
   import Decorplaatje from './Decorplaatje.svelte';
   import { TEGELS, type Decorplaatje as Plaatje } from '$lib/shared/pixeldecor';
 
-  /** Een tegel als achtergrondplaatje: de grond en de heuvels herhalen zich over de hele breedte. */
+  /** Een tegel als achtergrondplaatje: de grasrand herhaalt zich over de hele breedte. */
   function tegel(p: Plaatje) {
     const w = p.rijen[0].length;
     const h = p.rijen.length;
@@ -31,8 +32,7 @@
     return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
   }
   const GROND = tegel(TEGELS.grond);
-  const HEUVELS = tegel(TEGELS.heuvels);
-  import { aai, houdingVan, maakWereld, nieuweBewoner, stapWei, type Bewoner, type Decor } from './wei';
+  import { aai, houdingVan, nieuweBewoner, nieuweWereld, stapWei, type Bewoner } from './wei';
 
   let {
     spelers,
@@ -49,25 +49,9 @@
   } = $props();
 
   let wei = $state<Bewoner[]>([]);
-  let wereld = $state<Decor[]>([]);
+  /* Het decor van dit moment: het brein zet het neer en haalt het weer weg. */
+  let wereld = $state(nieuweWereld());
   let vak = $state<HTMLDivElement>();
-  /** Hoe breed de wei is, in em (een dier is 1em): zo weten we wat er past. */
-  let breedteEm = $state(20);
-  /* Wat kleins voor de sfeer: een paar graspollen, een bloempje, een steentje. Per avond ergens anders. */
-  const polletjes = Array.from({ length: 7 }, (_, i) => ({
-    id: i,
-    x: 2 + Math.random() * 94,
-    soort: ['pol', 'pol', 'pol', 'bloempje', 'steentje'][Math.floor(Math.random() * 5)],
-  }));
-
-  /* Het decor volgt de dieren: komt er een aap bij, dan komt er een bananenboom. */
-  $effect(() => {
-    const sleutels = wei.map((b) => b.sleutel).sort().join(',');
-    const breed = Math.round(breedteEm);
-    untrack(() => {
-      wereld = maakWereld(sleutels ? sleutels.split(',') : [], breed, wereld);
-    });
-  });
 
   /* Wie erbij komt valt de wei in; wie weggaat verdwijnt; wie van dier
      wisselt, verschijnt als zijn nieuwe dier. */
@@ -94,7 +78,8 @@
     const meet = () => {
       if (!vak) return;
       const em = parseFloat(getComputedStyle(vak).fontSize) || 16;
-      breedteEm = vak.clientWidth / em;
+      // Hoe breed de wei is, in em (een dier is 1em): zo weet het brein wat er past.
+      wereld.breedteEm = vak.clientWidth / em;
     };
     meet();
     const kijker = new ResizeObserver(meet);
@@ -122,12 +107,9 @@
   }
 </script>
 
-<div class="wei" bind:this={vak} style="--grond:{GROND};--heuvels:{HEUVELS}" class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
-  {#each polletjes as p (p.id)}
-    <div class="decor klein" style="left:{p.x}%"><Decorplaatje soort={p.soort} /></div>
-  {/each}
-  {#each wereld as d (d.soort + d.x)}
-    <div class="decor" data-soort={d.soort} style="left:{d.x}%" transition:fade={{ duration: 700 }}>
+<div class="wei" bind:this={vak} style="--grond:{GROND}" class:aaibaar role={aaibaar ? 'group' : undefined} aria-label={label || undefined} aria-hidden={aaibaar ? undefined : 'true'}>
+  {#each wereld.decor as d (d.id)}
+    <div class="decor" data-soort={d.soort} style="left:{d.x}%" in:fade={{ duration: 600 }} out:fade={{ duration: 900 }}>
       <Decorplaatje soort={d.soort} />
     </div>
   {/each}
@@ -162,8 +144,8 @@
     </div>
   {/each}
   <!-- Het wateroppervlak ligt vóór de dieren: wie zwemt, ligt er half in. -->
-  {#each wereld.filter((d) => d.soort === 'vijver') as d (d.x)}
-    <div class="decor water" style="left:{d.x}%" transition:fade={{ duration: 700 }}>
+  {#each wereld.decor.filter((d) => d.soort === 'vijver') as d (d.id)}
+    <div class="decor water" style="left:{d.x}%" in:fade={{ duration: 600 }} out:fade={{ duration: 900 }}>
       <Decorplaatje soort="vijver" />
     </div>
   {/each}

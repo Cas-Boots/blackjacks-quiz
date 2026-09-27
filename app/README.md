@@ -467,32 +467,33 @@ mee; het is er alleen voor de lol.
   iets geks, de rest scharrelt, snuffelt of dut. Een naambordje verschijnt
   pas als een dier iets doet, en de lobby maakt onderaan plaats voor de wei,
   zodat er geen dier door de tekst loopt.
-- **Een eigen stukje wereld.** Elk dier neemt mee wat bij hem hoort, en
-  alleen wat er voor de dieren van vanavond nodig is staat in de wei, zodat
-  het nooit vol wordt:
-  - de aap een bananenboom: hij klimt erin en eet een banaan;
+- **Een eigen stukje wereld.** Elk dier heeft iets dat bij hem hoort, maar
+  het staat er niet de hele tijd: het verschijnt pas als een dier het nodig
+  heeft, vlak bij hem, en verdwijnt weer als hij klaar is. Er staan er
+  hooguit twee tegelijk, en na een halve minuut komt er niemand nieuw meer
+  bij, zodat iets anders een beurt krijgt. Zo blijft de wei rustig:
+  - de aap krijgt een bananenboom: hij klimt erin en eet een banaan;
   - de luiaard, eekhoorn, uil, papegaai, giraf en egel een boom: de luiaard
     hangt er ondersteboven in te dutten, de eekhoorn eet er een nootje, de
     uil en papegaai strijken erin neer, de giraf eet van de blaadjes, de egel
     vindt er appels onder;
-  - vissen, dolfijn en octopus een vijver waar ze in blijven; krokodil,
-    nijlpaard, zeehond en pinguïn nemen er een bad, de kikker springt erin
-    met een plons, de flamingo staat erin op één been, de wasbeer wast er
-    zijn pizza, en wie dorst heeft drinkt aan de kant;
+  - krokodil, nijlpaard, zeehond en pinguïn een vijver om in te baden, de
+    kikker om in te plonzen, de flamingo om op één been in te staan, de
+    wasbeer om zijn pizza in te wassen; wie dorst heeft drinkt aan de kant.
+    Vissen, dolfijn en octopus wonen erin, dus zolang zij er zijn blijft
+    de vijver staan;
   - de bij en de vlinder bloemen om boven te zweven;
   - konijn, hamster, kip en slak een moestuin om van te knabbelen, de kameel
     een cactus;
-  - das, worm, konijn en eekhoorn holen: ze duiken het ene in en komen uit
-    het andere boven.
+  - das, worm, konijn en eekhoorn een hol: ze duiken erin en komen ergens
+    anders boven.
 
   Grond, water en lucht werken samen: wie langs de vijver loopt, loopt
   erachter over de oever met het water ervoor, zwemmers liggen er half in,
   vliegers zweven erboven en strijken neer in de boom. Het decor
   (`src/lib/shared/pixeldecor.ts`) is pixelkunst met hetzelfde licht,
-  dezelfde schaduw en dezelfde getinte omlijning als de dieren, staat elke
-  avond ergens anders, en komt en gaat met de dieren. Eronder ligt een strook
-  pixelgrond (gras op aarde met steentjes), in de verte heuvels, en hier en
-  daar een graspol, een bloempje of een steentje, zodat het één landschap is.
+  dezelfde schaduw en dezelfde getinte omlijning als de dieren, en komt en
+  gaat met een zachte overgang. Onder de wei ligt alleen een rustige grasrand.
 - **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
   uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
   dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,

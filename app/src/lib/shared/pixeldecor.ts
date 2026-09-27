@@ -1,7 +1,7 @@
 /**
- * Het decor van de wei, in pixelkunst: wat elk dier meeneemt (wei.ts), wat
- * kleins voor de sfeer, en de grond en de heuvels als tegels die zich
- * herhalen. Gegenereerd uit eenvoudige vormen, met licht van linksboven,
+ * Het decor van de wei, in pixelkunst: wat een dier nodig heeft (wei.ts),
+ * en de grasrand als tegel die zich herhaalt. Gegenereerd uit eenvoudige
+ * vormen, met licht van linksboven,
  * schaduw onderaan en een omlijning in een donkere tint, net als de dieren.
  * Een letter is een kleur uit het palet, een punt is leeg; 32 pixels is 1em.
  */
@@ -323,93 +323,19 @@ export const DECOR: Readonly<Record<string, Decorplaatje>> = {
       '.........dllllllllld........',
     ],
   },
-  pol: {
-    palet: { 'a': '#263531', 'b': '#6fa55e', 'c': '#2e3e37', 'd': '#3b7e34', 'e': '#83bc6c', 'f': '#549944', 'g': '#387233', 'h': '#4d8a42' },
-    rijen: [
-      '..aba.c.aba.',
-      '.cadacecada.',
-      'cecdacfcadac',
-      'cfcgacfcagae',
-      'chcabafcbacf',
-      '.cecdafcdaeh',
-      '.cfcdafcdafc',
-      '.chcgahcgahc',
-    ],
-  },
-  bloempje: {
-    palet: { 'a': '#5d5468', 'b': '#f9f4e6', 'c': '#cbc6c5', 'd': '#ffd23f', 'e': '#e1dcd7', 'f': '#2a3837', 'g': '#478744', 'h': '#61a058', 'i': '#427a42' },
-    rijen: [
-      '.........',
-      '....a....',
-      '...aba...',
-      '..acdca..',
-      '...aea...',
-      '...fgf...',
-      '...fgf...',
-      '...fhif..',
-      '...fgf...',
-      '...fif...',
-    ],
-  },
-  steentje: {
-    palet: { 'a': '#3e3548', 'b': '#aba597', 'c': '#8f8a80', 'd': '#787270' },
-    rijen: [
-      '..........',
-      '..........',
-      '..aaaaaa..',
-      '.abbbbbba.',
-      'abccccccba',
-      'adddddddda',
-    ],
-  },
 };
 
-/** De grond onder de wei en de heuvels erachter: tegels die zich herhalen. */
+/** De grasrand onder de wei: een tegel die zich herhaalt. */
 export const TEGELS: Readonly<Record<string, Decorplaatje>> = {
   grond: {
-    palet: { 'a': '#6fb85f', 'b': '#4c9446', 'c': '#3a7a37', 'd': '#5a3a22', 'e': '#6e4a2c', 'f': '#8a857a', 'g': '#46301c' },
+    palet: { 'a': '#6fb85f', 'b': '#4c9446', 'c': '#3a7a37', 'd': '#4a3220' },
     rijen: [
-      '.a..aa...b...aa...b...aa...b..b.',
+      '...a......a......a.......a...a..',
       'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'cccccccccccccccccccccccccccccccc',
       'dddddddddddddddddddddddddddddddd',
-      'dddddddddddedddddddddfdddddddddd',
-      'dddedddddddddddddddddddddedddddd',
-      'dddddddfdddddddddddddddddddddddd',
-      'dddddddddddddddddedddddddddddedd',
-      'gggggggggggggggggggggggggggggggg',
-    ],
-  },
-  heuvels: {
-    palet: { 'a': '#1d4535', 'b': '#173a2c' },
-    rijen: [
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '................................................................................................................................................................',
-      '........................aaaaaaaaaaaaaaaaaaaaaa..................................................................................................................',
-      '.................aaaaaaabbbbbbbbbbbbbbbbbbbbbbaaaaaaa...........................................................................................................',
-      '............aaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaa......................................................................................................',
-      '........aaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaa..................................................................................................',
-      '.....aaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaa..............................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...................................',
-      '...aabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaa..................aaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaa.........................',
-      'aaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaa........aaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaa.',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaa.aaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      'dddddddddddddddddddddddddddddddd',
     ],
   },
 };

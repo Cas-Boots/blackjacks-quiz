@@ -3428,16 +3428,14 @@ a.uitslagrij:hover {
   overflow: hidden;
   height: 2.3em;
   font-size: 3rem;
-  /* Pixelgrond met gras erop, en in de verte heuvels (tegels uit shared/pixeldecor.ts). */
-  background:
-    var(--grond) left bottom / 1em 0.3125em repeat-x,
-    var(--heuvels) left 0 bottom 0.26em / 5em 0.8125em repeat-x;
+  /* Een rustige grasrand (een tegel uit shared/pixeldecor.ts). */
+  background: var(--grond) left bottom / 1em 0.1875em repeat-x;
 }
 .bewoner {
   position: absolute;
   z-index: 1;
   /* Hoogte uit wei.ts: in een boom, boven de bloemen, of half onder water. */
-  bottom: calc(0.2em + var(--hoog, 0em));
+  bottom: calc(0.1em + var(--hoog, 0em));
   transition: bottom 0.9s ease-in-out;
   display: flex;
   flex-direction: column-reverse;
@@ -3462,7 +3460,7 @@ a.uitslagrij:hover {
 .decor {
   position: absolute;
   z-index: 0;
-  bottom: 0.2em;
+  bottom: 0.1em;
   line-height: 0;
   pointer-events: none;
 }
@@ -3474,7 +3472,7 @@ a.uitslagrij:hover {
   clip-path: inset(56% 0 0 0);
   opacity: 0.88;
 }
-.decor.klein { bottom: 0.2em; }
+
 @keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
 @keyframes wei-zwem { 0%, 100% { translate: 0 0; rotate: 6deg; } 50% { translate: 0 -0.15em; rotate: -6deg; } }
 /* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */
