@@ -31,9 +31,10 @@ const DRUPPEL: Icoon = {
   palet: { b: '#62b6ff', w: '#d6ecff' },
   rijen: ['...b...', '..bbb..', '.bbbbb.', '.bwbbb.', '.bbbbb.', '..bbb..', '.......'],
 };
+/** Eén dikke Z met trapjes van twee: een schuine lijn van één pixel verdwijnt in de omlijning. */
 const ZZZ: Icoon = {
-  palet: { z: '#dfe8ff' },
-  rijen: ['zzzzz..', '...z...', '..z....', '.z.....', 'zzzzz..', '.......', '.......'],
+  palet: { z: '#dfe8ff', s: '#a9b8e0' },
+  rijen: ['.zzzzzz', '....zz.', '...zz..', '..zz...', '.zz....', 'zzzzzz.', '.ssssss'],
 };
 const UITROEP: Icoon = {
   palet: { r: '#ffd23f' },
@@ -51,14 +52,16 @@ const BEL: Icoon = {
   palet: { b: '#9fd8ff', w: '#ffffff' },
   rijen: ['..bbb..', '.b...b.', 'b.w...b', 'b.....b', '.b...b.', '..bbb..', '.......'],
 };
+/** Het boze adertje: vier hoekjes die naar buiten knikken, geen haakjes. */
 const BOOS: Icoon = {
   palet: { r: '#ff5a4f' },
-  rijen: ['rr...rr', 'r.....r', '.......', 'r.....r', 'rr...rr', '.......', '.......'],
+  rijen: ['..r.r..', '..r.r..', 'rrr.rrr', '.......', 'rrr.rrr', '..r.r..', '..r.r..'],
 };
 
+/** Een feesttoeter met een paar snippers eruit; losse snippers waren ruis. */
 const CONFETTI: Icoon = {
-  palet: { r: '#ff5a7a', y: '#ffd23f', b: '#62b6ff', g: '#6cd46c' },
-  rijen: ['r...y..', '..b...g', '.y..r..', 'g...b.y', '..r....', 'b..g..r', '...y...'],
+  palet: { p: '#b36bff', y: '#ffd23f', r: '#ff5a7a', b: '#62b6ff', g: '#6cd46c' },
+  rijen: ['...y.r.', '.b.....', '.....g.', '...pp..', '..pyp..', '.ppp...', 'pp.....'],
 };
 
 const PER_TEKEN: Record<string, Icoon> = {
