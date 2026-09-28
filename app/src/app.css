@@ -892,7 +892,8 @@ textarea:focus {
   position: absolute;
   right: clamp(10px, 1.4vw, 22px);
   bottom: clamp(10px, 1.4vw, 22px);
-  z-index: 30;
+  /* Boven het pauzescherm: het aftellen naar middernacht wil je horen. */
+  z-index: 70;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
   border: 1px solid var(--rand);
@@ -907,6 +908,51 @@ textarea:focus {
   opacity: 1;
   color: var(--ivoor);
 }
+/* ===== Middernacht nadert ========================================
+   Op de televisie in de laatste tien minuten voor twaalf uur, zolang de
+   quiz nog doorloopt. Linksonder, waar niets anders staat. */
+.middernacht-melding {
+  position: absolute;
+  left: clamp(10px, 1.4vw, 22px);
+  bottom: clamp(10px, 1.4vw, 22px);
+  z-index: 30;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--goud-diep);
+  background: rgba(8, 21, 17, 0.85);
+  color: var(--goud-licht);
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.04em;
+  animation: middernacht-puls 2.4s ease-in-out infinite;
+}
+@keyframes middernacht-puls {
+  50% {
+    border-color: var(--goud-licht);
+  }
+}
+
+/* Op het hostscherm: de waarschuwing voor middernacht en de pauze. */
+.paneel.middernacht {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-color: var(--goud-diep);
+}
+.paneel.middernacht.dringend {
+  border-color: var(--rood);
+  animation: middernacht-dringend 1.6s ease-in-out infinite;
+}
+@keyframes middernacht-dringend {
+  50% {
+    box-shadow: 0 0 0 3px rgba(192, 69, 47, 0.35);
+  }
+}
+.paneel.pauzepaneel {
+  border-color: var(--goud);
+}
+
 /* ===== Het goede antwoord krijgt een glans ======================== */
 .keuze.goed {
   position: relative;

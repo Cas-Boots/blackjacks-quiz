@@ -126,6 +126,18 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
   await expect(page.locator('.prijs')).toHaveCount(7);
   expect(await buitenBeeld(page), 'het podium met zeven prijzen hoort op het scherm te passen').toEqual([]);
 
+  // Pauze en middernacht: het aftellen, de laatste seconden in het groot, en het nieuwe jaar.
+  await ga('pauze');
+  await expect(page.locator('.pauzelaag').getByRole('heading', { name: 'Even pauze' })).toBeVisible();
+  await ga('middernacht-nadert');
+  await expect(page.locator('.middernacht-melding')).toContainText('tot middernacht');
+  await ga('nieuwjaar-aftellen');
+  await expect(page.locator('.aftel')).toBeVisible();
+  await page.getByRole('button', { name: 'Nog 12 seconden tot middernacht' }).click();
+  await expect(page.locator('.slotcijfer')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('.pauzelaag').getByRole('heading', { name: 'Gelukkig nieuwjaar' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('.jaartal')).toHaveText('2027');
+
   await ga('vraag-video-ontbreekt');
   await expect(page.locator('.media-ontbreekt')).toContainText('ontbreekt', { timeout: 10_000 });
 

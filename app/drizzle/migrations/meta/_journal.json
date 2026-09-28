@@ -43,6 +43,13 @@
       "when": 1790443452227,
       "tag": "0005_maatjesnaam",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790539826796,
+      "tag": "0006_pauze",
+      "breakpoints": true
     }
   ]
 }

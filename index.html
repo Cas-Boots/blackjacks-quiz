@@ -542,6 +542,26 @@ input[type=file]{display:none}
   box-shadow:0 14px 34px -12px rgba(0,0,0,.8);animation:opkomen .25s ease-out both;
 }
 
+/* ---- Pauze en middernacht -------------------------------------- */
+/* Ligt over de vraag heen; de confetti (z-index 40) valt eroverheen. */
+.pauzelaag{
+  position:absolute;inset:0;z-index:35;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:var(--sp-4);padding:clamp(18px,4vw,90px);text-align:center;
+  background:radial-gradient(120% 90% at 50% 0%, #17362B 0%, var(--vilt) 42%, var(--vilt-diep) 100%);
+}
+.pauzelaag[hidden]{display:none}
+.pauze-inhoud{display:flex;flex-direction:column;align-items:center;gap:var(--sp-3)}
+.pauze-aftel{
+  font-family:var(--display);font-weight:700;line-height:.9;margin:0;
+  font-size:clamp(4rem,18vw,16rem);font-variant-numeric:tabular-nums;color:var(--goud-licht);
+}
+.pauze-aftel.is-slot{font-size:clamp(8rem,40vh,28rem);text-shadow:0 0 60px rgba(235,210,124,.45)}
+.pauze-jaar{font-family:var(--display);font-weight:700;line-height:.9;margin:0;font-size:clamp(3rem,14vw,12rem);color:var(--goud)}
+.middernacht-melding{border-color:var(--goud-diep);color:var(--goud-licht)}
+.middernacht-melding[hidden]{display:none}
+.middernacht-melding.is-dringend{border-color:var(--rood);animation:pols .9s ease-in-out infinite}
+
 /* ---- Diversen --------------------------------------------------- */
 .scheiding{height:1px;background:var(--rand-zacht);border:none;margin:0;width:100%}
 .stapel{display:flex;flex-direction:column;gap:var(--sp-3)}
@@ -644,6 +664,10 @@ input[type=file]{display:none}
   </header>
   <main id="podium" tabindex="-1"></main>
   <footer class="besturing" id="besturing" hidden></footer>
+  <div class="pauzelaag" id="pauzelaag" role="status" hidden>
+    <div class="pauze-inhoud" id="pauzeInhoud"></div>
+    <div class="knoprij" id="pauzeKnoppen" style="justify-content:center"></div>
+  </div>
 </div>
 <input type="file" id="fotoKiezer" accept="image/*">
 <input type="file" id="mediaKiezer" accept="image/*,video/*,audio/*" multiple>
@@ -2637,7 +2661,7 @@ function tekenBesturing(){
   else if(f === "vraag"){
     h += knop("terug","&larr; Terug","is-stil");
     h += K.totaal
-      ? knop("pauze", K.loopt ? "&#10073;&#10073; Pauze" : "&#9654; Hervat")
+      ? knop("pauze", K.loopt ? "&#10073;&#10073; Klok stil" : "&#9654; Klok verder")
       : knop("klok-start","&#9654; Klok starten");
     if(K.totaal) h += knop("plus30","+30s");
     h += `<span class="rek"></span>` + knop("toon-antwoord","Toon het antwoord &rarr;","is-hoofd");
@@ -2661,8 +2685,127 @@ function tekenBesturing(){
     h += knop("terug","&larr; Terug","is-stil");
     h += `<span class="rek"></span>` + knop("opnieuw","Nieuwe quiz");
   }
+  if(f !== "start"){
+    h += knop("pauze-quiz","&#9749; Pauze","is-stil");
+    h += `<button class="knop middernacht-melding" id="middernachtMelding" data-actie="pauze-nieuwjaar" title="Pauzeer en tel af naar middernacht" hidden></button>`;
+  }
   besturing.innerHTML = h;
+  tekenMiddernacht();
 }
+
+/* -----------------------------------------------------------------
+   PAUZE EN MIDDERNACHT
+   Om twaalf uur gaat de quiz even stil: aftellen, proosten, en dan
+   verder waar we waren. Het laatste uur voor middernacht staat onderin
+   hoe lang het nog is (de laatste tien minuten dringend), en één klik
+   pauzeert de quiz en telt af naar het nieuwe jaar.
+   Op 1 januari is het in Nederland altijd wintertijd (UTC+1), dus
+   middernacht is 23:00 UTC op oudejaarsdag.
+   Generale repetitie: open het bestand met ?nieuwjaar=+5 voor een
+   middernacht over vijf minuten.
+   ----------------------------------------------------------------- */
+const UUR_MS = 3600000;
+const NIEUWJAAR_REPETITIE = (function(){
+  let waarde = "";
+  try{ waarde = (new URLSearchParams(location.search).get("nieuwjaar") || "").trim(); }catch(e){}
+  if(!waarde) return null;
+  const minuten = /^\+?(\d+(?:\.\d+)?)$/.exec(waarde);
+  if(minuten) return Date.now() + Number(minuten[1]) * 60000;
+  const op = Date.parse(waarde);
+  return isFinite(op) ? op : null;
+})();
+function nieuwjaar(){
+  const nu = Date.now();
+  const jaarNu = new Date(nu + UUR_MS).getUTCFullYear();
+  const vorige = Date.UTC(jaarNu, 0, 1) - UUR_MS;
+  // Tot twee uur na middernacht blijft het de middernacht die net geweest is.
+  const echt = (nu >= vorige && nu - vorige < 2 * UUR_MS)
+    ? {op: vorige, jaar: jaarNu}
+    : {op: Date.UTC(jaarNu + 1, 0, 1) - UUR_MS, jaar: jaarNu + 1};
+  return NIEUWJAAR_REPETITIE === null ? echt : {op: NIEUWJAAR_REPETITIE, jaar: echt.jaar};
+}
+function aftelTekst(ms){
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  const u = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = String(t % 60).padStart(2, "0");
+  return u > 0 ? u + ":" + String(m).padStart(2, "0") + ":" + sec : m + ":" + sec;
+}
+function nogTekst(ms){
+  if(ms >= 60000){ const m = Math.ceil(ms / 60000); return "nog " + m + (m === 1 ? " minuut" : " minuten"); }
+  const sec = Math.max(0, Math.ceil(ms / 1000));
+  return "nog " + sec + (sec === 1 ? " seconde" : " seconden");
+}
+
+/* De pauze ligt over het scherm heen en hoort niet bij de opgeslagen
+   stand: na een herlaadbeurt staat de klok toch al stil. */
+const P = {soort:null, klokLiep:false, vorigeSec:null, inhoud:""};
+
+function pauzeer(soort){
+  if(S.fase === "start") return;
+  if(!P.soort){
+    P.klokLiep = K.loopt;
+    if(K.loopt){ K.rest = Math.max(0, K.eind - Date.now()); stopKlok(); }
+    stopAlleMedia();
+  }
+  P.soort = soort; P.vorigeSec = null; P.inhoud = "";
+  $("pauzeKnoppen").innerHTML =
+    knop("hervat-quiz","&#9654; Hervat de quiz","is-hoofd is-groot") +
+    (soort === "pauze"
+      ? knop("pauze-nieuwjaar","&#127878; Tel af naar middernacht")
+      : knop("pauze-quiz","Gewone pauze","is-stil"));
+  $("pauzelaag").hidden = false;
+  tekenPauze(); toonKlok(); tekenMiddernacht();
+}
+function hervatQuiz(){
+  if(!P.soort) return;
+  P.soort = null;
+  $("pauzelaag").hidden = true;
+  if(P.klokLiep && K.totaal && K.rest > 0){ K.eind = Date.now() + K.rest; K.loopt = true; lusKlok(); }
+  P.klokLiep = false;
+  tekenBesturing();
+  meld("De quiz gaat verder");
+}
+function tekenPauze(){
+  if(!P.soort) return;
+  const nj = nieuwjaar();
+  const rest = nj.op - Date.now();
+  const sec = Math.ceil(rest / 1000);
+  let h;
+  if(P.soort === "nieuwjaar" && rest <= 0){
+    h = `<p class="opschrift">Proost!</p>
+      <h1 class="titel">Gelukkig nieuwjaar</h1>
+      <p class="pauze-jaar">${nj.jaar}</p>
+      <p class="lood">De quiz gaat zo verder.</p>`;
+  } else if(P.soort === "nieuwjaar"){
+    h = `<p class="opschrift">Even pauze &middot; het is bijna twaalf uur</p>` + (sec <= 10
+      ? `<p class="pauze-aftel is-slot">${sec}</p>`
+      : `<p class="pauze-aftel">${aftelTekst(rest)}</p><p class="lood">tot ${nj.jaar}</p>`);
+  } else {
+    h = `<p class="opschrift">De quiz staat even stil</p>
+      <h1 class="titel">Even pauze</h1>
+      <p class="lood">Schenk nog wat in. We gaan zo verder waar we waren.</p>` +
+      (rest > 0 && rest <= UUR_MS ? `<p class="lood" style="color:var(--goud-licht)">&#127878; ${nogTekst(rest)} tot middernacht</p>` : "");
+  }
+  if(h !== P.inhoud){ $("pauzeInhoud").innerHTML = h; P.inhoud = h; }
+
+  // Een tik in de laatste tien seconden, en om twaalf uur feest.
+  if(P.soort === "nieuwjaar" && P.vorigeSec !== null && sec !== P.vorigeSec){
+    if(sec > 0 && sec <= 10) piep(sec <= 3 ? 1046 : 784, sec <= 3 ? .12 : .07);
+    if(sec <= 0 && P.vorigeSec > 0){ fanfare(); vierFeest(); }
+  }
+  P.vorigeSec = sec;
+}
+function tekenMiddernacht(){
+  const el = $("middernachtMelding");
+  if(!el) return;
+  const rest = nieuwjaar().op - Date.now();
+  const toon = !P.soort && rest > 0 && rest <= UUR_MS;
+  el.hidden = !toon;
+  if(!toon) return;
+  const tekst = "&#127878; " + nogTekst(rest) + " tot middernacht &mdash; tel af";
+  if(el.innerHTML !== tekst) el.innerHTML = tekst;
+  el.classList.toggle("is-dringend", rest <= 10 * 60000);
+}
+setInterval(() => { tekenPauze(); tekenMiddernacht(); }, 250);
 
 /* -----------------------------------------------------------------
    NAVIGATIE
@@ -2791,7 +2934,7 @@ function paneelMenu(){
       <div class="sneltoetsen">
         <span><kbd>spatie</kbd>volgende stap</span>
         <span><kbd>&larr;</kbd>een stap terug</span>
-        <span><kbd>P</kbd>klok pauzeren</span>
+        <span><kbd>P</kbd>klok stilzetten</span>
         <span><kbd>T</kbd>30 seconden erbij</span>
         <span><kbd>M</kbd>muziek of video afspelen</span>
         <span><kbd>Z</kbd>laatste actie ongedaan</span>
@@ -2966,6 +3109,9 @@ const ACTIES = {
   "naar-einde": naarEinde,
   "terug": terug,
   "pauze": pauzeerKlok,
+  "pauze-quiz": () => { wekGeluid(); pauzeer("pauze"); },
+  "pauze-nieuwjaar": () => { wekGeluid(); pauzeer("nieuwjaar"); },
+  "hervat-quiz": hervatQuiz,
   "klok-start": () => { startKlok(vraagTijd()); },
   "plus30": () => verlengKlok(30),
   "ken-toe": (id) => wisselToekenning(id),
@@ -3084,6 +3230,8 @@ document.addEventListener("keydown", (e) => {
   if(tag === "input" || tag === "textarea" || tag === "select") return;
   if(e.key === "Escape"){ sluitPaneel(); return; }
   if(document.querySelector(".paneel-achtergrond")) return;
+  // Tijdens de pauze doet het toetsenbord niets: hervatten is een bewuste klik.
+  if(P.soort) return;
   if(e.key === " " || e.key === "Enter"){
     e.preventDefault();
     if(S.fase === "start") ACTIES["start-film"]();

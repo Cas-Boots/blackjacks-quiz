@@ -9,6 +9,7 @@
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Podium from '$lib/client/Podium.svelte';
+  import Pauzescherm from '$lib/client/Pauzescherm.svelte';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade from '$lib/client/Dierenparade.svelte';
   import Dierenwei from '$lib/client/Dierenwei.svelte';
@@ -302,6 +303,10 @@
 
 <div class="scherm" data-sfeer={sfeer}>
   <div class="motief" aria-hidden="true"></div>
+  <!-- Over de rest heen, zodat een half getikt antwoord eronder blijft staan. -->
+  {#if staat?.pauze}
+    <Pauzescherm soort={staat.pauze} vorm="telefoon" />
+  {/if}
   {#if optocht && ik}
     {#key optocht.id}
       <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: optocht.dier ?? ik.dier, dierNaam: optocht.dierNaam !== undefined ? optocht.dierNaam : ik.dierNaam }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />

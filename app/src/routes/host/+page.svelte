@@ -7,6 +7,7 @@
   import { houdWakker } from '$lib/client/wakker';
   import { isAfrekening, type LogRegel } from '$lib/shared/state';
   import { GELUIDSBORD } from '$lib/shared/geluidsbord';
+  import { WAARSCHUW_VANAF_MS, DRINGEND_VANAF_MS, aftelTekst, nogTekst } from '$lib/shared/nieuwjaar';
   import { dierVan } from '$lib/shared/dieren';
 
   /** Een correctie met de hand: op de schaal van het scorebord, niet van één vraagpunt. */
@@ -65,6 +66,20 @@
   let afrekening = $derived(isAfrekening(staat?.ronde));
   let laatsteVraag = $derived(!!vraag && vraag.index + 1 >= vraag.aantal);
   let cijfersBezig = $state(false);
+
+  /* ---- Pauze en middernacht ---------------------------------------
+     Een half uur voor twaalf begint het hostscherm te waarschuwen; de
+     laatste tien minuten dringend. Pauzeren voor het aftellen zet de klok
+     stil en laat de televisie aftellen. Hervatten zet alles terug. */
+  let pauze = $derived(staat?.pauze ?? null);
+  let middernachtMs = $state<number | null>(null);
+  let middernachtWaarschuwing = $derived(
+    !pauze && middernachtMs !== null && middernachtMs > 0 && middernachtMs <= WAARSCHUW_VANAF_MS,
+  );
+  let middernachtDringend = $derived(middernachtWaarschuwing && (middernachtMs ?? Infinity) <= DRINGEND_VANAF_MS);
+  /** Het aftellen aanbieden heeft pas zin in het laatste uur. */
+  let aftellenMogelijk = $derived(middernachtMs !== null && middernachtMs > 0 && middernachtMs <= 60 * 60_000);
+  let middernachtGeweest = $derived(middernachtMs !== null && middernachtMs <= 0);
 
   /* ---- Het jaaroverzicht ----------------------------------------------
      De film loopt op de klok van de server. Dit scherm kijkt mee en tikt
@@ -151,7 +166,9 @@
     live.start();
     const laatSlapen = houdWakker();
     window.addEventListener('keydown', opToets);
+    const tik = setInterval(() => (middernachtMs = live.totMiddernachtMs()), 500);
     return () => {
+      clearInterval(tik);
       live.stop();
       laatSlapen();
       window.removeEventListener('keydown', opToets);
@@ -199,6 +216,8 @@
 
   /** De hoofdknop van dit moment — dezelfde die de spatiebalk indrukt. */
   function hoofdactie() {
+    // Tijdens de pauze doet de spatiebalk niets: hervatten is een bewuste klik.
+    if (pauze) return;
     const f = staat?.fase;
     if (f === 'jaaroverzicht') return doe('volgende');
     if (f === 'lobby' || f === 'ronde') return doe('start-ronde');
@@ -226,11 +245,11 @@
         break;
       case 'p':
       case 'P':
-        if (staat?.fase === 'vraag' || staat?.fase === 'jaaroverzicht') void doe('klok-pauze');
+        if ((staat?.fase === 'vraag' || staat?.fase === 'jaaroverzicht') && !pauze) void doe('klok-pauze');
         break;
       case 't':
       case 'T':
-        if (staat?.fase === 'vraag') void doe('klok-verleng', { seconden: 30 });
+        if (staat?.fase === 'vraag' && !pauze) void doe('klok-verleng', { seconden: 30 });
         break;
       case 'm':
       case 'M':
@@ -330,6 +349,49 @@
 
     {#if fout}<p class="let-op" style="border-color:var(--rood)" in:fade={{ duration: 200 }}>{fout}</p>{/if}
 
+    <!-- Middernacht komt eraan -->
+    {#if middernachtWaarschuwing && middernachtMs !== null}
+      <div class="paneel middernacht" class:dringend={middernachtDringend} role="alert" in:fade={{ duration: 200 }}>
+        <span style="flex:1 1 260px;min-width:0">
+          <p class="etiket">🎆 Middernacht komt eraan</p>
+          <p style="margin:.3rem 0 0"><strong>{nogTekst(middernachtMs)}</strong> tot twaalf uur (Nederlandse tijd).
+            {#if middernachtDringend}Rond de vraag af en pauzeer voor het aftellen.{:else}Houd de tijd in de gaten.{/if}</p>
+        </span>
+        <button class="knop" class:hoofd={middernachtDringend} onclick={() => doe('pauzeer', { soort: 'nieuwjaar' })} disabled={bezig}>
+          Pauzeer en tel af
+        </button>
+      </div>
+    {/if}
+
+    <!-- De quiz staat stil -->
+    {#if pauze}
+      <div class="paneel pauzepaneel" in:fade={{ duration: 200 }}>
+        <p class="etiket">{pauze === 'nieuwjaar' ? '🎆 Pauze voor middernacht' : '☕ Pauze'}</p>
+        {#if pauze === 'nieuwjaar' && middernachtMs !== null}
+          {#if middernachtGeweest}
+            <p class="groot" style="margin:.4rem 0 0">Gelukkig nieuwjaar!</p>
+            <p class="fijn">De televisie wenst iedereen een gelukkig {staat?.nieuwjaar.jaar}. Hervat de quiz als jullie klaar zijn met proosten.</p>
+          {:else}
+            <p class="groot" style="margin:.4rem 0 0;font-variant-numeric:tabular-nums">{aftelTekst(middernachtMs)}</p>
+            <p class="fijn">De televisie telt af naar {staat?.nieuwjaar.jaar}; de laatste tien seconden in het groot.</p>
+          {/if}
+        {:else}
+          <p class="fijn" style="margin-top:.3rem">De televisie en de telefoons tonen een pauzescherm.</p>
+        {/if}
+        <p class="fijn" style="margin-top:.3rem">
+          {staat?.fase === 'vraag' ? 'De klok staat stil en inleveren wacht tot je hervat. ' : ''}Na het hervatten staat alles weer waar het was.
+        </p>
+        <div class="knoprij" style="margin-top:.8rem">
+          <button class="knop hoofd" onclick={() => doe('hervat')} disabled={bezig}>▶ Hervat de quiz</button>
+          {#if pauze === 'pauze'}
+            <button class="knop" onclick={() => doe('pauzeer', { soort: 'nieuwjaar' })} disabled={bezig}>🎆 Toon het aftellen</button>
+          {:else}
+            <button class="knop stil" onclick={() => doe('pauzeer', { soort: 'pauze' })} disabled={bezig}>Gewone pauze</button>
+          {/if}
+        </div>
+      </div>
+    {/if}
+
     <!-- Wie er op welke telefoon zit -->
     <div class="paneel">
       <p class="etiket stil">Telefoons</p>
@@ -393,6 +455,7 @@
     {/if}
 
     <!-- Bediening -->
+    {#if !pauze}
     <div class="knoprij">
       {#if staat?.fase === 'jaaroverzicht' && film}
         <span class="fijn">
@@ -404,7 +467,7 @@
           {film.stap + 1 < film.stappen ? 'Volgende dia' : film.onthuld ? 'Terug naar de uitslag' : 'Naar ronde 1'}
         </button>
         <button class="knop" onclick={() => doe('klok-pauze')} disabled={bezig}>
-          {staat.klok?.loopt ? '⏸ Pauze' : '▶ Laat lopen'}
+          {staat.klok?.loopt ? '⏸ Film stil' : '▶ Laat lopen'}
         </button>
         {#if !film.onthuld}
           <button class="knop stil" onclick={() => doe('naar-ronde', { ronde: 0 })} disabled={bezig || keuzeGewijzigd}>De trailer overslaan</button>
@@ -426,7 +489,7 @@
         {/if}
       {:else if staat?.fase === 'vraag'}
         <button class="knop hoofd" onclick={() => doe('toon-antwoord')} disabled={bezig}>Toon het antwoord</button>
-        <button class="knop" onclick={() => doe('klok-pauze')} disabled={bezig}>{staat.klok?.loopt ? 'Pauze' : 'Hervat'}</button>
+        <button class="knop" onclick={() => doe('klok-pauze')} disabled={bezig}>{staat.klok?.loopt ? '⏸ Klok stil' : '▶ Klok verder'}</button>
         <button class="knop" onclick={() => doe('klok-verleng', { seconden: 30 })} disabled={bezig}>+30s</button>
         {#if vraag?.media && vraag.media.soort !== 'beeld'}
           <button class="knop" onclick={() => doe('media-wissel')} disabled={bezig}>
@@ -485,7 +548,14 @@
           {staat?.ronde?.cijfers === 'voorspellingen' ? 'Toon de voorspellingen' : 'Toon de cijfers van het jaar'}
         </button>
       {/if}
+      {#if staat}
+        <button class="knop stil" onclick={() => doe('pauzeer', { soort: 'pauze' })} disabled={bezig} title="Zet de klok stil en toon een pauzescherm">☕ Pauze</button>
+        {#if aftellenMogelijk}
+          <button class="knop stil" onclick={() => doe('pauzeer', { soort: 'nieuwjaar' })} disabled={bezig} title="Pauzeer en laat de televisie aftellen naar middernacht">🎆 Tel af naar middernacht</button>
+        {/if}
+      {/if}
     </div>
+    {/if}
     {#if porMelding}<p class="fijn" in:fade={{ duration: 200 }}>{porMelding}</p>{/if}
     {#if afrekening && (staat?.fase === 'ronde' || staat?.fase === 'cijfers')}
       <p class="fijn">
@@ -503,7 +573,7 @@
         </ol>
       </details>
     {/if}
-    <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> pauze · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt · <kbd>Z</kbd> ongedaan</p>
+    <p class="fijn">Sneltoetsen: <kbd>spatie</kbd> verder · <kbd>←</kbd> terug · <kbd>P</kbd> klok stil · <kbd>T</kbd> +30s · <kbd>M</kbd> fragment · <kbd>A</kbd> vink aan wat goed lijkt · <kbd>Z</kbd> ongedaan</p>
 
     <!-- Het geluidsbord: de quizmaster drukt, de televisie speelt. -->
     <details class="paneel">

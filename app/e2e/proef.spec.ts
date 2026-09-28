@@ -23,9 +23,14 @@ test('een proefrit met bots en een telefoon, zonder de echte avond te raken', as
   await page.getByPlaceholder('bijvoorbeeld Tom').fill('Tom');
   await page.getByRole('button', { name: 'Begin de proefrit' }).click();
 
-  // De vaste vijf en de plus-één, allemaal bot.
+  // De vaste spelers en de plus-één, allemaal bot. Hoeveel vaste spelers er
+  // zijn hangt af van wat eerdere proeven in de gedeelde database achterlieten
+  // (het beheer voegt er een toe), dus tellen we ze in plaats van vijf vast te zetten.
+  const beheer = await (await page.request.get('/api/beheer')).json();
+  const vast = (beheer.spelers as { naam: string; isGast: boolean; isQuizmaster: boolean }[])
+    .filter((s) => !s.isGast && !s.isQuizmaster);
   const tafel = page.locator('.tafel li');
-  await expect(tafel).toHaveCount(6, { timeout: 15_000 });
+  await expect(tafel).toHaveCount(vast.length + (vast.some((s) => s.naam === 'Tom') ? 0 : 1), { timeout: 15_000 });
   await expect(tafel.filter({ hasText: 'Tom' })).toContainText('bot');
 
   // De televisie in zijn kader, met het etiket en een QR-code naar de proefrit.
