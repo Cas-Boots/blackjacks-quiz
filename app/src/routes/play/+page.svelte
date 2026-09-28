@@ -15,7 +15,8 @@
   import Dierenwei from '$lib/client/Dierenwei.svelte';
   import Pixeldier from '$lib/client/Pixeldier.svelte';
   import Karakterkaart from '$lib/client/Karakterkaart.svelte';
-  import { DIEREN, MAX_DIERNAAM, dierVan, dierenroep, maatjeVoluit, schoneDierNaam } from '$lib/shared/dieren';
+  import Maatjesknoppen from '$lib/client/Maatjesknoppen.svelte';
+  import { DIEREN, MAX_DIERNAAM, dierVan, dierenroep, maatjeVoluit, schoneDierNaam, type Opdracht } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
@@ -212,6 +213,16 @@
     }
   }
 
+  /* ---- Je maatje iets laten doen ------------------------------------
+     Op je telefoon doet het het meteen; op de televisie zodra het bericht
+     er is. Gaat dat mis, dan heb je het hier toch gezien. */
+  let maatjeOpdracht = $state<{ opdracht: Opdracht; nr: number } | null>(null);
+  let opdrachtNr = 0;
+  function laatMaatje(opdracht: Opdracht) {
+    maatjeOpdracht = { opdracht, nr: ++opdrachtNr };
+    live.laatMaatje(opdracht).catch(() => { /* de volgende komt wel door */ });
+  }
+
   /* ---- Reacties naar de televisie ----------------------------------- */
   let laatsteReactie = $state('');
   async function reageer(emoji: string) {
@@ -379,7 +390,7 @@
           <p class="lood" style="font-size:1.05rem;margin-top:.3rem">
             <Pixeldier sleutel={mijnDier.sleutel} /> {ik?.dierNaam ? maatjeVoluit(mijnDier, ik.dierNaam) : `${ik?.naam}, ${mijnDier.titel}`}
           </p>
-          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook. Tik erop, dan doet het een kunstje.</p>
+          <p class="fijn" style="margin-top:.2rem">Het rent over het scherm als je het goed hebt. En als je het fout hebt, nou ja, ook. Tik erop, of laat het met de knoppen iets doen: dan doet het dat ook op de televisie.</p>
           {#key mijnDier.sleutel}
             <Karakterkaart dier={mijnDier} />
           {/key}
@@ -400,8 +411,9 @@
           </form>
           {#if ik}
             <div class="telefoonwei">
-              <Dierenwei spelers={[{ id: ik.id, naam: ik.naam, dier: ik.dier, dierNaam: ik.dierNaam }]} namen={false} aaibaar label="Je maatje" />
+              <Dierenwei spelers={[{ id: ik.id, naam: ik.naam, dier: ik.dier, dierNaam: ik.dierNaam }]} namen={false} aaibaar label="Je maatje" opdracht={maatjeOpdracht} />
             </div>
+            <Maatjesknoppen dier={mijnDier} kies={laatMaatje} naam={ik.dierNaam ?? ''} />
           {/if}
           <div class="dierenkiezer" role="radiogroup" aria-label="Kies je maatje">
             {#each DIEREN as d (d.sleutel)}
@@ -601,6 +613,12 @@
           <button onclick={() => reageer(emoji)} aria-label="Stuur {emoji}" style={laatsteReactie === emoji ? 'transform:scale(1.25) rotate(-8deg)' : ''}>{emoji}</button>
         {/each}
       </div>
+      {#if mijnDier}
+        <div class="maatjebalk">
+          <span class="maatjebalk-dier" aria-hidden="true"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /></span>
+          <Maatjesknoppen dier={mijnDier} kies={laatMaatje} naam={ik?.dierNaam ?? ''} />
+        </div>
+      {/if}
       {#if staat.inzendingen.length > 1}
         <div class="paneel" style="padding:.9rem 1rem">
           <p class="etiket stil" style="margin-bottom:.4rem">Wat de rest had</p>
@@ -659,6 +677,12 @@
           <button onclick={() => reageer(emoji)} aria-label="Stuur {emoji}" style={laatsteReactie === emoji ? 'transform:scale(1.25) rotate(-8deg)' : ''}>{emoji}</button>
         {/each}
       </div>
+      {#if mijnDier}
+        <div class="maatjebalk">
+          <span class="maatjebalk-dier" aria-hidden="true"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /></span>
+          <Maatjesknoppen dier={mijnDier} kies={laatMaatje} naam={ik?.dierNaam ?? ''} />
+        </div>
+      {/if}
       <div class="paneel">
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
         {#if rangwoord}<p class="lood" style="font-size:1.05rem;margin-top:.3rem">{rangwoord}</p>{/if}

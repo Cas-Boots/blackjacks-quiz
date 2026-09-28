@@ -1,5 +1,17 @@
 import { api } from './proef';
 import type { PubliekeStaat, Rol, Por } from '$lib/shared/state';
+import type { Opdracht } from '$lib/shared/dieren';
+
+/** Een maatje dat een speler vanaf zijn telefoon iets laat doen. Vluchtig, net als een reactie. */
+export interface MaatjeOpdracht {
+  id: number;
+  spelerId: number;
+  naam: string;
+  dierNaam: string | null;
+  dier: string | null;
+  opdracht: Opdracht;
+  x: number;
+}
 
 /**
  * De live verbinding met de server.
@@ -27,6 +39,8 @@ class Live {
   vorigePunten = $state<Record<number, number>>({});
   /** Reacties van telefoons die nu over het scherm zweven. Vluchtig. */
   reacties = $state<{ id: number; emoji: string; naam: string; x: number }[]>([]);
+  /** Maatjes die spelers nu iets laten doen op de televisie. Vluchtig. */
+  maatjes = $state<MaatjeOpdracht[]>([]);
   /** De laatste por van de quizmaster aan deze telefoon; verdwijnt vanzelf. */
   por = $state<Por | null>(null);
   #porTimer: ReturnType<typeof setTimeout> | null = null;
@@ -100,6 +114,17 @@ class Live {
           this.reacties = [...this.reacties.slice(-24), r];
           // Na de zweefanimatie mag hij weg.
           setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('maatje', (e) => {
+        try {
+          const m = JSON.parse((e as MessageEvent).data) as MaatjeOpdracht;
+          // Van elke speler maar één tegelijk: een nieuwe opdracht vervangt de vorige.
+          this.maatjes = [...this.maatjes.filter((x) => x.spelerId !== m.spelerId).slice(-11), m];
+          setTimeout(() => (this.maatjes = this.maatjes.filter((x) => x.id !== m.id)), 3200);
         } catch {
           /* kapot pakketje, laat maar */
         }
@@ -192,6 +217,15 @@ class Live {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ emoji }),
+    });
+  }
+
+  /** Laat je eigen maatje iets doen op de televisie. */
+  async laatMaatje(opdracht: Opdracht) {
+    await fetch(api('/api/maatje'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ opdracht }),
     });
   }
 

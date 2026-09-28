@@ -6,13 +6,15 @@
  * draaien, dan moet dit een gedeeld kanaal worden — vandaar dat alles hier
  * door één functie loopt.
  *
- * Twee kanalen: wijzigingen van de stand (met versienummer, uit de database)
- * en reacties van telefoons (vluchtig: ze worden nergens bewaard, alleen
- * doorgegeven aan wie op dat moment kijkt).
+ * Wijzigingen van de stand (met versienummer, uit de database), en wat
+ * telefoons naar de televisie sturen: reacties en opdrachten aan hun maatje.
+ * Die laatste zijn vluchtig: ze worden nergens bewaard, alleen doorgegeven
+ * aan wie op dat moment kijkt.
  */
 
 import { AsyncResource } from 'node:async_hooks';
 import type { Por } from '$lib/shared/state';
+import type { Opdracht } from '$lib/shared/dieren';
 import { huidigeProef } from './db/index';
 
 /*
@@ -52,10 +54,24 @@ export interface ReactieBericht {
   x: number;
 }
 type ReactieLuisteraar = (bericht: ReactieBericht) => void;
+/** Een speler laat zijn maatje iets doen op de televisie. */
+export interface MaatjeBericht {
+  id: number;
+  spelerId: number;
+  naam: string;
+  dierNaam: string | null;
+  /** Het dier zoals de speler het nu heeft (sleutel), of null: dan kiest dierVan er een bij de naam. */
+  dier: string | null;
+  opdracht: Opdracht;
+  /** Horizontale plek op de televisie, 0–100, net als bij een reactie. */
+  x: number;
+}
+type MaatjeLuisteraar = (bericht: MaatjeBericht) => void;
 type PorLuisteraar = (por: Por) => void;
 
 const luisteraars = new Set<Aangemeld<Luisteraar>>();
 const reactieLuisteraars = new Set<Aangemeld<ReactieLuisteraar>>();
+const maatjeLuisteraars = new Set<Aangemeld<MaatjeLuisteraar>>();
 const porLuisteraars = new Set<Aangemeld<PorLuisteraar>>();
 let porTeller = 0;
 
@@ -73,6 +89,14 @@ export function luisterReacties(fn: ReactieLuisteraar): () => void {
 
 export function meldReactie(bericht: ReactieBericht) {
   roep(reactieLuisteraars, bericht, 'reactieluisteraar');
+}
+
+export function luisterMaatjes(fn: MaatjeLuisteraar): () => void {
+  return meld(maatjeLuisteraars, fn);
+}
+
+export function meldMaatje(bericht: MaatjeBericht) {
+  roep(maatjeLuisteraars, bericht, 'maatjeluisteraar');
 }
 
 export function luisterPorren(fn: PorLuisteraar): () => void {

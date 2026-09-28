@@ -20,6 +20,7 @@ import { replaceState } from '$app/navigation';
 import { live } from './live.svelte';
 import { PUNT_WAARDE } from '$lib/shared/bonus';
 import { REACTIES, hash } from '$lib/shared/kwinkslagen';
+import { OPDRACHTEN } from '$lib/shared/dieren';
 import type {
   Cijfers, CijfersPersoon, Fase, JaarDia, JaarRegel, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat,
   PubliekTeam, PubliekeVraag, VoorspellingUitslag, VoorspellerStand,
@@ -921,6 +922,7 @@ export class Testmodus {
     for (const t of this.#reactieTimers) clearTimeout(t);
     this.#reactieTimers.clear();
     live.reacties = [];
+    live.maatjes = [];
   }
 
   ga(i: number, knip = true) {
@@ -986,6 +988,9 @@ export class Testmodus {
     }
     if (st.fase !== 'lobby') {
       uit.push({ label: 'Reactie van een telefoon', toets: 'E', doe: () => this.reactie() });
+    }
+    if (st.spelers.length) {
+      uit.push({ label: 'Maatje van een telefoon', toets: 'D', doe: () => this.maatje() });
     }
     return uit;
   }
@@ -1088,6 +1093,24 @@ export class Testmodus {
     live.reacties = [...live.reacties.slice(-24), r];
     const t = setTimeout(() => {
       live.reacties = live.reacties.filter((x) => x.id !== r.id);
+      this.#reactieTimers.delete(t);
+    }, 3200);
+    this.#reactieTimers.add(t);
+  }
+
+  /** Een speler laat zijn maatje iets doen, zoals via /api/maatje. */
+  maatje() {
+    const st = live.staat;
+    if (!st?.spelers.length) return;
+    const n = ++this.#reactieTeller;
+    const s = st.spelers[(n * 5) % st.spelers.length];
+    const m = {
+      id: -n, spelerId: s.id, naam: s.naam, dierNaam: s.dierNaam ?? null, dier: s.dier ?? null,
+      opdracht: OPDRACHTEN[n % OPDRACHTEN.length], x: 8 + ((n * 37) % 84),
+    };
+    live.maatjes = [...live.maatjes.filter((x) => x.spelerId !== s.id).slice(-11), m];
+    const t = setTimeout(() => {
+      live.maatjes = live.maatjes.filter((x) => x.id !== m.id);
       this.#reactieTimers.delete(t);
     }, 3200);
     this.#reactieTimers.add(t);

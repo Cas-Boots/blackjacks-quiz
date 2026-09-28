@@ -113,6 +113,45 @@ export function kiesActie(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => 
 }
 
 /**
+ * Wat een speler zijn maatje vanaf de telefoon kan laten doen. Het doet het
+ * op de telefoon, en tegelijk op de televisie: op zijn naambordje in de
+ * lobby, en later zweeft het even over het scherm, net als een reactie.
+ */
+export const OPDRACHTEN = ['zwaai', 'dans', 'kunstje', 'voer'] as const;
+export type Opdracht = (typeof OPDRACHTEN)[number];
+export const isOpdracht = (x: unknown): x is Opdracht => (OPDRACHTEN as readonly unknown[]).includes(x);
+
+/** Wat er op de knop staat. Voeren doe je met zijn eigen lievelingshapje. */
+export function knopVan(dier: Maatje, opdracht: Opdracht): { woord: string; teken: string; uitleg: string } {
+  switch (opdracht) {
+    case 'zwaai':
+      return { woord: 'Zwaai', teken: '❤️', uitleg: 'Laat je maatje zwaaien' };
+    case 'dans':
+      return { woord: 'Dans', teken: '🎵', uitleg: 'Laat je maatje dansen' };
+    case 'kunstje':
+      return { woord: 'Kunstje', teken: '✨', uitleg: 'Laat je maatje een kunstje doen' };
+    case 'voer':
+      return { woord: 'Voer', teken: dier.hapje.ding, uitleg: `Geef je maatje ${dier.hapje.naam}` };
+  }
+}
+
+/** Het kunstje bij een opdracht. Een kunstje is er één van hemzelf, niet een algemeen. */
+export function actieVoor(dier: Maatje, opdracht: Opdracht, toeval: () => number = Math.random): Actie {
+  switch (opdracht) {
+    case 'zwaai':
+      return { lijf: 'zwaai', ding: '❤️', dingGaat: 'op' };
+    case 'dans':
+      return { lijf: 'dans', ding: '🎵', dingGaat: 'op' };
+    case 'kunstje': {
+      const eigen = dier.acties.blij;
+      return eigen[Math.min(eigen.length - 1, Math.floor(toeval() * eigen.length))];
+    }
+    case 'voer':
+      return { lijf: 'snuffel', ding: dier.hapje.ding, dingGaat: 'val' };
+  }
+}
+
+/**
  * Hoe het pixeldier kijkt en staat tijdens een kunstje (Pixeldier.svelte):
  * ogen open of dicht, blosjes, poten die trappelen, een traan, zzz.
  */

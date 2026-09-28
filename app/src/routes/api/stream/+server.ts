@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { luister, luisterReacties, luisterPorren, luisterGeluiden } from '$lib/server/bus';
+import { luister, luisterReacties, luisterMaatjes, luisterPorren, luisterGeluiden } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
 
 /**
@@ -18,6 +18,7 @@ export const GET: RequestHandler = ({ locals }) => {
 
   let stop: (() => void) | null = null;
   let stopReacties: (() => void) | null = null;
+  let stopMaatjes: (() => void) | null = null;
   let stopPorren: (() => void) | null = null;
   let stopGeluiden: (() => void) | null = null;
   let hartslag: ReturnType<typeof setInterval> | null = null;
@@ -35,6 +36,7 @@ export const GET: RequestHandler = ({ locals }) => {
       stuur('staat', bouwStaat(rol));
       stop = luister(() => stuur('staat', bouwStaat(rol)));
       stopReacties = luisterReacties((bericht) => stuur('reactie', bericht));
+      stopMaatjes = luisterMaatjes((bericht) => stuur('maatje', bericht));
       stopGeluiden = luisterGeluiden((bericht) => stuur('geluid', bericht));
       // Een por is alleen voor de telefoon waar hij voor bedoeld is.
       stopPorren = luisterPorren((por) => {
@@ -51,6 +53,7 @@ export const GET: RequestHandler = ({ locals }) => {
     cancel() {
       stop?.();
       stopReacties?.();
+      stopMaatjes?.();
       stopPorren?.();
       stopGeluiden?.();
       if (hartslag) clearInterval(hartslag);

@@ -3419,6 +3419,67 @@ a.uitslagrij:hover {
   font-size: round(3.4rem, 32px);
 }
 
+/* ---- Je maatje iets laten doen (Maatjesknoppen.svelte) ------------------
+   Vier knoppen onder je maatje op de telefoon, elk met een pixelplaatje.
+   Wat je kiest, doet het ook op de televisie. */
+.maatjesknoppen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+.maatjesknoppen button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.2rem 0.45rem;
+  font: 600 0.78rem var(--ui);
+  color: var(--ivoor);
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 0.08s, border-color 0.2s;
+}
+.maatjesknoppen button:active { transform: scale(0.94); }
+.maatjesknoppen button[aria-disabled="true"] { opacity: 0.55; }
+.maatjesknoppen button.bezig {
+  opacity: 1;
+  border-color: var(--goud-licht);
+  box-shadow: 0 0 0 1px var(--goud), 0 8px 20px -12px rgba(201, 162, 39, 0.9);
+}
+.maatjesknoppen button:focus-visible { outline: 2px solid var(--goud-licht); outline-offset: 2px; }
+.maatjesknoppen .teken {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.maatjesknoppen .pixelicoon { width: 27px; height: 27px; }
+/* Na een vraag: je maatje naast de knoppen, zodat je weet wie je stuurt. */
+.maatjebalk {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+.maatjebalk-dier { font-size: 64px; line-height: 0; flex: 0 0 auto; }
+.maatjebalk .maatjesknoppen { flex: 1 1 auto; margin-top: 0; }
+
+/* Op de televisie: een maatje dat iemand stuurt zweeft omhoog als een
+   reactie, en doet onderweg zijn kunstje. */
+.maatjereactie .plaatmaatje {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  font-size: 64px;
+  font-size: max(64px, round(4.5vw, 32px));
+}
+
 /* ---- Het maatje op het naambordje (Plaatmaatje.svelte) -----------------
    In de lobby op de televisie staat ieders maatje op zijn eigen bordje: het
    knippert en ademt, en heel af en toe doet er één een kunstje. Wie er nog

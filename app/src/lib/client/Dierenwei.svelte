@@ -4,20 +4,23 @@
    *
    * Op de televisie in de lobby lopen alle dieren van wie er al is; op de
    * telefoon alleen dat van jezelf, en daar kun je erop tikken voor een
-   * kunstje. Wie van beweging houdt: zonder beweging (prefers-reduced-motion)
-   * staan ze gewoon stil naast elkaar.
+   * kunstje, of het met de knoppen eronder iets laten doen (`opdracht`).
+   * Wie niet van beweging houdt (prefers-reduced-motion): daar staan ze
+   * gewoon stil naast elkaar.
    */
   import { onMount, untrack } from 'svelte';
   import { dierVan } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
   import Ding from './Ding.svelte';
-  import { aai, houdingVan, nieuweBewoner, stapWei, type Bewoner } from './wei';
+  import type { Opdracht } from '$lib/shared/dieren';
+  import { aai, doeOpdracht, houdingVan, nieuweBewoner, stapWei, type Bewoner } from './wei';
 
   let {
     spelers,
     namen = true,
     aaibaar = false,
     label = '',
+    opdracht = null,
   }: {
     spelers: { id: number; naam: string; dier: string | null; dierNaam?: string | null }[];
     /** Een naambordje onder elk dier. */
@@ -25,6 +28,8 @@
     /** Tikken op een dier geeft een kunstje. */
     aaibaar?: boolean;
     label?: string;
+    /** Wat de speler zijn maatje net liet doen; `nr` telt op, zodat twee keer hetzelfde ook werkt. */
+    opdracht?: { opdracht: Opdracht; nr: number } | null;
   } = $props();
 
   let wei = $state<Bewoner[]>([]);
@@ -47,6 +52,14 @@
       }
       const erbij = lijst.filter((s) => !blijft.some((b) => b.id === s.id)).map((s) => nieuweBewoner(s));
       if (erbij.length || blijft.length !== wei.length) wei = [...blijft, ...erbij];
+    });
+  });
+
+  $effect(() => {
+    const o = opdracht;
+    if (!o) return;
+    untrack(() => {
+      for (const b of wei) doeOpdracht(b, o.opdracht);
     });
   });
 

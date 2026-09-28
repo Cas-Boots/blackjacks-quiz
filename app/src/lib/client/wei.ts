@@ -17,7 +17,7 @@
  * Dit is alleen het brein: `stapWei` schuift de tijd een stukje op.
  * Dierenwei.svelte tekent het, met Pixeldier.svelte.
  */
-import { actiesVan, dierVan, gangVan, poseVan, type Actie, type Lijf, type Pose } from '$lib/shared/dieren';
+import { actieVoor, actiesVan, dierVan, gangVan, poseVan, type Actie, type Lijf, type Opdracht, type Pose } from '$lib/shared/dieren';
 
 export type Doen =
   | 'loop' | 'ren' | 'staan' | 'snuffel' | 'slaap' | 'spring' | 'kunstje' | 'groet'
@@ -179,6 +179,16 @@ export function aai(b: Bewoner, toeval: () => number = Math.random) {
   b.groetPauze = Math.max(b.groetPauze, 2000);
   if (wakker) return begin(b, 'schrik', 700, { lijf: 'schrik', ding: '❗', dingGaat: 'op' });
   begin(b, 'kunstje', 1600, greep(actiesVan(dierVan(b.sleutel), 'blij'), toeval));
+}
+
+/**
+ * Een opdracht van de telefoon: zwaaien, dansen, een kunstje, eten. Het dier
+ * doet het meteen, ook als het sliep of onder de grond zat.
+ */
+export function doeOpdracht(b: Bewoner, opdracht: Opdracht, toeval: () => number = Math.random) {
+  b.groetPauze = Math.max(b.groetPauze, 2000);
+  const actie = actieVoor(dierVan(b.sleutel), opdracht, toeval);
+  begin(b, opdracht === 'voer' ? 'eet' : 'kunstje', opdracht === 'voer' ? 1800 : 1600, actie);
 }
 
 /** De tijd `dt` ms verder. Past de dieren aan; geeft niets terug. */

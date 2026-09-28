@@ -471,10 +471,19 @@ mee; het is er alleen voor de lol.
   het karakter: een snel dier rent vaker en harder, een slaperig dier dut
   vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
   wakker).
+- **Op de televisie, als jij dat wilt.** Onder je maatje staan vier knoppen:
+  *Zwaai*, *Dans*, *Kunstje* en *Voer* (met zijn eigen lievelingshapje). Je
+  maatje doet het meteen op je telefoon, en tegelijk op de televisie: in de
+  lobby op je naambordje, en na een vraag, bij de tussenstand en de uitslag
+  zweeft het met jouw naam erbij omhoog, net als een reactie. De knoppen
+  staan daar naast de emoji. Vluchtig, net als een reactie: het gaat via
+  `/api/maatje` en de live stroom, niets komt in de database, en elke telefoon
+  mag het hooguit één keer per 1,2 seconde.
 - **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
   uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
-  dezelfde stijl (`src/lib/shared/pixeliconen.ts`); voorwerpen als een ei,
-  een banaan of pizza blijven emoji. In de optocht stopt elk dier net niet
+  dezelfde stijl (`src/lib/shared/pixeliconen.ts`), net als de hapjes die ze
+  het vaakst bij zich hebben (appel, eikel, visje, banaan, blaadjes, bloemen,
+  bot, wortel, pizza, paddenstoel); de rest (een ei, een cupcake) blijft emoji. In de optocht stopt elk dier net niet
   in het gelid, een tikje links, rechts, hoger of lager. Op je telefoon staat je
   eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
   (en slaapt het, dan schrikt het wakker).
@@ -497,7 +506,8 @@ De dieren, hun titels, wat ze roepen en hun kunstjes staan in
 `src/lib/client/Dierenparade.svelte`, de entree `src/lib/client/Spotlight.svelte`,
 het maatje op het naambordje `src/lib/client/Plaatmaatje.svelte` (de tv-pagina
 kiest wie er een kunstje doet), en het podiumpje op de telefoon
-`src/lib/client/Dierenwei.svelte` met het brein in `src/lib/client/wei.ts`.
+`src/lib/client/Dierenwei.svelte` met het brein in `src/lib/client/wei.ts`, en
+de knoppen om je maatje iets te laten doen `src/lib/client/Maatjesknoppen.svelte`.
 De `px-…`-, `dier-…`-, `kunst-…`-, `ding-…`-, `spot-…`- en `wei-…`-animaties
 staan onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet,
 krijgt geen optochten en geen entree, en dieren die stilstaan.
@@ -801,6 +811,7 @@ ware grootte te zien; op een smal scherm ligt het paneel eroverheen.
 | `M` | het fragment afspelen of stoppen |
 | `N` | bij de cijfers van het jaar: een stap verder |
 | `E` | een reactie van een telefoon laat zweven |
+| `D` | een speler laat zijn maatje iets doen (in de lobby op zijn naambordje, daarna zwevend) |
 
 Bij elke dia staat waar je op let. Klik één keer in het scherm voor het
 geluid, net als op de avond. De URL onthoudt de dia (`/tv?test=stand`), dus

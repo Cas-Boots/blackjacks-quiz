@@ -24,7 +24,8 @@
   import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
   import Spotlight, { type Binnenkomer } from '$lib/client/Spotlight.svelte';
   import Pixeldier from '$lib/client/Pixeldier.svelte';
-  import { dierVan, dierenroep, kiesActie, maatjeVoluit, type Actie } from '$lib/shared/dieren';
+  import { actieVoor, dierVan, dierenroep, kiesActie, maatjeVoluit, type Actie } from '$lib/shared/dieren';
+  import type { MaatjeOpdracht } from '$lib/client/live.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
   import { houdWakker } from '$lib/client/wakker';
@@ -198,6 +199,25 @@
     };
     volgende();
     return () => clearTimeout(wacht);
+  });
+
+  /* ---- Maatjes die spelers vanaf hun telefoon iets laten doen --------
+     In de lobby doet het maatje het op zijn eigen naambordje, en gaat het
+     voor op wat de regisseur hierboven verzon. Daarna zweeft het even over
+     het scherm, net als een reactie. */
+  const actieVan = (m: MaatjeOpdracht) => actieVoor(dierVan(m.dier, m.naam), m.opdracht, () => ((m.id * 0.618) % 1));
+  let vorigeOpdracht = 0;
+  $effect(() => {
+    const m = live.maatjes.at(-1);
+    if (!m || m.id === vorigeOpdracht) return;
+    vorigeOpdracht = m.id;
+    geluid.plop();
+    if (live.staat?.fase !== 'lobby') return;
+    const nr = ++kunstjeNr;
+    plaatKunstje = { spelerId: m.spelerId, actie: actieVan(m), nr };
+    setTimeout(() => {
+      if (plaatKunstje?.nr === nr) plaatKunstje = null;
+    }, 2300);
   });
 
   let spot = $state<{ nr: number; wie: Binnenkomer } | null>(null);
@@ -564,6 +584,14 @@
         <span class="van">{r.naam}</span>
       </div>
     {/each}
+    {#if staat?.fase !== 'lobby'}
+      {#each live.maatjes as m (m.id)}
+        <div class="reactie maatjereactie" style="--x:{m.x}%">
+          <Plaatmaatje sleutel={dierVan(m.dier, m.naam).sleutel} kunstje={actieVan(m)} beurt={m.id} />
+          <span class="van">{m.dierNaam ?? m.naam}</span>
+        </div>
+      {/each}
+    {/if}
   </div>
 
   {#if optocht}
