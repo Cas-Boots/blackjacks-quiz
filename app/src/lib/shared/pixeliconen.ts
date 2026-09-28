@@ -3,7 +3,7 @@
  * een muzieknootje, een sterretje, een druppel, zzz, een uitroepteken.
  *
  * Emoji naast pixeldieren oogt rommelig; deze passen erbij. Wat hier niet
- * staat (een ei, een banaan, pizza) blijft gewoon een emoji. Een letter is
+ * staat (een ei, een cupcake, een steen) blijft gewoon een emoji. Een letter is
  * een kleur uit het palet, een punt is leeg; de omlijning komt er vanzelf bij.
  */
 
@@ -64,9 +64,70 @@ const CONFETTI: Icoon = {
   rijen: ['...y.r.', '.b.....', '.....g.', '...pp..', '..pyp..', '.ppp...', 'pp.....'],
 };
 
+/* Hapjes en dingen die de maatjes vaak bij zich hebben. */
+const APPEL: Icoon = {
+  palet: { r: '#e8423f', s: '#b52b35', w: '#ffb3a8', b: '#7a4a2a', g: '#6cd46c' },
+  rijen: ['...bgg.', '...b...', '.rrrrr.', 'rwrrrrr', 'rrrrrrr', 'rrrrrrs', '.rrrss.'],
+};
+const EIKEL: Icoon = {
+  palet: { c: '#7a4a2a', n: '#c9803a', w: '#f0b872', b: '#5a3620' },
+  rijen: ['...b...', '..ccc..', '.ccccc.', '.nnnnn.', '.nwnnn.', '..nnn..', '...n...'],
+};
+const VIS: Icoon = {
+  palet: { b: '#62b6ff', l: '#bfe3ff', w: '#ffffff', o: '#15101a' },
+  rijen: ['.......', 'b..bbbb', 'bbbbwob', '.bbbbbb', 'bbblllb', 'b..bbb.', '.......'],
+};
+const BANAAN: Icoon = {
+  palet: { y: '#ffd23f', s: '#d9a521', b: '#6b4a24' },
+  rijen: ['.....b.', '....yy.', '....yy.', '...yyy.', '.yyyys.', 'ssss...', '.......'],
+};
+const BLAD: Icoon = {
+  palet: { g: '#6cd46c', d: '#3f9a4f' },
+  rijen: ['.....gg', '...gggg', '..ggdgg', '.ggdgg.', '.gdgg..', '.dg....', 'd......'],
+};
+const HERFSTBLAD: Icoon = {
+  palet: { g: '#f0913a', d: '#b8562a' },
+  rijen: BLAD.rijen,
+};
+const BLOESEM: Icoon = {
+  palet: { p: '#ff9ec4', y: '#ffd23f' },
+  rijen: ['.pp.pp.', 'ppppppp', 'ppyyypp', '.pyyyp.', 'ppyyypp', 'ppppppp', '.pp.pp.'],
+};
+const BLOEM: Icoon = {
+  palet: { p: '#ffd23f', y: '#8a5a2a' },
+  rijen: BLOESEM.rijen,
+};
+const BOT: Icoon = {
+  palet: { w: '#f4efe2', s: '#c9c0aa' },
+  rijen: ['.......', '.......', 'ww...ww', 'wwwwwww', 'ss...ss', '.......', '.......'],
+};
+const WORTEL: Icoon = {
+  palet: { o: '#f5892a', s: '#c4621d', g: '#6cd46c' },
+  rijen: ['....g.g', '....oog', '...ooo.', '..ooo..', '.oso...', 'oo.....', '.......'],
+};
+const PIZZA: Icoon = {
+  palet: { b: '#c9803a', y: '#ffd23f', r: '#d8334a' },
+  rijen: ['bbbbbbb', 'yyyyyyy', '.yryyy.', '.yyyry.', '..yyy..', '..yry..', '...y...'],
+};
+const PADDENSTOEL: Icoon = {
+  palet: { r: '#e8423f', w: '#ffffff', e: '#f1e4c8' },
+  rijen: ['..rrr..', '.rwrrr.', 'rrrrwrr', 'rrrrrrr', '..eee..', '..eee..', '..eee..'],
+};
+const BOEM: Icoon = {
+  palet: { o: '#ff8a3d', y: '#ffd23f', w: '#ffffff' },
+  rijen: ['.o...o.', '..ooo..', '.oyyyo.', 'ooywyoo', '.oyyyo.', '..ooo..', '.o...o.'],
+};
+const PRAATJE: Icoon = {
+  palet: { w: '#f4f1ea', s: '#8a93a6' },
+  rijen: ['.......', '.wwwww.', 'wwwwwww', 'wswswsw', 'wwwwwww', '.wwwww.', '.w.....'],
+};
+
 const PER_TEKEN: Record<string, Icoon> = {
   '❤️': HART, '🎵': NOOT, '🎶': NOOT, '✨': STER, '💫': STER, '💧': DRUPPEL, '💦': DRUPPEL,
   '💤': ZZZ, '❗': UITROEP, '❓': VRAAG, '💨': WOLKJE, '🫧': BEL, '💢': BOOS, '🎉': CONFETTI,
+  '🍎': APPEL, '🌰': EIKEL, '🐟': VIS, '🍌': BANAAN, '🍃': BLAD, '🌿': BLAD, '🍂': HERFSTBLAD,
+  '🌸': BLOESEM, '🌼': BLOEM, '🌻': BLOEM, '🦴': BOT, '🥕': WORTEL, '🍕': PIZZA, '🍄': PADDENSTOEL,
+  '💥': BOEM, '💬': PRAATJE,
 };
 
 export type IcoonPaden = { kleur: string; d: string }[];

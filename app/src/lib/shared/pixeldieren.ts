@@ -1270,29 +1270,52 @@ export function lagenVan(sleutel: string): Lagen {
     if (laatste) oog = { x: Math.floor(laatste.x / SCHAAL), y: Math.floor(laatste.y / SCHAAL) };
   }
 
-  // Vleugel op: gespiegeld over zijn bovenste rij, zodat hij omhoog wijst,
-  // met een eigen randje waar hij boven het lijf uitsteekt.
-  const top = Math.min(...vleugel.map((p) => p.y));
-  const vleugelOp: Pixel[] = vleugel.map((p) => ({ ...p, y: top - (p.y - top) - 1 })).filter((p) => p.y >= 0);
-  const bezet = new Set([...lijf, ...vleugelOp].map((p) => `${p.x},${p.y}`));
+  // Vleugel op: hij klapt omhoog. Van opzij zie je hem korter, en hij helt
+  // naar achteren (de kop wijst naar rechts); een dier dat je van voren ziet
+  // (de uil) slaat twee vleugels naar buiten uit. Hij krijgt zijn eigen licht,
+  // schaduw en randje, ook waar hij voor het lijf langs gaat: anders is het een vlek.
+  const vorm = new Set<string>();
+  const paren = klonten(vleugel);
+  const midden = vleugel.reduce((som, p) => som + p.x, 0) / (vleugel.length || 1);
+  for (const klont of paren) {
+    const top = Math.min(...klont.map((p) => p.y));
+    const eigen = klont.reduce((som, p) => som + p.x, 0) / klont.length;
+    const uit = paren.length > 1 ? (eigen < midden ? -1 : 1) : -0.5;
+    for (const p of klont) {
+      const d = Math.floor((p.y - top) * 0.6);
+      const x = p.x + Math.trunc(d * uit);
+      const y = top - 1 - d;
+      if (x >= 0 && x < MAAT && y >= 0) vorm.add(`${x},${y}`);
+    }
+  }
+  const inVorm = (x: number, y: number) => vorm.has(`${x},${y}`);
+  const vleugelOp: Pixel[] = [...vorm].map((k) => {
+    const [x, y] = k.split(',').map(Number);
+    const basis = kleur('v');
+    const tint = !inVorm(x, y - 1) ? licht(basis, 0.28) : !inVorm(x, y + 1) ? schaduw(basis, 0.22) : basis;
+    return { x, y, kleur: tint };
+  });
   const randje = new Map<string, Pixel>();
   for (const p of vleugelOp) {
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const x = p.x + dx;
       const y = p.y + dy;
-      if (x < 0 || y < 0 || x >= MAAT || bezet.has(`${x},${y}`)) continue;
+      if (x < 0 || y < 0 || x >= MAAT || inVorm(x, y)) continue;
       randje.set(`${x},${y}`, { x, y, kleur: randKleur(kleur('v')) });
     }
   }
   vleugelOp.unshift(...randje.values());
 
-  // Lopen: om en om de helft van de poten optillen (de onderste rijen van die poot weg).
+  // Lopen: om en om de helft van de poten optillen. De hele poot gaat
+  // omhoog, zodat de voet een voet blijft; wat dan in het lijf zou steken
+  // valt weg. Vroeger ging de onderkant eraf, en dan verdween een korte voet.
   const groepen = potenGroepen(poten);
   const stap = (even: boolean) =>
     groepen.flatMap((g, i) => {
       if ((i % 2 === 0) !== even) return g;
-      const voet = Math.max(...g.map((p) => p.y));
-      return g.filter((p) => p.y <= voet - SCHAAL);
+      const boven = Math.min(...g.map((p) => p.y));
+      const til = Math.min(SCHAAL, Math.max(...g.map((p) => p.y)) - boven);
+      return g.map((p) => ({ ...p, y: p.y - til })).filter((p) => p.y >= boven);
     });
 
   const lagen: Lagen = {

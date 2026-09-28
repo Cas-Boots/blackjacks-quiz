@@ -18,7 +18,7 @@ describe('pixeliconen', () => {
   });
 
   it('laat de rest een gewone emoji', () => {
-    expect(icoonVan('🍌')).toBeNull();
+    expect(icoonVan('🧁')).toBeNull();
   });
 
   it('heeft een plaatje voor alles wat elk dier algemeen kan laten verschijnen, behalve voorwerpen', () => {
