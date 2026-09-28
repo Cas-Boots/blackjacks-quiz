@@ -7,6 +7,8 @@ import { zoekProef, tokenVoor, geldigApparaat } from '$lib/server/proef';
 import { apparaten } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
+import { startAchtergrond } from '$lib/server/recap/achtergrond';
+import { actiefSpel, bumpVersie, cijfersLiggenVast } from '$lib/server/spel';
 
 // Schema is kritiek: als dit faalt, moet het opstarten falen.
 zorgVoorMigraties();
@@ -18,6 +20,18 @@ try {
 } catch (err) {
   console.error('[seed] basis klaarzetten mislukt — verder met wat er staat:', err);
 }
+
+// De cijfers van resolution-recap bijna live houden (zie recap/achtergrond.ts).
+startAchtergrond({
+  mag: () => {
+    const spel = actiefSpel();
+    return !spel || !cijfersLiggenVast(spel);
+  },
+  veranderd: () => {
+    const spel = actiefSpel();
+    if (spel) bumpVersie(spel.id);
+  },
+});
 
 export const TOKEN_COOKIE = 'bjq_token';
 

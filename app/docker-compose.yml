@@ -33,6 +33,7 @@ services:
       # draait de quiz op de ingebouwde momentopname. Zie README.md.
       RECAP_URL: ${RECAP_URL:-}
       RECAP_TOKEN: ${RECAP_TOKEN:-}
+      RECAP_INTERVAL: ${RECAP_INTERVAL:-60}
     volumes:
       # De stand overleeft een herstart van de container.
       - quiz-data:/data

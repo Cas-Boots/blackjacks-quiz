@@ -629,12 +629,22 @@ Waar de cijfers vandaan komen, in deze volgorde:
 | `RECAP_BESTAND` | een export-JSON op schijf, bijvoorbeeld de nieuwste uit `resolution-recap/backups/` |
 | niets | de ingebouwde momentopname in `src/lib/content/recap-snapshot.json` |
 
-De cijfers worden ververst bij het opstarten, zodra je naar een van die rondes
-springt (met een wachttijd van hooguit zes seconden, zodat een trage
-verbinding de avond niet ophoudt), en met de knop **Ververs de cijfers** op het
-hostscherm. Mislukt het, dan blijven de vorige cijfers staan en zegt het
-hostscherm dat erbij. Zolang een ronde loopt, veranderen vraag en antwoord
-niet vanzelf.
+Met een live bron zijn de cijfers bijna live: de server haalt ze op bij het
+opstarten en daarna elke minuut (`RECAP_INTERVAL`, in seconden; minimaal 15,
+`0` zet het uit). Wie op de avond nog een sportje of taart invoert, zit er zo
+een minuut later in. Zolang een ronde loopt die de cijfers gebruikt, of het
+jaaroverzicht, slaat de server een beurt over: vraag en antwoord veranderen
+nooit halverwege. Bij het begin van zo'n ronde ververst hij sowieso nog één
+keer (met een wachttijd van hooguit zes seconden, zodat een trage verbinding
+de avond niet ophoudt), en met de knop **Ververs de cijfers** op het
+hostscherm kan het altijd. Mislukt het, dan blijven de vorige cijfers staan en
+zegt het hostscherm dat erbij, met de tijd van de export die er staat.
+
+`RECAP_URL` is het adres van resolution-recap zelf, zonder `/api/export`
+erachter (bijvoorbeeld `https://resolution-recap.avs-api.nl`), en
+`RECAP_TOKEN` het `BACKUP_TOKEN` van dat project; korter dan 32 tekens weigert
+resolution-recap hem. Let op dat je niet `blackjacks.avs-api.nl` neemt: dat is
+blackjacks-cup, en die heeft geen export.
 
 In de vragenlijst op het hostscherm staat *live* achter elke vraag die zo
 wordt uitgerekend. De sleutels (`live: "sport.meeste"` in
@@ -971,6 +981,8 @@ blackjacks-cup.
 | `PORT` | staat al goed | `3000`. |
 | `ADDRESS_HEADER`, `XFF_DEPTH` | staat al goed | `x-forwarded-for` en `1`: achter Traefik ziet de rem op de pincode zo het adres van de telefoon. |
 | `BODY_SIZE_LIMIT` | staat al goed | `512K`, het grootste verzoek dat de server aanneemt; een portret is hooguit 200 kB. |
+| `RECAP_URL`, `RECAP_TOKEN` | nee | De cijfers van het jaar live uit resolution-recap; zie [De cijfers van het jaar, live](#de-cijfers-van-het-jaar-live). Zonder draait de quiz op de ingebouwde momentopname. |
+| `RECAP_INTERVAL` | staat al goed | `60`: elke minuut verse cijfers, behalve tijdens een ronde die ze gebruikt. |
 | `NIEUWJAAR_OP` | nee | Alleen voor een generale repetitie: een verzonnen middernacht, `+10` (minuten na de start) of een tijdstip. Leeg laten op de avond zelf. |
 
 `HOST_PIN` heeft met opzet geen standaardwaarde. Draait de app in productie

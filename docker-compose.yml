@@ -42,6 +42,13 @@ services:
       MEDIA_DIR: /app/media
       PORT: '3000'
       NODE_ENV: production
+      # De cijfers van het jaar, live uit resolution-recap: het adres van die
+      # app (zonder /api/export) en zijn BACKUP_TOKEN. Zet ze in Dokploy onder
+      # Environment. Zonder deze twee draait de quiz op de ingebouwde
+      # momentopname. RECAP_INTERVAL is hoe vaak hij ververst, in seconden.
+      RECAP_URL: ${RECAP_URL:-}
+      RECAP_TOKEN: ${RECAP_TOKEN:-}
+      RECAP_INTERVAL: ${RECAP_INTERVAL:-60}
     # Geen `ports`: Traefik komt binnen over het netwerk hieronder. Wat niet
     # aan het internet hangt, hoeft niet dichtgezet te worden.
     expose:

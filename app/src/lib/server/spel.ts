@@ -90,6 +90,18 @@ export function pakketVan(spel: { id?: number; pakket: string }): Pakket {
   return pakket;
 }
 
+/**
+ * Of de cijfers van resolution-recap nu vast moeten blijven liggen: tijdens
+ * een ronde die ze gebruikt (levende vragen of de cijfers na afloop) en
+ * tijdens het jaaroverzicht. Zo verschuift een antwoord nooit halverwege.
+ */
+export function cijfersLiggenVast(spel: { pakket: string; samenstelling: string; fase: string; rondeIndex: number }): boolean {
+  if (spel.fase === 'jaaroverzicht') return true;
+  if (!['ronde', 'vraag', 'antwoord', 'cijfers'].includes(spel.fase)) return false;
+  const ronde = samengesteld(spel)[spel.rondeIndex];
+  return !!ronde && (!!ronde.cijfers || ronde.vragen.some((v) => !!v.live));
+}
+
 /** De rondes die daadwerkelijk meedoen, met alleen de gekozen vragen. */
 export function samengesteld(spel: { pakket: string; samenstelling: string }): Ronde[] {
   const pakket = pakketVan(spel);
