@@ -75,7 +75,8 @@ export type Lijf =
   | 'salto' | 'dans' | 'pirouette' | 'boing' | 'rol' | 'rek' | 'opblaas' | 'schud' | 'acht'
   | 'ondersteboven' | 'balans' | 'glij' | 'graaf' | 'kronkel'
   | 'zak' | 'omval' | 'mok' | 'verstop'
-  | 'kijkrond' | 'snuffel' | 'trappel' | 'schrik' | 'hik' | 'zwaai' | 'slaap';
+  | 'kijkrond' | 'snuffel' | 'trappel' | 'schrik' | 'hik' | 'zwaai' | 'slaap'
+  | 'juich';
 export type DingGaat = 'op' | 'gooi' | 'val' | 'rond';
 
 /** Wat elk dier kan als het blij is, bovenop zijn eigen kunstjes. */
@@ -93,6 +94,12 @@ export const ALGEMEEN_SIP: readonly Actie[] = [
   { lijf: 'mok', ding: '💢', dingGaat: 'op' },
   { lijf: 'verstop' },
 ];
+
+/**
+ * Het feest: een grote sprong met een draai in de lucht, landen, nog een
+ * sprongetje, en confetti. Voor wie wint, en voor wie op *Feest* drukt.
+ */
+export const JUICH: Actie = { lijf: 'juich', ding: '🎉', dingGaat: 'op' };
 
 /**
  * Alle kunstjes van een dier voor een stemming: zijn eigen, plus twee
@@ -117,7 +124,7 @@ export function kiesActie(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => 
  * op de telefoon, en tegelijk op de televisie: op zijn naambordje in de
  * lobby, en later zweeft het even over het scherm, net als een reactie.
  */
-export const OPDRACHTEN = ['zwaai', 'dans', 'kunstje', 'voer'] as const;
+export const OPDRACHTEN = ['zwaai', 'dans', 'kunstje', 'voer', 'feest'] as const;
 export type Opdracht = (typeof OPDRACHTEN)[number];
 export const isOpdracht = (x: unknown): x is Opdracht => (OPDRACHTEN as readonly unknown[]).includes(x);
 
@@ -132,6 +139,8 @@ export function knopVan(dier: Maatje, opdracht: Opdracht): { woord: string; teke
       return { woord: 'Kunstje', teken: '✨', uitleg: 'Laat je maatje een kunstje doen' };
     case 'voer':
       return { woord: 'Voer', teken: dier.hapje.ding, uitleg: `Geef je maatje ${dier.hapje.naam}` };
+    case 'feest':
+      return { woord: 'Feest', teken: '🎉', uitleg: 'Laat je maatje een feestje vieren' };
   }
 }
 
@@ -148,6 +157,8 @@ export function actieVoor(dier: Maatje, opdracht: Opdracht, toeval: () => number
     }
     case 'voer':
       return { lijf: 'snuffel', ding: dier.hapje.ding, dingGaat: 'val' };
+    case 'feest':
+      return JUICH;
   }
 }
 
@@ -161,7 +172,7 @@ const POSE: Record<Lijf, Pose> = {
   opblaas: 'blij', schud: 'schrik', acht: 'loop', ondersteboven: 'staan', balans: 'staan',
   glij: 'blij', graaf: 'loop', kronkel: 'loop', zak: 'sip', omval: 'schrik', mok: 'sip',
   verstop: 'sip', kijkrond: 'staan', snuffel: 'loop', trappel: 'loop', schrik: 'schrik',
-  hik: 'schrik', zwaai: 'blij', slaap: 'slaap',
+  hik: 'schrik', zwaai: 'blij', slaap: 'slaap', juich: 'blij',
 };
 export function poseVan(lijf: Lijf, stemming: 'blij' | 'sip'): Pose {
   const pose = POSE[lijf];
@@ -188,13 +199,16 @@ export const EINDE_SIP: Actie = { lijf: 'slaap', ding: '💤', dingGaat: 'op' };
 
 /**
  * Een heel optreden in drie tellen: een opwarmer, en dan twee verschillende
- * kunstjes van dit dier (sip soms eindigend in slaap). Zo doet een dier
- * zelden twee keer precies hetzelfde.
+ * kunstjes van dit dier (sip soms eindigend in slaap, en een winnaar met
+ * `feest` altijd eindigend in het feest). Zo doet een dier zelden twee keer
+ * precies hetzelfde.
  */
-export function kiesRoutine(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => number = Math.random): Actie[] {
+export function kiesRoutine(dier: Maatje, stemming: 'blij' | 'sip', toeval: () => number = Math.random, feest = false): Actie[] {
   const greep = <T>(lijst: readonly T[]) => lijst[Math.min(lijst.length - 1, Math.floor(toeval() * lijst.length))];
   const eerste = kiesActie(dier, stemming, toeval);
   const rest = actiesVan(dier, stemming).filter((a) => a.lijf !== eerste.lijf || a.ding !== eerste.ding);
+  // Een winnaar sluit af met het feest.
+  if (feest && stemming === 'blij') return [greep(OPWARMERS.blij), eerste, JUICH];
   const tweede = stemming === 'sip' && toeval() < 0.4 ? EINDE_SIP : greep(rest.length ? rest : [eerste]);
   return [greep(OPWARMERS[stemming]), eerste, tweede];
 }

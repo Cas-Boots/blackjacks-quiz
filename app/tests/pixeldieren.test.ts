@@ -18,12 +18,17 @@ describe('pixeldieren', () => {
     expect(Object.keys(SPRITES).sort()).toEqual(DIEREN.map((d) => d.sleutel).sort());
   });
 
-  it('geeft elk dier ogen die dicht kunnen', () => {
+  it('geeft elk dier ogen die dicht kunnen, en blije ogen die anders zijn dan slapende', () => {
+    let boogjes = 0;
     for (const d of DIEREN) {
       const l = lagenVan(d.sleutel);
       expect(l.ogenOpen.length, d.sleutel).toBeGreaterThan(0);
       expect(l.ogenDicht.length, d.sleutel).toBeGreaterThan(0);
+      expect(l.ogenBlij.length, d.sleutel).toBeGreaterThan(0);
+      if (JSON.stringify(l.ogenBlij) !== JSON.stringify(l.ogenDicht)) boogjes++;
     }
+    // Alleen een oog van twee pixels breed heeft geen ruimte voor een boogje.
+    expect(boogjes).toBeGreaterThan(DIEREN.length * 0.8);
   });
 
   it('laat dieren met poten echt stappen: om en om een andere poot van de grond', () => {

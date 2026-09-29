@@ -2851,7 +2851,21 @@ a.uitslagrij:hover {
 .actie[data-lijf="omval"] { animation-name: kunst-omval; transform-origin: 20% 100%; }
 .actie[data-lijf="mok"] { animation-name: kunst-mok; }
 .actie[data-lijf="verstop"] { animation-name: kunst-verstop; transform-origin: 50% 100%; }
+/* Het feest: in schokjes van vier beeldjes per stuk, zodat het pixeldier op
+   zijn pixels blijft, ook midden in de sprong. */
+.actie[data-lijf="juich"] { animation-name: kunst-juich; animation-timing-function: steps(4, end); transform-origin: 50% 100%; }
 
+@keyframes kunst-juich {
+  0% { transform: translateY(0) scale(1, 1); }
+  10% { transform: translateY(0) scale(1.15, 0.85); }
+  22% { transform: translateY(-70%) scale(0.92, 1.1); }
+  32% { transform: translateY(-100%) scale(-1, 1); }
+  42% { transform: translateY(-70%) scale(1, 1); }
+  52% { transform: translateY(0) scale(1.15, 0.85); }
+  62% { transform: translateY(-35%) scale(1, 1); }
+  72% { transform: translateY(0) scale(1.1, 0.9); }
+  80%, 100% { transform: translateY(0) scale(1, 1); }
+}
 @keyframes kunst-salto {
   0% { transform: translateY(0) rotate(0); }
   15% { transform: translateY(8%) scale(1.1, 0.85); }
@@ -3063,6 +3077,7 @@ a.uitslagrij:hover {
 .px-poten.a,
 .px-poten.b,
 .px-vleugel.op,
+.px-blij,
 .px-blos { display: none; }
 /* Knipperen, elk dier op zijn eigen ritme. */
 .px-open { animation: px-knipper 4.3s linear infinite; animation-delay: calc(var(--knipper, 0ms) * -4); }
@@ -3071,10 +3086,19 @@ a.uitslagrij:hover {
   95%, 98% { visibility: hidden; }
   99%, 100% { visibility: visible; }
 }
-/* Blij: ogen tevreden dicht, een blos op de wangen. Slapen: ogen dicht. */
+/* Blij: ogen tot boogjes geknepen (^^), een blos op de wangen, en een
+   huppeltje van twee pixels, pixel voor pixel. Slapen: ogen gewoon dicht. */
 .pixeldier[data-pose="blij"] .px-open,
 .pixeldier[data-pose="slaap"] .px-open { display: none; }
+.pixeldier[data-pose="blij"] .px-blij { display: inline; }
 .pixeldier[data-pose="blij"] .px-blos { display: inline; opacity: 0.85; }
+.pixeldier[data-pose="blij"] .px-alles { animation: px-huppel 0.8s steps(1, end) infinite; }
+@keyframes px-huppel {
+  0%, 55%, 100% { transform: translateY(0); }
+  65% { transform: translateY(-1px); }
+  72% { transform: translateY(-2px); }
+  86% { transform: translateY(-1px); }
+}
 /* Lopen: om en om de helft van de poten van de grond. */
 .pixeldier[data-pose="loop"] .px-poten.rust { display: none; }
 .pixeldier[data-pose="loop"] .px-poten.a { display: inline; animation: px-stap 0.34s linear infinite; }
@@ -3420,12 +3444,12 @@ a.uitslagrij:hover {
 }
 
 /* ---- Je maatje iets laten doen (Maatjesknoppen.svelte) ------------------
-   Vier knoppen onder je maatje op de telefoon, elk met een pixelplaatje.
+   Vijf knoppen onder je maatje op de telefoon, elk met een pixelplaatje.
    Wat je kiest, doet het ook op de televisie. */
 .maatjesknoppen {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
   margin-top: 0.6rem;
 }
 .maatjesknoppen button {

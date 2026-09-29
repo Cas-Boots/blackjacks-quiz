@@ -13,7 +13,7 @@ let teller = 0;
 
 /**
  * Een speler laat zijn maatje iets doen op de televisie: zwaaien, dansen,
- * een kunstje, of eten.
+ * een kunstje, eten of feestvieren.
  *
  * Vluchtig, net als een reactie: niets komt in de database. Het gaat via de
  * bus naar wie op dat moment kijkt. Je stuurt alleen je eigen maatje aan:

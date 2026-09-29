@@ -1240,6 +1240,8 @@ export interface Lagen {
   lijf: Laag;
   ogenOpen: Laag;
   ogenDicht: Laag;
+  /** Blije ogen: een boogje (^^) in plaats van een streepje. */
+  ogenBlij: Laag;
   wangen: Laag;
   vleugelNeer: Laag;
   vleugelOp: Laag;
@@ -1426,6 +1428,7 @@ export function lagenVan(sleutel: string): Lagen {
   // streepje onderaan, met daarboven het ooglid in de kleur van de kop.
   const ogenOpen: Pixel[] = [];
   const ogenDicht: Pixel[] = [];
+  const ogenBlij: Pixel[] = [];
   let oog = { x: 11, y: 4 };
   const letterVan = new Map(ogen.map((p) => [`${p.x},${p.y}`, p.t]));
   for (const kaal of klonten(ogen)) {
@@ -1454,6 +1457,49 @@ export function lagenVan(sleutel: string): Lagen {
       const erboven = at(p.x, boven - 1);
       const lid = rand(erboven) || oogLetter(erboven) ? kleur('a') : kleur(erboven);
       ogenDicht.push({ ...p, kleur: p.y === onder ? palet.k : lid });
+    }
+    // Blij: het ooglid dicht, met een boogje erin dat aan de zijkanten omlaag
+    // loopt (^^). Hoe breder het oog, hoe hoger de boog (hooguit twee pixels).
+    // Een smal oog krijgt de uiteinden van de boog ernaast, op de kop.
+    // Loopt het wit van het oog over in een lichte vlek op de kop (de witte
+    // snoet van de pinguïn), dan hoort het bij het gezicht: dat blijft wit, en
+    // het boogje komt over de pupil.
+    const wit = sprite.palet.w ?? '#f4f1ea';
+    const groot =
+      pupil.length > 0 &&
+      klont.some((p) =>
+        [[p.x - 1, p.y], [p.x + 1, p.y], [p.x, p.y - 1], [p.x, p.y + 1]].some(([x, y]) => {
+          const t = at(x, y);
+          return !rand(t) && !oogLetter(t) && t !== 'c' && helderheid(kleur(t)) > 0.8;
+        }),
+      );
+    const boogOver = groot ? pupil : klont;
+    const smal = Math.max(...boogOver.map((p) => p.x)) - Math.min(...boogOver.map((p) => p.x)) < 3;
+    const links = Math.min(...boogOver.map((p) => p.x)) - (smal ? 1 : 0);
+    const rechts = Math.max(...boogOver.map((p) => p.x)) + (smal ? 1 : 0);
+    const boogOnder = Math.max(...boogOver.map((p) => p.y));
+    const hoog = Math.min(2, boogOnder - Math.min(...boogOver.map((p) => p.y)));
+    const boog = new Set<string>();
+    for (let x = links; x <= rechts; x++) boog.add(`${x},${boogOnder - Math.min(x - links, rechts - x, hoog)}`);
+    const inOog = new Set(klont.map((p) => `${p.x},${p.y}`));
+    // Het ooglid is de kleur die het meest rond het oog zit (bij de wasbeer
+    // het masker, niet de witte vacht erboven). Op een donkere kop is een
+    // donker boogje onzichtbaar; daar wordt het licht, in het wit van het oog.
+    const telling = new Map<string, number>();
+    for (const p of klont) {
+      for (const [x, y] of [[p.x - 1, p.y], [p.x + 1, p.y], [p.x, p.y - 1], [p.x, p.y + 1]]) {
+        const t = at(x, y);
+        if (inOog.has(`${x},${y}`) || rand(t) || oogLetter(t)) continue;
+        telling.set(t, (telling.get(t) ?? 0) + 1);
+      }
+    }
+    const meest = [...telling].sort((a, b) => b[1] - a[1])[0]?.[0];
+    const blijLid = groot ? wit : meest ? kleur(meest) : kleur('a');
+    const boogKleur = helderheid(blijLid) < 0.3 ? wit : palet.k;
+    for (const p of klont) ogenBlij.push({ ...p, kleur: boog.has(`${p.x},${p.y}`) ? boogKleur : blijLid });
+    for (const plek of boog) {
+      const [x, y] = plek.split(',').map(Number);
+      if (!inOog.has(plek) && !rand(at(x, y)) && !oogLetter(at(x, y))) ogenBlij.push({ x, y, kleur: boogKleur });
     }
     const laatste = pupil.at(-1);
     if (laatste) oog = { x: Math.floor(laatste.x / SCHAAL), y: Math.floor(laatste.y / SCHAAL) };
@@ -1511,6 +1557,7 @@ export function lagenVan(sleutel: string): Lagen {
     lijf: alsLaag(lijf),
     ogenOpen: alsLaag(ogenOpen),
     ogenDicht: alsLaag(ogenDicht),
+    ogenBlij: alsLaag(ogenBlij),
     wangen: alsLaag(wangen),
     vleugelNeer: alsLaag(vleugel),
     vleugelOp: alsLaag(vleugelOp),

@@ -141,11 +141,11 @@
      Eén optocht tegelijk: bij binnenkomst, bij een goed antwoord, als
      iedereen fout zit, voor de stijger en voor de winnaar. Verder blijven
      de dieren stil op hun portret, zodat het nooit druk wordt. */
-  let optocht = $state<{ id: number; lopers: Loper[]; stemming: 'blij' | 'sip' } | null>(null);
+  let optocht = $state<{ id: number; lopers: Loper[]; stemming: 'blij' | 'sip'; feest: boolean } | null>(null);
   let optochtTeller = 0;
-  function laatLopen(lopers: Loper[], stemming: 'blij' | 'sip' = 'blij', wacht = 0) {
+  function laatLopen(lopers: Loper[], stemming: 'blij' | 'sip' = 'blij', wacht = 0, feest = false) {
     if (!lopers.length) return;
-    setTimeout(() => (optocht = { id: ++optochtTeller, lopers, stemming }), wacht);
+    setTimeout(() => (optocht = { id: ++optochtTeller, lopers, stemming, feest }), wacht);
   }
   function lopersVan(ids: number[]): Loper[] {
     return ids
@@ -464,7 +464,7 @@
         if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), WINNAAR_NA_MS);
         // Het maatje van de stijger maakt een rondje; bij de uitslag dat van de winnaar.
         if (st.fase === 'stand' && stijgerId !== null) laatLopen(lopersVan([stijgerId]), 'blij', 2200 + naOvergang);
-        if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', WINNAAR_NA_MS + 900);
+        if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', WINNAAR_NA_MS + 900, true);
       }
       vorigeFase = st.fase;
     }
@@ -596,7 +596,7 @@
 
   {#if optocht}
     {#key optocht.id}
-      <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} klaar={() => (optocht = null)} />
+      <Dierenparade lopers={optocht.lopers} stemming={optocht.stemming} feest={optocht.feest} klaar={() => (optocht = null)} />
     {/key}
   {/if}
   <!-- Wie binnenkomt krijgt even het podium, één tegelijk. -->

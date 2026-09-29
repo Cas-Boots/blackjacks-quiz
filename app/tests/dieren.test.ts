@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
+  DIEREN, ALGEMEEN_BLIJ, ALGEMEEN_SIP, OPWARMERS, EINDE_SIP, JUICH, actiesVan, kiesActie, kiesRoutine, poseVan, dierVan,
   vrijDier, dierenroep, paradeGang, isDier, schoneDierNaam, maatjeVoluit, MAX_DIERNAAM, EIGENSCHAPPEN,
 } from '../src/lib/shared/dieren';
 
@@ -27,7 +27,7 @@ describe('maatjes', () => {
 
   it('geeft elk dier een handvol kunstjes, blij en sip, en elk kunstje bestaat in app.css', () => {
     const css = readFileSync(resolve(__dirname, '../src/app.css'), 'utf8');
-    const alle = [...ALGEMEEN_BLIJ, ...ALGEMEEN_SIP, ...OPWARMERS.blij, ...OPWARMERS.sip, EINDE_SIP];
+    const alle = [...ALGEMEEN_BLIJ, ...ALGEMEEN_SIP, ...OPWARMERS.blij, ...OPWARMERS.sip, EINDE_SIP, JUICH];
     for (const d of DIEREN) {
       const blij = actiesVan(d, 'blij');
       const sip = actiesVan(d, 'sip');

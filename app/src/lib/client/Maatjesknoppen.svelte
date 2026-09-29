@@ -1,8 +1,8 @@
 <script lang="ts">
   /**
    * De knoppen waarmee je je maatje iets laat doen: zwaaien, dansen, een
-   * kunstje, of zijn lievelingshapje eten. Het doet het op de televisie, en
-   * (via `kies`) meteen ook op je telefoon.
+   * kunstje, zijn lievelingshapje eten, of een feestje vieren. Het doet het
+   * op de televisie, en (via `kies`) meteen ook op je telefoon.
    *
    * Een kunstje duurt anderhalve seconde. Tot het klaar is wachten de knoppen
    * even, net als de server: anders stapelt het zich op en ziet niemand het.

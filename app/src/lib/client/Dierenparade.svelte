@@ -32,10 +32,13 @@
   let {
     lopers,
     stemming = 'blij',
+    feest = false,
     klaar,
   }: {
     lopers: Loper[];
     stemming?: 'blij' | 'sip';
+    /** De winnaars: blij, en ze sluiten af met het feest (JUICH). */
+    feest?: boolean;
     /** Als de laatste de overkant heeft gehaald. */
     klaar?: () => void;
   } = $props();
@@ -44,6 +47,7 @@
      De eerste loopt het verst door, zodat niemand een ander inhaalt. Een
      optocht die al loopt verandert niet meer; een nieuwe krijgt een nieuwe. */
   const sip = untrack(() => stemming === 'sip');
+  const winnaars = untrack(() => feest);
   const HEEN_MS = sip ? 2600 : 1500;
   const TEL_MS = 1300;
   const TELLEN = 3;
@@ -58,7 +62,7 @@
     const stop = plek + (Math.random() - 0.5) * (alle.length === 1 ? 16 : 7);
     const hoogte = Math.random() * 2.5;
     const gang = sip ? 'sip' : paradeGang(d.beweging);
-    return { ...l, d, gang, routine: kiesRoutine(d, sip ? 'sip' : 'blij'), stop, hoogte, start: i * ZETJE_MS + Math.random() * 150 };
+    return { ...l, d, gang, routine: kiesRoutine(d, sip ? 'sip' : 'blij', Math.random, winnaars), stop, hoogte, start: i * ZETJE_MS + Math.random() * 150 };
   });
   let verstreken = $state(0);
   onMount(() => {

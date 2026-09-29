@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { DIEREN, OPDRACHTEN, actieVoor, dierVan, isOpdracht, knopVan } from '../src/lib/shared/dieren';
+import { DIEREN, JUICH, OPDRACHTEN, actieVoor, dierVan, isOpdracht, kiesRoutine, knopVan } from '../src/lib/shared/dieren';
 import { icoonVan } from '../src/lib/shared/pixeliconen';
 import { doeOpdracht, houdingVan, nieuweBewoner, stapWei } from '../src/lib/client/wei';
 
 describe('je maatje iets laten doen', () => {
-  it('kent alleen de vier opdrachten', () => {
+  it('kent alleen de vijf opdrachten', () => {
     for (const o of OPDRACHTEN) expect(isOpdracht(o)).toBe(true);
     for (const x of ['vlieg', '', null, 3, { opdracht: 'dans' }]) expect(isOpdracht(x)).toBe(false);
   });
@@ -28,7 +28,7 @@ describe('je maatje iets laten doen', () => {
   });
 
   it('heeft pixelplaatjes op de vaste knoppen', () => {
-    for (const o of ['zwaai', 'dans', 'kunstje'] as const) expect(icoonVan(knopVan(DIEREN[0], o).teken), o).not.toBeNull();
+    for (const o of ['zwaai', 'dans', 'kunstje', 'feest'] as const) expect(icoonVan(knopVan(DIEREN[0], o).teken), o).not.toBeNull();
   });
 
   it('laat het dier in de wei het meteen doen, ook als het sliep, en daarna weer gewoon verder', () => {
@@ -47,5 +47,14 @@ describe('je maatje iets laten doen', () => {
     stapWei([b], 2000, () => 0.5);
     expect(b.beurt).toBeGreaterThan(beurt);
     expect(b.doen).not.toBe('eet');
+  });
+
+  it('laat een winnaar afsluiten met het feest, en een gewone blije optocht niet altijd', () => {
+    for (const d of DIEREN) {
+      expect(actieVoor(d, 'feest')).toEqual(JUICH);
+      expect(kiesRoutine(d, 'blij', () => 0.3, true).at(-1)).toEqual(JUICH);
+      expect(kiesRoutine(d, 'sip', () => 0.3, true).at(-1)).not.toEqual(JUICH);
+      expect(kiesRoutine(d, 'blij', () => 0.3).at(-1)).not.toEqual(JUICH);
+    }
   });
 });

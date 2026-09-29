@@ -4,8 +4,8 @@
    *
    * Het dier staat hier als losse lagen: lijf, ogen, blosjes, vleugels en
    * poten. app.css wisselt die lagen per pose: knipperen doet hij altijd,
-   * lopen laat de poten om en om stappen, blij knijpt de ogen dicht met een
-   * blos, sip laat een traan vallen, slapen geeft zzz, schrikken een uitroep.
+   * lopen laat de poten om en om stappen, blij knijpt de ogen tot boogjes
+   * met een blos en laat het dier huppelen, sip laat een traan vallen, slapen geeft zzz, schrikken een uitroep.
    * Een vliegend dier klappert met zijn vleugels.
    */
   import { lagenVan, MAAT, SCHAAL } from '$lib/shared/pixeldieren';
@@ -42,10 +42,12 @@
   style="--knipper:{ritme}ms;{stijl}"
   aria-hidden="true"
 >
+  <g class="px-alles">
   <g class="px-lijf">
     {#each l.lijf as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}
     <g class="px-dicht">{#each l.ogenDicht as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-open">{#each l.ogenOpen as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+    <g class="px-blij">{#each l.ogenBlij as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-blos">{#each l.wangen as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-vleugel neer">{#each l.vleugelNeer as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-vleugel op">{#each l.vleugelOp as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
@@ -62,5 +64,6 @@
     {:else if pose === 'schrik'}
       <path class="px-uitroep" fill="#ffd23f" d="M{oog.x} -5h1v3h-1zM{oog.x} -1h1v1h-1z" />
     {/if}
+  </g>
   </g>
 </svg>

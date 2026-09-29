@@ -433,8 +433,8 @@ mee; het is er alleen voor de lol.
   ronde ogen met een glinstering. Het is geen plaatje maar losse lagen, zodat het
   dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
   ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
-  vleugels als het vliegt, knijpt blij zijn ogen dicht met een blos op de
-  wangen, laat sip een traan vallen, slaapt met zzz en schrikt met een
+  vleugels als het vliegt, knijpt blij zijn ogen tot boogjes (^^) met een
+  blos op de wangen en huppelt pixel voor pixel, laat sip een traan vallen, slaapt met zzz en schrikt met een
   uitroepteken.
 - **Erin, een optreden, en weer weg.** Elk dier komt op zijn eigen manier
   binnen, stopt op zijn eigen plek, doet een optreden van drie tellen en gaat
@@ -471,8 +471,9 @@ mee; het is er alleen voor de lol.
   het karakter: een snel dier rent vaker en harder, een slaperig dier dut
   vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
   wakker).
-- **Op de televisie, als jij dat wilt.** Onder je maatje staan vier knoppen:
-  *Zwaai*, *Dans*, *Kunstje* en *Voer* (met zijn eigen lievelingshapje). Je
+- **Op de televisie, als jij dat wilt.** Onder je maatje staan vijf knoppen:
+  *Zwaai*, *Dans*, *Kunstje*, *Voer* (met zijn eigen lievelingshapje) en
+  *Feest*. Je
   maatje doet het meteen op je telefoon, en tegelijk op de televisie: in de
   lobby op je naambordje, en na een vraag, bij de tussenstand en de uitslag
   zweeft het met jouw naam erbij omhoog, net als een reactie. De knoppen
@@ -495,6 +496,10 @@ mee; het is er alleen voor de lol.
   algemene: een salto, een dansje met muzieknootjes, een pirouette met
   sterretjes, stuiteren met confetti. Sip: een zucht met een traan, omvallen,
   mokken met een boos wolkje, of zich klein maken.
+- **Het feest.** Een grote sprong met een draai in de lucht, landen, nog een
+  sprongetje, en confetti, in schokjes zodat het dier op zijn pixels blijft.
+  De winnaars sluiten de optocht bij de uitslag ermee af, en iedereen kan het
+  met *Feest* op zijn telefoon laten doen.
 - **Het roept iets.** Bij de onthulling roept het maatje van de eerste die het
   goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
   telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*

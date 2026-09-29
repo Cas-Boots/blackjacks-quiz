@@ -182,7 +182,7 @@ export function aai(b: Bewoner, toeval: () => number = Math.random) {
 }
 
 /**
- * Een opdracht van de telefoon: zwaaien, dansen, een kunstje, eten. Het dier
+ * Een opdracht van de telefoon: zwaaien, dansen, een kunstje, eten, feesten. Het dier
  * doet het meteen, ook als het sliep of onder de grond zat.
  */
 export function doeOpdracht(b: Bewoner, opdracht: Opdracht, toeval: () => number = Math.random) {
