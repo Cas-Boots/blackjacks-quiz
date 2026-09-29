@@ -679,6 +679,31 @@ eigen jaar. De quizmaster loopt erdoorheen met *Volgende* (of de spatiebalk)
 en kan ze overslaan met *Naar de tussenstand*; met *Toon de cijfers van het
 jaar* haal je ze op elk moment in de ronde terug.
 
+### De WK-poule
+
+De ronde *De WK-poule* rekent haar vragen uit de export van
+[`blackjacks-cup`](https://github.com/Cas-Boots/blackjacks-cup): wie de poule
+won en wie onderaan eindigde, wie de wereldkampioen vooraf mis had, wie als
+enige een vooraf-vraag goed had, de beste en de verspilde jokers, de wedstrijd
+van de kampioen die niemand goed had en wie de meeste uitslagen precies raadde.
+De sleutels (`live: "poule.winnaar"`) staan in `src/lib/server/recap/poule.ts`.
+Als er meer mensen hetzelfde antwoord delen, past de vraag zich aan.
+
+Het WK is voorbij, dus er is geen live bron: de cijfers staan vast in
+`src/lib/content/poule-snapshot.json`. De punten komen zoals de poule ze
+toekende (jokers al dubbel), zodat de quiz de spelregels niet hoeft na te doen.
+Wordt er in de poule achteraf nog iets rechtgezet, haal dan een nieuwe export op
+en ververs de momentopname:
+
+```bash
+curl -H "Authorization: Bearer $EXPORT_TOKEN" https://blackjacks.avs-api.nl/api/export -o /tmp/cup.json
+python3 -c "import json;d=json.load(open('/tmp/cup.json'));[u.pop(k,None) for u in d['users'] for k in ('createdAt','isAdmin')];[p.pop(k,None) for p in d['predictions'] for k in ('updatedAt','id')];[p.pop('id',None) for p in d['outrightPredictions']];json.dump(d,open('src/lib/content/poule-snapshot.json','w'),ensure_ascii=False,separators=(',',':'))"
+```
+
+De vaste antwoorden in `packs.ts` (voor de losse HTML-quiz) moeten gelijk
+blijven aan wat de server uitrekent; `npm test` zegt het als ze uit elkaar
+lopen. De ronde staat uitgevinkt; vink hem aan in de vragenkiezer.
+
 ### De voorspellingen van januari
 
 De ronde *De Voorspellingen* werkt net zo, met als bron
@@ -1185,13 +1210,6 @@ het domein pas vlak voor de avond online.
 
 ## Wat er nog niet in zit
 
-- De ronde *De WK-poule* wacht op de cijfers uit
-  [`blackjacks-cup`](https://github.com/Cas-Boots/blackjacks-cup). Dat project
-  heeft nog geen export en bewaart geen back-ups in de repository; de poule
-  staat alleen in zijn productiedatabase. Nodig zijn de tabellen `users`,
-  `predictions`, `matches`, `outright_questions` en `outright_predictions`
-  als JSON. Zodra die er zijn, kan de ronde net als de voorspellingen worden
-  uitgerekend.
 - *Oktober tot december* wacht op de gebeurtenissen van het najaar. Vul ze in
   `src/lib/content/packs.ts` en draai `npm run content:sync`; `npm run
   verify` telt per ronde hoeveel gekozen vragen nog een antwoord missen.

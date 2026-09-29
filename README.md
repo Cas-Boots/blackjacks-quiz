@@ -31,7 +31,7 @@ seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
 dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
 naar de laatste vijf seconden), en het ritme wisselt steeds: een ronde over
 het jaar, dan een over onszelf, en om en om ieder voor zich en in teams. Rondes
-die nog leeg zijn of alleen voor kenners (*Sport: de Marges*, *De WK-poule*,
+die nog leeg zijn, alleen voor kenners of extra (*Sport: de Marges*, *De WK-poule*,
 *Jullie Jaar in Beeld*, *Bliksemronde*, *Oktober tot december*) staan
 uitgevinkt. Vink ze aan in de
 vragenkiezer als je ze wilt spelen.
@@ -60,7 +60,9 @@ Nog twee rondes over de groep:
 - **De Voorspellingen** — de veertien voorspellingen van januari. In de
   meespeelversie leven ze in `app/src/lib/content/voorspellingen.ts`, met de
   uitkomsten; hier wachten ze op handwerk.
-- **De WK-poule** — wacht op een export uit `blackjacks-cup`; die bestaat nog niet.
+- **De WK-poule** — acht vragen over onze eigen poule, uit de export van
+  `blackjacks-cup` (momentopname van 29 september; het WK is voorbij, dus die
+  verandert niet meer). Staat uitgevinkt: vink hem aan in de vragenkiezer.
   Tot die tijd staat hij uitgevinkt.
 
 Daarnaast is er een lege, uitgevinkte ronde **Oktober tot december**, want die

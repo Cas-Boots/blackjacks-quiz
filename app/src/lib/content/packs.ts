@@ -84,14 +84,24 @@ export const PAKKETTEN: Pakketten = {
         naam: "De WK-poule",
         suit: "♣", thema: "Blackjacks Cup", sfeer: "poule",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
-        optioneel: true, teVullen: true,
-        uitleg: "Onze eigen poule. Vul deze ronde met de export uit blackjacks-cup en vink hem dan aan.",
+        optioneel: true,
+        uitleg: "Onze eigen poule, uit de export van blackjacks-cup. Vink hem aan om mee te doen.",
         vragen: [
-          {v:"Wie won uiteindelijk de poule, en met hoeveel punten?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie eindigde er onderaan?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie had Spanje vooraf als wereldkampioen aangewezen?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie verspilde een joker aan een wedstrijd die niets opleverde?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke wedstrijd voorspelde niemand van ons goed?", a:"— nog invullen —", teVullen:true}
+          {v:"Wie won uiteindelijk de poule, en met hoeveel punten?", a:"Liz — 221 punten", live:"poule.winnaar",
+           toelichting:"Daarna Bastiaan met 203, Cas met 187, Joris met 181, Eva met 152 en Rik met 142."},
+          {v:"Wie eindigde er onderaan?", a:"Rik — 142 punten", live:"poule.onderaan",
+           toelichting:"Nog 10 punten achter Eva."},
+          {v:"Iedereen op één na had Spanje vooraf als wereldkampioen aangewezen. Wie niet?", a:"Eva (Frankrijk)", live:"poule.kampioen",
+           toelichting:"Eva liet 20 punten liggen."},
+          {v:"Bij welke vooraf-vraag was één van ons de enige met het goede antwoord?", a:"Finalist (B) — Joris (Argentinië)", live:"poule.enigeGoed",
+           toelichting:"Ook goed: Winnaar Groep D — Liz (de Verenigde Staten) en Winnaar Groep K — Cas (Colombia)."},
+          {v:"Wie haalde de meeste punten uit een joker, en op welke wedstrijd?", a:"Bastiaan op Argentinië–Zwitserland (3-1) en Liz op Noorwegen–Engeland (1-2)", live:"poule.jokerBest",
+           toelichting:"12 punten elk: de uitslag precies goed, en dubbel door de joker."},
+          {v:"Drie van ons verspilden een joker aan een wedstrijd die niets opleverde. Wie?", a:"Bastiaan en Liz op Nederland–Marokko (1-1) en Joris op Duitsland–Paraguay (1-1)", live:"poule.jokerVerspild"},
+          {v:"Welke wedstrijd van de latere wereldkampioen Spanje voorspelde niemand van ons goed?", a:"Spanje–Kaapverdië (0-0)", live:"poule.niemandGoed",
+           toelichting:"In totaal leverden achttien wedstrijden niemand van ons iets op."},
+          {v:"Wie had de meeste uitslagen precies goed?", a:"Liz — negen keer", live:"poule.exact",
+           toelichting:"Daarna Bastiaan met 6, Cas met 6, Eva met 3, Joris met 3 en Rik met 2."}
         ]
       },
       {

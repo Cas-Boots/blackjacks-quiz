@@ -13,6 +13,7 @@
 import type { Vraag } from '$lib/content/types';
 import type { VoorspellingenUitslag } from '$lib/shared/state';
 import { VOORSPELLING_OPLOSSERS } from './voorspellingen';
+import { POULE_OPLOSSERS, pouleAnalyse } from './poule';
 import {
   type Analyse, type Persoon, datumTekst, maandNaam, opsomming, sportNaam, telwoord, zoekSportTag,
 } from './analyse';
@@ -375,13 +376,14 @@ const OPLOSSERS: Record<string, Oplosser> = {
 };
 
 /** Sleutels die je in `live:` kunt gebruiken. Voor het hostscherm en de tests. */
-export const LIVE_SLEUTELS = [...Object.keys(OPLOSSERS), ...Object.keys(VOORSPELLING_OPLOSSERS)];
+export const LIVE_SLEUTELS = [...Object.keys(OPLOSSERS), ...Object.keys(VOORSPELLING_OPLOSSERS), ...Object.keys(POULE_OPLOSSERS)];
 
 /** Lost één sleutel op; null als de sleutel onbekend is. Argument na de dubbele punt: 'sport.enige:pilates'. */
 export function beantwoord(sleutel: string, analyse: Analyse, voorspellingen?: VoorspellingenUitslag): LevendAntwoord | null {
   const [naam, arg = ''] = sleutel.split(':');
   try {
     if (VOORSPELLING_OPLOSSERS[naam]) return voorspellingen ? VOORSPELLING_OPLOSSERS[naam](voorspellingen) : null;
+    if (POULE_OPLOSSERS[naam]) return POULE_OPLOSSERS[naam](pouleAnalyse());
     const oplosser = OPLOSSERS[naam];
     return oplosser ? oplosser(analyse, arg) : null;
   } catch (err) {
