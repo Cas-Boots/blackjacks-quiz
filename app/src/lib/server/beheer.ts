@@ -23,8 +23,8 @@ import type { Pakketten } from '$lib/content/types';
 import { actiefSpel, bumpVersie, deelnemersVan, standVan, voegDeelnemerToe, MAX_NAAM_TEKENS } from './spel';
 import { maakSpel } from './seed';
 import { geldigeFoto } from './foto';
-import { zorgVoorDieren, dobbelDier, noemDier } from './dieren';
-import { dierVan } from '$lib/shared/dieren';
+import { dobbelDier, noemDier } from './dieren';
+import { isDier } from '$lib/shared/dieren';
 import { aantalLuisteraars } from './bus';
 import { inProductie, omgevingsFouten, omgevingsWaarschuwingen } from './omgeving';
 import { recapStatus, type RecapStatus } from './recap/bron';
@@ -37,7 +37,7 @@ export interface BeheerSpeler {
   naam: string;
   foto: string | null;
   /** Het maatje, een sleutel uit shared/dieren.ts. */
-  dier: string;
+  dier: string | null;
   /** De naam van het maatje, of null. */
   dierNaam: string | null;
   isQuizmaster: boolean;
@@ -274,7 +274,7 @@ export function beheerSpelers(): BeheerSpeler[] {
       id: s.id,
       naam: s.naam,
       foto: s.foto,
-      dier: dierVan(s.dier, s.naam).sleutel,
+      dier: isDier(s.dier) ? s.dier : null,
       dierNaam: s.dierNaam,
       isQuizmaster: s.isQuizmaster,
       isGast: s.isGast,
@@ -370,7 +370,6 @@ export function voegSpelerToe(invoer: unknown) {
   const naam = schoneNaam(invoer);
   if (db.select().from(spelers).where(eq(spelers.naam, naam)).get()) throw new Error('Die naam is er al.');
   const speler = db.insert(spelers).values({ naam, isGast: false }).returning().get();
-  zorgVoorDieren();
   const spel = actiefSpel();
   if (spel && spel.fase === 'lobby') voegDeelnemerToe(spel, naam);
   meld();

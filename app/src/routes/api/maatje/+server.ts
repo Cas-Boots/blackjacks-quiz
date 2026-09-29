@@ -37,6 +37,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     .where(eq(spelers.id, locals.spelerId))
     .get();
   if (!speler) error(404, 'speler niet gevonden');
+  if (!speler.dier) error(409, 'kies eerst een maatje');
 
   meldMaatje({
     id: ++teller,

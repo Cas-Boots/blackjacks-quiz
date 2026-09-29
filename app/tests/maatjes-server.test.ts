@@ -12,6 +12,7 @@ let dieren: Dieren;
 let db: typeof import('../src/lib/server/db/index').db;
 let schema: typeof import('../src/lib/server/db/schema');
 let spelId: number;
+let spel: typeof import('../src/lib/server/spel');
 
 beforeAll(async () => {
   const { zorgVoorMigraties } = await import('../src/lib/server/db/migrate');
@@ -21,8 +22,8 @@ beforeAll(async () => {
   dieren = await import('../src/lib/server/dieren');
   ({ db } = await import('../src/lib/server/db/index'));
   schema = await import('../src/lib/server/db/schema');
-  const { actiefSpel } = await import('../src/lib/server/spel');
-  spelId = actiefSpel()!.id;
+  spel = await import('../src/lib/server/spel');
+  spelId = spel.actiefSpel()!.id;
 });
 
 function spelersNu() {
@@ -30,22 +31,30 @@ function spelersNu() {
 }
 
 describe('maatjes op de server', () => {
-  it('geeft iedereen bij de start een eigen dier', () => {
-    const lijst = spelersNu();
-    expect(lijst.every((s) => s.dier)).toBe(true);
-    expect(new Set(lijst.map((s) => s.dier)).size).toBe(lijst.length);
+  it('geeft niemand bij de start al een dier: ieder kiest zelf', () => {
+    expect(spelersNu().every((s) => s.dier === null)).toBe(true);
   });
 
   it('laat je een vrij dier kiezen, maar niet dat van een ander aan tafel', () => {
     const [a, b] = spelersNu().filter((s) => !s.isQuizmaster);
     expect(dieren.kiesDier(a.id, 'draak', spelId)).toEqual({ ok: false, reden: 'onbekend dier' });
-    expect(dieren.kiesDier(a.id, b.dier, spelId)).toEqual({ ok: false, reden: `al gekozen door ${b.naam}` });
+    expect(dieren.kiesDier(b.id, 'lama', spelId)).toEqual({ ok: true });
+    expect(dieren.kiesDier(a.id, 'lama', spelId)).toEqual({ ok: false, reden: `al gekozen door ${b.naam}` });
 
-    const vrij = ['das', 'konijn', 'worm'].find((d) => !spelersNu().some((s) => s.dier === d))!;
-    expect(dieren.kiesDier(a.id, vrij, spelId)).toEqual({ ok: true });
-    expect(spelersNu().find((s) => s.id === a.id)!.dier).toBe(vrij);
+    expect(dieren.kiesDier(a.id, 'das', spelId)).toEqual({ ok: true });
+    expect(spelersNu().find((s) => s.id === a.id)!.dier).toBe('das');
     // Je eigen dier nog eens kiezen mag gewoon.
-    expect(dieren.kiesDier(a.id, vrij, spelId)).toEqual({ ok: true });
+    expect(dieren.kiesDier(a.id, 'das', spelId)).toEqual({ ok: true });
+  });
+
+  it('laat wie zijn dier van een vorige avond meeneemt opnieuw kiezen als een ander het nu heeft', () => {
+    const { voegDeelnemerToe, actiefSpel } = spel;
+    const [a] = spelersNu().filter((s) => !s.isQuizmaster && s.dier);
+    // Een gast van vroeger die toevallig hetzelfde dier nog heeft.
+    const gast = db.insert(schema.spelers).values({ naam: 'Oudgast', isGast: true, dier: a.dier }).returning().get();
+    voegDeelnemerToe(actiefSpel()!, 'Oudgast');
+    expect(spelersNu().find((s) => s.id === gast.id)!.dier).toBeNull();
+    expect(spelersNu().find((s) => s.id === a.id)!.dier).toBe(a.dier);
   });
 
   it('dobbelt voor de quizmaster altijd een ander dier', () => {

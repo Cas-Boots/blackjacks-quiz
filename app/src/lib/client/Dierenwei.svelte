@@ -37,7 +37,8 @@
   /* Wie erbij komt valt de wei in; wie weggaat verdwijnt; wie van dier
      wisselt, verschijnt als zijn nieuwe dier. */
   $effect(() => {
-    const lijst = spelers.map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam ?? null }));
+    // Wie nog geen maatje koos, staat er (nog) niet in.
+    const lijst = spelers.filter((s) => s.dier).map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam ?? null }));
     // Alleen de spelers tellen; de wei zelf verandert elk frame.
     untrack(() => {
       const nu = new Map(lijst.map((s) => [s.id, s]));
@@ -95,6 +96,7 @@
     >
       {#key b.beurt}
         <span class="actie" data-lijf={h.lijf}>
+          <!-- Wat erbij hoort (een hapje voor de snuit, de spuug) draait mee als het dier naar links kijkt. -->
           <span class="kijk" class:links={b.richting === -1}>
             {#if aaibaar}
               <button class="aai" onclick={() => tik(b)} aria-label={b.dierNaam ? `Aai ${b.dierNaam}` : 'Aai je maatje'}>
@@ -103,12 +105,12 @@
             {:else}
               <Pixeldier sleutel={b.sleutel} pose={h.pose} vlieg={h.vlieg} />
             {/if}
+            {#if b.actie?.ding}
+              {#each b.actie.dingGaat === 'op' || b.actie.dingGaat === 'val' ? [0, 1] : [0] as n (n)}
+                <span class="ding" data-gaat={b.actie.dingGaat} style="--n:{n}"><Ding teken={b.actie.ding} /></span>
+              {/each}
+            {/if}
           </span>
-          {#if b.actie?.ding}
-            {#each b.actie.dingGaat === 'op' || b.actie.dingGaat === 'val' ? [0, 1] : [0] as n (n)}
-              <span class="ding" data-gaat={b.actie.dingGaat} style="--n:{n}"><Ding teken={b.actie.ding} /></span>
-            {/each}
-          {/if}
         </span>
       {/key}
       {#if namen}<span class="weinaam" data-naam={b.dierNaam ?? b.naam}></span>{/if}

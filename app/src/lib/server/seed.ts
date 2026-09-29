@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 import { db } from './db/index';
 import { spelers, spellen, deelnemers } from './db/schema';
 import { standaardSamenstelling } from './spel';
-import { zorgVoorDieren } from './dieren';
+import { ontdubbelDieren } from './dieren';
 
 export const VASTE_SPELERS = ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva'];
 export const QUIZMASTER = 'Cas';
@@ -19,7 +19,6 @@ export function zorgVoorBasis() {
   }
   const qm = db.select().from(spelers).where(eq(spelers.naam, QUIZMASTER)).get();
   if (!qm) db.insert(spelers).values({ naam: QUIZMASTER, isQuizmaster: true }).run();
-  zorgVoorDieren();
 
   const actief = db.select().from(spellen).where(eq(spellen.isActief, true)).get();
   if (!actief) maakSpel('jaar2026');
@@ -44,5 +43,6 @@ export function maakSpel(pakketId: string) {
     if (s.isQuizmaster || s.isGast) continue;
     db.insert(deelnemers).values({ spelId: rij.id, spelerId: s.id }).run();
   }
+  ontdubbelDieren(rij.id);
   return rij;
 }

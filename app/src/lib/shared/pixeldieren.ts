@@ -11,6 +11,7 @@
  *   k  omlijning           w o  oog: wit (of een eigen kleur in het palet) en pupil
  *   c  wang (bloost als hij blij is)
  *   v  vleugel (klappert: om en om zoals getekend en omhoog gespiegeld)
+ *   j  arm (gaat omhoog als hij blij is: juichen, zwaaien)
  *
  * De onderste `poten` rijen zijn de poten: elke losse kolom daarin is een poot,
  * en om en om tilt het dier er de helft van op. Zo lopen ze echt.
@@ -35,6 +36,11 @@ export interface Sprite {
   palet: Readonly<Record<string, string>>;
   /** Hoeveel rijen onderaan poten zijn, in rijen van de tekening zelf. 0: geen poten (vis, worm, slak). */
   poten: number;
+  /**
+   * Kruipt als een slinky (de worm): alles links van deze kolom schuift in
+   * twee stapjes naar de kop toe en veert weer terug. De kop staat stil.
+   */
+  slinky?: number;
 }
 
 /** Wat voor elk dier geldt, tenzij het palet het anders zegt. */
@@ -277,39 +283,39 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
   },
   eenhoorn: {
     poten: 8,
-    palet: { a: '#fbf7fb', b: '#d9cbe6', d: '#f3dbe4', c: '#fbf7fb', y: '#f5c83a', h: '#c98a1c', r: '#ff6f91', q: '#ffa94d', g: '#7fd67f', t: '#6cb6ff', p: '#b58cff', n: '#7a4a6a' },
+    palet: { s: '#ffe680', a: '#fbf7fb', b: '#ddd0ea', e: '#ffb3c8', m: '#ffb3c8', n: '#7a4a6a', y: '#f5c83a', h: '#c98a1c', r: '#ff6f91', q: '#ffa94d', l: '#ffe066', g: '#7fd67f', t: '#6cb6ff', p: '#b58cff', c: '#ffd6e2' },
     rijen: [
-      '............................kk..',
-      '.....................k.....kyhk.',
-      '...................kkakk..khyk..',
-      '.........k.......kktprrakkyhk...',
-      '........kyk.....kgtpraygahyk....',
-      '.......kyyyk...kktpraygtkkkak...',
-      '........kyk...kgtpraaaabbbbak...',
-      '.........k....ktpraaaaawoowaak..',
-      '............kktpraaaaaawoowaaak.',
-      '...........kgtpraaaaaaaabbaadndk',
-      '...........ktprqaaaaaaccaaaddndk',
-      '..........ktprqaaaaaaaaaaakkkkdk',
-      '....kk....kprqyaaaaaaakkadddddk.',
-      '...kprkkkkprqyaaaaaaaaakkkdddk..',
-      '..kprqygaprqyaaaaaaaaakk..kkk...',
-      '..krqyaaaaaaaaaaaaaaaaaak.......',
-      '.krqyaaayaaaaaaaaaaaaaaaak......',
-      'krqyaaaaaaaaaaaaaaaaaaaaaak.....',
-      'kqygaaaaaaayaaaaaaaaaaaaaak.....',
-      'kygtaaayaaaaaaaaaaaaaaaaaak.....',
-      'kgtpraaaaaaaaaaaaaaaaaaaak......',
-      '.kprqkkaaaaaaaaaaaaaaaaak.......',
-      '..kqbbbbkaaaakkkkkbbbkaaak......',
-      '...kbbbk.kaaak...kbbk.kaak......',
-      '...kbbk..kaak....kbbk.kaak......',
-      '...kbbk..kaak....kbbk.kaak......',
-      '...kbbk..kaak....kbbk.kaak......',
-      '...kbbk..kaak....kbbk.kaak......',
-      '...kyyk..kyyk....kyyk.kyyk......',
-      '...kyyk..kyyk....kyyk.kyyk......',
-      '....kk....kk......kk...kk.......',
+      '..............k..............k..',
+      '.............ksk............kyk.',
+      '............ksssk....k.....kyyk.',
+      '.............ksk...kkakk.kkhyk..',
+      '..............k...krraerkyykk...',
+      '.................krrraarrakak...',
+      '...............kkqqqaaakkkkaak..',
+      '..............kqqqqaaaawwwaaak..',
+      '..............kllllaaaawooaaaak.',
+      '............kklllaaaaaawooaaaaak',
+      '...........kggggaaaaaaaccaaamnmk',
+      '...........kgggaaaaaaaaaaaaammmk',
+      '..........kktttaaaaaaaaaaaaaakk.',
+      '...kkk.kkkttttaaaaaaaakkkkkkk...',
+      '..krrrkaaaapppaaaaaaaak.........',
+      '.krrrkaaaaaaaaaaaaaaaak.........',
+      'kqqqkaaaaaaaaaaaaaaaaaak........',
+      'klllkaaaaaaaaaaaaaaaaaak........',
+      'klllkaaaaaaaaaaaaaaaaaak........',
+      'kgggkaaaaaaaaaaaaaaaaaak........',
+      'kttkkaaaaaaaaaaaaaaaaaak........',
+      'kttk.kaaaaaaaaaaaaaaaaak........',
+      '.kppk.kaaaaaaaaaaaaaaak.........',
+      '..kk.kaakkkbbkkkaakkkbbk........',
+      '.....kaak.kbbk.kaak.kbbk........',
+      '.....kaak.kbbk.kaak.kbbk........',
+      '.....kaak.kbbk.kaak.kbbk........',
+      '.....kaak.kbbk.kaak.kbbk........',
+      '.....kyyk.kyyk.kyyk.kyyk........',
+      '.....kyyk.kyyk.kyyk.kyyk........',
+      '......kk...kk...kk...kk.........',
       '................................',
     ],
   },
@@ -467,40 +473,40 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
   },
   egel: {
     poten: 3,
-    palet: { a: '#5e4330', s: '#8a6647', q: '#efe0c0', d: '#ecd3a8', c: '#ecd3a8', e: '#c9a07a', b: '#3b2a20', n: '#15101a', z: '#9fd8ff' },
+    palet: { a: '#5e4330', s: '#94704e', d: '#ebcf9f', c: '#ebcf9f', e: '#c98a6a', b: '#3b2a20', n: '#15101a' },
     rijen: [
       '................................',
-      '................k...............',
-      '...............kqk..............',
-      '...............kqk..............',
-      '...............kqk..............',
-      '...............kqk..............',
-      '...............ksk..............',
-      '......k....k...ksk..............',
-      '.....kqk..kqk.kassk.............',
-      '...k..kqkkkqqkkassk..k.......k..',
-      '..kqk.kqqqkqsqqassk.kek.....kzk.',
-      '..kqqkkqsqskssqasskkeeek....kzzk',
-      '.k.ksqqksskskaskskakeeekk....kk.',
-      'kqkkqsqskaqsskaqsskkkekkkk......',
-      'kqqqksssskassskassskdkkdddk.....',
-      '.ksqskassskassskasskdddddddk....',
-      '.kqsqskaskskaskskakdddkwookdk...',
-      '.kksqsskaqsskaqsskkdddkwookddk..',
-      'kqqkassskassskassskdddkwwwkddk..',
-      'kqqskassskassskasskddddkkkdddkk.',
-      '.ksqskaskskaskskaskdddddddddknnk',
-      '..kssskaqsskaqsskkddddccddddknnk',
-      '..kqssskassskassskdddddddddkdkk.',
-      '...ksssskassskasskddddddddkdkk..',
-      '....kaskskaskskaskdddddddkkk....',
-      '.....kaqsskaqsskakdddddkk.......',
-      '.....kkkssskassskakdkkk.........',
-      '....kbbkkksskassskakk...........',
-      '....kbbk..kkkkkkkkk.............',
-      '....kbbbk.....kbbbk.............',
-      '.....kkk.......kkk..............',
       '................................',
+      '................................',
+      '...........k....k....k..........',
+      '.......k..kak..kak..kak.........',
+      '......kak.kaak.kaak.kaak........',
+      '....k.kaakkaaakkaaakkaaak.......',
+      '...kakkaaakaaaaaaaaaaaaaak......',
+      '...kaskaaasaaaasaaaasaaaask.....',
+      '..kkassaaassaaassaaassaaask.....',
+      '.kakaaaaaaaaaaaaaaakkkaaaak.....',
+      '.kaaaaaaaaaaaaaaaakeeekkkkk.....',
+      '..ksaaaasaaaasaaaaskeedddddk....',
+      '.kkssaaassaaassaaaskdddwwwdk....',
+      'kakaaaaaaaaaaaaaaaakdkwwooddk...',
+      'kaaaaaaaaaaaaaaaaakddkwwoodddk..',
+      '.kaaaasaaaasaaaasakdddkwwkdddkk.',
+      'kssaaassaaassaaasskddddkkddddddk',
+      'kaaaaaaaaaaaaaaaaakddccddddddnnk',
+      '.kaaaaaaaaaaaaaaaakddccddddddnnk',
+      'kaaasaaaasaaaasaaakdddddddkkddk.',
+      'kaaassaaassaaassaakddddddddddk..',
+      '.kaaaaaaaaaaaaaaaakdddddddddk...',
+      '.kaaaaaaaaaaaaaaaakddddddddk....',
+      '..kaaaasaaaasaakkkdddddddddk....',
+      '...kaaassaakkkkdddddddddddk.....',
+      '....kaakkkkdddddddddddddddk.....',
+      '.....kkdddddddddddddddddddk.....',
+      '......kbbbkkkkkkkkkbbbkkkk......',
+      '......kbbbk.......kbbbk.........',
+      '......kbbbbk......kbbbbk........',
+      '.......kkkk........kkkk.........',
     ],
   },
   zeehond: {
@@ -618,41 +624,41 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
     ],
   },
   nijlpaard: {
-    poten: 4,
-    palet: { a: '#8e84a8', b: '#6c6386', d: '#d6a3b8', r: '#e79ab2', n: '#3a2c4c', c: '#e79ab2', t: '#fbf7ee', q: '#c95f86', p: '#ffffff', s: '#6fb3d9' },
+    poten: 7,
+    palet: { m: '#b0a4cf', a: '#9489b3', b: '#766c98', d: '#eeb5ca', e: '#d9b3d6', p: '#e88aab', n: '#3a2c4c', t: '#ffffff', h: '#f3e7d8', c: '#f2a0bd' },
     rijen: [
       '................................',
       '................................',
-      '.....kkkkkkk....................',
-      '...kkkpppppk....................',
-      '..k..ksssssk.........kkk........',
-      '..k..kpppppk....kk..kwwwk.......',
-      '...kkkpppppk...krkkkawook.......',
-      '....kkkpppkk..kaaaaaawooak......',
-      '...kppppppppkkaaaaaaaaaaaakkkkk.',
-      '....kkkkkkkkkaaaaaaaaaaaaaanaank',
-      '..kkaaaaaaaaaaaaaaaaaaaaaaaaaaak',
-      '.kaaaaaaaaaaaaaabaaaccaaaaaaaaak',
-      'kaaaaaaaaaaaaaaabaaaccaaaaaaaaak',
-      'kaaaaaaaaaaaaaabaaaaaaaaaaaaaaak',
-      'kaaaaaaaaaaaaaabaaakkaaaaaaaaaak',
-      'kaaaaaaaaaaaaaaaaaaakkkkkkkkkkkk',
-      'kaaaaaaaaaaaaaaaaaaakqqqqqqqqqqk',
-      'kaaaaaaaaaaaaaaaaaaakqqqqqqqqqqk',
-      'kaaaaaaaaaaaaaaaaaaaakqttqqqttqk',
-      'kaaaaaaaaaaaaaaaaaaaaakttqqqttqk',
-      'kaaaaaaaaaaaaaaaaaaaaakkkkkkkkkk',
-      'kaaaaaaaaaaaaaaaaaaaddddddddddk.',
-      '.kaaaaaaaaaaaaaaaadddddddddddk..',
-      '.kaadddddddddddddddddddddkkkk...',
-      '.kdddddddddddddddddddddddk......',
-      '.kdddddddddddddddddddddddk......',
-      '..kdddddddddddddddddddddk.......',
-      '..kbbbkkkbbbkkkbbbkkkbbbk.......',
-      '..kbbbk.kbbbk.kbbbk.kbbbk.......',
-      '..kbbbk.kbbbk.kbbbk.kbbbk.......',
-      '..kbttk.kbttk.kbttk.kbttk.......',
-      '...kkk...kkk...kkk...kkk........',
+      '................................',
+      '.................kk...kkkk......',
+      '................kaak.kaaaak.....',
+      '...............kapakkawwwwak....',
+      '...............kapakkawwooak....',
+      '.......kkkkk.kkaaaaaaawwooakk.k.',
+      '....kkkaaaaakaaaaaaaaaaaaamkmkmk',
+      '..kkaaaaaaaaakaaaaaaaaaaammmnmnk',
+      '.kaaaaaaaaaaaakaaaaaaaaammmmmmmk',
+      'kaaaaaaaaaaaaakaaaaaaaaammmmmmmk',
+      'kaaaaaaaaaaaaaakaaaaaaaammmmmmmk',
+      'kaaaaaaaaaaaaaaakaaaaccammmmmmmk',
+      'kaaaaaaaaaaaaaaakaaaaccammmmmmmk',
+      'kaaaaaaaaaaaaaaakaaaaaakmmmmmmmk',
+      'kaaaaaaaaaaaaaaaakaaaaaakkkkkkk.',
+      'kaaaaaaaaaaaaaaaakaaaaaaeteeteek',
+      'kaaaaaaaaaaaaaaaaakaaaaaeeeeeek.',
+      'kaaaaaaaaaaaaaaaaaakaaaaeeeeek..',
+      'kaaaaaaadddddddaaaaakkkkkkkkk...',
+      '.kaaaadddddddddddaaaaaaaaaak....',
+      '.kaaaaddddddddddddaaaaaaaaak....',
+      '..kaaaaddddddddddaaaaaaaaaak....',
+      '.kaaaakkkbbbbkkkaaaakkkbbbbk....',
+      '.kaaaak.kbbbbk.kaaaak.kbbbbk....',
+      '.kaaaak.kbbbbk.kaaaak.kbbbbk....',
+      '.kaaaak.kbbbbk.kaaaak.kbbbbk....',
+      '.kaaaak.kbbbbk.kaaaak.kbbbbk....',
+      '.kahahk.kbhbhk.kahahk.kbhbhk....',
+      '..kkkk...kkkk...kkkk...kkkk.....',
+      '................................',
     ],
   },
   giraf: {
@@ -809,7 +815,7 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
   },
   aap: {
     poten: 6,
-    palet: { a: '#7a4f2e', b: '#5a3820', d: '#f0cfa4', e: '#e3a984', n: '#3a2418', c: '#f0cfa4' },
+    palet: { a: '#7a4f2e', b: '#5a3820', d: '#f0cfa4', e: '#e3a984', n: '#3a2418', c: '#f0cfa4', j: '#8a5a35' },
     rijen: [
       '................................',
       '................................',
@@ -822,22 +828,22 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
       '........kaeeaddooddooddaeeak....',
       '........kaeeaddooddooddaeeak....',
       '........kaeeaaddddddddaaeeak....',
-      '.......kkkaaaadddndnddaaaak.....',
-      '......kaaakkkacdddddddakkk......',
-      '.....kaaaaak.kddkdddkdk.........',
-      '....kaaaaaak..kkdkkkkk..........',
-      '....kaakkaak.kkaaaaaak.kk.......',
-      '....kaakaaakkaaaaaaaaakaak......',
-      '....kaakaak.kaaaddddaaaaak......',
-      '....kaakkk.kaaaaddddaaaaaak.....',
-      '....kaak...kaaaddddddaakaak.....',
-      '....kaaak..kaaaddddddaakaak.....',
-      '.....kaaakkkaaaddddddaakaak.....',
-      '......kaaaaaaaaaddddaakkaaak....',
-      '.......kaaaaaaaaddddaaakkaak....',
-      '........kkddakaaaaaaaaakkddk....',
-      '.........kddkkaaakkkaaakkddk....',
-      '..........kk.kaaak.kaaak.kk.....',
+      '.........kaaaadddndnddaaaak.....',
+      '..........kkkacdddddddakkk......',
+      '.............kddkdddkdk.........',
+      '...........kkkkkkkkkkkkkk.......',
+      '..........kjjkaaaaaaaakjjk......',
+      '..........kjjkaaddddaakjjk......',
+      '..kkkk...kjjjkaddddddakjjjk.....',
+      '.kaaaak..kjjkaaddddddaakjjk.....',
+      'kaakkaak.kjjkaaddddddaakjjk.....',
+      'kak..kk.kjjjkaaddddddaakjjjk....',
+      'kak.....kjjjkaaddddddaakjjjk....',
+      'kak.....kjjjkaaddddddaakjjjk....',
+      'kaakkkkkkjjjkaaaddddaaakjjjk....',
+      '.kaaaaaakjjjkaaaaaaaaaakjjjk....',
+      '..kkkkkk.kkkkkaaakkkaaakkkk.....',
+      '.............kaaak.kaaak........',
       '.............kaaak.kaaak........',
       '.............kaaak.kaaak........',
       '............kddddk.kddddk.......',
@@ -935,9 +941,9 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
       '............kbbbbbbbbbaakk......',
       '............kbbbbbbbbbbbaakk....',
       '..........kkbbbbbbbbbbbbbaaak...',
-      '.........kbbbbbbbbbbbboobaaak...',
-      '........kbbbbbbbbbbbbboobaaaak..',
-      '.......kbbbbbbaaddddbbbdaaaaakkk',
+      '.........kbbbbbbbbbbbbbbbaaak...',
+      '........kbbbbbbbbbbbbbbwoowaak..',
+      '.......kbbbbbbaaddddbbbdwoowakkk',
       '.......kbbbbaddddddddddddddaaaaa',
       '......kbbbbddddddddddddddddaaaaa',
       '.....kbbbbddddddddddddddddkkkkkk',
@@ -1113,44 +1119,45 @@ export const SPRITES: Readonly<Record<string, Sprite>> = {
   },
   konijn: {
     poten: 3,
-    palet: { a: '#ab9b8c', b: '#7f6f62', d: '#f4ede2', r: '#f4a7b9', c: '#f4a7b9', n: '#15101a', t: '#ffffff' },
+    palet: { a: '#b3a79c', b: '#8c7f74', d: '#f4efe8', r: '#f4a7b9', p: '#ea7594', c: '#b3a79c', n: '#15101a', t: '#ffffff' },
     rijen: [
-      '......................kkkk......',
-      '.....................kaaaak.....',
-      '.....................karrak.....',
-      '...........kkkkkkkk..karrak.....',
-      '..........kaaaaaaaak.karrak.....',
-      '..........kaaakkaaak.karrak.....',
-      '..........kaak.karak.karrak.....',
-      '...........kak.karak.karrak.....',
-      '............k..karak.karrak.....',
-      '...............kaaaakkaaaak.....',
-      '...............kaaaaaaaaaaak....',
-      '..............kaaaaaaaakkkaak...',
-      '......kkkkkk..kaaaaaaaawwwaaak..',
-      '....kkaaaaaakkkaaaaaaawwoowaaak.',
-      '...kaaaaaaaaaakaaaaaaawwoowaddrk',
-      '.kkkaaaaaaaaaakaaaaccaawwwaddddk',
-      'ktttkaaaaaaaaaaaaaaccaaaaadddkk.',
-      'kttttkaaaaaaaaaaaaaaaaaaaadkttk.',
-      'kttttkaaaaaaaaaaaaaaaaaaaadkttk.',
-      'kttttkaaaaaaaaaaaaaaaaaaaddkkkk.',
-      'ktttkaaabbbbaaaaaaaddddddkk.....',
-      '.kkkaaabaaaabaaaadddddddk.......',
-      '.kaaaabaaaaaabaaddddddddk.......',
-      '.kaaabaaaaaaaaaaddddddddk.......',
-      '.kaaabaaaaaaaaaaddddddddk.......',
-      '.kaabaaaaaaaaaaaaddddddk........',
-      '.kaabaaaaaaaaaaaaadddddk........',
-      '.kaaaaaaaaaaaaaadddkdddk........',
-      '.kaaaakkkkkkkkkkkkkkdddk........',
-      '.kaaaaaaaaaaaaaddk.kdddk........',
-      '.kaaaaaaaaaaaaaddk.kddddk.......',
-      '..kkkkkkkkkkkkkkk...kkkkk.......',
+      '..............kk....kk..........',
+      '.............kbbk..kaak.........',
+      '............kbbbbkkaaaak........',
+      '............kbbbbkkarrak........',
+      '............kbbbbkkarrak........',
+      '............kbbbbkkarrak........',
+      '.............kbbbkkarrak........',
+      '.............kbbbkkarrak........',
+      '.............kbbbkkarrak........',
+      '.............kbbbbkarrak........',
+      '..............kbbbaarraakk......',
+      '.............kaaaaaaaaaaaak.....',
+      '............kaaaaaaaawwwaaak....',
+      '........kkkkaaaaaaakwwooaaaak...',
+      '......kkaaaaaaaaaaakwwooaaaaak..',
+      '.....kaaaaaaaaaaaaaakwwkaaddppk.',
+      '....kaaaaaaaaaaaaaaaakkaadddppdk',
+      '...kaaaaaaaaaaaaaaaaaaccadddddk.',
+      '..kaaaaaaaaaaaaaaaaaaaaaaddkkk..',
+      '..kaaaaaaaaaaaaaaaaaaaaaaakttk..',
+      '.ktkaaaaaaaaaaaaaaakkkkkkkkttk..',
+      'ktttkaaaaaaakkkaaakddddddk.kk...',
+      'ktttkaaaaaakaaakaakdddddddk.....',
+      'ktttkaaaaakaaaaakakdddddddk.....',
+      '.ktkaaaaaakaaaaaakkdddddddk.....',
+      '..kaaaaaaakaaaaaakddddddddk.....',
+      '..kaaaaaaakaaaaaakdddddddk......',
+      '...kaaaaaaakaaaaakkkkaaak.......',
+      '....kaaaaaaakkkkkkaakaaaak......',
+      '...kaaaaaaaaaaaaaaak.kaaaak.....',
+      '...kdddddddddddddddk.kddddk.....',
+      '....kkkkkkkkkkkkkkk...kkkk......',
     ],
   },
   worm: {
     poten: 0,
+    slinky: 19,
     palet: { a: '#f08aa0', b: '#d06a82', c: '#ffb3c4' },
     rijen: [
       '................................',
@@ -1245,6 +1252,11 @@ export interface Lagen {
   wangen: Laag;
   vleugelNeer: Laag;
   vleugelOp: Laag;
+  armNeer: Laag;
+  armOp: Laag;
+  /** De slinky: het lijf een beetje en flink ingeknepen. Leeg voor wie niet kruipt. */
+  romp1: Laag;
+  romp2: Laag;
   potenRust: Laag;
   potenA: Laag;
   potenB: Laag;
@@ -1371,6 +1383,26 @@ export function lagenVan(sleutel: string): Lagen {
   const klaar = cache.get(sleutel);
   if (klaar) return klaar;
   const sprite = SPRITES[sleutel] ?? SPRITES.hond;
+  const lagen = bouw(sprite);
+  if (sprite.slinky) {
+    lagen.romp1 = bouw({ ...sprite, slinky: undefined, rijen: knijp(sprite.rijen, sprite.slinky, 3) }).lijf;
+    lagen.romp2 = bouw({ ...sprite, slinky: undefined, rijen: knijp(sprite.rijen, sprite.slinky, 6) }).lijf;
+  }
+  cache.set(sleutel, lagen);
+  return lagen;
+}
+
+/**
+ * De tekening met `weg` kolommen minder links van `kop`, netjes verspreid, en
+ * naar rechts aangeschoven: de staart trekt naar de kop toe. Hele kolommen,
+ * zodat het een pixeltekening blijft en niet uitsmeert.
+ */
+function knijp(rijen: readonly string[], kop: number, weg: number): string[] {
+  const uit = new Set(Array.from({ length: weg }, (_, i) => Math.round(((i + 1) * kop) / (weg + 1))));
+  return rijen.map((rij) => '.'.repeat(uit.size) + [...rij.slice(0, kop)].filter((_, x) => !uit.has(x)).join('') + rij.slice(kop));
+}
+
+function bouw(sprite: Sprite): Lagen {
   const palet = { ...BASIS, ...sprite.palet };
   const kleur = (t: string) => palet[t] ?? palet.a;
 
@@ -1383,7 +1415,7 @@ export function lagenVan(sleutel: string): Lagen {
 
   /** De kleur van een vulpixel, met licht en schaduw naar hoe hij aan de rand ligt. */
   function vul(x: number, y: number, t: string): string {
-    const basis = t === 'v' ? kleur('v') : kleur(t);
+    const basis = kleur(t);
     if (rand(at(x, y + 1))) return schaduw(basis, 0.22);
     if (rand(at(x, y - 1))) return licht(basis, 0.28);
     if (rand(at(x + 1, y))) return schaduw(basis, 0.12);
@@ -1395,7 +1427,7 @@ export function lagenVan(sleutel: string): Lagen {
   function lijn(x: number, y: number): string {
     for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
       const t = at(x + dx, y + dy);
-      if (!rand(t) && !oogLetter(t) && t !== 'c') return randKleur(kleur(t === 'v' ? 'a' : t));
+      if (!rand(t) && !oogLetter(t) && t !== 'c') return randKleur(kleur(t === 'v' || t === 'j' ? 'a' : t));
     }
     return palet.k;
   }
@@ -1404,8 +1436,14 @@ export function lagenVan(sleutel: string): Lagen {
   const ogen: { x: number; y: number; t: string }[] = [];
   const wangen: Pixel[] = [];
   const vleugel: Pixel[] = [];
+  const arm: Pixel[] = [];
+  /** De omlijning van een vleugel of arm: die gaat mee als hij opklapt. */
+  const vleugelRand: Pixel[] = [];
+  const armRand: Pixel[] = [];
   const poten: Pixel[] = [];
   const potenVanaf = MAAT - sprite.poten * (fijn ? 1 : SCHAAL);
+  const ledemaat = (t: string) => t === 'v' || t === 'j';
+  const buren = (x: number, y: number) => [at(x, y - 1), at(x - 1, y), at(x + 1, y), at(x, y + 1)];
 
   raster.forEach((rij, y) => {
     [...rij].forEach((t, x) => {
@@ -1414,11 +1452,25 @@ export function lagenVan(sleutel: string): Lagen {
       if (y >= potenVanaf) return void poten.push(px);
       if (oogLetter(t)) return void ogen.push({ x, y, t });
       if (t === 'c') wangen.push({ x, y, kleur: BLOS });
-      if (t === 'v') {
-        // Onder de vleugel zit gewoon lijf: klapt hij op, dan zie je dat.
+      if (ledemaat(t)) {
+        // Onder de vleugel of arm zit gewoon lijf: klapt hij op, dan zie je dat.
         lijf.push({ x, y, kleur: vul(x, y, 'a') });
-        vleugel.push(px);
+        (t === 'v' ? vleugel : arm).push(px);
         return;
+      }
+      if (t === 'k') {
+        // De lijn tussen een vleugel (of arm) en het lijf hoort bij de vleugel:
+        // bleef hij achter, dan zag je twee vleugels als hij opklapt. Eronder
+        // komt lijf. Een buitenrand blijft ook op het lijf staan.
+        const b = buren(x, y);
+        const aan = b.find(ledemaat);
+        if (aan) {
+          (aan === 'v' ? vleugelRand : armRand).push(px);
+          const lijfBuur = b.find((u) => !rand(u) && !ledemaat(u) && !oogLetter(u));
+          if (b.includes('.')) lijf.push(px);
+          else if (lijfBuur) lijf.push({ x, y, kleur: vul(x, y, lijfBuur === 'c' ? 'a' : lijfBuur) });
+          return;
+        }
       }
       lijf.push(px);
     });
@@ -1505,41 +1557,60 @@ export function lagenVan(sleutel: string): Lagen {
     if (laatste) oog = { x: Math.floor(laatste.x / SCHAAL), y: Math.floor(laatste.y / SCHAAL) };
   }
 
-  // Vleugel op: hij klapt omhoog. Van opzij zie je hem korter, en hij helt
-  // naar achteren (de kop wijst naar rechts); een dier dat je van voren ziet
-  // (de uil) slaat twee vleugels naar buiten uit. Hij krijgt zijn eigen licht,
-  // schaduw en randje, ook waar hij voor het lijf langs gaat: anders is het een vlek.
-  const vorm = new Set<string>();
-  const paren = klonten(vleugel);
-  const midden = vleugel.reduce((som, p) => som + p.x, 0) / (vleugel.length || 1);
-  for (const klont of paren) {
-    const top = Math.min(...klont.map((p) => p.y));
-    const eigen = klont.reduce((som, p) => som + p.x, 0) / klont.length;
-    const uit = paren.length > 1 ? (eigen < midden ? -1 : 1) : -0.5;
-    for (const p of klont) {
-      const d = Math.floor((p.y - top) * 0.6);
-      const x = p.x + Math.trunc(d * uit);
-      const y = top - 1 - d;
-      if (x >= 0 && x < MAAT && y >= 0) vorm.add(`${x},${y}`);
+  /**
+   * Een vleugel of arm die opklapt. Van opzij zie je hem korter, en hij helt
+   * naar achteren (een vleugel) of naar voren (een arm; de kop wijst naar
+   * rechts). Een dier dat je van voren ziet (de uil, de aap) slaat er twee
+   * naar buiten uit: dat zijn twee stukken ver uit elkaar, elk een flink deel.
+   * Hij krijgt zijn eigen licht, schaduw en randje, ook waar hij voor het lijf
+   * langs gaat: anders is het een vlek.
+   */
+  function klapOp(delen: Pixel[], letter: 'v' | 'j'): Pixel[] {
+    if (!delen.length) return [];
+    let stukken = klonten(delen);
+    const breedte = (k: { x: number }[]) => [Math.min(...k.map((p) => p.x)), Math.max(...k.map((p) => p.x))];
+    const groot = stukken.filter((k) => k.length >= delen.length * 0.2).sort((a, b) => b.length - a.length);
+    const paar =
+      groot.length >= 2 &&
+      (() => {
+        const [a0, a1] = breedte(groot[0]);
+        const [b0, b1] = breedte(groot[1]);
+        return b0 - a1 >= 3 || a0 - b1 >= 3;
+      })();
+    if (!paar) stukken = [delen];
+    const midden = delen.reduce((som, p) => som + p.x, 0) / delen.length;
+    const vorm = new Set<string>();
+    for (const klont of stukken) {
+      const top = Math.min(...klont.map((p) => p.y));
+      const eigen = klont.reduce((som, p) => som + p.x, 0) / klont.length;
+      const uit = paar ? (eigen < midden ? -1 : 1) : letter === 'v' ? -0.5 : 0.5;
+      for (const p of klont) {
+        const d = Math.floor((p.y - top) * 0.6);
+        const x = p.x + Math.trunc(d * uit);
+        const y = top - 1 - d;
+        if (x >= 0 && x < MAAT && y >= 0) vorm.add(`${x},${y}`);
+      }
     }
-  }
-  const inVorm = (x: number, y: number) => vorm.has(`${x},${y}`);
-  const vleugelOp: Pixel[] = [...vorm].map((k) => {
-    const [x, y] = k.split(',').map(Number);
-    const basis = kleur('v');
-    const tint = !inVorm(x, y - 1) ? licht(basis, 0.28) : !inVorm(x, y + 1) ? schaduw(basis, 0.22) : basis;
-    return { x, y, kleur: tint };
-  });
-  const randje = new Map<string, Pixel>();
-  for (const p of vleugelOp) {
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const x = p.x + dx;
-      const y = p.y + dy;
-      if (x < 0 || y < 0 || x >= MAAT || inVorm(x, y)) continue;
-      randje.set(`${x},${y}`, { x, y, kleur: randKleur(kleur('v')) });
+    const inVorm = (x: number, y: number) => vorm.has(`${x},${y}`);
+    const basis = kleur(letter);
+    const op: Pixel[] = [...vorm].map((k) => {
+      const [x, y] = k.split(',').map(Number);
+      const tint = !inVorm(x, y - 1) ? licht(basis, 0.28) : !inVorm(x, y + 1) ? schaduw(basis, 0.22) : basis;
+      return { x, y, kleur: tint };
+    });
+    const randje = new Map<string, Pixel>();
+    for (const p of op) {
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const x = p.x + dx;
+        const y = p.y + dy;
+        if (x < 0 || y < 0 || x >= MAAT || inVorm(x, y)) continue;
+        randje.set(`${x},${y}`, { x, y, kleur: randKleur(basis) });
+      }
     }
+    return [...randje.values(), ...op];
   }
-  vleugelOp.unshift(...randje.values());
+  const vleugelOp = klapOp(vleugel, 'v');
+  const armOp = klapOp(arm, 'j');
 
   // Lopen: om en om de helft van de poten optillen. De hele poot gaat
   // omhoog, zodat de voet een voet blijft; wat dan in het lijf zou steken
@@ -1559,13 +1630,16 @@ export function lagenVan(sleutel: string): Lagen {
     ogenDicht: alsLaag(ogenDicht),
     ogenBlij: alsLaag(ogenBlij),
     wangen: alsLaag(wangen),
-    vleugelNeer: alsLaag(vleugel),
+    vleugelNeer: alsLaag([...vleugelRand, ...vleugel]),
     vleugelOp: alsLaag(vleugelOp),
+    armNeer: alsLaag([...armRand, ...arm]),
+    armOp: alsLaag(armOp),
+    romp1: [],
+    romp2: [],
     potenRust: alsLaag(poten),
     potenA: alsLaag(stap(true)),
     potenB: alsLaag(stap(false)),
     oog,
   };
-  cache.set(sleutel, lagen);
   return lagen;
 }

@@ -6,7 +6,8 @@
    * poten. app.css wisselt die lagen per pose: knipperen doet hij altijd,
    * lopen laat de poten om en om stappen, blij knijpt de ogen tot boogjes
    * met een blos en laat het dier huppelen, sip laat een traan vallen, slapen geeft zzz, schrikken een uitroep.
-   * Een vliegend dier klappert met zijn vleugels.
+   * Een vliegend dier klappert met zijn vleugels, en wie armen heeft (de
+   * aap) juicht ermee als hij blij is. De worm kruipt als een slinky.
    */
   import { lagenVan, MAAT, SCHAAL } from '$lib/shared/pixeldieren';
   import { hash } from '$lib/shared/kwinkslagen';
@@ -37,6 +38,7 @@
   data-pose={pose}
   data-vlieg={vlieg || null}
   data-vleugels={l.vleugelNeer.length ? '' : null}
+  data-slinky={l.romp1.length ? '' : null}
   viewBox="0 0 {MAAT} {MAAT}"
   shape-rendering="crispEdges"
   style="--knipper:{ritme}ms;{stijl}"
@@ -44,13 +46,19 @@
 >
   <g class="px-alles">
   <g class="px-lijf">
-    {#each l.lijf as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}
+    <g class="px-romp">{#each l.lijf as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+    {#if l.romp1.length}
+      <g class="px-romp-1">{#each l.romp1 as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+      <g class="px-romp-2">{#each l.romp2 as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+    {/if}
     <g class="px-dicht">{#each l.ogenDicht as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-open">{#each l.ogenOpen as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-blij">{#each l.ogenBlij as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-blos">{#each l.wangen as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-vleugel neer">{#each l.vleugelNeer as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
     <g class="px-vleugel op">{#each l.vleugelOp as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+    <g class="px-arm neer">{#each l.armNeer as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
+    <g class="px-arm op">{#each l.armOp as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
   </g>
   <g class="px-poten rust">{#each l.potenRust as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>
   <g class="px-poten a">{#each l.potenA as p (p.kleur)}<path fill={p.kleur} d={p.d} />{/each}</g>

@@ -3,7 +3,7 @@
   import { invalidateAll } from '$app/navigation';
   import { maakPortret } from '$lib/client/portret';
   import Portret from '$lib/client/Portret.svelte';
-  import { dierVan } from '$lib/shared/dieren';
+  import { maatjeVan } from '$lib/shared/dieren';
   import type { PageData } from './$types';
   import type { BeheerOverzicht } from '$lib/server/beheer';
 
@@ -339,7 +339,7 @@
                   </button>
                 {/if}
                 {#if !s.isQuizmaster}
-                  <button class="knop stil" onclick={() => doe('speler-dier', { id: s.id })} disabled={bezig} title="Nu: {dierVan(s.dier, s.naam).titel}">🎲 Ander dier</button>
+                  <button class="knop stil" onclick={() => doe('speler-dier', { id: s.id })} disabled={bezig} title={maatjeVan(s.dier) ? `Nu: ${maatjeVan(s.dier)?.titel}` : 'Nog geen maatje gekozen'}>🎲 {s.dier ? 'Ander dier' : 'Dobbel een dier'}</button>
                 {/if}
                 {#if s.dierNaam}
                   <button class="knop stil" onclick={() => doe('speler-dier-naam', { id: s.id })} disabled={bezig} title="Het maatje heet nu {s.dierNaam}">Naam maatje weg</button>

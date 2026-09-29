@@ -16,7 +16,7 @@
   import Pixeldier from '$lib/client/Pixeldier.svelte';
   import Karakterkaart from '$lib/client/Karakterkaart.svelte';
   import Maatjesknoppen from '$lib/client/Maatjesknoppen.svelte';
-  import { DIEREN, MAX_DIERNAAM, dierVan, dierenroep, maatjeVoluit, schoneDierNaam, type Opdracht } from '$lib/shared/dieren';
+  import { DIEREN, MAX_DIERNAAM, maatjeVan, dierenroep, maatjeVoluit, schoneDierNaam, type Opdracht } from '$lib/shared/dieren';
   import { maakPortret } from '$lib/client/portret';
   import { houdWakker } from '$lib/client/wakker';
   import { prijsIcoon } from '$lib/shared/prijzen';
@@ -147,10 +147,10 @@
   /* ---- Je maatje ---------------------------------------------------
      Een dier dat je zelf kiest. Het staat klein op de rand van je portret
      en rent over het scherm als je het goed (of fout) hebt. */
-  let mijnDier = $derived(ik ? dierVan(ik.dier, ik.naam) : null);
+  let mijnDier = $derived(ik ? maatjeVan(ik.dier) : null);
   /** Wat je maatje roept bij het oordeel. */
   let roep = $derived(
-    ik && (uitslag === 'goed' || uitslag === 'fout') ? dierenroep(ik.dier, ik.naam, uitslag, sleutel) : '',
+    ik?.dier && (uitslag === 'goed' || uitslag === 'fout') ? dierenroep(ik.dier, ik.naam, uitslag, sleutel) : '',
   );
   /* Wie net een ander dier koos, ziet meteen dat nieuwe dier lopen, ook als de
      server het nog niet heeft teruggemeld. */
@@ -158,7 +158,7 @@
   let optochtTeller = 0;
   /** Welke dieren al door een ander aan tafel gekozen zijn, met wie. */
   let bezetDoor = $derived(
-    new Map((staat?.spelers ?? []).filter((s) => s.id !== live.spelerId).map((s) => [s.dier, s.naam])),
+    new Map((staat?.spelers ?? []).filter((s) => s.id !== live.spelerId && s.dier).map((s) => [s.dier, s.naam])),
   );
   let dierBezig = $state(false);
   let dierMelding = $state('');
@@ -318,7 +318,7 @@
   {#if staat?.pauze}
     <Pauzescherm soort={staat.pauze} vorm="telefoon" />
   {/if}
-  {#if optocht && ik}
+  {#if optocht && ik && (optocht.dier ?? ik.dier)}
     {#key optocht.id}
       <Dierenparade lopers={[{ id: ik.id, naam: ik.naam, dier: optocht.dier ?? ik.dier, dierNaam: optocht.dierNaam !== undefined ? optocht.dierNaam : ik.dierNaam }]} stemming={optocht.stemming} klaar={() => (optocht = null)} />
     {/key}
@@ -384,9 +384,13 @@
           {#if fotoMelding}<p class="fijn" style="margin-top:.4rem">{fotoMelding}</p>{/if}
         </span>
       </div>
-      {#if mijnDier}
+      {#if ik}
         <div class="paneel" in:fly={{ y: 16, duration: 420, delay: 160, easing: cubicOut }}>
           <p class="etiket stil">Kies je maatje</p>
+          {#if !mijnDier}
+            <p class="lood" style="font-size:1.05rem;margin-top:.3rem">Je hebt nog geen maatje.</p>
+            <p class="fijn" style="margin-top:.2rem">Kies er hieronder een. Wat een ander aan tafel al koos, is bezet: iedereen heeft zijn eigen dier. Het rent over het scherm als je het goed hebt, en ook als je het fout hebt.</p>
+          {:else}
           <p class="lood" style="font-size:1.05rem;margin-top:.3rem">
             <Pixeldier sleutel={mijnDier.sleutel} /> {ik?.dierNaam ? maatjeVoluit(mijnDier, ik.dierNaam) : `${ik?.naam}, ${mijnDier.titel}`}
           </p>
@@ -415,20 +419,21 @@
             </div>
             <Maatjesknoppen dier={mijnDier} kies={laatMaatje} naam={ik.dierNaam ?? ''} />
           {/if}
+          {/if}
           <div class="dierenkiezer" role="radiogroup" aria-label="Kies je maatje">
             {#each DIEREN as d (d.sleutel)}
               {@const van = bezetDoor.get(d.sleutel)}
               <button
                 role="radio"
-                aria-checked={d.sleutel === mijnDier.sleutel}
-                class:gekozen={d.sleutel === mijnDier.sleutel}
+                aria-checked={d.sleutel === mijnDier?.sleutel}
+                class:gekozen={d.sleutel === mijnDier?.sleutel}
                 disabled={dierBezig || !!van}
                 title={van ? `${d.titel} — al gekozen door ${van}` : `${d.titel} — ${d.specialiteit}`}
                 aria-label={van ? `${d.titel}, al gekozen door ${van}` : d.titel}
                 onclick={() => kiesDier(d.sleutel)}
               >
-                <span class="dier" data-beweging={d.sleutel === mijnDier.sleutel ? d.beweging : null}>
-                  <Pixeldier sleutel={d.sleutel} pose={d.sleutel === mijnDier.sleutel ? 'blij' : 'staan'} />
+                <span class="dier" data-beweging={d.sleutel === mijnDier?.sleutel ? d.beweging : null}>
+                  <Pixeldier sleutel={d.sleutel} pose={d.sleutel === mijnDier?.sleutel ? 'blij' : 'staan'} />
                 </span>
               </button>
             {/each}

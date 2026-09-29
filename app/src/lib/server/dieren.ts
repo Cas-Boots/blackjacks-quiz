@@ -1,24 +1,35 @@
 /**
  * Wie welk maatje heeft. Zie shared/dieren.ts voor de dieren zelf.
  *
- * Iedereen zonder dier krijgt er één dat nog vrij is, zodat er aan tafel
- * geen twee lama's zitten. Op de telefoon kiest ieder daarna zijn eigen
- * maatje; de quizmaster kan er op het beheerscherm een dobbelen.
+ * Niemand krijgt vanzelf een dier: ieder kiest zijn eigen maatje op de
+ * telefoon, en tot dan heeft hij er geen. Twee mensen in hetzelfde spel
+ * hebben nooit hetzelfde dier. De quizmaster kan er op het beheerscherm een
+ * dobbelen.
  */
-import { and, eq, isNull, ne } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { db } from './db/index';
 import { spelers, deelnemers } from './db/schema';
 import { isDier, schoneDierNaam, vrijDier } from '$lib/shared/dieren';
 
-/** Geeft iedereen zonder dier een vrij dier. Idempotent en goedkoop. */
-export function zorgVoorDieren() {
-  const zonder = db.select().from(spelers).where(isNull(spelers.dier)).all();
-  if (!zonder.length) return;
-  const bezet = db.select({ dier: spelers.dier }).from(spelers).all().map((r) => r.dier);
-  for (const s of zonder) {
-    const dier = vrijDier(bezet, s.naam);
-    db.update(spelers).set({ dier }).where(eq(spelers.id, s.id)).run();
-    bezet.push(dier);
+/**
+ * Zorgt dat niemand in dit spel hetzelfde dier heeft als een ander. Dat kan
+ * gebeuren als iemand zijn dier van een vorige avond meeneemt, terwijl een
+ * ander het intussen koos: wie het eerst in dit spel zat, houdt het; de
+ * ander kiest opnieuw.
+ */
+export function ontdubbelDieren(spelId: number) {
+  const rijen = db
+    .select({ id: spelers.id, dier: spelers.dier, sinds: deelnemers.id })
+    .from(deelnemers)
+    .innerJoin(spelers, eq(deelnemers.spelerId, spelers.id))
+    .where(eq(deelnemers.spelId, spelId))
+    .all()
+    .sort((a, b) => a.sinds - b.sinds);
+  const gezien = new Set<string>();
+  for (const r of rijen) {
+    if (!r.dier) continue;
+    if (gezien.has(r.dier)) db.update(spelers).set({ dier: null }).where(eq(spelers.id, r.id)).run();
+    else gezien.add(r.dier);
   }
 }
 
@@ -46,19 +57,26 @@ export function noemDier(spelerId: number, naam: unknown): string | null {
 
 /**
  * Een speler kiest zelf zijn maatje. Mag niet als iemand anders in hetzelfde
- * spel het al heeft; wie van een vorige avond hetzelfde dier had, telt niet.
+ * spel het al heeft; wie van een vorige avond hetzelfde dier had en niet
+ * meedoet, telt niet (schuift hij later aan, dan ontdubbelt voegDeelnemerToe).
  */
 export function kiesDier(spelerId: number, sleutel: unknown, spelId: number | null): { ok: true } | { ok: false; reden: string } {
   if (!isDier(sleutel)) return { ok: false, reden: 'onbekend dier' };
-  if (spelId !== null) {
-    const bezet = db
-      .select({ naam: spelers.naam })
-      .from(deelnemers)
-      .innerJoin(spelers, eq(deelnemers.spelerId, spelers.id))
-      .where(and(eq(deelnemers.spelId, spelId), ne(spelers.id, spelerId), eq(spelers.dier, sleutel)))
-      .get();
-    if (bezet) return { ok: false, reden: `al gekozen door ${bezet.naam}` };
-  }
+  // In een spel telt wie meedoet; zonder spel telt iedereen.
+  const bezet =
+    spelId !== null
+      ? db
+          .select({ naam: spelers.naam })
+          .from(deelnemers)
+          .innerJoin(spelers, eq(deelnemers.spelerId, spelers.id))
+          .where(and(eq(deelnemers.spelId, spelId), ne(spelers.id, spelerId), eq(spelers.dier, sleutel)))
+          .get()
+      : db
+          .select({ naam: spelers.naam })
+          .from(spelers)
+          .where(and(ne(spelers.id, spelerId), eq(spelers.dier, sleutel)))
+          .get();
+  if (bezet) return { ok: false, reden: `al gekozen door ${bezet.naam}` };
   db.update(spelers).set({ dier: sleutel }).where(eq(spelers.id, spelerId)).run();
   return { ok: true };
 }

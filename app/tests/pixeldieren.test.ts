@@ -50,4 +50,31 @@ describe('pixeldieren', () => {
       for (const p of l.vleugelOp) expect(p.d).not.toMatch(/M-/);
     }
   });
+
+  it('laat de aap met zijn armen juichen: omhoog, allebei naar buiten', () => {
+    const l = lagenVan('aap');
+    expect(l.armNeer.length).toBeGreaterThan(0);
+    expect(l.armOp.length).toBeGreaterThan(0);
+    const xs = l.armOp.flatMap((p) => [...p.d.matchAll(/M(\d+) /g)].map((m) => Number(m[1])));
+    expect(Math.min(...xs)).toBeLessThan(10);
+    expect(Math.max(...xs)).toBeGreaterThan(22);
+  });
+
+  it('laat een vleugel die opklapt niet zijn omlijning op het lijf achter (geen twee vleugels)', () => {
+    const l = lagenVan('kip');
+    // De lijn tussen vleugel en lijf gaat mee met de vleugel.
+    const rand = l.vleugelNeer.flatMap((p) => p.d.split('z')).filter(Boolean).length;
+    const vul = SPRITES.kip.rijen.join('').split('').filter((t) => t === 'v').length;
+    expect(rand).toBeGreaterThan(vul);
+  });
+
+  it('laat de worm kruipen als een slinky: twee ingeknepen lijven, de kop op zijn plek', () => {
+    const l = lagenVan('worm');
+    expect(l.romp1.length).toBeGreaterThan(0);
+    expect(l.romp2.length).toBeGreaterThan(0);
+    const minX = (laag: typeof l.lijf) => Math.min(...laag.flatMap((p) => [...p.d.matchAll(/M(\d+) /g)].map((m) => Number(m[1]))));
+    expect(minX(l.romp1)).toBeGreaterThan(minX(l.lijf));
+    expect(minX(l.romp2)).toBeGreaterThan(minX(l.romp1));
+    expect(lagenVan('hond').romp1).toEqual([]);
+  });
 });

@@ -24,7 +24,7 @@
   import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
   import Spotlight, { type Binnenkomer } from '$lib/client/Spotlight.svelte';
   import Pixeldier from '$lib/client/Pixeldier.svelte';
-  import { actieVoor, dierVan, dierenroep, kiesActie, maatjeVoluit, type Actie } from '$lib/shared/dieren';
+  import { actieVoor, dierenroep, kiesActie, maatjeVan, maatjeVoluit, type Actie } from '$lib/shared/dieren';
   import type { MaatjeOpdracht } from '$lib/client/live.svelte';
   import { flip } from 'svelte/animate';
   import * as geluid from '$lib/client/geluid';
@@ -150,8 +150,9 @@
   function lopersVan(ids: number[]): Loper[] {
     return ids
       .map((id) => staat?.spelers.find((s) => s.id === id))
-      .filter((s) => !!s)
-      .map((s) => ({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam }));
+      // Wie nog geen maatje koos, loopt niet mee.
+      .filter((s) => !!s && !!s.dier)
+      .map((s) => ({ id: s!.id, naam: s!.naam, dier: s!.dier, dierNaam: s!.dierNaam }));
   }
   // Boekhouding, geen toestand voor het scherm: bewust niet reactief, anders
   // zou het effect zichzelf bij elke schrijfactie opnieuw aanzwengelen.
@@ -166,11 +167,28 @@
       begroetingTeller += 1;
       // Het maatje stelt zichzelf voor in de spotlight; hier alleen een welkom voor de speler.
       begroeting = metNaam(kies(BEGROETINGEN, `${nieuw.naam}:${begroetingTeller}`), nieuw.naam);
-      laatBinnen({ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam });
+      if (nieuw.dier) laatBinnen({ id: nieuw.id, naam: nieuw.naam, dier: nieuw.dier, dierNaam: nieuw.dierNaam });
       geluid.boing();
     }
     // De eerste momentopname telt niet als binnenkomen: die mensen zaten er al.
     eerderVerbonden = nu;
+  });
+  /* Wie in de lobby voor het eerst een maatje kiest, krijgt alsnog zijn
+     entree: dan pas is er een dier om te laten zien. */
+  let eerderGekozen: Map<number, string | null> | null = null;
+  $effect(() => {
+    const st = live.staat;
+    if (!st) return;
+    const nu = new Map(st.spelers.map((s) => [s.id, s.dier]));
+    if (eerderGekozen && st.fase === 'lobby') {
+      for (const s of st.spelers) {
+        if (s.dier && eerderGekozen.has(s.id) && !eerderGekozen.get(s.id)) {
+          laatBinnen({ id: s.id, naam: s.naam, dier: s.dier, dierNaam: s.dierNaam });
+          geluid.boing();
+        }
+      }
+    }
+    eerderGekozen = nu;
   });
 
   /* ---- De maatjes in de lobby ----------------------------------------
@@ -185,11 +203,12 @@
     let wacht: ReturnType<typeof setTimeout>;
     const volgende = () => {
       wacht = setTimeout(() => {
-        const aan = (live.staat?.spelers ?? []).filter((s) => s.verbonden && s.id !== vorigeKunstenaar);
+        const aan = (live.staat?.spelers ?? []).filter((s) => s.verbonden && s.dier && s.id !== vorigeKunstenaar);
         if (aan.length && !spot) {
           const s = aan[Math.floor(Math.random() * aan.length)];
+          const dier = maatjeVan(s.dier)!;
           vorigeKunstenaar = s.id;
-          plaatKunstje = { spelerId: s.id, actie: kiesActie(dierVan(s.dier, s.naam), 'blij'), nr: ++kunstjeNr };
+          plaatKunstje = { spelerId: s.id, actie: kiesActie(dier, 'blij'), nr: ++kunstjeNr };
           setTimeout(() => {
             if (plaatKunstje?.nr === kunstjeNr) plaatKunstje = null;
           }, 2300);
@@ -205,16 +224,20 @@
      In de lobby doet het maatje het op zijn eigen naambordje, en gaat het
      voor op wat de regisseur hierboven verzon. Daarna zweeft het even over
      het scherm, net als een reactie. */
-  const actieVan = (m: MaatjeOpdracht) => actieVoor(dierVan(m.dier, m.naam), m.opdracht, () => ((m.id * 0.618) % 1));
+  const actieVan = (m: MaatjeOpdracht) => {
+    const dier = maatjeVan(m.dier);
+    return dier ? actieVoor(dier, m.opdracht, () => ((m.id * 0.618) % 1)) : null;
+  };
   let vorigeOpdracht = 0;
   $effect(() => {
     const m = live.maatjes.at(-1);
     if (!m || m.id === vorigeOpdracht) return;
     vorigeOpdracht = m.id;
     geluid.plop();
-    if (live.staat?.fase !== 'lobby') return;
+    const actie = actieVan(m);
+    if (live.staat?.fase !== 'lobby' || !actie) return;
     const nr = ++kunstjeNr;
-    plaatKunstje = { spelerId: m.spelerId, actie: actieVan(m), nr };
+    plaatKunstje = { spelerId: m.spelerId, actie, nr };
     setTimeout(() => {
       if (plaatKunstje?.nr === nr) plaatKunstje = null;
     }, 2300);
@@ -267,14 +290,16 @@
     if (!staat || staat.fase !== 'antwoord' || alleGoed) return null;
     const eerste = staat.inzendingen.find((i) => i.isGoed === true);
     const sp = eerste ? ledenVan(eerste.inzender)[0] : null;
-    if (!sp) return null;
-    return { dier: dierVan(sp.dier, sp.naam), zin: dierenroep(sp.dier, sp.naam, 'goed', vraagSleutelNu) };
+    const dier = maatjeVan(sp?.dier);
+    if (!sp || !dier) return null;
+    return { dier, zin: dierenroep(sp.dier, sp.naam, 'goed', vraagSleutelNu) };
   });
   let winDier = $derived.by(() => {
     if (winnaars.length !== 1) return null;
     const w = winnaars[0];
     const dierNaam = staat?.spelers.find((s) => s.id === w.spelerId)?.dierNaam;
-    return { ...dierVan(w.dier, w.naam), voluit: maatjeVoluit(dierVan(w.dier, w.naam), dierNaam) };
+    const dier = maatjeVan(w.dier);
+    return dier ? { ...dier, voluit: maatjeVoluit(dier, dierNaam) } : null;
   });
 
   /* Zodra een vraag beoordeeld is: wie punten pakte rent blij over het
@@ -585,9 +610,9 @@
       </div>
     {/each}
     {#if staat?.fase !== 'lobby'}
-      {#each live.maatjes as m (m.id)}
+      {#each live.maatjes.filter((m) => m.dier) as m (m.id)}
         <div class="reactie maatjereactie" style="--x:{m.x}%">
-          <Plaatmaatje sleutel={dierVan(m.dier, m.naam).sleutel} kunstje={actieVan(m)} beurt={m.id} />
+          <Plaatmaatje sleutel={m.dier!} kunstje={actieVan(m)} beurt={m.id} />
           <span class="van">{m.dierNaam ?? m.naam}</span>
         </div>
       {/each}
@@ -672,12 +697,14 @@
                     <span class="stip" class:aan={s.verbonden}></span>
                     <Portret naam={s.naam} foto={s.foto} dier={s.dier} dierNaam={s.dierNaam} zonderDier />
                     <strong>{s.naam}</strong>
-                    <Plaatmaatje
-                      sleutel={dierVan(s.dier, s.naam).sleutel}
-                      kunstje={plaatKunstje?.spelerId === s.id ? plaatKunstje.actie : null}
-                      beurt={plaatKunstje?.spelerId === s.id ? plaatKunstje.nr : 0}
-                      slaapt={!s.verbonden}
-                    />
+                    {#if s.dier}
+                      <Plaatmaatje
+                        sleutel={s.dier}
+                        kunstje={plaatKunstje?.spelerId === s.id ? plaatKunstje.actie : null}
+                        beurt={plaatKunstje?.spelerId === s.id ? plaatKunstje.nr : 0}
+                        slaapt={!s.verbonden}
+                      />
+                    {/if}
                   </span>
                 {/each}
               </div>

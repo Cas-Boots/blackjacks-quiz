@@ -392,9 +392,13 @@ in de Tuin* of *Rik, de Goudvis met Drie Seconden Geheugen*. Het telt nergens
 mee; het is er alleen voor de lol.
 
 - **Kiezen.** Op de telefoon staat in de lobby *Kies je maatje*, met alle 31
-  dieren. Een dier dat een ander aan tafel al heeft, is grijs. Wie niets
-  kiest, krijgt er vanzelf een. De quizmaster kan op het beheerscherm een
-  ander dier dobbelen.
+  dieren. Niemand krijgt vanzelf een dier: tot je er een kiest, heb je geen
+  maatje (en staat er ook geen op je portret of naambordje). Een dier dat een
+  ander in hetzelfde spel al heeft, is grijs en kan niet meer, ook niet via de
+  server. Neemt iemand een dier mee van een vorige avond terwijl een ander het
+  nu heeft, dan houdt wie er het eerst was het, en kiest de ander opnieuw. Wie
+  kiest, krijgt zijn entree in de spotlight op de televisie. De quizmaster kan
+  op het beheerscherm een dier dobbelen.
 - **Een eigen naam.** Onder de kiezer kun je je maatje een naam geven
   (hooguit 20 tekens), dan heet het bijvoorbeeld *Knabbel, de Paniekkip*. De
   naam staat in de spotlight als je binnenkomt, bij de optocht (*Knabbel ·
@@ -434,7 +438,8 @@ mee; het is er alleen voor de lol.
   dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
   ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
   vleugels als het vliegt, knijpt blij zijn ogen tot boogjes (^^) met een
-  blos op de wangen en huppelt pixel voor pixel, laat sip een traan vallen, slaapt met zzz en schrikt met een
+  blos op de wangen en huppelt pixel voor pixel (de aap gooit er zijn armen
+  bij in de lucht), laat sip een traan vallen, slaapt met zzz en schrikt met een
   uitroepteken.
 - **Erin, een optreden, en weer weg.** Elk dier komt op zijn eigen manier
   binnen, stopt op zijn eigen plek, doet een optreden van drie tellen en gaat
@@ -472,8 +477,8 @@ mee; het is er alleen voor de lol.
   vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
   wakker).
 - **Op de televisie, als jij dat wilt.** Onder je maatje staan vijf knoppen:
-  *Zwaai*, *Dans*, *Kunstje*, *Voer* (met zijn eigen lievelingshapje) en
-  *Feest*. Je
+  *Zwaai*, *Dans*, *Kunstje*, *Voer* (zijn eigen lievelingshapje verschijnt
+  voor zijn snuit en wordt hap voor hap kleiner) en *Feest*. Je
   maatje doet het meteen op je telefoon, en tegelijk op de televisie: in de
   lobby op je naambordje, en na een vraag, bij de tussenstand en de uitslag
   zweeft het met jouw naam erbij omhoog, net als een reactie. De knoppen
@@ -496,6 +501,11 @@ mee; het is er alleen voor de lol.
   algemene: een salto, een dansje met muzieknootjes, een pirouette met
   sterretjes, stuiteren met confetti. Sip: een zucht met een traan, omvallen,
   mokken met een boos wolkje, of zich klein maken.
+- **Eigen kunstjes met iets erbij.** De lama spuugt echt: bol opblazen,
+  achterover, en pats, een klodder vliegt in een boog uit zijn bek. Het konijn
+  knabbelt een wortel weg. De worm kruipt als een slinky (in hele kolommen,
+  geen uitgesmeerde pixels), zwemmers gaan in golven met belletjes erachter,
+  en slingeraars hangen aan een liaan.
 - **Het feest.** Een grote sprong met een draai in de lucht, landen, nog een
   sprongetje, en confetti, in schokjes zodat het dier op zijn pixels blijft.
   De winnaars sluiten de optocht bij de uitslag ermee af, en iedereen kan het

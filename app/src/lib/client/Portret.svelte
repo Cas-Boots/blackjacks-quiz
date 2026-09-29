@@ -6,7 +6,7 @@
    * stil figuurtje op de rand, zodat je ziet bij wie het hoort als het op de
    * grote momenten over het scherm rent (Dierenparade.svelte).
    */
-  import { dierVan, maatjeVoluit } from '$lib/shared/dieren';
+  import { maatjeVan, maatjeVoluit } from '$lib/shared/dieren';
   import Pixeldier from './Pixeldier.svelte';
 
   let {
@@ -32,7 +32,8 @@
     stijl?: string;
   } = $props();
 
-  let d = $derived(dierVan(dier, naam));
+  /* Wie nog geen maatje koos, heeft er ook geen op zijn portret. */
+  let d = $derived(maatjeVan(dier));
 </script>
 
 <span class="portret {maat}">
@@ -41,5 +42,5 @@
   {:else}
     <span class="avatar {maat}" class:goud style={stijl}>{naam.slice(0, 2)}</span>
   {/if}
-  {#if !zonderDier}<span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>{/if}
+  {#if !zonderDier && d}<span class="dierbadge" title="{maatjeVoluit(d, dierNaam)}. {d.specialiteit}." aria-hidden="true"><Pixeldier sleutel={d.sleutel} /></span>{/if}
 </span>

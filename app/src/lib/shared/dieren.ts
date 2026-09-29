@@ -76,8 +76,8 @@ export type Lijf =
   | 'ondersteboven' | 'balans' | 'glij' | 'graaf' | 'kronkel'
   | 'zak' | 'omval' | 'mok' | 'verstop'
   | 'kijkrond' | 'snuffel' | 'trappel' | 'schrik' | 'hik' | 'zwaai' | 'slaap'
-  | 'juich';
-export type DingGaat = 'op' | 'gooi' | 'val' | 'rond';
+  | 'juich' | 'knabbel' | 'spuug';
+export type DingGaat = 'op' | 'gooi' | 'val' | 'rond' | 'knabbel' | 'spuug';
 
 /** Wat elk dier kan als het blij is, bovenop zijn eigen kunstjes. */
 export const ALGEMEEN_BLIJ: readonly Actie[] = [
@@ -156,7 +156,8 @@ export function actieVoor(dier: Maatje, opdracht: Opdracht, toeval: () => number
       return eigen[Math.min(eigen.length - 1, Math.floor(toeval() * eigen.length))];
     }
     case 'voer':
-      return { lijf: 'snuffel', ding: dier.hapje.ding, dingGaat: 'val' };
+      // Het hapje verschijnt voor zijn snuit en wordt hap voor hap kleiner.
+      return { lijf: 'knabbel', ding: dier.hapje.ding, dingGaat: 'knabbel' };
     case 'feest':
       return JUICH;
   }
@@ -172,7 +173,7 @@ const POSE: Record<Lijf, Pose> = {
   opblaas: 'blij', schud: 'schrik', acht: 'loop', ondersteboven: 'staan', balans: 'staan',
   glij: 'blij', graaf: 'loop', kronkel: 'loop', zak: 'sip', omval: 'schrik', mok: 'sip',
   verstop: 'sip', kijkrond: 'staan', snuffel: 'loop', trappel: 'loop', schrik: 'schrik',
-  hik: 'schrik', zwaai: 'blij', slaap: 'slaap', juich: 'blij',
+  hik: 'schrik', zwaai: 'blij', slaap: 'slaap', juich: 'blij', knabbel: 'staan', spuug: 'staan',
 };
 export function poseVan(lijf: Lijf, stemming: 'blij' | 'sip'): Pose {
   const pose = POSE[lijf];
@@ -250,7 +251,7 @@ export const DIEREN: readonly Maatje[] = [
     karakter: { snel: 3, slim: 3, slaperig: 2, gezellig: 2, ondeugend: 4, drama: 5 },
     hapje: { ding: '🌾', naam: 'hooi' },
     specialiteit: 'Spuugt precies op het verkeerde moment',
-    acties: { blij: [{ lijf: 'opblaas', ding: '💦', dingGaat: 'gooi' }, { lijf: 'dans' }], sip: [{ lijf: 'zak', ding: '💦', dingGaat: 'val' }] },
+    acties: { blij: [{ lijf: 'spuug', ding: '💦', dingGaat: 'spuug' }, { lijf: 'dans' }], sip: [{ lijf: 'zak', ding: '💦', dingGaat: 'val' }] },
   },
   {
     sleutel: 'luiaard', emoji: '🦥', titel: 'de Luiaard met Deadline',
@@ -558,7 +559,7 @@ export const DIEREN: readonly Maatje[] = [
     karakter: { snel: 5, slim: 2, slaperig: 2, gezellig: 4, ondeugend: 3, drama: 2 },
     hapje: { ding: '🥕', naam: 'worteltjes' },
     specialiteit: 'Verdwijnt in een hol als het spannend wordt',
-    acties: { blij: [{ lijf: 'boing', ding: '🥕', dingGaat: 'gooi' }, { lijf: 'graaf', ding: '🌷', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '🕳️', dingGaat: 'val' }] },
+    acties: { blij: [{ lijf: 'knabbel', ding: '🥕', dingGaat: 'knabbel' }, { lijf: 'boing', ding: '🥕', dingGaat: 'gooi' }, { lijf: 'graaf', ding: '🌷', dingGaat: 'op' }], sip: [{ lijf: 'verstop', ding: '🕳️', dingGaat: 'val' }] },
   },
   {
     sleutel: 'worm', emoji: '🪱', titel: 'de Worm die de Diepte in Gaat',
@@ -612,6 +613,11 @@ export function isDier(sleutel: unknown): sleutel is string {
 }
 
 /** Het dier bij een sleutel. Zonder geldige sleutel beslist de naam. */
+/** Het maatje dat iemand koos, of null als hij er (nog) geen heeft. Geen verzonnen dier. */
+export function maatjeVan(sleutel: string | null | undefined): Maatje | null {
+  return (sleutel && PER_SLEUTEL.get(sleutel)) || null;
+}
+
 export function dierVan(sleutel: string | null | undefined, naam = ''): Maatje {
   return (sleutel && PER_SLEUTEL.get(sleutel)) || kies(DIEREN, `dier:${naam}`);
 }

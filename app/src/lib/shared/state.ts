@@ -10,8 +10,8 @@ export interface PubliekeSpeler {
   id: number;
   naam: string;
   foto: string | null;
-  /** Het maatje, een sleutel uit shared/dieren.ts. */
-  dier: string;
+  /** Het maatje, een sleutel uit shared/dieren.ts; null zolang hij er nog geen koos. */
+  dier: string | null;
   /** De naam die de speler zijn maatje gaf, of null. */
   dierNaam: string | null;
   /** Aantal seconden sinds dit apparaat zich voor het laatst meldde. */
@@ -121,8 +121,8 @@ export interface PubliekeStaat {
     naam: string;
     punten: number;
     foto: string | null;
-    /** Het maatje, een sleutel uit shared/dieren.ts. */
-    dier: string;
+    /** Het maatje, een sleutel uit shared/dieren.ts; null zolang hij er nog geen koos. */
+    dier: string | null;
     /** Punten in de huidige ronde, bonussen inbegrepen. Voor de fiches bij de tussenstand. */
     dezeRonde?: number;
   }[];

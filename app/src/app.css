@@ -2786,8 +2786,40 @@ a.uitslagrij:hover {
 .dier[data-beweging="loop"] { animation: dier-stap 0.5s ease-in-out infinite; }
 .dier[data-beweging="spring"],
 .dier[data-beweging="stuiter"] { animation: dier-spring 1.2s cubic-bezier(0.3, 0, 0.5, 1) infinite; transform-origin: 50% 100%; }
-.dier[data-beweging="schommel"] { animation: dier-schommel 1.8s ease-in-out infinite; transform-origin: 50% -40%; }
-.dier[data-beweging="zwem"] { animation: dier-golf 1.6s ease-in-out infinite; }
+.dier[data-beweging="schommel"] { animation: dier-schommel 2s ease-in-out infinite; transform-origin: 50% -45%; }
+.dier[data-beweging="zwem"] { animation: dier-golf 2s ease-in-out infinite; }
+/* Aan een liaan: hij hangt aan het draaipunt en zwaait mee. Alleen bij een
+   pixeldier, niet bij de emoji op het hostscherm. */
+.dier[data-beweging="schommel"],
+.dier[data-beweging="zwem"] { position: relative; }
+.dier[data-beweging="schommel"]:has(.pixeldier)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 88%;
+  width: 0.0625em;
+  height: 0.5em;
+  margin-left: -0.03125em;
+  background: #4f8a3c;
+  box-shadow: 0.0625em 0.125em 0 #3d6e2e, -0.0625em 0.3125em 0 #3d6e2e;
+}
+/* Onder water: belletjes die opstijgen achter de staart, pixel voor pixel. */
+.dier[data-beweging="zwem"]:has(.pixeldier)::after {
+  content: "";
+  position: absolute;
+  left: -0.05em;
+  top: 20%;
+  width: 0.16em;
+  height: 0.16em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath fill='%239fd8ff' d='M1 0h3v1h-3zM0 1h1v3h-1zM4 1h1v3h-1zM1 4h3v1h-3z'/%3E%3Cpath fill='%23ffffff' d='M1 1h1v1h-1z'/%3E%3C/svg%3E") center / contain no-repeat;
+  image-rendering: pixelated;
+  animation: dier-bel 2s steps(6, end) infinite;
+}
+@keyframes dier-bel {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(-0.2em, -0.9em); opacity: 0; }
+}
 .dier[data-beweging="vlieg"] { animation: dier-fladder 1.6s ease-in-out infinite; }
 .dier[data-beweging="graaf"] { animation: dier-graaf 3s ease-in-out infinite; }
 .dier[data-beweging="draai"] { animation: dier-draai 3s ease-in-out infinite; transform-origin: 50% 50%; }
@@ -2854,7 +2886,23 @@ a.uitslagrij:hover {
 /* Het feest: in schokjes van vier beeldjes per stuk, zodat het pixeldier op
    zijn pixels blijft, ook midden in de sprong. */
 .actie[data-lijf="juich"] { animation-name: kunst-juich; animation-timing-function: steps(4, end); transform-origin: 50% 100%; }
+/* Knabbelen: kauwen in schokjes, terwijl het hapje voor de snuit kleiner wordt. */
+.actie[data-lijf="knabbel"] { animation-name: kunst-knabbel; animation-timing-function: steps(1, end); transform-origin: 50% 100%; }
+/* Spugen: bol opblazen, achterover leunen, en dan naar voren: pats. */
+.actie[data-lijf="spuug"] { animation-name: kunst-spuug; animation-timing-function: steps(2, end); transform-origin: 50% 100%; }
 
+@keyframes kunst-knabbel {
+  0%, 20%, 40%, 60%, 80%, 100% { transform: translateY(0) scale(1, 1); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(1.5%) scale(1.02, 0.97); }
+}
+@keyframes kunst-spuug {
+  0% { transform: translateX(0) scale(1, 1); }
+  18% { transform: translateX(-3%) scale(1.06, 0.96); }
+  34% { transform: translateX(-6%) rotate(-6deg) scale(1.1, 0.94); }
+  40% { transform: translateX(7%) rotate(5deg) scale(0.95, 1.05); }
+  52% { transform: translateX(2%) rotate(0) scale(1, 1); }
+  100% { transform: translateX(0) scale(1, 1); }
+}
 @keyframes kunst-juich {
   0% { transform: translateY(0) scale(1, 1); }
   10% { transform: translateY(0) scale(1.15, 0.85); }
@@ -3077,6 +3125,9 @@ a.uitslagrij:hover {
 .px-poten.a,
 .px-poten.b,
 .px-vleugel.op,
+.px-arm.op,
+.px-romp-1,
+.px-romp-2,
 .px-blij,
 .px-blos { display: none; }
 /* Knipperen, elk dier op zijn eigen ritme. */
@@ -3093,6 +3144,17 @@ a.uitslagrij:hover {
 .pixeldier[data-pose="blij"] .px-blij { display: inline; }
 .pixeldier[data-pose="blij"] .px-blos { display: inline; opacity: 0.85; }
 .pixeldier[data-pose="blij"] .px-alles { animation: px-huppel 0.8s steps(1, end) infinite; }
+/* De slinky (de worm), als hij stilstaat of kruipt: de staart trekt in twee
+   stapjes naar de kop toe en veert terug. Hele kolommen, geen uitsmeren. */
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp { animation: px-slinky-0 1.1s steps(1, end) infinite; }
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp-1 { display: inline; animation: px-slinky-1 1.1s steps(1, end) infinite; }
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp-2 { display: inline; animation: px-slinky-2 1.1s steps(1, end) infinite; }
+@keyframes px-slinky-0 { 0% { visibility: visible; } 25%, 100% { visibility: hidden; } }
+@keyframes px-slinky-1 { 0% { visibility: hidden; } 25% { visibility: visible; } 50% { visibility: hidden; } 75%, 100% { visibility: visible; } }
+@keyframes px-slinky-2 { 0%, 25% { visibility: hidden; } 50% { visibility: visible; } 75%, 100% { visibility: hidden; } }
+/* Wie armen heeft, juicht: om en om omhoog en omlaag. */
+.pixeldier[data-pose="blij"] .px-arm.neer { animation: px-stap 0.4s linear infinite; }
+.pixeldier[data-pose="blij"] .px-arm.op { display: inline; animation: px-stap 0.4s linear infinite reverse; }
 @keyframes px-huppel {
   0%, 55%, 100% { transform: translateY(0); }
   65% { transform: translateY(-1px); }
@@ -3149,6 +3211,10 @@ a.uitslagrij:hover {
 .ding[data-gaat="gooi"] { animation-name: ding-gooi; animation-duration: 1.4s; }
 .ding[data-gaat="val"] { animation-name: ding-val; animation-timing-function: ease-in; }
 .ding[data-gaat="rond"] { animation-name: ding-rond; animation-timing-function: linear; }
+/* Het hapje voor de snuit (de kop wijst naar rechts): hap voor hap weg. */
+.ding[data-gaat="knabbel"] { left: 90%; top: 38%; animation-name: ding-knabbel; animation-duration: 1.7s; animation-delay: 0.1s; animation-timing-function: steps(1, end); }
+/* De spuug: vliegt precies op het moment dat de lama naar voren schiet uit zijn bek. */
+.ding[data-gaat="spuug"] { left: 92%; top: 12%; animation-name: ding-spuug; animation-duration: var(--tel, 2.2s); animation-delay: 0s; animation-timing-function: linear; }
 @keyframes ding-op {
   0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 70%), 0) scale(0.5); }
   20% { opacity: 1; }
@@ -3163,6 +3229,23 @@ a.uitslagrij:hover {
   0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), -60%); }
   15% { opacity: 1; }
   100% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), 260%); }
+}
+@keyframes ding-knabbel {
+  0% { opacity: 0; clip-path: inset(0 0 0 0); }
+  6% { opacity: 1; clip-path: inset(0 0 0 0); }
+  26% { opacity: 1; clip-path: inset(0 0 0 22%); }
+  46% { opacity: 1; clip-path: inset(0 0 0 44%); }
+  66% { opacity: 1; clip-path: inset(0 0 0 64%); }
+  84% { opacity: 1; clip-path: inset(0 0 0 84%); }
+  96%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+}
+@keyframes ding-spuug {
+  0%, 38% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  40% { opacity: 1; transform: translate(15%, -10%) scale(0.8); }
+  55% { opacity: 1; transform: translate(80%, -50%) scale(1); }
+  70% { opacity: 1; transform: translate(140%, -20%) scale(1); }
+  85% { opacity: 1; transform: translate(180%, 50%) scale(0.9); }
+  100% { opacity: 0; transform: translate(200%, 120%) scale(0.8); }
 }
 @keyframes ding-rond {
   0% { opacity: 0; transform: rotate(0) translateY(-180%) rotate(0); }
@@ -3282,12 +3365,24 @@ a.uitslagrij:hover {
   50% { transform: translateY(-150%) scale(0.92, 1.1) rotate(-10deg); }
 }
 @keyframes dier-schommel {
-  0%, 100% { transform: rotate(-26deg); }
-  50% { transform: rotate(26deg); }
+  0%, 100% { transform: rotate(-38deg); }
+  10% { transform: rotate(-30deg); }
+  45% { transform: rotate(34deg); }
+  50% { transform: rotate(38deg); }
+  60% { transform: rotate(30deg); }
+  95% { transform: rotate(-34deg); }
 }
 @keyframes dier-golf {
-  0%, 100% { transform: translateY(0) rotate(10deg); }
-  50% { transform: translateY(-30%) rotate(-10deg); }
+  /* Een golf: neus omhoog als hij stijgt, neus omlaag als hij duikt, met een
+     staartslag (even korter) op het diepste en het hoogste punt. */
+  0%, 100% { transform: translate(0, 0) rotate(0) scaleX(1); }
+  12% { transform: translate(5%, -16%) rotate(-14deg) scaleX(1); }
+  25% { transform: translate(9%, -30%) rotate(0) scaleX(0.94); }
+  37% { transform: translate(5%, -18%) rotate(14deg) scaleX(1); }
+  50% { transform: translate(0, 4%) rotate(18deg) scaleX(1); }
+  62% { transform: translate(-5%, 18%) rotate(6deg) scaleX(0.94); }
+  75% { transform: translate(-9%, 22%) rotate(-4deg) scaleX(1); }
+  87% { transform: translate(-5%, 12%) rotate(-12deg) scaleX(1); }
 }
 @keyframes dier-bubbels {
   0%, 100% { transform: translateY(0); opacity: 0.9; }
@@ -3363,7 +3458,7 @@ a.uitslagrij:hover {
   transform: translateX(-50%);
 }
 .bewoner .actie { transform-origin: 50% 100%; }
-.bewoner .kijk { display: inline-block; }
+.bewoner .kijk { display: inline-block; position: relative; }
 .bewoner .kijk.links { transform: scaleX(-1); }
 .bewoner .ding { --ding: 0.36; }
 /* Hoe het lijf meebeweegt; via `translate`, zodat het niet botst met het kunstje. */
@@ -3376,9 +3471,14 @@ a.uitslagrij:hover {
 .bewoner[data-soort="lucht"] .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
 .bewoner[data-soort="lucht"][data-doen="slaap"] { bottom: 0.14em; }
 .bewoner[data-soort="water"] { bottom: 0.35em; }
-.bewoner[data-soort="water"] .actie:not([data-lijf]) { animation: wei-zwem 1.4s ease-in-out infinite; }
+.bewoner[data-soort="water"] .actie:not([data-lijf]) { animation: wei-zwem 1.8s ease-in-out infinite; }
 @keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
-@keyframes wei-zwem { 0%, 100% { translate: 0 0; rotate: 6deg; } 50% { translate: 0 -0.15em; rotate: -6deg; } }
+@keyframes wei-zwem {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 0 -0.28em; rotate: -14deg; }
+  50% { translate: 0 -0.06em; rotate: 12deg; }
+  75% { translate: 0 0.1em; rotate: 4deg; }
+}
 /* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */
 .bewoner[data-doen="graaf"] .kijk { animation: wei-zak var(--tel) ease-in both; }
 @keyframes wei-zak {

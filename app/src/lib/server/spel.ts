@@ -12,7 +12,7 @@ import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correctie
 import { PAKKETTEN } from '$lib/content/packs';
 import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
-import { zorgVoorDieren } from './dieren';
+import { ontdubbelDieren } from './dieren';
 import {
   vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, telStand,
 } from './scoring';
@@ -31,7 +31,7 @@ import { berekenBonussen, opScorebord, PUNT_WAARDE, type BonusVraag } from './bo
 import { vermenigvuldigers, vermenigvuldigerVan } from './vermenigvuldiger';
 import { ingekort } from './klok';
 import type { Verdeling } from './scoring';
-import { dierVan } from '$lib/shared/dieren';
+import { isDier } from '$lib/shared/dieren';
 
 /** Een apparaat geldt als verbonden zolang het zich binnen deze tijd meldde. */
 const STIL_DREMPEL_MS = 20_000;
@@ -177,7 +177,6 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
   let speler = db.select().from(spelers).where(eq(spelers.naam, schoon)).get();
   if (!speler) {
     speler = db.insert(spelers).values({ naam: schoon, isGast: true }).returning().get();
-    zorgVoorDieren();
   }
   if (speler.isQuizmaster) throw new Error('de quizmaster speelt niet mee');
 
@@ -188,6 +187,8 @@ export function voegDeelnemerToe(spel: { id: number; pakket: string; samenstelli
     .get();
   if (alDeelnemer) return { speler, nieuw: false };
   db.insert(deelnemers).values({ spelId: spel.id, spelerId: speler.id }).run();
+  // Had hij nog een dier dat een ander hier al heeft, dan kiest hij opnieuw.
+  ontdubbelDieren(spel.id);
 
   // Zit er al een teamindeling voor de huidige ronde, dan hoort de gast daar bij.
   const ronde = samengesteld(spel)[spel.rondeIndex];
@@ -548,13 +549,13 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     spelers: lijst.map((s) => {
       const laatste = laatsteVan.get(s.id) ?? null;
       return {
-        id: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel, dierNaam: s.dierNaam,
+        id: s.id, naam: s.naam, foto: s.foto, dier: isDier(s.dier) ? s.dier : null, dierNaam: s.dierNaam,
         stilSinds: laatste ? Math.round((nu - laatste) / 1000) : null,
         verbonden: laatste != null && nu - laatste < STIL_DREMPEL_MS,
       };
     }),
     stand: lijst
-      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, dier: dierVan(s.dier, s.naam).sleutel, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
+      .map((s) => ({ spelerId: s.id, naam: s.naam, foto: s.foto, dier: isDier(s.dier) ? s.dier : null, punten: stand[s.id] ?? 0, dezeRonde: dezeRonde[s.id] ?? 0 }))
       .sort((a, b) => b.punten - a.punten || a.naam.localeCompare(b.naam, 'nl')),
     serverTijd: nu,
     klok: {
