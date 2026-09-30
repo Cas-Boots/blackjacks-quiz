@@ -8,6 +8,7 @@ const REEL = require('./reel-data.js');
 const { B, BAR } = REEL;
 const { seq: SEQ, total: DUR } = REEL.sequence();
 const SR = 44100, N = Math.ceil(SR * DUR);
+const SWOOSH = 0.32; // matches the swoosh between shots in index.html
 
 const L = new Float32Array(N), R = new Float32Array(N);      // dry bus
 const PL = new Float32Array(N), PR = new Float32Array(N);    // sidechained bus (pads, bass)
@@ -185,30 +186,34 @@ const CH = {
 const PROG = [['Am', 'F', 'C', 'G'], ['F', 'G', 'Am', 'Am'], ['C', 'G', 'Am', 'F'], ['Dm', 'F', 'C', 'G'], ['Am', 'Am', 'F', 'G']];
 const tr = (c, k) => ({ b: c.b + k, p: c.p.map(m => m + k) });
 
-// one bar of groove; level 0 = pad only, 1 = light, 2 = news bed, 3 = full
+// one bar of groove; level 1 = light, 2 = news bed, 3 = full
 function grooveBar(t0, c, level, opts = {}) {
-  const arp = opts.arp, bright = opts.bright || 1;
-  pad(t0, BAR - 0.05, c.p, level === 0 ? 0.8 : 1, bright);
-  if (level === 0) return;
+  pad(t0, BAR - 0.05, c.p, 1, opts.bright || 1);
   for (let b = 0; b < 4; b++) {
     const tb = t0 + b * B;
-    kick(tb, level >= 3 ? 1 : 0.8);
+    kick(tb, level >= 3 ? 1 : 0.85);
     hat(tb + B / 2, true, level >= 2 ? 0.8 : 0.5);
-    if (level >= 2 && b % 2 === 1) clap(tb, level >= 3 ? 0.9 : 0.6);
-    if (level >= 3) for (const s of [0.25, 0.75]) hat(tb + s * B, false, 0.55, -0.3);
-    bass(tb, B / 2 - 0.02, c.b, level >= 2 ? 1 : 0.8);
-    bass(tb + B / 2, B / 2 - 0.02, c.b + 12, 0.65);
+    if (level >= 2 && b % 2 === 1) clap(tb, level >= 3 ? 0.9 : 0.7);
+    if (level >= 2) for (const s of [0.25, 0.75]) hat(tb + s * B, false, 0.5, -0.3);
+    // news-style staccato bass pulse in sixteenths
+    for (let s = 0; s < 4; s++) bass(tb + s * B / 4, B / 4 - 0.03, c.b + (s === 2 ? 12 : 0), s ? 0.55 : 0.9);
   }
-  if (arp) {
+  if (opts.arp) {
     const seq = [c.p[0] + 12, c.p[1] + 12, c.p[2] + 12, c.p[1] + 24, c.p[2] + 12, c.p[0] + 24, c.p[1] + 12, c.p[2] + 24];
-    for (let s = 0; s < 16; s++) pluck(t0 + s * B / 4, seq[s % 8], (s % 4 === 0 ? 1 : 0.7) * (arp === true ? 1 : arp), s % 2 ? 0.5 : -0.5);
+    for (let s = 0; s < 16; s++) pluck(t0 + s * B / 4, seq[s % 8], (s % 4 === 0 ? 1 : 0.7) * opts.arp, s % 2 ? 0.5 : -0.5);
   }
 }
+// the news chime that opens every headline
+function chime(t0, lift = 0) {
+  pluck(t0, 84 + lift, 1.4, -0.3); pluck(t0 + B / 2, 79 + lift, 1.2, 0.3);
+  shimmer(t0, 1.2, [84 + lift, 91 + lift], 0.5);
+}
 
-// the reel ticks (same curve as index.html)
+// the reel ticks: the same curve as index.html, stretched to one bar
+const OB = 60 / 128, K = BAR / (4 * OB);
 const reelV = (i, t) => {
-  let v = [2, 0, 2, 5][i] - (i + 1) * 10 * (1 - outExpo(P(t, 1.2, 3.0 + 0.3 * i)));
-  if (i === 3) v += outBack(P(t, 6.0, 6.4));
+  let v = [2, 0, 2, 5][i] - (i + 1) * 10 * (1 - outExpo(P(t, 0.25, 0.95 + 0.14 * i)));
+  if (i === 3) v += outBack(P(t, 1.46, 1.66));
   return v;
 };
 
@@ -219,81 +224,65 @@ for (const sc of SEQ) {
   switch (sc.kind) {
     case 'rol': {
       for (let i = 0; i < 4; i++) {
-        let prev = Math.floor(reelV(i, 1.0) + 0.5), last = -1;
-        for (let t = 1.0; t < 6.6; t += 0.0005) {
+        let prev = Math.floor(reelV(i, 0.2) + 0.5), last = -1;
+        for (let t = 0.2; t < 1.7; t += 0.0005) {
           const d = Math.floor(reelV(i, t) + 0.5);
-          if (d !== prev && t - last > 0.012) { tick(t, 0.5, 2200 + i * 350, (i - 1.5) * 0.5); last = t; }
+          if (d !== prev && t - last > 0.012) { tick(t0 + t * K, 0.5, 2200 + i * 350, (i - 1.5) * 0.5); last = t; }
           prev = d;
         }
       }
-      tick(6.0, 1.6, 1800); tick(6.01, 1.0, 3600);
-      pad(0, 2 * BAR, CH.Am.p, 0.6, 0.5); pad(2 * BAR, 2 * BAR, CH.F.p, 0.7, 0.7);
-      kick(4.0, 0.5, false); kick(5.0, 0.5, false); kick(6.0, 0.7, false); kick(6.5, 0.5, false);
-      riser(3.6, 8.0, 0.9);
-      whoosh(7.0, 1.0, 300, 5000, 0.9);
+      tick(t0 + 1.46 * K, 1.6, 1800); tick(t0 + 1.47 * K, 1.0, 3600);
+      pad(t0, BAR, CH.Am.p, 0.7, 0.6);
+      riser(t0 + 0.3, t0 + BAR, 0.8);
+      whoosh(t0 + 1.62 * K, BAR - 1.62 * K, 300, 5000, 0.9);
       break;
     }
     case 'knal': {
       impact(t0, 1.0);
-      grooveBar(at(0), CH.Am, 3);
-      stab(at(1), [69, 72, 76], 1.1);
-      for (let b = 0; b < 4; b++) tick(at(1) + b * B, 0.8, 1500 + b * 300);
-      grooveBar(at(1), CH.F, 3);
-      grooveBar(at(2), CH.C, 3);
-      for (let b = 0; b < 4; b++) whoosh(at(2) + b * B, 0.3, 2000, 400, 0.3);
-      pad(at(3), BAR, CH.G.p, 1.1, 1.3);
-      kick(at(3), 1.1); impact(at(3), 0.5);
-      whoosh(at(3) + 0.6, 1.4, 150, 8000, 1.0, -0.3, 0.3);
+      grooveBar(t0, CH.Am, 3);
+      stab(t0 + B, [69, 72, 76], 1.0);
+      whoosh(t0 + 3 * B, B, 200, 7000, 0.9, -0.3, 0.3);
       break;
     }
-    case 'raster': {
-      for (let k = 0; k < bars; k++) grooveBar(at(k), CH[PROG[0][k % 4]], k < 1 ? 1 : 2, { arp: k >= 2 && k < 5 ? 0.8 : false });
-      for (let c = 0; c < 53; c += 2) tick(t0 + 0.2 + c * 0.04, 0.25, 3000 + c * 20, (c / 26) - 1);
-      tick(t0 + 3.5, 1.0, 1200);
-      whoosh(at(5) - 0.2, 1.9, 300, 3000, 0.7);
-      break;
-    }
-    case 'baan': {
-      for (let k = 0; k < bars; k++) grooveBar(at(k), CH[PROG[2][k % 4]], k < 5 ? 2 : 1, { arp: true, bright: 0.9 });
-      riser(at(4), at(6), 0.8);
-      break;
-    }
+    case 'raster': { tick(t0, 1, 1200); grooveBar(t0, CH.F, 3, { arp: 0.8 }); whoosh(t0 + 3 * B - 0.1, 0.5, 400, 3000, 0.6); break; }
+    case 'baan': { grooveBar(t0, CH.C, 3, { arp: 0.8 }); riser(t0 + 2 * B, t0 + BAR, 0.7); break; }
     case 'getallen': {
-      impact(t0, 0.9);
-      for (let k = 0; k < bars; k++) grooveBar(at(k), CH[PROG[3][k % 4]], 3, { arp: k % 2 ? 0.6 : false });
-      for (let p = 0; p < 4; p++) {
-        stab(t0 + p * 2 * BAR, [69, 72, 76].map(m => m + [0, 2, 3, 5][p]), 1.1);
-        if (p) whoosh(t0 + p * 2 * BAR - 0.12, 0.35, 800, 6000, 0.7, p % 2 ? -0.8 : 0.8, p % 2 ? 0.8 : -0.8);
-      }
-      whoosh(t0 + sc.dur - 0.3, 0.3, 3000, 300, 0.7);
+      impact(t0, 0.8);
+      grooveBar(t0, CH.G, 3);
+      for (let b = 0; b < 4; b++) { stab(t0 + b * B, [69, 72, 76].map(m => m + [0, 2, 3, 5][b]), 1.1); if (b) whoosh(t0 + b * B - 0.1, 0.25, 800, 6000, 0.6, b % 2 ? -0.8 : 0.8, b % 2 ? 0.8 : -0.8); }
       break;
     }
-    case 'nieuws': {
-      impact(t0, 0.7);
-      grooveBar(at(0), CH.Am, 2);
-      pad(at(1), BAR, CH.E.p, 1, 1.2);
-      for (let s = 0; s < 8; s++) kick(at(1) + s * B / 2, 0.35 + s * 0.08, false);
-      riser(at(1), at(2), 0.8);
+    case 'opening': {
+      // the network ident: a big hit, rising strings, the theme
+      impact(t0, 1.1);
+      stab(t0, [57, 64, 69, 72], 1.3);
+      grooveBar(at(0), CH.Am, 3, { arp: 0.7, bright: 1.3 });
+      grooveBar(at(1), CH.F, 3, { arp: 0.7, bright: 1.3 });
+      [0, 0.75, 1.5, 3, 3.5].forEach((b, i) => stab(t0 + b * B, [69, 72, 76, 81].map(m => m + (i === 4 ? 2 : 0)), 0.9));
+      chime(at(1) + 2 * B);
+      whoosh(t0 + sc.dur - 0.35, 0.7, 500, 6000, 0.9);
       break;
     }
     case 'maand': {
       const lift = sc.m >= 6 ? 2 : 0; // the summer goes up a whole tone
       const prog = PROG[progI++ % PROG.length];
-      impact(t0, 0.45); whoosh(t0 - 0.25, 0.5, 400, 4000, 0.6);
-      stab(t0, CH[prog[0]].p.map(m => m + 12 + lift), 0.8);
-      let k = 0;
-      const zonAt = sc.items.findIndex(it => it.vorm === 'zon');
-      for (; k < bars; k++) {
+      // month sting
+      impact(t0, 0.6); stab(t0, CH[prog[0]].p.map(m => m + 12 + lift), 1.0);
+      pad(t0, BAR - 0.05, tr(CH[prog[0]], lift).p, 1.1, 1.2);
+      for (let b = 0; b < 4; b++) kick(t0 + b * B, 0.7, false);
+      riser(t0 + B, t0 + BAR, 0.4);
+      const zonAt = sc.items.findIndex(it => it.beeld === 'zon' && !it.media);
+      for (let k = 1; k < bars; k++) {
         const c = tr(CH[prog[k % 4]], lift);
         const itemK = Math.floor((k - 1) / 3), barInItem = (k - 1) % 3;
-        if (k >= 1 && itemK === zonAt) {
-          // the eclipse: drums drop out, tension builds to totality on the third bar
-          if (barInItem === 0) { pad(at(k), 2 * BAR, [57, 60, 65].map(m => m + lift), 1.1, 0.7); bass(at(k), 2 * BAR, 41 + lift, 0.7); riser(at(k) + 0.2, at(k) + 2 * BAR, 1.1); kick(at(k) + B, 0.4, false); kick(at(k) + 3 * B, 0.4, false); kick(at(k) + 5 * B, 0.45, false); kick(at(k) + 7 * B, 0.5, false); }
+        if (barInItem === 0) { chime(at(k) + 0.25, lift); whoosh(at(k) - SWOOSH, 2 * SWOOSH, 500, 6000, 0.55); }
+        if (itemK === zonAt) {
+          // the eclipse: the drums drop out and it builds to totality on the third bar
+          if (barInItem === 0) { pad(at(k), 2 * BAR, [57, 60, 65].map(m => m + lift), 1.1, 0.7); bass(at(k), 2 * BAR, 41 + lift, 0.6); riser(at(k) + 0.3, at(k) + 2 * BAR, 1.1); for (let b = 1; b < 8; b += 2) kick(at(k) + b * B, 0.4, false); }
           if (barInItem === 2) { impact(at(k), 1.1); shimmer(at(k), 2.2, [76, 80, 83, 88].map(m => m + lift), 1); pad(at(k), BAR, [56, 59, 64].map(m => m + lift), 1.2, 1.4); }
           continue;
         }
-        grooveBar(at(k), c, k === 0 ? 1 : 2, { arp: sc.m % 2 === 0 && k > 0 ? 0.55 : false, bright: 1 + 0.05 * sc.m });
-        if (k >= 1 && barInItem === 0) { tick(at(k) + 0.15, 0.7, 2400); whoosh(at(k) - 0.4, 0.45, 2500, 500, 0.35); }
+        grooveBar(at(k), c, 2, { arp: barInItem === 1 ? 0.5 : 0, bright: 1 + 0.04 * sc.m });
       }
       break;
     }
@@ -301,20 +290,20 @@ for (const sc of SEQ) {
       whoosh(t0 - 0.3, 0.5, 3000, 300, 0.4);
       const ch = ['Am', 'F', 'C', 'G'];
       for (let k = 0; k < bars; k++) pad(at(k), BAR - 0.05, CH[ch[k]].p, 0.9, 0.6);
-      bass(t0, 4 * BAR - 0.3, 45, 0.5);
+      bass(t0, bars * BAR - 0.3, 45, 0.5);
       [0.9, 1.4, 1.9, 2.4, 2.9, 3.4].forEach((d, i) => pluck(t0 + d, [76, 79, 81, 83, 84, 88][i], 0.8, i % 2 ? 0.4 : -0.4));
-      shimmer(t0 + 4, 3.5, [81, 84, 88], 0.6);
+      shimmer(t0 + 5, 4, [81, 84, 88], 0.6);
       break;
     }
     case 'dossier': {
       for (let k = 0; k < bars; k++) {
-        pad(at(k), BAR - 0.05, [k < 2 ? 57 : 56, 60, 64], 0.7, 0.6);
+        pad(at(k), BAR - 0.05, [k < 1 ? 57 : 56, 60, 64], 0.7, 0.6);
         for (let s = 0; s < 8; s++) hat(at(k) + s * B / 2, false, 0.7, s % 2 ? 0.4 : -0.4);
-        for (let b = 0; b < 4; b++) { bass(at(k) + b * B, 0.2, k < 2 ? 33 : 32, 0.9); }
+        for (let b = 0; b < 4; b++) bass(at(k) + b * B, 0.2, k < 1 ? 33 : 32, 0.9);
       }
-      for (let i = 0; i < 11; i++) { const tt = t0 + 0.8 + i * B / 2; clap(tt, 0.5); kick(tt, 0.35, false); }
-      impact(at(2), 1.0); stab(at(2), [68, 71, 76], 1.0);
-      riser(at(2) + 0.6, t0 + sc.dur, 1.0);
+      for (let i = 0; i < 11; i++) { const tt = t0 + 0.5 + i * B / 2; clap(tt, 0.5); kick(tt, 0.35, false); }
+      impact(t0 + 1.5 * BAR, 1.0); stab(t0 + 1.5 * BAR, [68, 71, 76], 1.0);
+      riser(t0 + 1.5 * BAR + 0.5, t0 + sc.dur, 1.0);
       whoosh(t0 + sc.dur - 0.9, 0.9, 6000, 200, 0.8, 0, 0);
       break;
     }
@@ -323,14 +312,11 @@ for (const sc of SEQ) {
       pad(t0, BAR, CH.E.p, 1, 1.2);
       riser(t0 + 0.2, at(1), 0.7);
       impact(at(1), 1.1); stab(at(1), [69, 72, 76, 81], 1.3); shimmer(at(1), 2.0, [81, 84, 88], 0.8);
-      for (let k = 1; k < 5; k++) grooveBar(at(k), CH[['Am', 'F', 'C', 'G'][k - 1]], 3, { arp: 0.8, bright: 1.5 });
-      impact(at(3), 0.6);
-      // countdown: 3, 2, 1, START
-      for (let b = 0; b < 4; b++) {
-        const tb = at(5) + b * B;
-        kick(tb, 1.1); stab(tb, [69, 72, 76].map(m => m + [0, 3, 5, 12][b]), 1.1); tick(tb, 1, 1000 + 400 * b);
-      }
-      impact(at(5) + 3 * B, 1.2);
+      for (let k = 1; k < bars - 1; k++) grooveBar(at(k), CH[['Am', 'F', 'C', 'G'][k - 1]], 3, { arp: 0.8, bright: 1.5 });
+      impact(t0 + 2.4 * BAR, 0.6);
+      const cd = t0 + sc.dur - BAR;
+      for (let b = 0; b < 4; b++) { const tb = cd + b * B; kick(tb, 1.1); stab(tb, [69, 72, 76].map(m => m + [0, 3, 5, 12][b]), 1.1); tick(tb, 1, 1000 + 400 * b); }
+      impact(cd + 3 * B, 1.2);
       break;
     }
   }
