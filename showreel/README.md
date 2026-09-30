@@ -1,9 +1,9 @@
 # Jaaroverzicht 2026: de openingsfilm
 
-A motion piece of almost four minutes that opens the quiz night: 1920×1080, 60 fps, 100 BPM.
+A motion piece of 3:50 that opens the quiz night: 1920×1080, 60 fps, 100 BPM.
 
 1. **A fast intro.** 2025 rolls over to 2026, then 365 days, one lap around the sun and the year in numbers. It takes 12 seconds.
-2. **"Het jaar in beeld".** The news told the way a news network does it, as the fictional *BJ Journaal*. Each month opens with a short sting. Every headline gets a full-screen picture, a chyron and a ticker, with a swoosh between shots. The news slides show no figures. Dutch news comes first, then the world.
+2. **"Het jaar in beeld".** The news told the way a news network does it, as the fictional *BJ Journaal*. Each month opens with a sting of 1.2 seconds. Every headline gets 4.8 seconds: a full-screen picture, a chyron and a ticker, with a swoosh between shots. The news slides show no figures. Dutch news comes first, then the world.
 3. **In memoriam**, a **secret dossier** ("de rest hoor je vanavond") and a countdown into the quiz.
 
 Everything is generated from code. The picture and the soundtrack both read their timing from `reel-data.js`, so they stay in sync.
@@ -64,20 +64,28 @@ media: { video: 'darts', frames: 216, fps: 30, bron: 'NOS' }
 
 ## October to December
 
-The news is researched up to 30 September 2026. December currently has only tonight's fireworks ban.
+The news is researched up to 30 September 2026. October, November and December hold **placeholders** (a test card with "Nieuws volgt"), so the film already has its final length and pacing. December also has tonight's fireworks ban.
 
-Add items with `m: 9`, `10` or `11`. A month appears as soon as it has an item.
+To fill in a placeholder, replace one of the generated test-card items at the bottom of `NIEUWS` in `reel-data.js` with a real one:
 
-- Each month adds 2.4 seconds.
-- Each headline adds 7.2 seconds.
-- A new headline needs an existing `beeld` or a `media` file.
-
-Then rebuild:
-
-```sh
-node audio.js                          # new soundtrack
-FFMPEG=/path/to/ffmpeg node render.js  # about 45 minutes on four cores
-node render.js --stills 20 42.5        # or check a few frames first
+```js
+{ m: 9, tag: 'NL', datum: '14 oktober', beeld: 'darts', kop: 'Short headline', sub: 'One sentence of context.' }
 ```
 
-The finished video is larger than GitHub's 100 MB limit, so it is not committed. Render it locally.
+Give it a drawn `beeld` that exists in `index.html`, or a `media` file.
+
+## Rendering it yourself
+
+You need Node.js 18 or newer. From this folder:
+
+```sh
+npm install          # installs Playwright, its Chromium and its own ffmpeg
+npm run render       # soundtrack + jaaroverzicht-2026.mp4
+npm run stills 20 42.5   # optional: check a few frames first (they land in stills/)
+```
+
+- It works on Windows, macOS and Linux.
+- It uses all but one CPU core. Four cores take about 50 minutes.
+- To watch it live instead, open `index.html` in a browser and click it to play it with sound. Your browser may block local files; if so, run `npx serve` in this folder and open the address it gives you.
+
+The finished video is larger than GitHub's 100 MB limit, so it is not committed.

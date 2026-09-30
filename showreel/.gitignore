@@ -3,3 +3,4 @@ stills/
 sheet.png
 render.log
 *.mp4
+node_modules/

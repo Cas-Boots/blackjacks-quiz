@@ -266,24 +266,28 @@ for (const sc of SEQ) {
     case 'maand': {
       const lift = sc.m >= 6 ? 2 : 0; // the summer goes up a whole tone
       const prog = PROG[progI++ % PROG.length];
-      // month sting
+      const STING = REEL.STING_BARS * BAR, ITEM = REEL.ITEM_BARS * BAR, ZON_T = 1.25 * BAR;
+      // month sting: a hit and two beats of drums
       impact(t0, 0.6); stab(t0, CH[prog[0]].p.map(m => m + 12 + lift), 1.0);
-      pad(t0, BAR - 0.05, tr(CH[prog[0]], lift).p, 1.1, 1.2);
-      for (let b = 0; b < 4; b++) kick(t0 + b * B, 0.7, false);
-      riser(t0 + B, t0 + BAR, 0.4);
-      const zonAt = sc.items.findIndex(it => it.beeld === 'zon' && !it.media);
-      for (let k = 1; k < bars; k++) {
-        const c = tr(CH[prog[k % 4]], lift);
-        const itemK = Math.floor((k - 1) / 3), barInItem = (k - 1) % 3;
-        if (barInItem === 0) { chime(at(k) + 0.25, lift); whoosh(at(k) - SWOOSH, 2 * SWOOSH, 500, 6000, 0.55); }
-        if (itemK === zonAt) {
-          // the eclipse: the drums drop out and it builds to totality on the third bar
-          if (barInItem === 0) { pad(at(k), 2 * BAR, [57, 60, 65].map(m => m + lift), 1.1, 0.7); bass(at(k), 2 * BAR, 41 + lift, 0.6); riser(at(k) + 0.3, at(k) + 2 * BAR, 1.1); for (let b = 1; b < 8; b += 2) kick(at(k) + b * B, 0.4, false); }
-          if (barInItem === 2) { impact(at(k), 1.1); shimmer(at(k), 2.2, [76, 80, 83, 88].map(m => m + lift), 1); pad(at(k), BAR, [56, 59, 64].map(m => m + lift), 1.2, 1.4); }
-          continue;
+      pad(t0, STING, tr(CH[prog[0]], lift).p, 1.1, 1.2);
+      kick(t0, 0.9); kick(t0 + B, 0.7, false); hat(t0 + B / 2, true, 0.6); riser(t0 + 0.2, t0 + STING, 0.35);
+      sc.items.forEach((it, k) => {
+        const i0 = t0 + STING + k * ITEM;
+        chime(i0 + 0.12, lift);
+        whoosh(i0 - SWOOSH, 2 * SWOOSH, 500, 6000, 0.55);
+        if (it.beeld === 'zon' && !it.media) {
+          // the eclipse: the drums drop out and it builds to totality
+          pad(i0, ZON_T, [57, 60, 65].map(m => m + lift), 1.1, 0.7); bass(i0, ZON_T, 41 + lift, 0.6);
+          riser(i0 + 0.2, i0 + ZON_T, 1.1); for (let b = 1; b < 5; b += 2) kick(i0 + b * B, 0.4, false);
+          impact(i0 + ZON_T, 1.1); shimmer(i0 + ZON_T, 2.2, [76, 80, 83, 88].map(m => m + lift), 1);
+          pad(i0 + ZON_T, ITEM - ZON_T, [56, 59, 64].map(m => m + lift), 1.2, 1.4);
+          return;
         }
-        grooveBar(at(k), c, 2, { arp: barInItem === 1 ? 0.5 : 0, bright: 1 + 0.04 * sc.m });
-      }
+        for (let q = 0; q < REEL.ITEM_BARS; q++) {
+          const c = tr(CH[prog[(k * 2 + q + 1) % 4]], lift);
+          grooveBar(i0 + q * BAR, c, 2, { arp: q === 1 ? 0.5 : 0, bright: 1 + 0.04 * sc.m });
+        }
+      });
       break;
     }
     case 'memoriam': {

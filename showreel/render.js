@@ -1,15 +1,17 @@
 // Renders index.html frame by frame to jaaroverzicht-2026.mp4.
-//   node render.js                  -> the whole reel, in parallel (needs soundtrack.wav, see audio.js)
-//   node render.js --jobs 3          -> choose the number of parallel browsers (default 3)
+//   npm run render                   -> soundtrack plus the whole film, in parallel
+//   node render.js --jobs 3          -> choose the number of parallel browsers (default: cores - 1)
 //   node render.js --stills 1 4.2    -> PNG stills at the given times, for checking
-// Set FFMPEG to an ffmpeg with libx264 if it is not on your PATH.
+// ffmpeg comes from the ffmpeg-static package; set FFMPEG to use another one.
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { pathToFileURL } = require('url');
 
 const FPS = 60;
-const FFMPEG = process.env.FFMPEG || 'ffmpeg';
+const FFMPEG = process.env.FFMPEG || (() => { try { return require('ffmpeg-static'); } catch { return 'ffmpeg'; } })();
 const here = __dirname;
 const OUT = path.join(here, 'jaaroverzicht-2026.mp4');
 const clip = { x: 0, y: 0, width: 1920, height: 1080 };
@@ -18,7 +20,7 @@ async function openPage() {
   const browser = await chromium.launch({ args: ['--font-render-hinting=none'] });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('pageerror', e => { console.error('[page error]', e); process.exit(1); });
-  await page.goto('file://' + path.join(here, 'index.html') + '?capture=1');
+  await page.goto(pathToFileURL(path.join(here, 'index.html')).href + '?capture=1');
   await page.evaluate(() => window.__ready);
   return { browser, page };
 }
@@ -61,7 +63,7 @@ async function segment(from, to, file) {
   }
   if (args[0] === '--segment') { await segment(+args[1], +args[2], args[3]); return; }
 
-  const jobs = args[0] === '--jobs' ? +args[1] : 3;
+  const jobs = args[0] === '--jobs' ? +args[1] : Math.max(1, os.cpus().length - 1);
   const { browser, page } = await openPage();
   const dur = await page.evaluate(() => window.__duration);
   await browser.close();
@@ -79,7 +81,7 @@ async function segment(from, to, file) {
       p.on('close', c => c ? rej(new Error('segment ' + j)) : res());
     });
   }));
-  fs.writeFileSync(path.join(tmp, 'lijst.txt'), parts.map(p => `file '${p}'`).join('\n'));
+  fs.writeFileSync(path.join(tmp, 'lijst.txt'), parts.map(p => `file '${p.replace(/\\/g, '/')}'`).join('\n'));
   await run(['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', path.join(tmp, 'lijst.txt'),
     '-i', path.join(here, 'soundtrack.wav'), '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', '-movflags', '+faststart', OUT]);
   fs.rmSync(tmp, { recursive: true, force: true });
