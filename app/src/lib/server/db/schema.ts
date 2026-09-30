@@ -7,7 +7,13 @@ export const spelers = sqliteTable('spelers', {
   naam: text('naam').notNull().unique(),
   /** Portret als data-URI; klein gehouden (256x256 JPEG). */
   foto: text('foto'),
+  /** Het maatje, een sleutel uit shared/dieren.ts. Alleen voor de lol. */
+  dier: text('dier'),
+  /** De naam die je je maatje gaf ("Knabbel"). Leeg: het heet gewoon naar zijn soort. */
+  dierNaam: text('dier_naam'),
   isQuizmaster: integer('is_quizmaster', { mode: 'boolean' }).notNull().default(false),
+  /** Een gast van één avond: doet niet vanzelf mee aan het volgende spel. */
+  isGast: integer('is_gast', { mode: 'boolean' }).notNull().default(false),
   aangemaaktOp: text('aangemaakt_op').notNull().default(sql`(datetime('now'))`),
 });
 
@@ -28,6 +34,12 @@ export const spellen = sqliteTable('spellen', {
   klokLoopt: integer('klok_loopt', { mode: 'boolean' }).notNull().default(false),
   /** Rest bij pauze, zodat hervatten exact doorloopt. */
   klokRestMs: integer('klok_rest_ms').notNull().default(0),
+  /** Of het fragment bij de huidige vraag speelt. De quizmaster zet dit aan en uit. */
+  mediaSpeelt: integer('media_speelt', { mode: 'boolean' }).notNull().default(false),
+  /** De quiz staat even stil: 'pauze', of 'nieuwjaar' voor het aftellen naar middernacht. null als hij loopt. */
+  pauze: text('pauze'),
+  /** Of de klok liep toen de pauze begon; dan loopt hij bij het hervatten weer door. */
+  pauzeKlokLiep: integer('pauze_klok_liep', { mode: 'boolean' }).notNull().default(false),
   /** Loopt op bij elke wijziging. Clients negeren pakketjes met een lagere versie. */
   versie: integer('versie').notNull().default(0),
   isActief: integer('is_actief', { mode: 'boolean' }).notNull().default(true),
@@ -76,6 +88,8 @@ export const antwoorden = sqliteTable(
     tekst: text('tekst').notNull(),
     /** Unix-ms volgens de serverklok. */
     ingediendOp: integer('ingediend_op').notNull(),
+    /** Hoeveel ms na het opengaan van de vraag dit binnenkwam; null als de klok niet liep. */
+    naMs: integer('na_ms'),
     /** Door de quizmaster goedgekeurd; null zolang er niet beoordeeld is. */
     isGoed: integer('is_goed', { mode: 'boolean' }),
   },
@@ -123,4 +137,23 @@ export const apparaten = sqliteTable(
     laatstGezien: integer('laatst_gezien').notNull(),
   },
   (t) => [index('apparaten_speler').on(t.spelerId)],
+);
+
+/** Wat de quizmaster deed, in volgorde. Elke regel draagt een momentopname
+ *  van vóór de handeling, zodat hij in zijn geheel kan worden teruggedraaid. */
+export const logboek = sqliteTable(
+  'logboek',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    spelId: integer('spel_id').notNull().references(() => spellen.id, { onDelete: 'cascade' }),
+    opdracht: text('opdracht').notNull(),
+    /** Leesbare omschrijving voor het hostscherm. */
+    omschrijving: text('omschrijving').notNull(),
+    /** JSON met de toestand van vóór de handeling; null als hij niet terug kan. */
+    vorige: text('vorige'),
+    /** Of deze handeling al is teruggedraaid. */
+    isOngedaan: integer('is_ongedaan', { mode: 'boolean' }).notNull().default(false),
+    aangemaaktOp: integer('aangemaakt_op').notNull(),
+  },
+  (t) => [index('logboek_spel').on(t.spelId)],
 );

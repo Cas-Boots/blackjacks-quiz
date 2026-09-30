@@ -8,6 +8,55 @@
       "when": 1789560110382,
       "tag": "0000_curved_captain_flint",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789664522122,
+      "tag": "0001_antwoordtijd",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789664847049,
+      "tag": "0002_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1789675261328,
+      "tag": "0003_gasten_en_logboek",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790342523623,
+      "tag": "0004_geestdieren",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790443452227,
+      "tag": "0005_maatjesnaam",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790539826796,
+      "tag": "0006_pauze",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1790670000000,
+      "tag": "0007_zelf_kiezen",
+      "breakpoints": true
     }
   ]
 }

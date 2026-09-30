@@ -8,3 +8,7 @@ node_modules
 /test-results
 /playwright-report
 .env
+
+# Foto's en muziek van de avond horen niet in git.
+/media/*
+!/media/README.md

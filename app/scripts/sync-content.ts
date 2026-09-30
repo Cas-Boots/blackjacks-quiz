@@ -1,46 +1,24 @@
 /**
- * Haalt het PAKKETTEN-blok uit de losse HTML-quiz en schrijft het als
- * getypte module naar src/lib/content/packs.ts.
+ * Eén bron voor de vragen: src/lib/content/packs.ts.
  *
- * De losse quiz blijft daarmee de bron van de vragen, zodat de app en het
- * ene-bestand-scherm nooit uit elkaar lopen. Draai dit opnieuw zodra je
- * vragen aanpast in ../index.html.
+ * Dat bestand is getypt, dus een vergeten antwoord of een verkeerd vraagtype
+ * valt bij `npm run check` al om. De losse HTML-quiz kan geen module
+ * importeren (hij moet vanaf een usb-stick werken, zonder server), dus dit
+ * script schrijft hetzelfde blok in ../index.html. Met --check controleert
+ * het alleen of de twee nog gelijk lopen; dat draait in CI.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync } from 'node:fs';
+import { vergelijkInhoud, HTML_PAD } from './lib/inhoud';
 
-const hier = dirname(fileURLToPath(import.meta.url));
-const htmlPad = resolve(hier, '../../index.html');
-const uitPad = resolve(hier, '../src/lib/content/packs.ts');
+const alleenControleren = process.argv.includes('--check');
+const { gelijk, nieuw, aantalRondes, aantalMaanden } = vergelijkInhoud();
 
-const html = readFileSync(htmlPad, 'utf8');
-
-const demoMatch = html.match(/const DEMO_BEELD = ("(?:[^"\\]|\\.)*");/);
-if (!demoMatch) throw new Error('DEMO_BEELD niet gevonden in index.html');
-
-const start = html.indexOf('const PAKKETTEN = {');
-const eind = html.indexOf('\nconst STANDAARD_SPELERS');
-if (start < 0 || eind < 0) throw new Error('PAKKETTEN-blok niet gevonden in index.html');
-
-const blok = html
-  .slice(start, eind)
-  .replace(/^const PAKKETTEN = /, '')
-  .trim()
-  .replace(/;$/, '');
-
-const uit = `// AUTOMATISCH GEGENEREERD — niet met de hand aanpassen.
-// Bron: ../../index.html. Opnieuw genereren met: npm run content:sync
-import type { Pakketten } from './types';
-
-const DEMO_BEELD = ${demoMatch[1]};
-
-export const PAKKETTEN: Pakketten = ${blok} as Pakketten;
-
-export const PAKKET_IDS = Object.keys(PAKKETTEN);
-`;
-
-writeFileSync(uitPad, uit);
-
-const aantalRondes = (blok.match(/\n\s{6}\{\n\s+naam:/g) ?? []).length;
-console.log(`packs.ts geschreven — ${Object.keys(JSON.parse(JSON.stringify({}))).length + aantalRondes} rondes, ${uit.length} tekens`);
+if (gelijk) {
+  console.log(`index.html loopt gelijk met de inhoud — ${aantalRondes} rondes, ${aantalMaanden} maanden.`);
+} else if (alleenControleren) {
+  console.error('index.html loopt achter op de inhoud in src/lib/content/. Draai: npm run content:sync');
+  process.exit(1);
+} else {
+  writeFileSync(HTML_PAD, nieuw);
+  console.log(`index.html bijgewerkt — ${aantalRondes} rondes, ${aantalMaanden} maanden, ${nieuw.length} tekens.`);
+}

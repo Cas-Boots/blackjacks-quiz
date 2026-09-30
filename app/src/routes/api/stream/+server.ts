@@ -1,7 +1,6 @@
 import type { RequestHandler } from './$types';
-import { luister } from '$lib/server/bus';
+import { luister, luisterReacties, luisterMaatjes, luisterPorren, luisterGeluiden } from '$lib/server/bus';
 import { bouwStaat, raakApparaatAan } from '$lib/server/spel';
-import { TOKEN_COOKIE } from '../../../hooks.server';
 
 /**
  * Live stroom met de stand, als server-sent events.
@@ -11,12 +10,17 @@ import { TOKEN_COOKIE } from '../../../hooks.server';
  * heeft daarnaast een terugval op /api/state, zodat een geblokkeerde stroom
  * de avond niet stillegt.
  */
-export const GET: RequestHandler = ({ locals, cookies }) => {
+export const GET: RequestHandler = ({ locals }) => {
   const rol = locals.rol;
-  const token = cookies.get(TOKEN_COOKIE);
-  if (token) raakApparaatAan(token, rol, locals.spelerId, null);
+  const spelerId = locals.spelerId;
+  const token = locals.token;
+  if (token) raakApparaatAan(token, rol, spelerId, null);
 
   let stop: (() => void) | null = null;
+  let stopReacties: (() => void) | null = null;
+  let stopMaatjes: (() => void) | null = null;
+  let stopPorren: (() => void) | null = null;
+  let stopGeluiden: (() => void) | null = null;
   let hartslag: ReturnType<typeof setInterval> | null = null;
 
   const stroom = new ReadableStream({
@@ -31,16 +35,27 @@ export const GET: RequestHandler = ({ locals, cookies }) => {
 
       stuur('staat', bouwStaat(rol));
       stop = luister(() => stuur('staat', bouwStaat(rol)));
+      stopReacties = luisterReacties((bericht) => stuur('reactie', bericht));
+      stopMaatjes = luisterMaatjes((bericht) => stuur('maatje', bericht));
+      stopGeluiden = luisterGeluiden((bericht) => stuur('geluid', bericht));
+      // Een por is alleen voor de telefoon waar hij voor bedoeld is.
+      stopPorren = luisterPorren((por) => {
+        if (spelerId !== null && por.spelerIds.includes(spelerId)) stuur('por', por);
+      });
 
       // Houdt tussenliggende proxies wakker en laat de client merken dat de
       // verbinding nog leeft.
       hartslag = setInterval(() => {
-        if (token) raakApparaatAan(token, rol, locals.spelerId, null);
+        if (token) raakApparaatAan(token, rol, spelerId, null);
         stuur('hartslag', { t: Date.now() });
       }, 10_000);
     },
     cancel() {
       stop?.();
+      stopReacties?.();
+      stopMaatjes?.();
+      stopPorren?.();
+      stopGeluiden?.();
       if (hartslag) clearInterval(hartslag);
     },
   });

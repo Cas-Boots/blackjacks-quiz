@@ -12,8 +12,17 @@ content:sync` haalt ze uit `../index.html`.
 ```bash
 npm install --legacy-peer-deps   # zie 'Bekende hobbels' onderaan
 npm run db:seed                  # spelers en een leeg spel klaarzetten
-npm run dev                      # http://localhost:5173
+npm run dev                      # http://localhost:5173, alleen op deze computer
 ```
+
+Wil je er met de televisie en de telefoons bij, dan start je hem zo:
+
+```bash
+npm run lokaal                   # bouwt en start op http://<adres van deze pc>:3000
+```
+
+Zie [Op je eigen pc](#op-je-eigen-pc-voor-de-televisie-en-de-telefoons) voor
+wat dat doet en wat er mis kan gaan.
 
 Of in Docker, zoals blackjacks-cup draait:
 
@@ -21,17 +30,731 @@ Of in Docker, zoals blackjacks-cup draait:
 HOST_PIN=1234 docker compose up --build
 ```
 
+## Op je eigen pc, voor de televisie en de telefoons
+
+`npm run dev` luistert alleen op de computer zelf (`localhost`): handig om aan
+de code te werken, maar een telefoon op dezelfde wifi komt er niet bij. Voor
+een proefavond thuis, met de echte televisie en de echte telefoons, is er een
+tweede manier:
+
+```bash
+npm run lokaal
+```
+
+Op Windows kun je ook dubbelklikken op `lokaal.cmd` in deze map; die
+installeert de eerste keer de afhankelijkheden en doet daarna hetzelfde.
+
+Wat er dan gebeurt:
+
+1. De app wordt gebouwd (een paar seconden) en gestart op **alle
+   netwerkkaarten** van de pc, standaard op poort 3000.
+2. De database staat in `data/lokaal.db` en overleeft een herstart; de
+   bestanden bij de vragen komen uit `media/`. Beide horen niet in git.
+3. Zodra `/api/health` groen is, staat er in het venster welk adres je op de
+   televisie tikt (`http://192.168.1.10:3000/tv`), waar het hostscherm en het
+   beheerscherm staan, en een **QR-code** die een telefoon zo kan scannen —
+   handig als de televisie nog niet aanstaat.
+4. `Ctrl`+`C` stopt de server weer.
+
+De pincode is de voorbeeldcode `2627`, tenzij je `HOST_PIN` in `.env` zet of
+`--pin` meegeeft. Dit is met opzet geen productie: de voorbeeldcode mag, het
+cookie blijft zonder `Secure` (de telefoons praten over gewoon http) en de
+server vertelt zijn netwerkadressen. Een `ORIGIN` uit `.env` wordt hier
+genegeerd, want die hoort bij de echte server.
+
+| Optie | Doet |
+|---|---|
+| `--dev` | de ontwikkelserver van Vite op het netwerk, zonder bouwen en met herladen bij elke wijziging |
+| `--poort 8080` | een andere poort, als 3000 bezet is |
+| `--pin 4711` | een eigen pincode voor het hostscherm |
+| `--zonder-bouw` | de vorige build hergebruiken |
+
+Op het televisiescherm zie je hetzelfde: open je hem per ongeluk via
+`localhost`, dan zegt de waarschuwing onder de QR-code welk adres je in
+plaats daarvan moet tikken. Het beheerscherm toont onder *Server* alle
+adressen van de pc, met de naam van de netwerkkaart erbij.
+
+### Als een telefoon er niet bij komt
+
+- **De firewall van Windows.** De eerste keer dat Node op een poort luistert
+  vraagt Windows of het mag; kies *Toegang toestaan* voor **particuliere
+  netwerken**. Klikte je het weg, zoek dan in de instellingen naar *Een app
+  toestaan via Windows Firewall* en vink Node.js aan voor privénetwerken.
+  Staat de wifi bij Windows als *openbaar netwerk*, zet hem dan op *privé*
+  (Instellingen › Netwerk en internet › de wifi › Netwerkprofiel), anders
+  blokkeert de firewall alles van buiten.
+- **Hetzelfde netwerk.** Pc, televisie en telefoons moeten op dezelfde wifi
+  zitten. Een gastnetwerk of een router met *AP-isolatie* of *client
+  isolation* laat apparaten elkaar niet zien, ook al hebben ze allebei
+  internet. Mobiele data op de telefoon uit, of in elk geval de wifi aan.
+- **Meer dan één adres.** Een pc met Docker, WSL, VirtualBox of een VPN
+  heeft meerdere adressen. Het script zet het waarschijnlijkste bovenaan
+  (192.168.x.x eerst) en noemt de rest; werkt het bovenste niet, probeer dan
+  de volgende. Een VPN die al het verkeer omleidt kun je tijdens de avond
+  beter uitzetten.
+- **De televisie zelf.** Een smart-tv opent `http://192.168.1.10:3000/tv` in
+  zijn eigen browser, maar die browsers zijn traag en oud. Een laptop aan de
+  HDMI-kabel, of de laptop naar de televisie casten, werkt altijd; dan open
+  je het televisiescherm gewoon op de laptop via hetzelfde netwerkadres —
+  niet via `localhost`, want dat adres komt in de QR-code.
+- **WSL (Ubuntu binnen Windows).** WSL2 heeft standaard een eigen virtueel
+  netwerk: het adres dat het script ziet (172.x.x.x) bestaat alleen binnen
+  WSL, en een telefoon komt er niet bij — het script waarschuwt daarvoor.
+  Zet WSL eenmalig op het netwerk van Windows: maak in Windows het bestand
+  `C:\Users\<naam>\.wslconfig` met
+
+  ```
+  [wsl2]
+  networkingMode=mirrored
+  ```
+
+  open in een PowerShell als beheerder alleen poort 3000, alleen op
+  privénetwerken, en laat diezelfde poort door naar WSL:
+
+  ```
+  netsh advfirewall firewall add rule name="Blackjacks quiz" dir=in action=allow protocol=TCP localport=3000 profile=private
+  New-NetFirewallHyperVRule -Name "BlackjacksQuiz" -DisplayName "Blackjacks quiz" -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts 3000
+  ```
+
+  en herstart WSL met `wsl --shutdown`. Daarna noemt het script het gewone
+  wifi-adres (192.168.x.x). Meer staat er niet open: alleen die poort, alleen
+  op het thuisnetwerk, en alleen zolang de quiz draait. Weghalen kan met
+  `netsh advfirewall firewall delete rule name="Blackjacks quiz"` en
+  `Remove-NetFirewallHyperVRule -Name "BlackjacksQuiz"`. Blijft het 172.x.x.x (Windows 10 kent geen
+  gespiegeld netwerk), stuur de poort dan door vanuit Windows, opnieuw na
+  elke herstart omdat het WSL-adres verandert:
+
+  ```
+  netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=<172-adres uit het script>
+  ```
+
+  De telefoons gebruiken dan het wifi-adres van Windows (`ipconfig`, bij de
+  Wi-Fi-adapter). Of sla WSL over: installeer Node op Windows zelf en
+  dubbelklik `lokaal.cmd`.
+- **Docker in plaats van Node.** Ook `docker compose up` in deze map zet de
+  quiz op poort 3000 van de pc. De container kent het adres van de pc dan
+  niet, dus het script en het beheerscherm kunnen het niet noemen; kijk het
+  op met `ipconfig` (Windows) of `ip addr` (Linux, Mac: `ifconfig`). Zet
+  `HOST_PIN` in een `.env` naast `docker-compose.yml`, want de container
+  draait als productie en weigert de voorbeeldcode.
+
+### Komen de vragen goed door?
+
+Als de telefoon erop komt, is de volgende vraag of hij ook het goede te zien
+krijgt. Daar is een controle voor die de hele quiz naloopt en precies zegt
+waar het misgaat:
+
+```bash
+npm run verify -- --url http://192.168.1.10:3000   # het adres uit npm run lokaal
+npm run verify                                     # via localhost
+npm run verify -- --zonder-server                  # alleen op papier
+```
+
+Eerst op papier: loopt `index.html` gelijk met `packs.ts`, heeft elke vraag
+wat zijn type nodig heeft (antwoord, opties, doelgetal), staan de foto's en
+fragmenten waar vragen naar verwijzen in `media/`, en hoeveel vragen staan
+nog op `teVullen`. Daarna het jaaroverzicht: hoeveel regels de trailer heeft
+(en een waarschuwing als dat er nog weinig zijn), welke maanden in de film
+meedraaien, welke er leeg blijven, hoeveel regels er nog op invulling wachten,
+en of alles tussen haken hoort bij iets wat vanavond ook echt gevraagd wordt.
+
+Dan tegen de server. Hij meldt zich als quizmaster, als één telefoon en als
+de televisie, en speelt elke gekozen ronde en elke vraag door in een eigen
+**wegwerpspel** met dezelfde samenstelling, zodat het spel dat klaarstaat
+heel blijft. Per vraag vergelijkt hij wat de telefoon en de televisie te zien
+krijgen met `packs.ts`: vraagtekst, opties, emoji of songtekst, beeld, punten
+en klok. Hij let erop dat het antwoord tot de onthulling verborgen blijft en
+dat de onthulling daarna klopt met het spiekbriefje van de quizmaster
+(antwoord, toelichting, goede optie, doelgetal). Bij een levende vraag neemt
+hij de tekst die de server uit de cijfers van resolution-recap maakt; na een
+recap-ronde controleert hij dat de cijfers van het jaar er staan. Hij luistert
+mee op de live-stroom zoals een telefoon dat doet, zodat je ook ziet of de
+server de vragen echt *duwt* en niet alleen op verzoek geeft, en hij haalt elk
+mediabestand één keer op via `/media/`. Aan het eind zet hij het oude spel
+weer actief en gooit het wegwerpspel weg.
+
+Geef `--url` het netwerkadres, dan test je de weg die de telefoons nemen; via
+`localhost` zegt hij dat er zo niets over het netwerk bewezen is. Schermen
+die open staan zien de controle voorbijkomen; loopt er al een spel, dan stopt
+hij daarom, en met `--forceer` loopt hij toch door. Met `--alles` zie je elke
+vraag langskomen in plaats van alleen de problemen. De opdracht eindigt met
+een foutcode zodra er iets mis is, dus hij past ook in een script. De pincode
+komt uit `.env` of `--pin`, net als bij `npm run lokaal`.
+
+Een vraag die je in `packs.ts` aanpast zonder opnieuw te bouwen komt hier
+meteen boven: het spiekbriefje, de telefoon en de televisie tonen dan nog de
+oude tekst, en de controle zegt dat de server een oudere bouw draait.
+
 ## De drie schermen
 
 | Scherm | Adres | Voor wie |
 |---|---|---|
-| Televisie | `/tv` | het grote scherm; vraag, klok en tussenstand |
-| Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten |
-| Telefoon | `/` → kies je naam | de spelers; antwoordblad |
+| Televisie | `/tv` | het grote scherm; QR-code, het jaaroverzicht, vraag, klok, onthulling, tussenstand, podium |
+| Hostscherm | `/host` | de quizmaster; bediening, antwoorden, punten, rondes kiezen |
+| Telefoon | `/` → kies je naam | de spelers; antwoordblad, jouw uitslag, selfie |
+| Uitslag | `/uitslag` | iedereen; alle avonden, met per avond de eindstand, prijzen en wat er per vraag gebeurde |
+| Beheer | `/beheer` | de quizmaster, buiten de avond om; spelers, oude spellen, telefoons, bestanden bij de vragen, back-up |
+| Proefrit | `/proef` (of `/playtest`) | de quizmaster; de hele avond uitproberen met bots, zonder de echte te raken |
 
 De quizmaster meldt zich met de pincode uit `HOST_PIN`. Spelers hebben geen
 pincode: op de avond zelf is een vergeten code een echt risico, en het
 hostscherm laat zien wie er op welke naam zit.
+
+### Meedoen via de televisie
+
+In de lobby toont de televisie een QR-code met het adres waarop hij zelf de
+quiz opende. Iedereen scant, kiest zijn naam en heeft zijn antwoordblad in
+handen. Open het televisiescherm daarom via het netwerkadres van de laptop
+(bijvoorbeeld `http://192.168.1.10:3000/tv`), niet via `localhost` — het
+scherm waarschuwt als je dat toch doet en noemt het adres dat wél werkt.
+`npm run lokaal` zet dat adres ook in het terminalvenster. Onder de namen
+staat hoeveel telefoons er al bij zijn.
+
+Staat iemand niet in de lijst? Onder de namen tikt een gast zijn naam in en
+schuift aan, ook midden in een ronde: hij krijgt meteen een plek in de
+teamindeling. De quizmaster kan hetzelfde doen met *+ Gast* op het
+hostscherm. Een gast doet niet vanzelf mee aan het volgende spel.
+
+De vaste groep is vijf man: Liz, Bastiaan, Joris, Rik en Eva. Cas is de
+quizmaster en speelt de vragen niet mee. Een plus-één voeg je toe als gast;
+die speelt elke ronde mee, behalve *De Voorspellingen* (zie hieronder).
+
+Telefoon en televisie houden het scherm wakker zolang de quiz open staat, dus
+een vraag verdwijnt niet achter een slotscherm en de laptop schiet niet in de
+schermbeveiliging.
+
+Op de telefoon kun je in de lobby een selfie kiezen. Die wordt op de telefoon
+zelf bijgesneden en verkleind (256 bij 256) en staat daarna bij je naam op de
+televisie, in de stand en op het podium. Tik later op je portret in de kop om
+hem te vervangen.
+
+### Het jaaroverzicht: een trailer vooraf, de film na afloop
+
+De quiz gaat over het jaar, dus een overzicht van het jaar vóór de eerste
+vraag verklapt al snel de antwoorden. Daarom zijn het er twee.
+
+**De trailer** opent de avond. Daarin staat alleen wat de quiz *niet* vraagt:
+de regels uit de tijdlijn zonder dubbele haken (vaak iets van onszelf), en
+per maand hoe vaak er gesport is. Geen wereldnieuws, geen maandkoppen — die
+noemen de onderwerpen van vanavond — en geen taarten, landen of wie het
+vaakst ging, want dat vragen de recap-rondes. Wat de trailer niet laat zien,
+gaat ook niet mee in het pakketje naar de televisie en de telefoons, net
+zoals een vraag daar pas bij de onthulling in staat.
+
+**De film** draait na de uitslag: het hele jaar maand voor maand.
+
+- **De wereld**: de momenten van die maand, uit dezelfde nagezochte feiten
+  als de vragen. Wat er die avond gevraagd werd, staat onderstreept, en er
+  schuift een zwarte balk vanaf als de dia binnenkomt.
+- **Wij**: hoe vaak er gesport is, hoeveel taart erdoorheen ging, welke
+  landen erbij kwamen en wie er het vaakst ging, met de stand van het jaar
+  die meeloopt tot de slotkaart met het jaar in getallen. Rechtstreeks uit
+  resolution-recap, op de avond zelf uitgerekend.
+- Op je **telefoon** staat dezelfde dia, met **jouw** maand eronder: hoe
+  vaak jij sportte, hoeveel taart jij at, waar jij was.
+
+Beide lopen vanzelf door: elke dia staat acht tot achttien seconden in beeld,
+en het hostscherm tikt hem door zodra de klok afloopt. Met **Pauze** (of `P`)
+zet je hem stil, met **Volgende dia** ga je sneller, met `←` een stap terug,
+en met **De trailer overslaan** ga je meteen naar ronde 1. Na de laatste dia
+van de trailer begint ronde 1 vanzelf; na de film staat het podium er weer.
+Welke van de twee draait, beslist de server zelf: vóór de uitslag de trailer,
+daarna de film. Terug naar de lobby, en het is weer de trailer.
+
+De trailer neemt alleen maanden mee met een regel die erin mag; de film elke
+maand waar iets van te vertellen valt. Zo staat er in oktober geen lege kaart
+zolang die maand nog niet bijgeschreven is.
+
+Schrijf je de maanden bij? Zie [Het jaaroverzicht bijschrijven](#het-jaaroverzicht-bijschrijven);
+`npm run verify` zegt hoe lang de trailer is en hoeveel regels er nog op
+invulling wachten.
+
+### Zo verloopt een vraag
+
+1. **De vraag** staat op de televisie en op elke telefoon. Waar/niet waar en
+   meerkeuze zijn knoppen, open vragen en dichtstbij een invoerveld, en bij een
+   stemvraag zijn de mensen aan tafel de knoppen. De televisie laat zien wie er
+   al heeft ingeleverd, zonder de inhoud. Blijft iemand achter, dan **port** de
+   quizmaster hem: een trilling en een gele balk op die telefoon. Heeft
+   iedereen ingeleverd, dan springt de klok naar de laatste vijf seconden:
+   niemand hoeft te wachten op een klok terwijl de tafel al klaar is.
+2. **De onthulling.** Eerst een tromgeroffel; de telefoons wachten mee, zodat
+   niemand het antwoord verklapt. Bij meerkeuze vallen de foute opties één voor
+   één af en klapt de goede om. Dan toont de televisie het antwoord én wat iedereen had
+   ingetikt, als kaartjes. Bij dichtstbij wordt dat een getallenlijn met het
+   doel erop, bij een stemvraag een telling met balkjes en wie op wie stemde.
+   Dichtstbij en stem rekent de server op dit moment meteen uit. Elke telefoon
+   zegt of je het goed had en hoeveel punten dat opleverde — met een trilling —
+   en laat zien wat de rest had.
+3. **De quizmaster tikt aan** wie het goed had, of drukt op *Vink aan wat goed
+   lijkt* (sneltoets `A`) om in één keer alles te nemen wat de machine met
+   zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee, en
+   op elk goed kaartje landt een fiche met de punten.
+
+### De telling: zoals Kahoot
+
+Het scorebord telt in grote getallen, en wie sneller goed zit krijgt meer. De
+bedoeling: het blijft tot de laatste vraag spannend wie er wint.
+
+- **Snelheid.** Elk punt van een vraag is 500 waard op het scorebord, maal
+  het deel van de klok dat nog over was: meteen goed is alles, op de valreep
+  de helft. Een vraag van 2 punten levert dus 500 tot 1000 op. In een
+  teamronde telt de tijd van het team. Bij een stemvraag telt snelheid niet
+  (dat is een mening), en wat de quizmaster met de hand toekent zonder
+  antwoord van een telefoon telt als op de valreep.
+- **Op dreef.** Vanaf de tweede vraag op rij met punten komt er +100 bij, dan
+  +200, en zo verder tot +500 per vraag. De reeks is van de persoon en loopt
+  door als de teams wisselen; een vraag zonder punten begint hem opnieuw.
+- **De gouden kaart.** In elke ronde van drie vragen of meer telt één
+  willekeurige vraag dubbel. Televisie en telefoons laten het zien zodra de
+  vraag opengaat. De kaart ligt vast per avond: dezelfde avond geeft steeds
+  dezelfde kaarten.
+- **Dubbele slotrondes.** De laatste twee rondes tellen dubbel (de afrekening
+  van de voorspellingen niet meegerekend). Een gouden kaart in een slotronde
+  telt vier keer.
+- **Je plek na elke vraag.** Zoals bij Kahoot ziet elke telefoon na de
+  onthulling je plek, en hoeveel je achter de volgende staat.
+
+De vragen zelf houden hun kleine punten (1, 2, 3); pas op het scorebord gaan
+er snelheid, reeks en vermenigvuldigers overheen. De afrekening van de
+voorspellingen telt 500 per punt, zonder snelheid. De knoppen bij de stand op
+het hostscherm corrigeren met 100 tegelijk.
+
+Niets hiervan wordt opgeslagen: de server leidt het bij elke telling af uit
+de uitdelingen, de antwoordtijden en de samenstelling
+(`src/lib/server/bonus.ts` en `src/lib/server/vermenigvuldiger.ts`).
+Corrigeert de quizmaster een eerdere vraag of draait hij iets terug, dan
+schuiven de reeksen vanzelf mee. De televisie laat de reeksen zien bij de
+onthulling, met een vlammetje in de tussenstand; de telefoon noemt ze onder
+je punten.
+
+De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
+manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.
+
+Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
+"Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
+zilver en brons die één voor één uit de vloer rijzen, van drie naar één, met
+de fanfare als de winnaar bovenaan staat. Daaronder de prijzen:
+**scherpschutter** (meeste vragen goed), **snelste vinger** (het snelste goede
+antwoord), **beste ronde**, **langste reeks** (drie of meer op rij goed),
+**comeback van de avond** (wie na een ronde het diepst stond en het meest is
+geklommen) en de **moeilijkste vraag** (de vraag die de minste mensen goed
+hadden). Een prijs die meer dan twee mensen zouden delen valt weg. Bij een
+gelijkspel bovenaan winnen ze allebei.
+
+Onder het podium staat het adres van de uitslagpagina, en op elke telefoon een
+knop *Bekijk en deel de uitslag*. Die pagina blijft bestaan: `/uitslag` toont
+alle avonden, `/uitslag/7` één avond met de eindstand, de prijzen, de punten
+per ronde en per vraag wie het goed had. *Deel de uitslag* zet een samenvatting
+in de groepsapp of op het klembord.
+
+### De stemronde
+
+De slotronde *Wie van de Blackjacks?* is een stemvraag (`type: "stem"`):
+iedereen kiest op zijn telefoon een medespeler. De meerderheid beslist; wie
+met de meerderheid meestemde krijgt de punten. Bij een gelijke stand bovenaan
+tellen beide kampen. De quizmaster kan het resultaat altijd nog met de hand
+aanpassen.
+
+### De gekke momenten
+
+De tafel blijft chic, maar af en toe mag het gek. Alles hieronder is kort en
+komt alleen op een moment dat het mag:
+
+- **Stempels.** *TIJD!* slaat op de kaart als de klok op nul staat, *Iedereen
+  fout* (met treurige trombone) of *Iedereen goed* op het antwoordpaneel, en
+  *Goed!* of *Mis* op je telefoon.
+- **Kwinkslagen.** Een welkom als iemand binnenkomt ("Rik heeft de wifi
+  gevonden."), wachtzinnen in de lobby, een regel bij elke ronde, en op je
+  telefoon een aanmoediging of troost. Ze worden gekozen op de vraag, niet op
+  toeval, dus televisie en telefoons zeggen hetzelfde. Aanpassen kan in
+  `src/lib/shared/kwinkslagen.ts`.
+- **Reacties.** Bij de onthulling en de stand staan er zes emoji's op je
+  telefoon; ze zweven met je naam over de televisie omhoog. Vluchtig, niets
+  wordt bewaard, hooguit één per 400 ms per telefoon.
+- **Kroontje, lantaarn, stijger.** De koploper draagt een kroontje, de laatste
+  een rode lantaarn, en wie het meest klom krijgt *Stijger* achter zijn naam.
+  Bij dichtstbij krijgt een gok die er hopeloos naast zat een label.
+- **Poedelprijs** voor de laatste op het podium.
+- De vraagkaart ligt nooit precies recht en trilt in de laatste vijf seconden.
+- **Overgangen.** Bij een nieuwe ronde, de tussenstand en de uitslag vliegt er
+  een speelkaart zo groot als het scherm voorbij. De eerste ronde begint met
+  drie-twee-één onder twee zoeklichten.
+- **Het geluidsbord.** Op het hostscherm staan knoppen voor applaus, een
+  tromgeroffel, een toeter, "ooooh", een bel, de foute zoemer, de treurige
+  trombone en een fanfare. De quizmaster drukt, de televisie speelt.
+
+### De maatjes
+
+Je foto (of selfie) blijft je portret. Daarnaast kiest iedereen een
+**maatje**: een dier dat de avond meegaat, zoals *Liz, het Konijn met een Gat
+in de Tuin* of *Rik, de Goudvis met Drie Seconden Geheugen*. Het telt nergens
+mee; het is er alleen voor de lol.
+
+- **Kiezen.** Op de telefoon staat in de lobby *Kies je maatje*, met alle 31
+  dieren. Niemand krijgt vanzelf een dier: tot je er een kiest, heb je geen
+  maatje (en staat er ook geen op je portret of naambordje). Een dier dat een
+  ander in hetzelfde spel al heeft, is grijs en kan niet meer, ook niet via de
+  server. Neemt iemand een dier mee van een vorige avond terwijl een ander het
+  nu heeft, dan houdt wie er het eerst was het, en kiest de ander opnieuw. Wie
+  kiest, krijgt zijn entree in de spotlight op de televisie. De quizmaster kan
+  op het beheerscherm een dier dobbelen.
+- **Een eigen naam.** Onder de kiezer kun je je maatje een naam geven
+  (hooguit 20 tekens), dan heet het bijvoorbeeld *Knabbel, de Paniekkip*. De
+  naam staat in de spotlight als je binnenkomt, bij de optocht (*Knabbel ·
+  Liz*) en bij *Hulde aan…!*. Wissel je van dier, dan
+  gaat de naam mee. Leegmaken en op *Naam weg* tikken haalt hem weg; de
+  quizmaster kan op het beheerscherm een flauwe naam weghalen met *Naam
+  maatje weg*.
+- **Stil op je portret.** Het maatje zit klein en stil op de rand van je
+  portret, op de televisie, de telefoon, het hostscherm en het podium.
+- **Over het scherm op de grote momenten**, en alleen dan:
+  - als je in de lobby binnenkomt;
+  - als je punten pakt bij een vraag: de maatjes van wie het goed had rennen
+    blij over de televisie, en dat van jou over je eigen telefoon;
+  - als iedereen fout zit: de tafel sjokt grijs en met een regenwolkje voorbij
+    (op je telefoon ook als alleen jij het fout had);
+  - bij de tussenstand voor de stijger, en bij de uitslag voor de winnaar.
+
+  Er is steeds maar één optocht tegelijk en nooit meer dan vier dieren, zodat
+  het leuk blijft en niet druk wordt.
+- **Pixelkunst.** Elk dier is met de hand getekend, met de kop naar rechts.
+  De meeste in een raster van 16 bij 16; de dieren die daarin niet te
+  herkennen waren (luiaard, das, aap, kreeft, wasbeer, nijlpaard, hamster,
+  zeehond, uil, bij, krokodil, dolfijn, flamingo, hond, konijn, kikker,
+  kangoeroe, slak, vlinder) in 32 bij 32, met ruimte voor wat ze herkenbaar
+  maakt: het masker en de haakklauwen van de luiaard, de witte streep van neus
+  tot kruin bij de das, de knoerten van tanden van het nijlpaard, de S-hals en
+  de bananensnavel van de flamingo, de krokodillentraan, de flaporen en de
+  wapperende tong van de hond, de hangoor en de konijnentanden, het jong in
+  de buidel van de kangoeroe, de spiraal op het huisje van de slak, het
+  rechtop staande aapje met grote oren en krulstaart, de geringde staart van
+  de wasbeer, de schaar van de kreeft, de gele ogen van de uil, de dolfijn
+  midden in een sprong. Chique mag, maar gek hoort erbij: grote koppen,
+  kraalogen die net een beetje scheel kijken, en een grijns. Alles komt op 32 bij 32 op het scherm: bij
+  de grove worden de trapjes schuine lijnen (Scale2x), met licht van linksboven, een
+  schaduw onderaan, een omlijning in een donkere tint van het dier zelf, en
+  ronde ogen met een glinstering. Het is geen plaatje maar losse lagen, zodat het
+  dier echt kan bewegen: het knippert met zijn ogen (elk dier op zijn eigen
+  ritme), zet om en om zijn poten neer als het loopt, klappert met zijn
+  vleugels als het vliegt, knijpt blij zijn ogen tot boogjes (^^) met een
+  blos op de wangen en huppelt pixel voor pixel (de aap gooit er zijn armen
+  bij in de lucht), laat sip een traan vallen, slaapt met zzz en schrikt met een
+  uitroepteken.
+- **Erin, een optreden, en weer weg.** Elk dier komt op zijn eigen manier
+  binnen, stopt op zijn eigen plek, doet een optreden van drie tellen en gaat
+  weer: eerst opwarmen (rondkijken, snuffelen, trappelen, schrikken,
+  zwaaien), en dan twee verschillende kunstjes. Sip valt hij soms gewoon in
+  slaap. Met meer dieren staan ze even naast elkaar, elk met een eigen
+  optreden.
+- **Zonder decor.** Lopers en springers laten stofwolkjes achter, vliegers
+  fartlijnen, zwemmers zwemmen gewoon door de lucht, slingeraars huppen,
+  gravers lopen. Elk dier staat op een zacht gouden schijnsel.
+- **Een eigen karakter.** Elk dier heeft zes eigenschappen van 1 tot 5
+  (snelheid, slimheid, slaperigheid, gezelligheid, ondeugd en drama), een
+  lievelingshapje en iets waar hij om bekend staat: de slak is traag, de
+  luiaard slaperig, de wasbeer ondeugend en dol op pizzakorstjes, de kip
+  een en al drama. Op de telefoon staat het als kaartje bij je maatje. Het
+  karakter is niet alleen voor de sier: het bepaalt hoe het dier zich op je
+  telefoon gedraagt (zie hieronder).
+- **Op je naambordje.** In de lobby op de televisie staat ieders maatje op
+  zijn eigen naambordje: het knippert en ademt, en heel af en toe doet er
+  één een kunstje (nooit twee tegelijk), zodat de kamer het ziet en het
+  scherm verder rustig en chique blijft. Wie er nog niet is, heeft een
+  maatje dat ligt te slapen.
+- **De entree.** Wie binnenkomt, krijgt even het podium: de zaal wordt
+  donkerder, er valt een zacht gouden spotlicht, het maatje rent groot het
+  beeld in, doet een kunstje en buigt, met eronder wie het is (*Joris · Koko,
+  de Aap die Aan de Lamp Hangt*) en hoe het binnenkomt. Komen er meer
+  tegelijk binnen, dan krijgt ieder zijn beurt.
+- **Geen decor.** Het scherm is van de quiz: groen vilt, goud en mooie
+  letters. De pixeldieren zijn het enige grappige erop; in de optocht staan
+  ze op een zacht gouden schijnsel in plaats van in een landschap.
+- **Op de telefoon** staat je eigen maatje op een eigen vilten podiumpje,
+  met een eigen willetje: lopen, rondkijken, snuffelen, slapen, springen,
+  een kunstje, of zijn lievelingshapje opeten. Hoe vaak wat gebeurt volgt
+  het karakter: een snel dier rent vaker en harder, een slaperig dier dut
+  vaker. Tik erop en het doet een kunstje (slaapt het, dan schrikt het
+  wakker).
+- **Op de televisie, als jij dat wilt.** Onder je maatje staan vijf knoppen:
+  *Zwaai*, *Dans*, *Kunstje*, *Voer* (zijn eigen lievelingshapje verschijnt
+  voor zijn snuit en wordt hap voor hap kleiner) en *Feest*. Je
+  maatje doet het meteen op je telefoon, en tegelijk op de televisie: in de
+  lobby op je naambordje, en na een vraag, bij de tussenstand en de uitslag
+  zweeft het met jouw naam erbij omhoog, net als een reactie. De knoppen
+  staan daar naast de emoji. Vluchtig, net als een reactie: het gaat via
+  `/api/maatje` en de live stroom, niets komt in de database, en elke telefoon
+  mag het hooguit één keer per 1,2 seconde.
+- **Pixelplaatjes.** Hartjes, muzieknootjes, sterretjes, druppels, zzz,
+  uitroep- en vraagtekens rond de dieren zijn kleine pixelplaatjes in
+  dezelfde stijl (`src/lib/shared/pixeliconen.ts`), net als de hapjes die ze
+  het vaakst bij zich hebben (appel, eikel, visje, banaan, blaadjes, bloemen,
+  bot, wortel, pizza, paddenstoel); de rest (een ei, een cupcake) blijft emoji. In de optocht stopt elk dier net niet
+  in het gelid, een tikje links, rechts, hoger of lager. Op je telefoon staat je
+  eigen maatje in een eigen weitje: **tik erop en het doet een kunstje**
+  (en slaapt het, dan schrikt het wakker).
+- **Elk dier kent een handvol kunstjes**, blij en sip, en welk het doet is elke
+  keer een verrassing. Eigen kunstjes: de lama spuugt, de kip legt een ei, de
+  aap gooit met bananen, de eenhoorn maakt een regenboog, de eekhoorn begraaft
+  een nootje, de luiaard hangt ondersteboven, de egel rolt zich op, de
+  zeehond houdt een bal hoog. Daarnaast kan elk dier een paar van de
+  algemene: een salto, een dansje met muzieknootjes, een pirouette met
+  sterretjes, stuiteren met confetti. Sip: een zucht met een traan, omvallen,
+  mokken met een boos wolkje, of zich klein maken.
+- **Eigen kunstjes met iets erbij.** De lama spuugt echt: bol opblazen,
+  achterover, en pats, een klodder vliegt in een boog uit zijn bek. Het konijn
+  knabbelt een wortel weg. De worm kruipt als een slinky (in hele kolommen,
+  geen uitgesmeerde pixels), zwemmers gaan in golven met belletjes erachter,
+  en slingeraars hangen aan een liaan.
+- **Het feest.** Een grote sprong met een draai in de lucht, landen, nog een
+  sprongetje, en confetti, in schokjes zodat het dier op zijn pixels blijft.
+  De winnaars sluiten de optocht bij de uitslag ermee af, en iedereen kan het
+  met *Feest* op zijn telefoon laten doen.
+- **Het roept iets.** Bij de onthulling roept het maatje van de eerste die het
+  goed had iets op de televisie ("De kip legt van blijdschap een ei."), op je
+  telefoon roept je eigen maatje, en de winnaar krijgt *Hulde aan…!*
+
+De dieren, hun titels, wat ze roepen en hun kunstjes staan in
+`src/lib/shared/dieren.ts`; de tekeningen in `src/lib/shared/pixeldieren.ts`
+(een letter per pixel, met uitleg bovenaan) en het dier zelf in
+`src/lib/client/Pixeldier.svelte`. De optocht is
+`src/lib/client/Dierenparade.svelte`, de entree `src/lib/client/Spotlight.svelte`,
+het maatje op het naambordje `src/lib/client/Plaatmaatje.svelte` (de tv-pagina
+kiest wie er een kunstje doet), en het podiumpje op de telefoon
+`src/lib/client/Dierenwei.svelte` met het brein in `src/lib/client/wei.ts`, en
+de knoppen om je maatje iets te laten doen `src/lib/client/Maatjesknoppen.svelte`.
+De `px-…`-, `dier-…`-, `kunst-…`-, `ding-…`-, `spot-…`- en `wei-…`-animaties
+staan onderaan `src/app.css`. Wie *minder beweging* in zijn systeem aanzet,
+krijgt geen optochten en geen entree, en dieren die stilstaan.
+
+### Het hostscherm
+
+Bovenaan staat de vraag die open staat, met een **spiekbriefje** dat je zelf
+openklapt voor het antwoord. Daaronder de knoppen van dat moment, met
+sneltoetsen zoals in de losse quiz:
+
+| Toets | Doet |
+|---|---|
+| `spatie`, `Enter`, `→` | verder: ronde starten, antwoord tonen, volgende vraag |
+| `←` | een stap terug |
+| `P` | klok stilzetten of laten doorlopen |
+| `T` | 30 seconden erbij |
+| `M` | fragment afspelen of stoppen |
+| `A` | vink aan wat goed lijkt |
+| `Z` | de laatste handeling ongedaan maken |
+
+In de lobby staat **Start de trailer** als hoofdknop; bij de uitslag staat
+er *De film: het hele jaar*. Tijdens de trailer of de film zegt het
+hostscherm bij welke dia je bent, en bedien je hem met *Volgende dia*,
+*Pauze* (`P`), `←` en, in de trailer, *De trailer overslaan*.
+
+Bij een open vraag staat er een knop **Por de achterblijvers**; tik op een naam
+in de inleverrij om één telefoon te porren.
+
+Het **logboek** houdt elke handeling bij: ronde gestart, antwoord getoond,
+punten voor wie, correcties. Elke handeling die de stand of de plek in de quiz
+verandert draagt een momentopname van ervoor, dus *Ongedaan* (of `Z`) zet hem
+in zijn geheel terug — ook na een verkeerd vinkje of een per ongeluk overgeslagen
+vraag. Meerdere keren achter elkaar mag.
+
+### Pauze, en middernacht
+
+**☕ Pauze** zet de hele quiz even stil, in elke fase: de klok staat stil, een
+fragment stopt, en de televisie en de telefoons tonen een pauzescherm. Wat
+eronder staat blijft staan — een half getikt antwoord op een telefoon ook.
+Tijdens de pauze kan niemand inleveren en doen de knoppen die de klok of de
+dia veranderen niets (punten bijstellen en een gast toevoegen mogen wel).
+**▶ Hervat de quiz** zet alles terug zoals het was; liep de klok, dan loopt hij
+verder met de seconden die er nog op stonden.
+
+De avond loopt over middernacht heen, dus het hostscherm let op de klok
+(Nederlandse tijd, 1 januari 00:00):
+
+- Vanaf **een half uur** voor twaalf staat bovenaan hoe lang het nog is.
+- De **laatste tien minuten** wordt dat dringend, en ziet de kamer het ook:
+  linksonder op de televisie staat *nog 8 minuten tot middernacht*.
+- **Pauzeer en tel af** pauzeert de quiz en laat de televisie aftellen. De
+  laatste tien seconden staan in het groot, met een tik per seconde; om twaalf
+  uur komen de fanfare, de confetti en *Gelukkig nieuwjaar 2027*. De
+  telefoons tellen mee en trillen om twaalf uur.
+- Dat blijft staan tot jij de quiz hervat. Klaar met proosten? Hervat, en de
+  vraag van vóór het vuurwerk staat er weer.
+
+Een gewone pauze kun je met één knop omzetten in het aftellen en terug.
+
+Oefenen zonder op oudejaarsavond te wachten: zet `NIEUWJAAR_OP` bij het
+starten. `NIEUWJAAR_OP=+10 npm run lokaal` legt middernacht tien minuten na
+het starten van de server; een tijdstip mag ook
+(`NIEUWJAAR_OP=2026-12-28T21:00:00+01:00`). Op de televisie alleen kan het in
+de testmodus: `/tv?test=nieuwjaar-aftellen`.
+
+*← Terug* werkt overal: vanaf de titelkaart van een ronde ga je naar de
+tussenstand van de vorige ronde, vanaf de uitslag naar de laatste tussenstand.
+
+Onderaan het overzicht **Rondes**: alle rondes van het pakket met de vragen
+en antwoorden erin, en rode labels bij wat nog ingevuld moet worden. Vóór de
+eerste vraag vink je hier aan welke rondes en vragen vanavond meedoen; daarna
+ligt de samenstelling vast (anders zouden de rondenummers en daarmee de stand
+verschuiven) en spring je er naar een andere ronde. *Nieuw spel* begint
+opnieuw met een pakket; de oude stand blijft in de database bewaard.
+
+### Het beheerscherm
+
+Het hostscherm bedient de avond; `/beheer` regelt de rest, vóór of ná de
+avond. Dezelfde pincode. Wat er staat:
+
+- **Server.** Of de instellingen kloppen (dezelfde controle als
+  `/api/health`), het adres, de database met haar grootte, hoeveel schermen
+  er live meekijken, en waar de cijfers van resolution-recap vandaan komen.
+  Met **Download een back-up** krijg je de hele database als JSON — voor op
+  de usb-stick, vóór de avond. De tokens van de telefoons zitten er niet in.
+- **Inhoud.** Per pakket het aantal rondes en vragen, hoeveel er live worden
+  uitgerekend en hoeveel er nog een antwoord missen. Daaronder de
+  **bestanden bij de vragen**: elk bestand waar een vraag naar verwijst, met
+  een groene of rode stip voor of het echt in `media/` staat, en welke
+  bestanden in de map door geen vraag gebruikt worden. Zo zie je een vergeten
+  filmpje vóór de avond in plaats van erop.
+- **Spelers.** De vaste groep en de gasten van eerdere avonden. Hernoemen,
+  een portret kiezen of weghalen, een gast vast maken (dan doet hij vanzelf
+  mee aan het volgende spel) of andersom, en een nieuwe vaste speler
+  toevoegen — die schuift meteen aan als het spel nog in de lobby staat.
+  Weghalen kan alleen als er nooit een avond aan hing; anders zou een oude
+  uitslag zijn naam kwijtraken. Maak hem dan gast.
+- **Spellen.** Elke avond, met fase, aantal spelers, antwoorden en wie er
+  voorop staat. Een proefrit gooi je hier weg, met alles wat erbij hoort; was
+  het het actieve spel, dan wordt het jongste overgebleven spel actief, en
+  als er geen is komt er een leeg spel, zodat de schermen nooit zonder
+  zitten. Een eerder spel kun je ook weer **actief maken**: de televisie en
+  de telefoons springen er meteen naar.
+- **Apparaten.** Elke telefoon, televisie en elk hostscherm dat zich meldde,
+  met wanneer het zich voor het laatst liet zien. Zit iemand op de verkeerde
+  naam, dan **koppel je die telefoon los**: hij wordt weer kijker en kiest
+  opnieuw. Je eigen scherm kun je niet loskoppelen. Apparaten die zich een
+  dag niet meldden ruim je met één knop op.
+
+Alles hier wijzigt de database meteen en laat de schermen die open staan
+meebewegen. Vragen zelf pas je niet hier aan maar in
+`src/lib/content/packs.ts`, zodat de losse HTML-quiz gelijk blijft lopen.
+
+### De cijfers van het jaar, live
+
+Drie rondes gaan over onszelf: *Onze Sportcompetitie*, *Taart & Verre
+Landen* en *Hoger of Lager*. Hun vragen en antwoorden komen niet uit `packs.ts`, maar worden op
+de avond zelf uitgerekend uit de export van
+[`resolution-recap`](https://github.com/Cas-Boots/resolution-recap). Sport
+iemand op oudejaarsdag nog, dan telt dat mee. Ook de tekst van een vraag past
+zich aan: staan er twee mensen zonder sportschool in de cijfers, dan vraagt de
+vraag naar allebei.
+
+Waar de cijfers vandaan komen, in deze volgorde:
+
+| Instelling | Doet |
+|---|---|
+| `RECAP_URL` + `RECAP_TOKEN` | live: haalt `/api/export` van resolution-recap op met het `BACKUP_TOKEN` van dat project |
+| `RECAP_BESTAND` | een export-JSON op schijf, bijvoorbeeld de nieuwste uit `resolution-recap/backups/` |
+| niets | de ingebouwde momentopname in `src/lib/content/recap-snapshot.json` |
+
+Met een live bron zijn de cijfers bijna live: de server haalt ze op bij het
+opstarten en daarna elke minuut (`RECAP_INTERVAL`, in seconden; minimaal 15,
+`0` zet het uit). Wie op de avond nog een sportje of taart invoert, zit er zo
+een minuut later in. Zolang een ronde loopt die de cijfers gebruikt, of het
+jaaroverzicht, slaat de server een beurt over: vraag en antwoord veranderen
+nooit halverwege. Bij het begin van zo'n ronde ververst hij sowieso nog één
+keer (met een wachttijd van hooguit zes seconden, zodat een trage verbinding
+de avond niet ophoudt), en met de knop **Ververs de cijfers** op het
+hostscherm kan het altijd. Mislukt het, dan blijven de vorige cijfers staan en
+zegt het hostscherm dat erbij, met de tijd van de export die er staat.
+
+`RECAP_URL` is het adres van resolution-recap zelf, zonder `/api/export`
+erachter (bijvoorbeeld `https://resolution-recap.avs-api.nl`), en
+`RECAP_TOKEN` het `BACKUP_TOKEN` van dat project; korter dan 32 tekens weigert
+resolution-recap hem. Let op dat je niet `blackjacks.avs-api.nl` neemt: dat is
+blackjacks-cup, en die heeft geen export.
+
+In de vragenlijst op het hostscherm staat *live* achter elke vraag die zo
+wordt uitgerekend. De sleutels (`live: "sport.meeste"` in
+`src/lib/content/packs.ts`) staan in `src/lib/server/recap/vragen.ts`; daar voeg je ook een nieuwe aan toe. De
+momentopname ververs je met een kopie van de nieuwste back-up:
+
+```bash
+python3 -c "import json;d=json.load(open('../../resolution-recap/backups/backup-2026-12-31.json'));json.dump({k:d[k] for k in ['exportSchemaVersion','seasons','people','metrics','goals','countries_visited','exportedAt','entries']},open('src/lib/content/recap-snapshot.json','w'),ensure_ascii=False,separators=(',',':'))"
+```
+
+**Na de laatste vraag** van zo'n ronde laat de televisie de cijfers zelf zien,
+vóór de tussenstand: eerst iedereen naast elkaar, dan per persoon een
+jaarkaart (één hokje per dag, de weken als kolommen), het aantal per maand en
+de sporten met hoe vaak — of bij de taartronde de taartdagen en de bezochte
+landen met vlaggen, in volgorde van bezoek. Elke telefoon toont intussen het
+eigen jaar. De quizmaster loopt erdoorheen met *Volgende* (of de spatiebalk)
+en kan ze overslaan met *Naar de tussenstand*; met *Toon de cijfers van het
+jaar* haal je ze op elk moment in de ronde terug.
+
+### De WK-poule
+
+De ronde *De WK-poule* rekent haar vragen uit de export van
+[`blackjacks-cup`](https://github.com/Cas-Boots/blackjacks-cup): wie de poule
+won en wie onderaan eindigde, wie de wereldkampioen vooraf mis had, wie als
+enige een vooraf-vraag goed had, de beste en de verspilde jokers, de wedstrijd
+van de kampioen die niemand goed had en wie de meeste uitslagen precies raadde.
+De sleutels (`live: "poule.winnaar"`) staan in `src/lib/server/recap/poule.ts`.
+Als er meer mensen hetzelfde antwoord delen, past de vraag zich aan.
+
+Het WK is voorbij, dus er is geen live bron: de cijfers staan vast in
+`src/lib/content/poule-snapshot.json`. De punten komen zoals de poule ze
+toekende (jokers al dubbel), zodat de quiz de spelregels niet hoeft na te doen.
+Wordt er in de poule achteraf nog iets rechtgezet, haal dan een nieuwe export op
+en ververs de momentopname:
+
+```bash
+curl -H "Authorization: Bearer $EXPORT_TOKEN" https://blackjacks.avs-api.nl/api/export -o /tmp/cup.json
+python3 -c "import json;d=json.load(open('/tmp/cup.json'));[u.pop(k,None) for u in d['users'] for k in ('createdAt','isAdmin')];[p.pop(k,None) for p in d['predictions'] for k in ('updatedAt','id')];[p.pop('id',None) for p in d['outrightPredictions']];json.dump(d,open('src/lib/content/poule-snapshot.json','w'),ensure_ascii=False,separators=(',',':'))"
+```
+
+De vaste antwoorden in `packs.ts` (voor de losse HTML-quiz) moeten gelijk
+blijven aan wat de server uitrekent; `npm test` zegt het als ze uit elkaar
+lopen. De ronde staat uitgevinkt; vink hem aan in de vragenkiezer.
+
+### De voorspellingen van januari
+
+De ronde *De Voorspellingen* werkt net zo, met als bron
+`src/lib/content/voorspellingen.ts`: de veertien voorspellingen uit
+`Voorspellingen_2026.xlsx`, wat iedereen antwoordde en de inzet uit de
+puntenmatrix. Vul daar vóór de avond de uitkomsten in (`uitkomst`, en bij open
+voorspellingen `goed: ['Eva']`). Een paar rekent de app zelf uit: het aantal
+landen van de grootste reiziger en of iedereen zijn eigen sportgetal haalde
+(uit resolution-recap), met hoeveel mensen de quiz gespeeld wordt (uit de quiz
+zelf) en wie de meeste voorspellingen goed had (uit de rest van de lijst).
+Voorspellingen zonder uitkomst staan als *nog open* op de televisie en tellen
+niet mee; de vragen van de ronde zeggen erbij hoeveel er nog open staan.
+
+Deze ronde heeft geen vragen op de telefoon. *Start de afrekening* gaat
+meteen naar de televisie: de stand (goed, mis, open, punten) en dan één
+voorspelling per dia, met wat iedereen zei, de uitkomst en wie er scoorde. Op
+je telefoon licht je eigen regel op. De vragen van de ronde staan alleen op
+het hostscherm, als spiekbriefje om bij de dia's te vertellen.
+
+Bij de tussenstand na deze ronde krijgt elke speler de punten van zijn eigen
+voorspellingen in de stand van de avond. Wie er in januari bij was, doet mee:
+de vaste vijf én Cas. De punten van Cas blijven in deze ronde: hij staat op
+de dia's met het etiket *quizmaster*, maar niet in de stand van de avond en
+niet op het podium. Een gast voorspelde in januari niet en zit deze ronde uit;
+de televisie en zijn telefoon zeggen dat erbij. De punten worden niet
+opgeslagen maar afgeleid van waar het spel staat, dus *← Terug* of
+*ongedaan* haalt ze weer weg, en een uitkomst die je later nog invult telt
+vanzelf mee.
+
+### Foto's, video's en muziek bij vragen
+
+Zet de bestanden in de map `media/` naast de app; een vraag verwijst ernaar
+met `media.bron`. Zie `media/README.md` voor de ondersteunde bestandstypen.
+De bestanden worden op het moment zelf gelezen, dus herstarten is niet nodig,
+en in Docker koppelt `docker-compose.yml` de map aan de container.
+
+Foto's verschijnen op de televisie én op de telefoons. Filmpjes en muziek
+spelen alleen op de televisie; de quizmaster start en stopt ze vanaf het
+hostscherm, zodat niemand naar de laptop hoeft te lopen. Elke stap naar een
+andere dia zet het fragment stil. Ontbreekt een bestand, dan toont de
+televisie een nette melding en loopt de quiz gewoon door.
 
 ## Hoe het samenwerkt met teams
 
@@ -43,7 +766,104 @@ de persoon, dus het klassement blijft eerlijk als de teams wisselen.
 ## Testen zonder vijf mensen
 
 Dit is het belangrijkste stuk gereedschap: je kunt de hele avond vooraf
-naspelen.
+naspelen. Draai eerst `npm run verify` (zie [Komen de vragen goed
+door?](#komen-de-vragen-goed-door)), dan weet je dat de vragen kloppen
+voordat je de bediening oefent.
+
+### De hele avond: `/proef`
+
+Open **`/proef`** (of `/playtest`), meld je aan met de pincode van het
+hostscherm, kies hoe vaak de bots het goed hebben en of er een plus-één aan
+tafel zit, en druk op **Begin de proefrit**.
+
+- **Niets echts wordt geraakt.** Een proefrit is een eigen spel met een eigen
+  database in het geheugen van de server. De echte televisie en telefoons
+  zien er niets van, hij komt niet in de uitslagen of het beheer, en een
+  echte avond kan tegelijk gewoon doorlopen. Elk scherm van een proefrit
+  draagt een geel etiket *Proefrit*. Een proefrit verdwijnt na vier uur
+  zonder gebruik, bij *Stop de proefrit*, en bij een herstart van de server.
+- **Wat je gaat spelen.** De proefrit neemt de spelers (met portret) en de
+  gekozen rondes en vragen van de echte avond over.
+- **Alle schermen naast elkaar.** De televisie, een tot vier telefoons en
+  het hostscherm staan naast elkaar, elk op ware grootte en verkleind. Klik
+  door op het hostscherm en speel mee op de telefoons: elke telefoon is een
+  eigen apparaat en kiest zijn naam zoals een echte. **Opnieuw** zet een
+  telefoon terug bij het kiezen van een naam. *Los openen* opent een scherm
+  in een eigen tabblad.
+- **Bots aan tafel.** Elke naam waar geen telefoon op zit, speelt een bot: hij
+  levert op een geloofwaardig moment in, goed zo vaak als je instelt (70 %
+  standaard), bij een teamronde één keer per team. Zet je een telefoon op
+  een naam, dan stopt die bot; laat je de telefoon een minuut liggen, dan
+  neemt de bot het weer over. Bots uitzetten en een plus-één laten
+  aanschuiven kan ook tijdens de proefrit.
+- **Spring naar.** Elk onderdeel van de avond is één klik verderop: de lobby,
+  de trailer, per ronde de titelkaart, elke vraag **open** (klok loopt) of
+  **antwoord** (onthuld), de cijfers of de voorspellingen, de tussenstand,
+  het podium en de film na afloop. Alles ervoor spelen de bots meteen, zodat
+  de stand eruitziet als bij een echte avond; alles erna wordt gewist, dus
+  een vraag opnieuw openen begint hem leeg.
+- **Op je eigen telefoon.** Scan de QR-code op de proefpagina (of op de
+  televisie van de proefrit) om met een echte telefoon mee te doen. Die zit
+  dan in de proefrit, niet in de echte avond, en houdt zijn naam voor de
+  echte avond gewoon.
+
+Het verschil met de testmodus hieronder: `/tv?test` laat met verzonnen
+vragen zien hoe elke dia van de televisie eruitziet, zonder server. De
+proefrit speelt je echte vragen met de echte spelmotor, op alle schermen.
+
+### De televisie alleen: `/tv?test`
+
+Wil je alleen zien hoe het televisiescherm eruitziet en klinkt — zonder
+telefoons, zonder hostscherm, zonder spel — open dan de **testmodus**. Het
+jaaroverzicht heeft daar een eigen hoofdstuk: de trailer (titelkaart, een
+maand, slotkaart) en de film (een maand, slotkaart).
+
+```
+http://localhost:5173/tv?test        # bij npm run dev
+http://192.168.1.10:3000/tv?test     # het adres uit npm run lokaal, op de echte televisie
+```
+
+Het is hetzelfde scherm als op de avond, alleen komen de momentopnamen niet
+van de server maar uit een verzonnen spel met zes spelers. Links staat een
+paneel met alle dia's van de avond, in volgorde: de lobby, de titelkaart van
+een ronde, een vraag van elk type (waar/niet waar, meerkeuze in teams, open
+met songtekst, dichtstbij, stem, met foto, met muziekfragment, de
+bliksemronde), de onthulling in al zijn smaken (gemengd, nog te beoordelen,
+iedereen goed, iedereen fout, niemand ingeleverd, de getallenlijn, de
+stemtelling), de cijfers van het jaar, de tussenstand, het podium met de
+prijzen, en een paar randgevallen: een veel te lange vraag, een filmpje dat
+ontbreekt en het scherm vóór de eerste verbinding.
+
+Op een breed scherm schuift de dia naast het paneel, verkleind maar verder
+precies zoals de televisie hem toont. Klap het paneel weg met `T` om hem op
+ware grootte te zien; op een smal scherm ligt het paneel eroverheen.
+
+| Toets | Doet |
+|---|---|
+| `→`, `spatie` | volgende dia |
+| `←` | vorige dia |
+| `R` | dezelfde dia opnieuw, met alle overgangen en geluiden |
+| `T` | paneel tonen of verbergen, om het scherm kaal te zien |
+| `B` | in de lobby: een telefoon komt binnen (begroeting en boing) |
+| `I` | bij een vraag: iemand levert in; bij de onthulling: beoordeel de volgende inzending |
+| `K` | de klok op de laatste acht seconden zetten (het tikken, de trilling, de stempel TIJD!); bij het aftellen naar middernacht: nog twaalf seconden |
+| `P` | de klok pauzeren of hervatten |
+| `M` | het fragment afspelen of stoppen |
+| `N` | bij de cijfers van het jaar: een stap verder |
+| `E` | een reactie van een telefoon laat zweven |
+| `D` | een speler laat zijn maatje iets doen (in de lobby op zijn naambordje, daarna zwevend) |
+
+Bij elke dia staat waar je op let. Klik één keer in het scherm voor het
+geluid, net als op de avond. De URL onthoudt de dia (`/tv?test=stand`), dus
+na een herlading of een aanpassing in de code sta je weer op dezelfde plek —
+handig als je aan de opmaak van één dia werkt met `npm run dev`.
+
+De testmodus stuurt niets naar de server: de televisie meldt zich niet aan,
+de database blijft zoals hij is, en de vragen zijn verzonnen — de echte
+antwoorden horen niet in de browser van de televisie. Het rode etiket
+rechtsboven blijft altijd staan, zodat niemand dit scherm voor de echte
+avond aanziet. Wil je de echte avond met echte vragen naspelen, dan zijn de
+nepspelers hieronder het gereedschap.
 
 ### Nepspelers tegen een draaiende server
 
@@ -74,10 +894,18 @@ npm run build
 CHROMIUM_PAD=/pad/naar/chrome npx playwright test
 ```
 
-Opent een televisie, een hostscherm en drie telefoons als losse browsers met
-eigen koekjespotten, en controleert dat een vraag op alle schermen tegelijk
-verschijnt, dat inleveren werkt en dat de stand meebeweegt. `CHROMIUM_PAD` mag
-weg als Playwright zijn eigen browsers heeft.
+Opent een televisie, een hostscherm en telefoons als losse browsers met eigen
+koekjespotten, en speelt de avond na: de QR-code, een vraag op alle schermen
+tegelijk, inleveren, de onthulling en de stand (`live.spec.ts`); dichtstbij
+met de automatische berekening, een teamronde, een beeldvraag, de stemronde
+met een gast, een por, ongedaan maken, het podium met de prijzen, de
+uitslagpagina en een telefoon zonder live stroom (`avond.spec.ts`); het
+beheerscherm met en zonder pincode, spelers toevoegen en hernoemen, een
+proefrit weggooien, de back-up en een telefoon loskoppelen (`beheer.spec.ts`).
+`CHROMIUM_PAD` mag
+weg als Playwright zijn eigen browsers heeft; staat er al een Chromium op de
+machine (bijvoorbeeld `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`),
+dan wijs je daarheen in plaats van te downloaden.
 
 ### Eenheidstests
 
@@ -85,8 +913,14 @@ weg als Playwright zijn eigen browsers heeft.
 npm test
 ```
 
-Dekt de beoordeling van antwoorden, de puntentelling en de teamindeling — de
-drie plekken waar een fout de avond zou verpesten.
+Dekt de beoordeling van antwoorden, de puntentelling (ook de stemronde), de
+prijzen en de teamindeling — de plekken waar een fout de avond zou verpesten.
+
+### In CI
+
+`.github/workflows/ci.yml` draait bij elke push en pull request de typecontrole,
+de eenheidstests, de controle dat `index.html` gelijk loopt met de vragen, de
+build en daarna de browsertests.
 
 ## Waarom het blijft werken als de wifi hapert
 
@@ -111,13 +945,289 @@ drie plekken waar een fout de avond zou verpesten.
 
 En als alles tegenzit: `../index.html` openen en de avond op papier draaien.
 
+## De vragen aanpassen
+
+De vragen staan op één plek: `src/lib/content/packs.ts`. Dat bestand is
+getypt, dus een vergeten antwoord of een verkeerd vraagtype valt bij `npm run
+check` al om. Daarna:
+
+```bash
+npm run content:sync    # schrijft hetzelfde blok naar ../index.html
+npm run content:check   # alleen controleren; dit draait ook in CI
+```
+
+De losse quiz kan geen module importeren (hij moet vanaf een usb-stick werken),
+vandaar deze ene stap. Zie de hoofd-README voor de vorm van een ronde en een
+vraag.
+
+### Het jaaroverzicht bijschrijven
+
+De tijdlijn staat in `src/lib/content/jaaroverzicht.ts`, naast de vragen, en
+gaat met dezelfde `npm run content:sync` mee naar de losse quiz. Eén maand
+ziet er zo uit:
+
+```ts
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"🎂", tekst:"Een regel over onszelf, zonder haken: die komt ook in de trailer."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+De afspraken:
+
+1. **Wat de quiz vraagt, gaat tussen dubbele haken.** Zo'n regel komt nooit in
+   de trailer, alleen in de film, met het antwoord onderstreept. Elke
+   bewering met haken hoort ook in `packs.ts` te staan: de vragen zijn
+   nagezocht, de film zet ze op volgorde. `npm run verify` meldt het als er
+   iets tussen haken staat wat geen enkele vraag vraagt.
+2. **Een regel zonder haken is ook voor de trailer.** Iets wat de quiz niet
+   vraagt, vaak iets van onszelf: een verjaardag, een weekend weg, iemand die
+   ging verhuizen. Die feiten sta je zelf voor. Er mag geen antwoord van de
+   quiz in staan, ook niet via het emoji (❄️ zegt sneeuw);
+   `tests/jaaroverzicht.test.ts` vangt een antwoord dat er letterlijk in staat.
+3. **Raakt een regel zonder haken toch de quiz, zet er `pasNaAfloop: true`
+   bij.** "Daarmee evenaart hij het record" heeft geen haken, maar
+   beantwoordt een waar-of-niet-waar. Zo blijft hij uit de trailer.
+4. **De kop van een maand staat alleen in de film.** Daar mag hij alles zeggen.
+
+Een regel met `teVullen: true` slaat alles over; oktober, november en
+december staan zo klaar om in december bijgeschreven te worden, net als de
+ronde *Oktober tot december*. Onze eigen cijfers per maand hoef je nergens in
+te vullen: die komen uit resolution-recap, en wat de recap-rondes daarvan
+vragen komt vanzelf pas in de film.
+
+Zien hoe het eruitziet zonder een avond te draaien: `/tv?test=film-titel`,
+`/tv?test=film-maand` en `/tv?test=film-slot` voor de trailer,
+`/tv?test=film-onthuld` en `/tv?test=film-slot-onthuld` voor de film.
+
+Over de lengte hoef je niet te piekeren: een vraag van meer dan honderd tekens
+zet de televisie een maat kleiner, en past een dia dan nog niet op het scherm —
+een lange vraag met vier lange keuzes, of een podium met zes prijzen én een
+poedelprijs — dan krimpt hij in zijn geheel mee tot alles in beeld staat. Aan
+de televisie zit immers geen scrollbalk. Wil je zien hoe jouw langste vraag
+uitpakt: `/tv?test=vraag-lang` staat er voor klaar.
+
+## Naar productie
+
+Op de avond zelf is een laptop met `npm run lokaal` genoeg. Wil je de quiz op een
+echte server hebben — zodat de telefoons erbij kunnen zonder dat iedereen op
+hetzelfde wifi zit, en zodat je van tevoren rustig kunt proefdraaien — dan
+draait hij als container. De uitrol is ingericht voor Dokploy, net als
+blackjacks-cup.
+
+### Wat de server nodig heeft
+
+| Instelling | Verplicht | Wat het doet |
+|---|---|---|
+| `HOST_PIN` | ja | De code waarmee de quizmaster het hostscherm opent. |
+| `ORIGIN` | aangeraden | Het volledige adres waarop de quiz staat, bijvoorbeeld `https://quiz.deblackjacks.nl`. |
+| `DATABASE_PATH` | staat al goed | `/data/quiz.db`, op een volume dat een herstart overleeft. |
+| `MEDIA_DIR` | staat al goed | `/app/media`, de map met foto's, filmpjes en muziek. |
+| `PORT` | staat al goed | `3000`. |
+| `ADDRESS_HEADER`, `XFF_DEPTH` | staat al goed | `x-forwarded-for` en `1`: achter Traefik ziet de rem op de pincode zo het adres van de telefoon. |
+| `BODY_SIZE_LIMIT` | staat al goed | `512K`, het grootste verzoek dat de server aanneemt; een portret is hooguit 200 kB. |
+| `RECAP_URL`, `RECAP_TOKEN` | nee | De cijfers van het jaar live uit resolution-recap; zie [De cijfers van het jaar, live](#de-cijfers-van-het-jaar-live). Zonder draait de quiz op de ingebouwde momentopname. |
+| `RECAP_INTERVAL` | staat al goed | `60`: elke minuut verse cijfers, behalve tijdens een ronde die ze gebruikt. |
+| `NIEUWJAAR_OP` | nee | Alleen voor een generale repetitie: een verzonnen middernacht, `+10` (minuten na de start) of een tijdstip. Leeg laten op de avond zelf. |
+
+`HOST_PIN` heeft met opzet geen standaardwaarde. Draait de app in productie
+zonder eigen code — of nog met de voorbeeldcode `2627` uit `.env.example` — dan geeft
+`/api/health` een 503 en wordt de container nooit gezond. Dokploy laat de
+uitrol dan rood staan in plaats van een hostscherm online te zetten dat voor
+iedereen openstaat die het adres kent. Dezelfde reden als bij de migraties: een
+container die weigert te komen zie je meteen, een half werkende app niet.
+
+### Eerst een server
+
+Dokploy draait op je eigen server; er is geen gehoste versie. Je hebt nodig:
+
+- een VPS met **Ubuntu 22.04+ of Debian 12+**, minimaal **2 GB geheugen** en
+  **30 GB schijf**;
+- **poort 80 en 443 open** in de firewall — die heeft Traefik nodig om een
+  Let's Encrypt-certificaat op te halen;
+- een schone machine. Draait er al iets op 80 of 443, dan botst dat.
+
+Installeren gaat met één regel als root, over te nemen van
+[de installatiepagina van Dokploy](https://docs.dokploy.com/docs/core/installation).
+Haal hem daar op en niet uit dit bestand: het is een script dat je als root
+draait, en dan wil je de bron zien. Docker wordt onderweg meegeïnstalleerd.
+
+Daarna bereik je het paneel op `http://<ip-van-de-server>:3000` en maak je het
+beheerdersaccount aan. Doe dat meteen — tot die tijd kan iedereen die het
+adres kent het aanmaken.
+
+### In Dokploy
+
+De `docker-compose.yml` in de hoofdmap van de repository is hiervoor gemaakt.
+Hij bouwt de map `app/`, publiceert geen poort naar buiten en hangt aan het
+netwerk van Dokploy's Traefik.
+
+1. **Wijs het subdomein naar de server.** Zet bij je registrar een `A`-record
+   voor `quiz` onder `deblackjacks.nl`, wijzend naar het IP-adres van de
+   server. Het hoofddomein blijft zo vrij voor de andere projecten.
+   Controleer dat het staat voordat je verder gaat: het commando
+   `getent hosts quiz.deblackjacks.nl` moet het IP van de server teruggeven.
+   Zolang dat niet klopt kan Let's Encrypt geen certificaat afgeven en blijft
+   het domein in Dokploy op een foutmelding staan.
+
+   **Kijk ook naar het `AAAA`-record.** Veel registrars zetten er standaard
+   een IPv6-adres bij dat naar hun eigen parkeerpagina wijst. Let's Encrypt en
+   de meeste browsers geven voorrang aan IPv6, dus dan komt het verzoek daar
+   uit in plaats van bij jouw server — terwijl het `A`-record er perfect
+   uitziet. Haal het weg, of zet het op het IPv6-adres van de server. Bij
+   Strato staat het record op het subdomein zelf, niet op het hoofddomein;
+   je stelt het in via het tandwieltje naast het subdomein. Controleren kan
+   met `getent ahostsv4` en `getent ahostsv6` naast elkaar.
+2. Maak een project aan en daarin een service van het type **Compose**, met
+   Compose Type **Docker Compose**. Vul in:
+
+   | Veld | Waarde |
+   |---|---|
+   | Provider | GitHub (koppel eenmalig je account) |
+   | Repository | `Cas-Boots/blackjacks-quiz` |
+   | Branch | `main` |
+   | Compose Path | `./docker-compose.yml` |
+
+3. Zet onder **Environment** je eigen `HOST_PIN` en de `ORIGIN` die bij het
+   domein hoort. Schrijf ze niet in het bestand: dat staat in git.
+4. Voeg onder **Domains** een domein toe. Service Name is `quiz` — dat is de
+   naam uit de compose — en Container Port is `3000`. Zet HTTPS met Let's
+   Encrypt aan. Dokploy zet de Traefik-labels er zelf bij; je hoeft niets aan
+   het bestand te veranderen.
+5. Uitrollen. De container komt pas groen als `/api/health` `status: ok`
+   teruggeeft — dus als de database tabellen heeft én de pincode klopt.
+
+Wil je dat een `git push` naar `main` vanzelf uitrolt, zet dan **Autodeploy**
+aan. Handig tijdens het vullen van de vragen, maar zet hem uit op de dag zelf:
+een uitrol herstart de container en dat wil je niet halverwege een ronde.
+
+Een vers geregistreerd domein is niet meteen overal zichtbaar. Naast de tijd
+die het register nodig heeft, onthouden resolvers ook dat een naam *niet*
+bestond: dat heet negatieve caching en duurt bij `.nl` doorgaans tot een uur.
+Heb je het domein vlak na registratie al eens opgevraagd, dan kan het dus
+even duren voordat jouw resolver van gedachten verandert. Geduld, niet
+opnieuw registreren.
+
+Draai je op een gewone server met Docker en zonder Dokploy, gebruik dan
+`app/docker-compose.yml`. Die publiceert poort 3000 rechtstreeks; zet er zelf
+een proxy met een certificaat voor.
+
+### De bestanden bij de vragen
+
+De map `media/` zit in productie op een eigen volume, want foto's en filmpjes
+horen niet in git. Zet ze erin met:
+
+```bash
+docker cp ./media/. <container>:/app/media/
+```
+
+De app leest de map op het moment zelf, dus herstarten hoeft niet.
+
+### Voordat de avond begint
+
+```bash
+curl https://quiz.deblackjacks.nl/api/health
+```
+
+Je wilt `status: ok` zien, met het aantal tabellen en spelers, en een lege
+`waarschuwingen`. Staat `ORIGIN` er niet in, dan meldt hij dat hier — de quiz
+werkt dan gewoon, maar de koekjes missen hun `Secure`-markering.
+
+Speel daarna de avond een keer na tegen de echte server:
+
+```bash
+npx tsx scripts/simulate.ts --url https://quiz.deblackjacks.nl --pin <code> --auto-host --snelheid 20
+```
+
+### Wat er dicht staat
+
+Met een openbaar adres staat de server een avond lang open voor iedereen.
+Daarom, bovenop de verplichte pincode:
+
+- **Raden wordt afgeremd.** Vijf verkeerde pincodes binnen een minuut zetten
+  dat adres vijf minuten op slot, en de vergelijking gebeurt in vaste tijd.
+  Achter Traefik telt daarvoor het adres van de telefoon (`ADDRESS_HEADER`
+  staat in de compose). Een langere pincode blijft het beste middel; hij
+  hoeft maar één keer ingetikt.
+- **Opdrachten van een andere site worden geweigerd.** Elke schrijfopdracht
+  op `/api/` moet `application/json` zijn en mag niet van een andere site
+  komen (`Sec-Fetch-Site: cross-site`). Het sessiecookie is `HttpOnly` en
+  `SameSite=Lax`, en `Secure` zodra de app zeker weet dat de verbinding https
+  is (`ORIGIN` of `PROTOCOL_HEADER` gezet). Op het thuisnetwerk over gewoon
+  http blijft `Secure` uit — een browser weigert zo'n cookie over http en dan
+  zou geen telefoon zijn naam kunnen vasthouden.
+- **Strakke koppen op elke pagina.** Een Content-Security-Policy met nonces
+  (alleen eigen scripts; afbeeldingen, fragmenten en lettertypen van de
+  plekken die de app zelf gebruikt), `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, een
+  `Permissions-Policy` zonder camera, microfoon of locatie, en HSTS over
+  https. Bestanden uit `media/` gaan met een eigen policy die geen scripts
+  toelaat, ook niet in een svg. De stand (`/api/…`) krijgt
+  `Cache-Control: no-store`. De browsertest `e2e/koppen.spec.ts` opent de
+  vijf schermen en controleert dat de policy niets tegenhoudt — precies de
+  fout die je anders pas op de avond ziet.
+- **De container draait als `node`, niet als root**, met een alleen-lezen
+  bestandssysteem, zonder capabilities en zonder de mogelijkheid er meer bij
+  te krijgen (`no-new-privileges`). Alleen de volumes en `/tmp` zijn
+  beschrijfbaar; in `app/docker-compose.yml` is `media/` alleen-lezen
+  gekoppeld. `python3` en de compiler gaan na het installeren weer weg.
+- **Alleen wat er echt in de database hoort.** Een correctie hoort bij een
+  speler die meedoet en blijft binnen ±1000 punten; een portret is altijd
+  een kleine JPEG, PNG of WebP, ook als de quizmaster hem zet.
+
+**Een bestaand volume.** Draaide de quiz eerder als root, dan is `/data` in
+het volume nog van root en kan de nieuwe container er niet in schrijven. De
+app zegt dat dan zo bij het opkomen (*Geen schrijfrechten in /data*). Eén
+keer, met de compose die je gebruikt:
+
+```bash
+docker compose run --rm --user root --entrypoint chown quiz -R node:node /data /app/media
+```
+
+Onder Dokploy heb je die compose niet bij de hand; daar werk je op de naam van
+het volume. In de terminal van de server:
+
+```bash
+docker volume ls | grep quiz          # zoek de naam op
+docker run --rm -v <volumenaam>:/data alpine chown -R 1000:1000 /data
+```
+
+`1000` is de gebruiker `node` uit het image. Is er nog geen avond gespeeld,
+dan is weggooien korter dan repareren — een nieuw volume krijgt de eigenaar
+wel goed mee, want de Dockerfile zet hem:
+
+```bash
+docker volume rm <volumenaam>
+```
+
+Daarna opnieuw uitrollen. Let op dat dit de stand van een gespeelde avond
+wist; met een volle database gebruik je de `chown` hierboven.
+
+### Eén ding om te weten
+
+Spelers hebben geen pincode — dat is een bewuste keuze voor een avond onder
+vrienden, en op een huisnetwerk verandert er niets. Staat de quiz op een
+openbaar adres, dan kan iedereen die de link heeft een naam kiezen. Het
+hostscherm laat zien wie er op welke naam zit, dus je ziet het meteen. Wil je
+dat helemaal dicht, zet er dan in Dokploy een basisbeveiliging voor, of haal
+het domein pas vlak voor de avond online.
+
 ## Wat er nog niet in zit
 
-- Media bij vragen (foto's, video, muziek) werkt in de losse quiz, nog niet hier.
-- Portretten zijn in het model voorzien (`spelers.foto`), maar er is nog geen
-  scherm om ze te uploaden.
-- De vragenkiezer zit nog niet in het hostscherm; de samenstelling komt nu uit
-  `standaardSamenstelling()`.
+- *Oktober tot december* wacht op de gebeurtenissen van het najaar. Vul ze in
+  `src/lib/content/packs.ts` en draai `npm run content:sync`; `npm run
+  verify` telt per ronde hoeveel gekozen vragen nog een antwoord missen.
+- De uitkomsten van de voorspellingen die niemand kan uitrekenen (een nieuwe
+  baan, de temperatuur in De Bilt, Spotify Wrapped) vul je met de hand in
+  `src/lib/content/voorspellingen.ts`.
+- Een por komt alleen aan op een telefoon met een open live stroom; een
+  telefoon die op navragen is teruggevallen mist hem.
 
 ## Bekende hobbels
 

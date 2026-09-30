@@ -80,6 +80,49 @@ export function bepaalDichtstbij(
   return { winnaars, afstand: beste, precies, puntenPerTeam };
 }
 
+export interface StemTelling {
+  naam: string;
+  aantal: number;
+  /** De inzenders die op deze naam stemden. */
+  van: string[];
+}
+
+export interface StemUitslag {
+  telling: StemTelling[];
+  /** De inzenders die met de meerderheid meestemden. */
+  winnaars: string[];
+  /** De naam of namen met de meeste stemmen. */
+  gekozen: string[];
+}
+
+/**
+ * De groep beslist: wie met de meerderheid meestemt, heeft het "goed".
+ * Bij een gelijke stand bovenaan tellen alle stemmen op die namen.
+ * Een stem op een onbekende naam telt gewoon mee als eigen categorie; de
+ * quizmaster kan altijd nog met de hand bijsturen.
+ */
+export function bepaalStem(stemmen: { inzender: string; tekst: string }[]): StemUitslag | null {
+  const perNaam = new Map<string, StemTelling>();
+  for (const s of stemmen) {
+    const naam = String(s.tekst ?? '').trim();
+    if (!naam) continue;
+    const sleutel = naam.toLocaleLowerCase('nl');
+    const t = perNaam.get(sleutel) ?? { naam, aantal: 0, van: [] };
+    t.aantal += 1;
+    t.van.push(s.inzender);
+    perNaam.set(sleutel, t);
+  }
+  const telling = [...perNaam.values()].sort((a, b) => b.aantal - a.aantal || a.naam.localeCompare(b.naam, 'nl'));
+  if (!telling.length) return null;
+  const meeste = telling[0].aantal;
+  const bovenaan = telling.filter((t) => t.aantal === meeste);
+  return {
+    telling,
+    gekozen: bovenaan.map((t) => t.naam),
+    winnaars: bovenaan.flatMap((t) => t.van),
+  };
+}
+
 export function gissingenUitAntwoorden(rijen: { inzender: string; tekst: string }[]): Gissing[] {
   const uit: Gissing[] = [];
   for (const r of rijen) {

@@ -5,16 +5,36 @@ import { db } from '$lib/server/db/index';
 import { spellen, antwoorden, uitdelingen, correcties, teams as teamsTabel, spelers } from '$lib/server/db/schema';
 import {
   actiefSpel, huidige, deelnemersVan, teamsVoorRonde, schrijfTeams, sleutelVan, bumpVersie,
-  vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, gissingenUitAntwoorden, verplaats,
+  vraagPunten, vraagTijd, verdeelOverTeams, verplaats, schrijfUitdeling, markeerAntwoorden,
+  scoorAutomatisch, voegDeelnemerToe, MAX_NAAM_TEKENS,
 } from '$lib/server/spel';
+import { momentopname, schrijfLog, draaiTerug, type Momentopname } from '$lib/server/logboek';
+import { meldPor, meldGeluid } from '$lib/server/bus';
+import { isBordgeluid } from '$lib/shared/geluidsbord';
+import { geldigeFoto } from '$lib/server/foto';
 import { maakSpel } from '$lib/server/seed';
+import { PAKKETTEN } from '$lib/content/packs';
+import { ververs } from '$lib/server/recap/bron';
+import { aantalStappen } from '$lib/server/recap/cijfers';
+import { aantalDias, jaaroverzichtVoor } from '$lib/server/jaaroverzicht';
+import { recapAnalyse } from '$lib/server/recap/bron';
+import { isAfrekening } from '$lib/shared/state';
+
+/** Opdrachten die de klok of de plek in de quiz veranderen, en dus wachten tot na de pauze. */
+const GEBLOKKEERD_IN_PAUZE = new Set([
+  'naar-ronde', 'toon-cijfers', 'start-ronde', 'klok-pauze', 'klok-start', 'klok-verleng', 'toon-antwoord',
+  'media-wissel', 'volgende', 'vorige', 'naar-stand', 'naar-einde', 'por', 'ongedaan', 'zet-samenstelling', 'naar-lobby',
+  'jaaroverzicht',
+]);
 
 /**
  * Alle opdrachten van de quizmaster lopen hier langs.
  *
  * Eén ingang houdt de regels op één plek: elke opdracht eindigt met het
  * ophogen van de versie, waarna elke telefoon en de televisie vanzelf
- * meebewegen.
+ * meebewegen. Elke opdracht die de stand of de plek in de quiz verandert
+ * komt in het logboek, met een momentopname van ervoor, zodat hij met
+ * 'ongedaan' in zijn geheel terug kan.
  */
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (locals.rol !== 'quizmaster') error(403, 'alleen de quizmaster');
@@ -27,42 +47,137 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const { rondes, ronde, vraag } = huidige(spel);
   const lijst = deelnemersVan(spel.id);
   const sleutel = sleutelVan(spel.rondeIndex, spel.vraagIndex);
+  const naamVan = (id: number) => lijst.find((s) => s.id === id)?.naam ?? '?';
+  const inzenderNaam = (inzender: string) => {
+    const t = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst).find((x) => x.id === inzender) : undefined;
+    return t ? (t.leden.length === 1 ? naamVan(t.leden[0]) : t.naam) : inzender;
+  };
 
   const zet = (waarden: Partial<typeof spellen.$inferInsert>) =>
     db.update(spellen).set(waarden).where(eq(spellen.id, spel.id)).run();
 
-  const stopKlok = () => zet({ klokLoopt: false, klokEindigtOp: null, klokDuurMs: 0, klokRestMs: 0 });
+  // Elke stap naar een andere dia zet ook het fragment stil: een liedje dat
+  // doorspeelt over de volgende vraag heen is precies wat je niet wilt.
+  const stopKlok = () => zet({ klokLoopt: false, klokEindigtOp: null, klokDuurMs: 0, klokRestMs: 0, mediaSpeelt: false });
 
   const startKlok = (seconden: number) => {
     const duur = seconden * 1000;
-    zet({ klokLoopt: true, klokDuurMs: duur, klokEindigtOp: Date.now() + duur, klokRestMs: duur });
+    zet({ klokLoopt: true, klokDuurMs: duur, klokEindigtOp: Date.now() + duur, klokRestMs: duur, mediaSpeelt: false });
+  };
+
+  /** Wat er in het logboek komt. null betekent: niet loggen. */
+  let log: { omschrijving: string; terug: boolean } | null = null;
+  const voor: Momentopname = momentopname(spel);
+  let correctieId: number | undefined;
+
+  /** Hoeveel dia's met cijfers deze ronde heeft (overzicht plus één per persoon of voorspelling). */
+  const cijfersStappen = () => (ronde?.cijfers ? aantalStappen(ronde.cijfers, recapAnalyse()) : 0);
+
+  // Tijdens een pauze staat de quiz stil: niets dat de klok start of naar een
+  // andere dia gaat, anders loopt er achter het pauzescherm een vraag af. Wat
+  // de plek in de quiz niet raakt (punten bijstellen, een gast erbij) mag wel.
+  if (spel.pauze && GEBLOKKEERD_IN_PAUZE.has(opdracht)) {
+    error(409, 'De quiz staat op pauze. Hervat hem eerst.');
+  }
+
+  /* ---- Het jaaroverzicht ---------------------------------------------
+     De film loopt op de klok: elke dia zet hem op zijn eigen lengte, en
+     het hostscherm tikt door zodra hij afloopt. Pauzeren is dus gewoon de
+     klok pauzeren, en een stap terug zet hem weer vol. */
+  const jaarDias = () => aantalDias(recapAnalyse(), spel.geeindigdOp !== null);
+  const jaarDia = (stap: number) => jaaroverzichtVoor(recapAnalyse(), stap, spel.geeindigdOp !== null);
+  const zetJaarDia = (stap: number) => {
+    const doel = Math.max(0, Math.min(stap, jaarDias() - 1));
+    zet({ fase: 'jaaroverzicht', vraagIndex: doel });
+    startKlok(jaarDia(doel).seconden);
+    return doel;
   };
 
   switch (opdracht) {
+    case 'pauzeer': {
+      const soort = body.soort === 'nieuwjaar' ? 'nieuwjaar' : 'pauze';
+      if (spel.pauze) {
+        // Al gepauzeerd: alleen wisselen tussen gewone pauze en aftellen.
+        zet({ pauze: soort });
+      } else {
+        const rest = spel.klokLoopt ? Math.max(0, (spel.klokEindigtOp ?? Date.now()) - Date.now()) : spel.klokRestMs;
+        zet({ pauze: soort, pauzeKlokLiep: spel.klokLoopt, klokLoopt: false, klokRestMs: rest, mediaSpeelt: false });
+      }
+      log = { omschrijving: soort === 'nieuwjaar' ? 'Pauze voor middernacht' : 'Pauze', terug: false };
+      break;
+    }
+    case 'hervat': {
+      if (!spel.pauze) error(409, 'de quiz staat niet op pauze');
+      const klokWeer = spel.pauzeKlokLiep && spel.klokRestMs > 0;
+      zet({
+        pauze: null,
+        pauzeKlokLiep: false,
+        ...(klokWeer ? { klokLoopt: true, klokEindigtOp: Date.now() + spel.klokRestMs } : {}),
+      });
+      log = { omschrijving: 'De quiz gaat verder', terug: false };
+      break;
+    }
     case 'naar-ronde': {
       const doel = Math.max(0, Math.min(Number(body.ronde ?? 0), rondes.length - 1));
+      const r = rondes[doel];
+      // Een recap-ronde begint met verse cijfers. We wachten er even op, maar
+      // niet eindeloos: een trage verbinding mag de avond niet ophouden.
+      if (r?.cijfers && r.cijfers !== 'voorspellingen') {
+        await Promise.race([ververs(), new Promise((klaar) => setTimeout(klaar, 6000))]);
+      }
       stopKlok();
       zet({ fase: 'ronde', rondeIndex: doel, vraagIndex: 0 });
-      const r = rondes[doel];
       if (r) teamsVoorRonde(spel.id, doel, r, lijst);
+      log = { omschrijving: `Naar ronde ${doel + 1}: ${r?.naam ?? ''}`, terug: true };
+      break;
+    }
+    case 'ververs-cijfers': {
+      const veranderd = await ververs();
+      const versie = bumpVersie(spel.id);
+      return json({ ok: true, versie, veranderd });
+    }
+    case 'toon-cijfers': {
+      if (!ronde?.cijfers) error(409, 'deze ronde heeft geen cijfers');
+      stopKlok();
+      const stap = Math.max(0, Math.min(Number(body.stap ?? 0), cijfersStappen() - 1));
+      zet({ fase: 'cijfers', vraagIndex: stap });
+      log = { omschrijving: 'De cijfers van het jaar getoond', terug: true };
+      break;
+    }
+    case 'jaaroverzicht': {
+      // De film van het jaar. Voor de quiz met balken over de antwoorden,
+      // na de uitslag nog een keer zonder.
+      await Promise.race([ververs(), new Promise((klaar) => setTimeout(klaar, 6000))]);
+      const stap = zetJaarDia(Number(body.stap ?? 0));
+      log = { omschrijving: stap === 0 ? 'Het jaaroverzicht gestart' : `Jaaroverzicht: dia ${stap + 1}`, terug: true };
       break;
     }
     case 'herverdeel': {
       if (!ronde) error(409, 'geen ronde');
       db.delete(teamsTabel).where(and(eq(teamsTabel.spelId, spel.id), eq(teamsTabel.rondeIndex, spel.rondeIndex))).run();
       teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
+      log = { omschrijving: 'Teams opnieuw verdeeld', terug: true };
       break;
     }
     case 'verplaats': {
       if (!ronde) error(409, 'geen ronde');
       const huidigeTeams = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
       schrijfTeams(spel.id, spel.rondeIndex, verplaats(huidigeTeams, Number(body.spelerId)));
+      log = { omschrijving: `${naamVan(Number(body.spelerId))} naar een ander team`, terug: true };
       break;
     }
     case 'start-ronde': {
       if (!ronde) error(409, 'geen ronde');
+      if (isAfrekening(ronde)) {
+        // Geen vragen op de telefoon: meteen de voorspellingen van januari.
+        stopKlok();
+        zet({ fase: 'cijfers', vraagIndex: 0 });
+        log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
+        break;
+      }
       zet({ fase: 'vraag', vraagIndex: 0 });
       startKlok(vraagTijd(ronde, ronde.vragen[0]));
+      log = { omschrijving: `Ronde gestart: ${ronde.naam}`, terug: true };
       break;
     }
     case 'klok-pauze': {
@@ -91,36 +206,110 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     case 'toon-antwoord': {
       stopKlok();
       zet({ fase: 'antwoord' });
+      // Dichtstbij en stem rekent de machine meteen uit; de quizmaster hoeft
+      // er niet meer aan te denken en kan het altijd nog bijsturen.
+      if (ronde && vraag && spel.fase !== 'antwoord') scoorAutomatisch(spel, ronde, vraag, lijst);
+      log = { omschrijving: `Antwoord getoond bij vraag ${spel.vraagIndex + 1}`, terug: true };
+      break;
+    }
+    case 'media-wissel': {
+      if (!vraag?.media) error(409, 'deze vraag heeft geen fragment');
+      zet({ mediaSpeelt: !spel.mediaSpeelt });
       break;
     }
     case 'volgende': {
+      if (spel.fase === 'jaaroverzicht') {
+        // Het hostscherm tikt de film vanzelf door zodra de klok afloopt.
+        // Het zegt erbij op welke dia het dacht te staan, zodat twee open
+        // hostschermen samen geen twee stappen maken.
+        if (body.stap !== undefined && Number(body.stap) !== spel.vraagIndex) {
+          return json({ ok: true, versie: spel.versie, overgeslagen: true });
+        }
+        if (spel.vraagIndex + 1 < jaarDias()) {
+          const stap = zetJaarDia(spel.vraagIndex + 1);
+          log = { omschrijving: `Jaaroverzicht: dia ${stap + 1}`, terug: true };
+        } else if (spel.geeindigdOp) {
+          // De herhaling na de uitslag loopt terug naar het podium.
+          stopKlok();
+          zet({ fase: 'einde' });
+          log = { omschrijving: 'Terug naar de uitslag', terug: true };
+        } else {
+          stopKlok();
+          zet({ fase: 'ronde', rondeIndex: 0, vraagIndex: 0 });
+          const eerste = rondes[0];
+          if (eerste) teamsVoorRonde(spel.id, 0, eerste, lijst);
+          log = { omschrijving: `Van de film naar ronde 1: ${eerste?.naam ?? ''}`, terug: true };
+        }
+        break;
+      }
       if (!ronde) error(409, 'geen ronde');
       stopKlok();
-      if (spel.vraagIndex + 1 < ronde.vragen.length) {
+      if (spel.fase === 'cijfers') {
+        // Door de cijfers heen, en daarna de tussenstand.
+        if (spel.vraagIndex + 1 < cijfersStappen()) {
+          zet({ vraagIndex: spel.vraagIndex + 1 });
+          log = { omschrijving: `Cijfers: dia ${spel.vraagIndex + 2}`, terug: true };
+        } else {
+          zet({ fase: 'stand', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
+          log = { omschrijving: `Tussenstand na ${ronde.naam}`, terug: true };
+        }
+      } else if (spel.vraagIndex + 1 < ronde.vragen.length) {
         const volgendeIndex = spel.vraagIndex + 1;
         zet({ fase: 'vraag', vraagIndex: volgendeIndex });
         startKlok(vraagTijd(ronde, ronde.vragen[volgendeIndex]));
+        log = { omschrijving: `Door naar vraag ${volgendeIndex + 1}`, terug: true };
+      } else if (ronde.cijfers && cijfersStappen() > 0) {
+        // Na de laatste vraag van een recap-ronde: eerst de cijfers van het jaar.
+        zet({ fase: 'cijfers', vraagIndex: 0 });
+        log = { omschrijving: `De cijfers van het jaar na ${ronde.naam}`, terug: true };
       } else {
         zet({ fase: 'stand' });
+        log = { omschrijving: `Tussenstand na ${ronde.naam}`, terug: true };
       }
       break;
     }
     case 'vorige': {
+      if (spel.fase === 'jaaroverzicht') {
+        if (spel.vraagIndex > 0) {
+          const stap = zetJaarDia(spel.vraagIndex - 1);
+          log = { omschrijving: `Jaaroverzicht: dia ${stap + 1}`, terug: true };
+        } else {
+          stopKlok();
+          zet({ fase: spel.geeindigdOp ? 'einde' : 'lobby' });
+          log = { omschrijving: 'Terug uit het jaaroverzicht', terug: true };
+        }
+        break;
+      }
       stopKlok();
       if (spel.fase === 'antwoord') zet({ fase: 'vraag' });
       else if (spel.fase === 'vraag' && spel.vraagIndex > 0) zet({ fase: 'antwoord', vraagIndex: spel.vraagIndex - 1 });
       else if (spel.fase === 'vraag') zet({ fase: 'ronde' });
+      else if (spel.fase === 'cijfers' && spel.vraagIndex > 0) zet({ vraagIndex: spel.vraagIndex - 1 });
+      else if (spel.fase === 'cijfers' && isAfrekening(ronde)) zet({ fase: 'ronde', vraagIndex: 0 });
+      else if (spel.fase === 'cijfers' && ronde) zet({ fase: 'antwoord', vraagIndex: Math.max(0, ronde.vragen.length - 1) });
+      else if (spel.fase === 'stand' && ronde?.cijfers && cijfersStappen() > 0) zet({ fase: 'cijfers', vraagIndex: cijfersStappen() - 1 });
       else if (spel.fase === 'stand' && ronde) zet({ fase: 'antwoord', vraagIndex: ronde.vragen.length - 1 });
+      // Vanaf de titelkaart terug naar de tussenstand van de vorige ronde,
+      // en vanaf de eerste ronde terug naar de lobby.
+      else if (spel.fase === 'ronde' && spel.rondeIndex > 0) {
+        const vorigeRonde = rondes[spel.rondeIndex - 1];
+        zet({ fase: 'stand', rondeIndex: spel.rondeIndex - 1, vraagIndex: Math.max(0, (vorigeRonde?.vragen.length ?? 1) - 1) });
+      } else if (spel.fase === 'ronde') zet({ fase: 'lobby', rondeIndex: 0, vraagIndex: 0 });
+      // Vanaf de uitslag terug naar de laatste tussenstand.
+      else if (spel.fase === 'einde') zet({ fase: 'stand', geeindigdOp: null });
+      log = { omschrijving: 'Een stap terug', terug: true };
       break;
     }
     case 'naar-stand': {
       stopKlok();
       zet({ fase: 'stand' });
+      log = { omschrijving: 'Naar de tussenstand', terug: true };
       break;
     }
     case 'naar-einde': {
       stopKlok();
       zet({ fase: 'einde', geeindigdOp: new Date().toISOString() });
+      log = { omschrijving: 'Naar de uitslag', terug: true };
       break;
     }
     case 'ken-toe': {
@@ -130,51 +319,122 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       const verdeling = verdeelOverTeams(teamLijst, winnaars, {}, vraagPunten(ronde, vraag));
       schrijfUitdeling(spel.id, sleutel, verdeling);
       // Markeer de antwoorden zelf, zodat het hostscherm laat zien wat er geteld is.
-      const rijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel))).all();
-      for (const r of rijen) {
-        db.update(antwoorden).set({ isGoed: winnaars.includes(r.inzender) }).where(eq(antwoorden.id, r.id)).run();
-      }
+      markeerAntwoorden(spel.id, sleutel, winnaars);
+      log = {
+        omschrijving: winnaars.length ? `Punten voor ${winnaars.map(inzenderNaam).join(', ')}` : 'Alle punten van deze vraag weggehaald',
+        terug: true,
+      };
       break;
     }
-    case 'bereken-dichtstbij': {
-      if (!ronde || !vraag || typeof vraag.getal !== 'number') error(409, 'geen dichtstbij-vraag');
-      const rijen = db
-        .select({ inzender: antwoorden.inzender, tekst: antwoorden.tekst })
-        .from(antwoorden)
-        .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel)))
-        .all();
-      const uitslag = bepaalDichtstbij(gissingenUitAntwoorden(rijen), vraag.getal, vraagPunten(ronde, vraag));
-      if (!uitslag) {
-        schrijfUitdeling(spel.id, sleutel, {});
-        break;
-      }
-      const teamLijst = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
-      const verdeling = verdeelOverTeams(teamLijst, uitslag.winnaars, uitslag.puntenPerTeam, vraagPunten(ronde, vraag));
-      schrijfUitdeling(spel.id, sleutel, verdeling);
-      for (const r of rijen) {
-        db.update(antwoorden)
-          .set({ isGoed: uitslag.winnaars.includes(r.inzender) })
-          .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel), eq(antwoorden.inzender, r.inzender)))
-          .run();
-      }
+    case 'bereken-dichtstbij':
+    case 'bereken-stem':
+    case 'bereken': {
+      if (!ronde || !vraag) error(409, 'geen vraag');
+      if (!scoorAutomatisch(spel, ronde, vraag, lijst)) error(409, 'deze vraag rekent de machine niet uit');
+      const rij = db.select().from(uitdelingen).where(and(eq(uitdelingen.spelId, spel.id), eq(uitdelingen.vraagSleutel, sleutel))).get();
+      let ids: number[] = [];
+      try {
+        ids = Object.keys(JSON.parse(rij?.verdeling ?? '{}')).map(Number);
+      } catch { /* leeg */ }
+      log = { omschrijving: ids.length ? `Uitgerekend: punten voor ${ids.map(naamVan).join(', ')}` : 'Uitgerekend: niemand punten', terug: true };
       break;
     }
     case 'corrigeer': {
-      db.insert(correcties)
-        .values({ spelId: spel.id, spelerId: Number(body.spelerId), punten: Number(body.punten ?? 0), reden: body.reden ?? null })
-        .run();
+      const punten = Number(body.punten ?? 0);
+      const spelerId = Number(body.spelerId);
+      if (!lijst.some((s) => s.id === spelerId)) error(400, 'onbekende speler');
+      if (!Number.isFinite(punten) || Math.abs(punten) > 1000) error(400, 'ongeldig aantal punten');
+      const rij = db.insert(correcties)
+        .values({ spelId: spel.id, spelerId, punten, reden: body.reden ? String(body.reden).slice(0, 200) : 'handmatig via het hostscherm' })
+        .returning()
+        .get();
+      correctieId = rij.id;
+      log = { omschrijving: `${punten > 0 ? '+' : ''}${punten} voor ${naamVan(spelerId)}`, terug: true };
+      break;
+    }
+    case 'geluid': {
+      // Het geluidsbord: alleen doorgeven aan de televisie, de stand verandert niet.
+      if (!isBordgeluid(body.geluid)) error(400, 'onbekend geluid');
+      meldGeluid(body.geluid);
+      return json({ ok: true });
+    }
+    case 'por': {
+      // Een por naar wie nog niet heeft ingeleverd, of naar één speler.
+      if (spel.fase !== 'vraag' || !ronde) error(409, 'er staat nu geen vraag open');
+      const teamLijst = teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst);
+      const binnen = new Set(
+        db.select({ inzender: antwoorden.inzender }).from(antwoorden)
+          .where(and(eq(antwoorden.spelId, spel.id), eq(antwoorden.vraagSleutel, sleutel))).all().map((r) => r.inzender),
+      );
+      let doelen: number[];
+      if (body.spelerId !== undefined) doelen = [Number(body.spelerId)];
+      else doelen = teamLijst.filter((t) => !binnen.has(t.id)).flatMap((t) => t.leden);
+      const tekst = String(body.tekst ?? 'De quizmaster wacht op je. Schiet op!').slice(0, 120);
+      meldPor(doelen, tekst);
+      return json({ ok: true, aantal: doelen.length });
+    }
+    case 'voeg-speler-toe': {
+      const naam = String(body.naam ?? '').trim();
+      if (!naam) error(400, 'vul een naam in');
+      if (naam.length > MAX_NAAM_TEKENS) error(400, `een naam is hooguit ${MAX_NAAM_TEKENS} tekens`);
+      let speler: { naam: string };
+      let nieuw = false;
+      try {
+        ({ speler, nieuw } = voegDeelnemerToe(spel, naam));
+      } catch (e) {
+        error(400, (e as Error).message);
+      }
+      if (nieuw) log = { omschrijving: `${speler.naam} doet mee`, terug: false };
+      break;
+    }
+    case 'ongedaan': {
+      const omschrijving = draaiTerug(spel.id);
+      if (!omschrijving) error(409, 'Er is niets om terug te draaien.');
+      schrijfLog(spel.id, 'ongedaan', `Teruggedraaid: ${omschrijving}`, null);
       break;
     }
     case 'nieuw-spel': {
-      maakSpel(String(body.pakket ?? 'jaar2026'));
+      const pakketId = String(body.pakket ?? 'jaar2026');
+      if (!PAKKETTEN[pakketId]) error(400, 'onbekend pakket');
+      const nieuw = maakSpel(pakketId);
+      schrijfLog(nieuw.id, 'nieuw-spel', `Nieuw spel: ${PAKKETTEN[pakketId].naam}`, null);
       break;
     }
     case 'zet-samenstelling': {
-      zet({ samenstelling: JSON.stringify(body.samenstelling ?? {}) });
+      // De teamindeling en de uitdelingen hangen aan de rondenummers van de
+      // gespeelde volgorde. Zodra er gespeeld is, zou een andere samenstelling
+      // die nummers verschuiven en de stand door elkaar gooien. Dan kan het
+      // alleen nog met een nieuw spel.
+      const gespeeld = db.select({ id: antwoorden.id }).from(antwoorden).where(eq(antwoorden.spelId, spel.id)).get()
+        ?? db.select({ id: uitdelingen.id }).from(uitdelingen).where(eq(uitdelingen.spelId, spel.id)).get();
+      if (spel.fase !== 'lobby' || gespeeld) {
+        error(409, 'De samenstelling kan alleen veranderen zolang er nog niet gespeeld is. Begin daarvoor een nieuw spel.');
+      }
+      const keuze: Record<string, number[]> = {};
+      const invoer = body.samenstelling && typeof body.samenstelling === 'object' ? body.samenstelling : {};
+      for (const [k, v] of Object.entries(invoer as Record<string, unknown>)) {
+        if (!/^\d+$/.test(k) || !Array.isArray(v)) continue;
+        keuze[k] = v.map(Number).filter((n) => Number.isInteger(n) && n >= 0);
+      }
+      // De teamindeling hangt aan de rondenummers, en de lobby heeft voor
+      // ronde 0 al een indeling aangemaakt. Die hoort bij de oude volgorde.
+      db.delete(teamsTabel).where(eq(teamsTabel.spelId, spel.id)).run();
+      zet({ samenstelling: JSON.stringify(keuze), rondeIndex: 0, vraagIndex: 0 });
+      log = { omschrijving: 'Samenstelling aangepast', terug: true };
+      break;
+    }
+    case 'naar-lobby': {
+      stopKlok();
+      // Terug naar de lobby betekent: de avond begint opnieuw. Daar hoort
+      // ook bij dat het jaaroverzicht zijn balken terugkrijgt; die gaan er
+      // pas af als de uitslag geweest is.
+      zet({ fase: 'lobby', rondeIndex: 0, vraagIndex: 0, geeindigdOp: null });
+      log = { omschrijving: 'Terug naar de lobby', terug: true };
       break;
     }
     case 'zet-foto': {
-      const foto = String(body.foto ?? '').slice(0, 200_000);
+      const foto = String(body.foto ?? '');
+      if (foto && !geldigeFoto(foto)) error(400, 'geen geldige afbeelding');
       db.update(spelers).set({ foto: foto || null }).where(eq(spelers.id, Number(body.spelerId))).run();
       break;
     }
@@ -182,21 +442,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       error(400, `onbekende opdracht: ${opdracht}`);
   }
 
-  const versie = bumpVersie(spel.id);
+  if (log) {
+    schrijfLog(spel.id, opdracht, log.omschrijving, log.terug ? { ...voor, correctieId } : null);
+  }
+
+  // Na 'nieuw spel' is er een ander actief spel; dat moet de versie krijgen.
+  const versie = bumpVersie(actiefSpel()?.id ?? spel.id);
   return json({ ok: true, versie });
 };
-
-/** Vervangt de verdeling van één vraag in zijn geheel. Zie scoring.ts. */
-function schrijfUitdeling(spelId: number, vraagSleutel: string, verdeling: Record<number, number>) {
-  const bestaand = db
-    .select()
-    .from(uitdelingen)
-    .where(and(eq(uitdelingen.spelId, spelId), eq(uitdelingen.vraagSleutel, vraagSleutel)))
-    .get();
-  const json = JSON.stringify(verdeling);
-  if (bestaand) {
-    db.update(uitdelingen).set({ verdeling: json }).where(eq(uitdelingen.id, bestaand.id)).run();
-  } else {
-    db.insert(uitdelingen).values({ spelId, vraagSleutel, verdeling: json }).run();
-  }
-}

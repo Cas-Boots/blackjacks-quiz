@@ -1,0 +1,1 @@
+ALTER TABLE `antwoorden` ADD `na_ms` integer;

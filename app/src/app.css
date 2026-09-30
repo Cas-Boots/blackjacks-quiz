@@ -149,6 +149,28 @@ button {
   justify-content: center;
 }
 
+/* ---- De televisie: één beeld, nooit een scrollbalk ---------------
+   Aan de televisie draait niemand aan een balk: wat onder de onderrand
+   valt, bestaat niet voor de kamer. Het scherm is daarom precies zo hoog
+   als de televisie, en het vlak met de dia krimpt mee tot alles past —
+   zie `passend.ts`, dat `--pas` bijhoudt. */
+.scherm.televisie {
+  height: 100%;
+}
+.televisie .romp {
+  /* Zonder dit weigert de romp onder zijn inhoud te krimpen en duwt een
+     lange dia het scherm alsnog langer dan de televisie. */
+  min-height: 0;
+}
+.televisie .vlak {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  width: 100%;
+  transform: scale(var(--pas, 1));
+  transform-origin: center center;
+}
+
 /* ===== Typografie ================================================= */
 .etiket {
   font-size: var(--fs-etiket);
@@ -246,9 +268,12 @@ button {
   }
 }
 
+/* Een lange vraag hoort niet in dezelfde letter als een korte: acht regels
+   koeienletters duwen de keuzes en de inleverrij van het scherm af. Hoe langer
+   de tekst, hoe rustiger de maat — `--vraagmaat` komt uit het scherm zelf. */
 .vraagtekst {
   font-family: var(--display);
-  font-size: var(--fs-vraag);
+  font-size: calc(var(--fs-vraag) * var(--vraagmaat, 1));
   font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.012em;
@@ -257,7 +282,7 @@ button {
   text-wrap: balance;
 }
 .vraagtekst.klein {
-  font-size: calc(var(--fs-vraag) * 0.62);
+  font-size: calc(var(--fs-vraag) * 0.62 * var(--vraagmaat, 1));
 }
 .emoji {
   font-size: calc(var(--schaal) * clamp(2.6rem, 8vw, 7rem));
@@ -272,14 +297,14 @@ button {
 .lyric {
   font-family: var(--display);
   font-style: italic;
-  font-size: calc(var(--fs-vraag) * 0.82);
+  font-size: calc(var(--fs-vraag) * 0.82 * var(--vraagmaat, 1));
   line-height: 1.22;
   margin: 0;
   color: var(--kaart);
   text-wrap: balance;
 }
 .lyric.klein {
-  font-size: calc(var(--fs-vraag) * 0.44);
+  font-size: calc(var(--fs-vraag) * 0.44 * var(--vraagmaat, 1));
 }
 
 /* ===== Antwoordopties ============================================= */
@@ -608,46 +633,6 @@ button {
   }
 }
 
-/* ===== Podium ===================================================== */
-.podium {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: clamp(0.8rem, 1.6vw, 1.6rem);
-  align-items: end;
-  width: 100%;
-}
-.plaats {
-  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
-  border: 1px solid var(--rand);
-  border-radius: 18px;
-  padding: clamp(1.2rem, 2.4vw, 2.4rem) clamp(0.9rem, 1.6vw, 1.6rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-  animation: opkomen 0.6s var(--deal) both;
-  animation-delay: calc(var(--i, 0) * 260ms);
-}
-.plaats.eerste {
-  background: linear-gradient(180deg, rgba(201, 162, 39, 0.24), var(--vilt-hoog));
-  border-color: var(--goud);
-  box-shadow: 0 0 70px -18px rgba(201, 162, 39, 0.75);
-}
-.plaats .medaille {
-  font-size: clamp(2rem, 3.6vw, 3.4rem);
-  line-height: 1;
-}
-.plaats .naam {
-  font-family: var(--display);
-  font-size: calc(var(--fs-naam) * 0.9);
-  text-align: center;
-}
-.plaats .punten {
-  font-family: var(--mono);
-  color: var(--goud-licht);
-  font-size: calc(var(--fs-naam) * 0.6);
-}
-
 /* ===== Knoppen en formulieren ===================================== */
 .knop {
   display: inline-flex;
@@ -907,7 +892,8 @@ textarea:focus {
   position: absolute;
   right: clamp(10px, 1.4vw, 22px);
   bottom: clamp(10px, 1.4vw, 22px);
-  z-index: 30;
+  /* Boven het pauzescherm: het aftellen naar middernacht wil je horen. */
+  z-index: 70;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
   border: 1px solid var(--rand);
@@ -922,6 +908,51 @@ textarea:focus {
   opacity: 1;
   color: var(--ivoor);
 }
+/* ===== Middernacht nadert ========================================
+   Op de televisie in de laatste tien minuten voor twaalf uur, zolang de
+   quiz nog doorloopt. Linksonder, waar niets anders staat. */
+.middernacht-melding {
+  position: absolute;
+  left: clamp(10px, 1.4vw, 22px);
+  bottom: clamp(10px, 1.4vw, 22px);
+  z-index: 30;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--goud-diep);
+  background: rgba(8, 21, 17, 0.85);
+  color: var(--goud-licht);
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.04em;
+  animation: middernacht-puls 2.4s ease-in-out infinite;
+}
+@keyframes middernacht-puls {
+  50% {
+    border-color: var(--goud-licht);
+  }
+}
+
+/* Op het hostscherm: de waarschuwing voor middernacht en de pauze. */
+.paneel.middernacht {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-color: var(--goud-diep);
+}
+.paneel.middernacht.dringend {
+  border-color: var(--rood);
+  animation: middernacht-dringend 1.6s ease-in-out infinite;
+}
+@keyframes middernacht-dringend {
+  50% {
+    box-shadow: 0 0 0 3px rgba(192, 69, 47, 0.35);
+  }
+}
+.paneel.pauzepaneel {
+  border-color: var(--goud);
+}
+
 /* ===== Het goede antwoord krijgt een glans ======================== */
 .keuze.goed {
   position: relative;
@@ -960,19 +991,6 @@ textarea:focus {
   }
   100% {
     transform: rotateX(0deg) scale(1);
-  }
-}
-
-/* ===== Podium: de winnaar pulseert zacht ========================== */
-.plaats.eerste {
-  animation:
-    opkomen 0.6s var(--deal) both,
-    gloed 2.6s 1.2s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 260ms), 1.2s;
-}
-@keyframes gloed {
-  50% {
-    box-shadow: 0 0 110px -14px rgba(201, 162, 39, 0.95);
   }
 }
 
@@ -1232,4 +1250,2506 @@ textarea:focus {
     rgba(245, 224, 46, 0.035) 0 3px,
     transparent 3px 34px
   );
+}
+
+/* ===== Aanmelden: de QR-code naast de namen ======================= */
+.lobby {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto;
+  gap: clamp(1.5rem, 4vw, 5rem);
+  align-items: center;
+  width: 100%;
+}
+.lobby-tekst {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.6vh, 2.2rem);
+  min-width: 0;
+}
+.qr-kaart {
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: clamp(14px, 1.6vw, 26px);
+  border-radius: 18px;
+  background: linear-gradient(168deg, var(--kaart-papier), var(--kaart-papier-diep));
+  color: var(--kaart);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.5) inset,
+    0 40px 80px -30px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(201, 162, 39, 0.4);
+  max-width: min(42vh, 420px);
+}
+.qr-kaart .qr {
+  display: block;
+  width: min(36vh, 360px);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  image-rendering: pixelated;
+}
+.qr-adres {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: calc(var(--fs-lood) * 0.95);
+  letter-spacing: 0.02em;
+  text-align: center;
+  word-break: break-all;
+}
+.qr-let-op {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: rgba(19, 31, 26, 0.7);
+  text-align: center;
+  border-top: 1px solid rgba(19, 31, 26, 0.12);
+  padding-top: 0.6rem;
+}
+/* Het adres dat je in plaats van localhost moet tikken: klikbaar op de laptop, leesbaar vanaf de bank. */
+.qr-adres-tip {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  word-break: break-all;
+}
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  .lobby {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .lobby-tekst {
+    align-items: center;
+  }
+  .qr-kaart {
+    justify-self: center;
+  }
+}
+
+/* ===== De onthulling: wat iedereen had ingetikt ==================== */
+.antwoordenrij {
+  display: grid;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.antwoordkaart {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "wie oordeel"
+    "wat oordeel";
+  gap: 0.15rem 0.6rem;
+  align-items: center;
+  padding: clamp(0.6rem, 1.1vw, 1rem) clamp(0.8rem, 1.3vw, 1.2rem);
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  transition: border-color 0.35s var(--zacht), background 0.35s var(--zacht), opacity 0.35s var(--zacht);
+}
+.antwoordkaart .wie {
+  grid-area: wie;
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--salie);
+}
+.antwoordkaart .wat {
+  grid-area: wat;
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.7);
+  line-height: 1.15;
+  color: var(--ivoor);
+  overflow-wrap: anywhere;
+}
+.antwoordkaart .oordeel {
+  grid-area: oordeel;
+  font-size: calc(var(--fs-naam) * 0.8);
+  line-height: 1;
+  width: 1.2em;
+  text-align: center;
+}
+.antwoordkaart.goed {
+  border-color: var(--groen);
+  background: linear-gradient(170deg, rgba(78, 154, 107, 0.2), var(--vilt-diep));
+}
+.antwoordkaart.goed .oordeel {
+  color: var(--groen-licht);
+}
+.antwoordkaart.goed .wie {
+  color: var(--groen-licht);
+}
+.antwoordkaart.fout {
+  opacity: 0.62;
+}
+.antwoordkaart.fout .oordeel {
+  color: var(--rood-licht);
+}
+
+/* ===== Telefoon: jouw uitslag bij de onthulling =================== */
+.uitslag {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+.uitslag .teken {
+  font-size: 1.8rem;
+  line-height: 1;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--vilt-diep);
+  border: 1px solid var(--rand);
+  color: var(--salie);
+}
+.uitslag .plus {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  color: var(--goud-licht);
+  margin: 0 0.3rem;
+}
+.uitslag[data-uitslag="goed"] {
+  border-color: var(--groen);
+  background: linear-gradient(170deg, rgba(78, 154, 107, 0.26), var(--vilt-diep));
+  box-shadow: 0 0 40px -12px rgba(78, 154, 107, 0.7);
+}
+.uitslag[data-uitslag="goed"] .teken {
+  background: var(--groen);
+  border-color: var(--groen-licht);
+  color: #06120b;
+}
+.uitslag[data-uitslag="fout"] .teken {
+  color: var(--rood-licht);
+  border-color: var(--rood);
+}
+.standrij.ik {
+  background: linear-gradient(90deg, rgba(240, 217, 140, 0.1), transparent 70%);
+}
+.standrij.ik .naam::after {
+  content: " · jij";
+  font-family: var(--ui);
+  font-size: 0.6em;
+  color: var(--goud);
+  font-weight: 500;
+}
+
+/* ===== Media bij een vraag ======================================== */
+.media-beeld {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.media-beeld img,
+.media-beeld video {
+  display: block;
+  max-width: 100%;
+  max-height: min(42vh, 560px);
+  border-radius: 12px;
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.9);
+  background: #000;
+}
+.media-beeld.klein img,
+.media-beeld.klein video {
+  max-height: min(30vh, 380px);
+}
+.media-beeld figcaption {
+  font-size: calc(var(--fs-lood) * 0.8);
+  color: rgba(19, 31, 26, 0.6);
+  text-align: center;
+}
+.media-ontbreekt {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(19, 31, 26, 0.2);
+  border-radius: 10px;
+  color: rgba(19, 31, 26, 0.7);
+  font-size: calc(var(--fs-lood) * 0.85);
+}
+.media-ontbreekt code {
+  font-family: var(--mono);
+}
+.media-muziek {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: clamp(1rem, 2.4vh, 2rem);
+  border-radius: 14px;
+  background: rgba(19, 31, 26, 0.06);
+  border: 1px solid rgba(19, 31, 26, 0.12);
+  color: var(--kaart);
+}
+.media-muziek .tekst {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: calc(var(--fs-vraag) * 0.5);
+}
+.media-muziek .balken {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  height: clamp(2.4rem, 7vh, 5rem);
+}
+.media-muziek .balken i {
+  display: block;
+  width: clamp(0.4rem, 0.8vw, 0.8rem);
+  height: 18%;
+  border-radius: 3px;
+  background: var(--kaart);
+  opacity: 0.35;
+  transition: height 0.3s var(--zacht), opacity 0.3s var(--zacht);
+}
+.media-muziek.speelt .balken i {
+  opacity: 0.85;
+  animation: dansen 0.9s ease-in-out infinite;
+  animation-delay: calc(var(--n) * -0.13s);
+}
+@keyframes dansen {
+  0%, 100% { height: 22%; }
+  50% { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .media-muziek.speelt .balken i { height: 60%; }
+}
+
+/* ===== Hostscherm: vraag, spiekbriefje en rondes ================== */
+.host-vraagtekst {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin: 0.4rem 0 0;
+  color: var(--ivoor);
+}
+.spiek {
+  margin-top: 0.7rem;
+  border-top: 1px solid var(--rand);
+  padding-top: 0.5rem;
+}
+.spiek summary {
+  cursor: pointer;
+  color: var(--salie);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.spiek p {
+  margin: 0.4rem 0 0;
+  color: var(--groen-licht);
+  font-size: 1.05rem;
+}
+kbd {
+  font-family: var(--mono);
+  font-size: 0.78em;
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--rand);
+  border-radius: 5px;
+  background: var(--vilt-diep);
+  color: var(--ivoor-zacht);
+}
+.rondes > summary {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  cursor: pointer;
+  list-style: none;
+}
+.rondes > summary::-webkit-details-marker {
+  display: none;
+}
+.rondes > summary::before {
+  content: "▸";
+  color: var(--salie);
+  font-size: 0.8rem;
+}
+.rondes[open] > summary::before {
+  content: "▾";
+}
+.rondelijst {
+  display: flex;
+  flex-direction: column;
+}
+.ronderij {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.7rem;
+  align-items: start;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid var(--rand);
+}
+.ronderij.uit {
+  opacity: 0.55;
+}
+.ronderij.nu {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.14), transparent 70%);
+}
+.ronderij input[type="checkbox"],
+.vragenlijst input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--goud);
+}
+.ronderij .volgnummer {
+  font-family: var(--mono);
+  color: var(--salie);
+  width: 1.4rem;
+  text-align: center;
+  padding-top: 0.1rem;
+}
+/* Het spiekbriefje bij de afrekening van de voorspellingen. */
+.praatpunten {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 10px;
+}
+.praatpunten summary {
+  cursor: pointer;
+  color: var(--goud);
+}
+.praatpunten ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.rondedetails summary {
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  list-style: none;
+}
+.rondedetails summary::-webkit-details-marker {
+  display: none;
+}
+.rondedetails summary .suit {
+  color: var(--goud);
+}
+.rondedetails summary .suit.rood {
+  color: var(--rood-licht);
+}
+.badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--rand);
+  color: var(--salie);
+}
+.badge.rood {
+  border-color: var(--rood);
+  color: var(--rood-licht);
+}
+.vragenlijst {
+  margin: 0.5rem 0 0.2rem;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  color: var(--ivoor-zacht);
+}
+.vragenlijst li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.vragenlijst li.uit {
+  opacity: 0.5;
+}
+
+/* ===== Telefoon: je portret in de kop ============================= */
+.portretknop {
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 0;
+}
+.portretknop:disabled {
+  opacity: 0.5;
+}
+
+/* ===== De prijzen onder het podium ================================ */
+.prijzen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: clamp(0.6rem, 1.2vw, 1.2rem);
+  width: min(100%, 1400px);
+  margin-top: clamp(0.5rem, 1.5vh, 1.2rem);
+}
+.prijs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icoon titel"
+    "icoon naam"
+    "icoon detail";
+  column-gap: 0.8rem;
+  align-items: center;
+  text-align: left;
+  padding: clamp(0.7rem, 1.2vw, 1.1rem) clamp(0.9rem, 1.4vw, 1.3rem);
+  border-radius: 14px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+}
+.prijsicoon {
+  grid-area: icoon;
+  font-size: clamp(1.6rem, 2.6vw, 2.6rem);
+  line-height: 1;
+}
+.prijstitel {
+  grid-area: titel;
+  font-size: calc(var(--fs-etiket) * 0.92);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--goud);
+}
+.prijsnaam {
+  grid-area: naam;
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.75);
+  line-height: 1.1;
+  color: var(--ivoor);
+}
+.prijsdetail {
+  grid-area: detail;
+  font-size: calc(var(--fs-lood) * 0.8);
+  color: var(--salie);
+}
+
+/* ===================================================================
+   DE GEKKE MOMENTEN
+
+   De tafel blijft chic; wat er af en toe op neerkomt niet. Stempels,
+   een kroontje dat wiebelt, een rode lantaarn, emoji's die omhoog
+   zweven. Allemaal kort, allemaal op een moment dat het mag.
+   =================================================================== */
+
+/* ---- De rubberen stempel ---------------------------------------- */
+.stempel {
+  position: absolute;
+  z-index: 6;
+  padding: 0.15em 0.55em;
+  border: 0.14em solid currentColor;
+  border-radius: 0.25em;
+  font-family: var(--ui);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4.2vw, 4rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--rood);
+  background: rgba(251, 248, 239, 0.92);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+  mix-blend-mode: multiply;
+  transform: rotate(var(--hoek, -9deg));
+  animation: stempelen 0.42s var(--deal) both;
+  pointer-events: none;
+  /* Inktrandje, alsof het stempelkussen bijna op was. */
+  -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgba(0, 0, 0, 0.75) 100%);
+  mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgba(0, 0, 0, 0.75) 100%);
+}
+.stempel.groen {
+  color: #2f7a4d;
+}
+.stempel.goud {
+  color: var(--goud-diep);
+}
+.stempel.rechtsboven {
+  top: clamp(-10px, -1vw, -18px);
+  right: clamp(8px, 2vw, 40px);
+}
+.stempel.midden {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(var(--hoek, -9deg));
+  animation-name: stempelenMidden;
+}
+@keyframes stempelen {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--hoek, -9deg)) scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(var(--hoek, -9deg)) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(var(--hoek, -9deg)) scale(1);
+  }
+}
+@keyframes stempelenMidden {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--hoek, -9deg)) scale(1);
+  }
+}
+/* Bij de onthulling staat de stempel op het antwoordpaneel, waar rechts
+   ruimte is — niet over de vraag heen. */
+.onthulling {
+  position: relative;
+}
+.onthulling .stempel {
+  top: 12%;
+  right: 4%;
+  font-size: clamp(1.4rem, 3.4vw, 3.2rem);
+  /* Vermenigvuldigen is voor de ivoren kaart; op het donkere paneel zou
+     de stempel erin verdwijnen. */
+  mix-blend-mode: normal;
+  background: rgba(251, 248, 239, 0.96);
+}
+/* Op de telefoon: kleiner, en over de uitslag heen. */
+.uitslag {
+  position: relative;
+  overflow: visible;
+}
+.uitslag .stempel {
+  font-size: 1.1rem;
+  top: -0.7rem;
+  right: 0.6rem;
+  border-width: 0.16em;
+}
+
+/* ---- De kaart ligt scheef en trilt in de laatste seconden ------- */
+.tafelkaart {
+  transform: rotate(var(--kanteling, 0deg));
+}
+.scherm.spanning .tafelkaart {
+  animation: trillen 0.32s ease-in-out infinite;
+}
+@keyframes trillen {
+  0%, 100% { transform: rotate(var(--kanteling, 0deg)) translate(0, 0); }
+  25% { transform: rotate(calc(var(--kanteling, 0deg) - 0.25deg)) translate(-1px, 1px); }
+  75% { transform: rotate(calc(var(--kanteling, 0deg) + 0.25deg)) translate(1px, -1px); }
+}
+/* De 'leggen'-animatie zet transform: none; laat hem eindigen in de kanteling. */
+@keyframes leggen {
+  from {
+    opacity: 0;
+    transform: translateY(26px) rotate(calc(var(--kanteling, 0deg) - 1.1deg)) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--kanteling, 0deg));
+  }
+}
+
+/* ---- Het kroontje en de rode lantaarn --------------------------- */
+/* Het kroontje hangt aan een houder om het portret heen, want op een
+   <img> kan geen pseudo-element, en overflow op het portret zelf zou de
+   ronde uitsnede tenietdoen. */
+.kroonhouder {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.kroonhouder.kroon::after {
+  content: "👑";
+  position: absolute;
+  top: -0.45em;
+  left: 50%;
+  font-size: clamp(1.1rem, 1.8vw, 1.8rem);
+  line-height: 1;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(-16deg);
+  animation: kroonWiebel 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+@keyframes kroonWiebel {
+  0%, 100% { transform: translateX(-50%) rotate(-16deg); }
+  50% { transform: translateX(-46%) rotate(-8deg) translateY(-2px); }
+}
+.standrij.laatste .naam::after {
+  content: " 🏮";
+  font-size: 0.7em;
+  animation: lantaarnZwaai 2.6s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: 50% 0;
+}
+@keyframes lantaarnZwaai {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+.standrij .badge {
+  margin-left: 0.6rem;
+  vertical-align: middle;
+  font-size: 0.55em;
+  letter-spacing: 0.1em;
+}
+.badge.stijger {
+  border-color: var(--groen);
+  color: var(--groen-licht);
+  animation: opkomen 0.5s 0.9s var(--deal) both;
+}
+
+/* ---- Reacties die omhoog zweven --------------------------------- */
+.reacties {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  overflow: hidden;
+}
+.reactie {
+  position: absolute;
+  bottom: -3rem;
+  left: var(--x, 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  transform: translateX(-50%);
+  animation: zweven 3s cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+}
+.reactie .emoji {
+  font-size: clamp(2.2rem, 4.5vw, 4.4rem);
+  line-height: 1;
+  animation: zwabberen 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+.reactie .van {
+  font-size: var(--fs-etiket);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ivoor);
+  background: rgba(8, 21, 17, 0.7);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+@keyframes zweven {
+  0% { transform: translate(-50%, 0); opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(-50%, calc(-100vh + 4rem)); opacity: 0; }
+}
+@keyframes zwabberen {
+  0%, 100% { transform: rotate(-12deg) translateX(-4px); }
+  50% { transform: rotate(12deg) translateX(4px); }
+}
+.reactierij {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+.reactierij button {
+  flex: 1 1 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0.55rem 0;
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+.reactierij button:active {
+  transform: scale(1.25) rotate(-8deg);
+}
+
+/* ---- Antwoordknoppen op de telefoon: wat je koos licht op ------- */
+.knop.gekozen {
+  border-color: var(--goud-licht);
+  background: linear-gradient(180deg, rgba(240, 217, 140, 0.22), var(--vilt-diep));
+  color: var(--ivoor);
+  box-shadow: 0 0 0 1px var(--goud), 0 10px 26px -14px rgba(201, 162, 39, 0.9);
+}
+
+/* ---- Een kwinkslag: cursief, ivoor, nooit schreeuwend ----------- */
+.kwinkslag {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: calc(var(--fs-lood) * 1.05);
+  color: var(--ivoor-zacht);
+  margin: 0;
+  animation: opkomen 0.5s var(--deal) both;
+}
+.kwinkslag.begroeting {
+  color: var(--goud-licht);
+  animation: opkomen 0.5s var(--deal) both, wegzakken 0.6s 4.4s var(--zacht) both;
+}
+@keyframes wegzakken {
+  to { opacity: 0; transform: translateY(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar.kroon::after,
+  .standrij.laatste .naam::after,
+  .reactie .emoji,
+  .scherm.spanning .tafelkaart {
+    animation: none;
+  }
+}
+
+/* ---- Por: een duwtje van de quizmaster op de telefoon ------------------ */
+.por {
+  background: var(--goud);
+  color: #1a1405;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  animation: porschud 0.5s ease-in-out 2;
+}
+@keyframes porschud {
+  25% { transform: translateX(-6px) rotate(-1deg); }
+  75% { transform: translateX(6px) rotate(1deg); }
+}
+
+/* ---- Stemronde ---------------------------------------------------------- */
+.stemknop {
+  justify-content: flex-start;
+}
+.stemtelling {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.8vh, 0.6rem);
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+.stemrij {
+  display: grid;
+  grid-template-columns: auto minmax(7ch, 0.6fr) 1fr auto minmax(0, 0.8fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--rand);
+}
+.stemrij.wint {
+  border-color: var(--goud);
+  background: rgba(201, 162, 39, 0.1);
+}
+.stemrij .naam {
+  font-family: var(--display);
+  font-size: calc(var(--fs-naam) * 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stembalk {
+  height: 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.stembalk i {
+  display: block;
+  height: 100%;
+  width: calc(var(--deel) * 100%);
+  background: linear-gradient(90deg, var(--goud), var(--goud-licht));
+  transform-origin: left;
+  animation: stemgroei 0.7s var(--deal) both;
+  animation-delay: calc(0.6s + var(--i) * 0.12s);
+}
+@keyframes stemgroei {
+  from { transform: scaleX(0); }
+}
+.stemaantal {
+  font-family: var(--mono);
+  font-size: calc(var(--fs-naam) * 0.8);
+  color: var(--goud-licht);
+}
+.stemmers {
+  font-size: var(--fs-etiket);
+  color: var(--salie);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prijsdetail.lang {
+  font-style: italic;
+  white-space: normal;
+}
+
+/* ---- Logboek van de quizmaster ----------------------------------------- */
+.logboek {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+}
+.logregel {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  padding: 0.2rem 0;
+  border-bottom: 1px dashed var(--rand);
+}
+.logregel .tijd {
+  font-family: var(--mono);
+  color: var(--salie);
+  font-size: 0.8rem;
+  flex: 0 0 auto;
+}
+.logregel.ongedaan {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+/* ---- Uitslagpagina ------------------------------------------------------ */
+button.naamplaat {
+  cursor: pointer;
+  font: inherit;
+}
+a.uitslagrij {
+  text-decoration: none;
+  color: inherit;
+}
+a.uitslagrij:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.uitslagtabel {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+}
+.uitslagtabel th,
+.uitslagtabel td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--rand);
+  text-align: left;
+  white-space: nowrap;
+}
+.uitslagtabel th {
+  font-family: var(--ui);
+  font-weight: 600;
+  color: var(--salie);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.uitslagtabel .cijfer {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.uitslagtabel .cijfer.best {
+  color: var(--goud-licht);
+}
+.uitslagtabel .totaal td {
+  border-top: 2px solid var(--goud-diep);
+  border-bottom: 0;
+  font-weight: 700;
+  color: var(--goud-licht);
+}
+
+/* ---- Beheerscherm ------------------------------------------------------- */
+.mono {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+.beheer-feiten {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.2rem;
+  margin: 0.8rem 0 0;
+  font-size: 0.92rem;
+  color: var(--ivoor-zacht);
+}
+.beheer-feiten dt {
+  color: var(--salie);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-top: 0.15rem;
+}
+.beheer-feiten dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.beheer-lijst {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.6rem;
+}
+.beheer-rij {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.6rem 0.2rem;
+  border-bottom: 1px solid var(--rand);
+}
+.beheer-rij.beheer-actief {
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.14), transparent 70%);
+}
+.beheer-rij .plek {
+  color: var(--salie);
+  min-width: 2.4rem;
+}
+.beheer-rij .badge {
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+/* Op een telefoon is een tabel breder dan het scherm; dan schuift hij opzij
+   in plaats van de hele pagina uit te rekken. */
+.beheer-tabel {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.uitslagtabel tr.beheer-ontbreekt td {
+  color: var(--rood-licht);
+}
+@media (max-width: 640px) {
+  .beheer-rij {
+    grid-template-columns: auto 1fr;
+  }
+  .beheer-rij > .knoprij {
+    grid-column: 1 / -1;
+    justify-content: flex-start !important;
+  }
+  .beheer-feiten {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+  .beheer-feiten dd {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ===================================================================
+   DE SHOW
+
+   De momenten waarop de avond even een spelshow wordt: een kaart die
+   over het scherm vliegt tussen twee blokken, een tromgeroffel voor de
+   onthulling, fiches voor wie punten pakt, en bonussen die glimmen.
+   =================================================================== */
+
+/* ---- De overgang: een speelkaart zo groot als het scherm --------- */
+.overgang {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.overgang.kaart {
+  perspective: 1400px;
+}
+.vliegkaart {
+  position: relative;
+  width: min(62vh, 44vw);
+  aspect-ratio: 5 / 7;
+  border-radius: 3.2vh;
+  background: linear-gradient(160deg, var(--kaart-papier), var(--kaart-papier-diep));
+  border: 1px solid rgba(19, 31, 26, 0.18);
+  box-shadow: 0 60px 120px -30px rgba(0, 0, 0, 0.9), 0 0 0 1.4vh rgba(201, 162, 39, 0.35);
+  color: var(--kaart);
+  display: grid;
+  place-items: center;
+  animation: vliegen 1.15s cubic-bezier(0.55, 0, 0.35, 1) both;
+}
+.vliegkaart.rood {
+  color: var(--rood);
+}
+.vliegkaart .midden {
+  font-size: min(30vh, 22vw);
+  line-height: 1;
+}
+.vliegkaart .tekst {
+  position: absolute;
+  bottom: 14%;
+  left: 8%;
+  right: 8%;
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: min(4.4vh, 3vw);
+  line-height: 1.1;
+  color: var(--kaart);
+  text-wrap: balance;
+}
+.vliegkaart .hoek {
+  position: absolute;
+  font-size: min(6vh, 4vw);
+  line-height: 1;
+}
+.vliegkaart .hoek.boven {
+  top: 4%;
+  left: 6%;
+}
+.vliegkaart .hoek.onder {
+  bottom: 4%;
+  right: 6%;
+  transform: rotate(180deg);
+}
+@keyframes vliegen {
+  0% {
+    transform: translateX(120vw) rotate(24deg) rotateY(-40deg);
+  }
+  38%,
+  58% {
+    transform: translateX(0) rotate(-3deg) rotateY(0deg) scale(1.04);
+  }
+  100% {
+    transform: translateX(-130vw) rotate(-26deg) rotateY(40deg);
+  }
+}
+
+/* ---- De opening: drie, twee, één --------------------------------- */
+.overgang.aftellen {
+  background: radial-gradient(ellipse at center, rgba(6, 15, 12, 0.72), rgba(6, 15, 12, 0.96));
+  animation: vervagen 3.3s linear both;
+}
+.overgang .tel {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: min(46vh, 34vw);
+  line-height: 1;
+  color: var(--goud-licht);
+  text-shadow: 0 0 60px rgba(201, 162, 39, 0.6);
+  animation: tellen 0.8s var(--deal) both;
+}
+.overgang .tel.start {
+  font-size: min(16vh, 11vw);
+  text-align: center;
+  padding-inline: 5vw;
+  animation: tellen 0.9s var(--deal) both;
+}
+.overgang .spots i {
+  position: absolute;
+  top: -20vh;
+  width: 30vw;
+  height: 140vh;
+  background: linear-gradient(to bottom, rgba(240, 217, 140, 0.34), transparent 80%);
+  clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%);
+  transform-origin: top center;
+  mix-blend-mode: screen;
+}
+.overgang .spots i:first-child {
+  left: 5vw;
+  animation: zoeklicht 3.3s ease-in-out both;
+}
+.overgang .spots i:last-child {
+  right: 5vw;
+  animation: zoeklicht 3.3s ease-in-out reverse both;
+}
+@keyframes tellen {
+  0% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(0.95);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+@keyframes zoeklicht {
+  0% {
+    transform: rotate(28deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+  100% {
+    transform: rotate(10deg);
+  }
+}
+@keyframes vervagen {
+  0%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- De tromgeroffel voor de onthulling --------------------------- */
+.trommel {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: clamp(18px, 2.6vw, 40px);
+}
+.trommel .stokken {
+  font-size: clamp(3rem, 8vw, 7rem);
+  line-height: 1;
+  animation: roffelen 0.09s ease-in-out infinite alternate;
+}
+.trommel .etiket {
+  animation: hartslag 0.5s ease-in-out infinite;
+}
+@keyframes roffelen {
+  from {
+    transform: translateY(-3px) rotate(-4deg);
+  }
+  to {
+    transform: translateY(3px) rotate(4deg);
+  }
+}
+/* Tijdens de tromgeroffel dimt de vraag en trilt de tafel mee. */
+.scherm.roffelt .tafelkaart {
+  filter: brightness(0.6);
+  transition: filter 0.4s var(--zacht);
+  animation: trillen 0.2s ease-in-out infinite;
+}
+
+/* ---- Keuzes vallen één voor één af, het goede klapt om ------------ */
+.keuze.fout.afvallen {
+  animation: afvallen 0.45s calc(var(--n, 0) * 0.32s) var(--zacht) both;
+}
+@keyframes afvallen {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  35% {
+    opacity: 1;
+    transform: translateX(-6px) scale(1.02);
+  }
+  100% {
+    opacity: 0.32;
+    transform: translateY(4px) scale(0.97);
+    filter: grayscale(1);
+  }
+}
+.keuze.goed.omklappen {
+  animation: omdraaien 0.7s calc(var(--n, 0) * 0.32s + 0.15s) var(--deal) both;
+}
+.keuze.goed.omklappen::after {
+  animation-delay: calc(var(--n, 0) * 0.32s + 0.7s);
+}
+@keyframes omdraaien {
+  0% {
+    transform: rotateX(0deg);
+    background: rgba(19, 31, 26, 0.05);
+    border-color: rgba(19, 31, 26, 0.13);
+    box-shadow: none;
+  }
+  45% {
+    transform: rotateX(90deg);
+    background: rgba(19, 31, 26, 0.05);
+  }
+  100% {
+    transform: translateX(6px) rotateX(0deg);
+  }
+}
+.onthulling.na-keuzes {
+  animation-delay: calc(var(--n, 0) * 0.32s + 0.6s);
+}
+
+/* ---- Fiches: punten die je ziet ------------------------------------ */
+.fiche {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.3em;
+  height: 2.3em;
+  padding-inline: 0.35em;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.8em;
+  color: #1a1405;
+  background:
+    repeating-conic-gradient(from 0deg, var(--goud) 0 20deg, var(--goud-licht) 20deg 40deg);
+  box-shadow:
+    inset 0 0 0 0.28em var(--goud-diep),
+    inset 0 0 0 0.42em var(--goud-licht),
+    0 6px 14px -6px rgba(0, 0, 0, 0.8);
+  animation: fichePlof 0.55s var(--wacht, 0s) var(--deal) both;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.fiche span {
+  background: var(--goud-licht);
+  border-radius: 999px;
+  padding: 0 0.3em;
+}
+@keyframes fichePlof {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.4) rotate(-120deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.12) rotate(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.antwoordkaart {
+  position: relative;
+}
+.antwoordkaart .fiche {
+  position: absolute;
+  top: -0.9em;
+  right: -0.6em;
+  font-size: calc(var(--fs-naam) * 0.42);
+}
+.standpunten .fiche {
+  margin-left: 0.5em;
+  font-size: 0.42em;
+  vertical-align: middle;
+}
+
+/* ---- Bonussen -------------------------------------------------------- */
+.bonusrij {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+}
+.bonus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.45em 0.6em 0.45em 0.9em;
+  border-radius: 999px;
+  border: 1px solid var(--goud);
+  background: linear-gradient(120deg, rgba(201, 162, 39, 0.22), rgba(8, 21, 17, 0.9));
+  color: var(--goud-licht);
+  font-size: calc(var(--fs-naam) * 0.5);
+  box-shadow: 0 0 30px -8px rgba(201, 162, 39, 0.6);
+  animation: opkomen 0.5s var(--wacht, 0s) var(--deal) both;
+}
+.bonus strong {
+  color: var(--ivoor);
+  font-weight: 600;
+}
+.bonus .fiche {
+  font-size: 0.8em;
+}
+/* De gouden kaart en de slotrondes: hier telt alles dubbel. */
+.gouden-kaart,
+.dubbel-banier {
+  align-self: flex-start;
+  display: inline-block;
+  padding: 0.3em 0.9em;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #1a1405;
+  /* Vaste kleuren: de sfeer van een ronde kleurt het goud anders bij. */
+  background: linear-gradient(120deg, #f3dc8e, #c9a227 55%, #8a6d12);
+  box-shadow: 0 0 34px -6px rgba(201, 162, 39, 0.85);
+  animation: goudGloed 1.6s ease-in-out infinite alternate;
+}
+.gouden-kaart {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.5vw, 1.5rem);
+}
+.gouden-kaart.dubbel {
+  animation: none;
+}
+.dubbel-banier {
+  font-size: var(--fs-etiket);
+}
+@keyframes goudGloed {
+  to {
+    box-shadow: 0 0 52px -2px rgba(233, 196, 90, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gouden-kaart,
+  .dubbel-banier {
+    animation: none;
+  }
+}
+.badge.vuur {
+  border-color: #e0762f;
+  color: #ffb37a;
+  animation: opkomen 0.5s 1s var(--deal) both;
+}
+
+/* ---- Iedereen is binnen -------------------------------------------- */
+.iedereen-binnen {
+  align-self: center;
+  padding: 0.35em 1.1em;
+  border-radius: 999px;
+  background: var(--goud);
+  color: #1a1405;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: calc(var(--fs-naam) * 0.62);
+  box-shadow: 0 0 40px -6px rgba(201, 162, 39, 0.8);
+  animation: stempelen 0.45s var(--deal) both;
+  --hoek: -2deg;
+}
+
+/* ---- Het geluidsbord op het hostscherm ------------------------------ */
+.geluidsbord {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+.geluidsbord .knop {
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overgang,
+  .trommel .stokken,
+  .scherm.roffelt .tafelkaart,
+  .keuze.goed.omklappen,
+  .keuze.fout.afvallen,
+  .fiche,
+  .bonus {
+    animation: none;
+  }
+}
+.uitslag .bonusregel {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--goud-licht);
+  font-size: 0.92rem;
+  animation: opkomen 0.45s 0.4s var(--deal) both;
+}
+/* Je plek na elke vraag, op de telefoon. */
+.mijnplek {
+  margin: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--goud-licht);
+}
+.mijnplek strong {
+  font-size: 1.25rem;
+  color: var(--ivoor);
+}
+
+/* ===== De maatjes ===================================================
+   Ieder kiest een dier dat meegaat (shared/dieren.ts). Het zit stil en
+   klein op de rand van het portret (Portret.svelte), en rent alleen op de
+   grote momenten over het scherm (Dierenparade.svelte). */
+.portret {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.dierbadge {
+  position: absolute;
+  right: -0.35em;
+  bottom: -0.25em;
+  font-size: 0.95rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+.dierbadge .pixeldier { width: 1.2em; height: 1.2em; }
+.portret.m .dierbadge { font-size: clamp(1rem, 1.5vw, 1.5rem); }
+.portret.l .dierbadge { font-size: clamp(1.4rem, 2.3vw, 2.3rem); }
+
+/* ---- Het karakter van je maatje (Karakterkaart.svelte) ---------------- */
+.karakterkaart {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.8rem;
+  background: rgba(8, 21, 17, 0.45);
+}
+.karakterkaart .specialiteit {
+  font-style: italic;
+  color: var(--goud-licht);
+  margin-bottom: 0.5rem;
+}
+.karakterkaart dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+.eigenschap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.eigenschap dt { color: var(--ivoor); }
+.eigenschap dd {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+}
+/* Pixelblokjes: vol goud, leeg een schaduw. Ze vullen zich een voor een. */
+.eigenschap i {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+}
+.eigenschap i.vol {
+  background: var(--goud);
+  box-shadow: inset -2px -2px 0 var(--goud-diep), inset 2px 2px 0 var(--goud-licht);
+  animation: blokje-vol 0.25s steps(2, jump-none) calc(var(--n) * 70ms) both;
+}
+@keyframes blokje-vol { from { transform: scale(0); } to { transform: scale(1); } }
+.karakterkaart .hapje { margin-top: 0.5rem; }
+@media (max-width: 360px) {
+  .karakterkaart dl { grid-template-columns: 1fr; }
+}
+
+/* ---- Een naam voor je maatje, op de telefoon ------------------------ */
+.diernaam {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.diernaam input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- De kiezer op de telefoon: alleen het gekozen dier beweegt ------- */
+.dierenkiezer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.1rem, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+.dierenkiezer button {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  line-height: 1;
+  border-radius: 0.8rem;
+  border: 1px solid var(--rand);
+  background: var(--vilt-diep);
+  cursor: pointer;
+  padding: 0;
+  overflow: visible;
+}
+.dierenkiezer button.gekozen {
+  border-color: var(--goud);
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.28), var(--vilt-diep));
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.3);
+}
+.dierenkiezer button:disabled:not(.gekozen) {
+  opacity: 0.28;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.dier {
+  display: inline-block;
+  line-height: 1;
+  transform-origin: 50% 90%;
+}
+.dier[data-beweging="loop"] { animation: dier-stap 0.5s ease-in-out infinite; }
+.dier[data-beweging="spring"],
+.dier[data-beweging="stuiter"] { animation: dier-spring 1.2s cubic-bezier(0.3, 0, 0.5, 1) infinite; transform-origin: 50% 100%; }
+.dier[data-beweging="schommel"] { animation: dier-schommel 2s ease-in-out infinite; transform-origin: 50% -45%; }
+.dier[data-beweging="zwem"] { animation: dier-golf 2s ease-in-out infinite; }
+/* Aan een liaan: hij hangt aan het draaipunt en zwaait mee. Alleen bij een
+   pixeldier, niet bij de emoji op het hostscherm. */
+.dier[data-beweging="schommel"],
+.dier[data-beweging="zwem"] { position: relative; }
+.dier[data-beweging="schommel"]:has(.pixeldier)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 88%;
+  width: 0.0625em;
+  height: 0.5em;
+  margin-left: -0.03125em;
+  background: #4f8a3c;
+  box-shadow: 0.0625em 0.125em 0 #3d6e2e, -0.0625em 0.3125em 0 #3d6e2e;
+}
+/* Onder water: belletjes die opstijgen achter de staart, pixel voor pixel. */
+.dier[data-beweging="zwem"]:has(.pixeldier)::after {
+  content: "";
+  position: absolute;
+  left: -0.05em;
+  top: 20%;
+  width: 0.16em;
+  height: 0.16em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath fill='%239fd8ff' d='M1 0h3v1h-3zM0 1h1v3h-1zM4 1h1v3h-1zM1 4h3v1h-3z'/%3E%3Cpath fill='%23ffffff' d='M1 1h1v1h-1z'/%3E%3C/svg%3E") center / contain no-repeat;
+  image-rendering: pixelated;
+  animation: dier-bel 2s steps(6, end) infinite;
+}
+@keyframes dier-bel {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(-0.2em, -0.9em); opacity: 0; }
+}
+.dier[data-beweging="vlieg"] { animation: dier-fladder 1.6s ease-in-out infinite; }
+.dier[data-beweging="graaf"] { animation: dier-graaf 3s ease-in-out infinite; }
+.dier[data-beweging="draai"] { animation: dier-draai 3s ease-in-out infinite; transform-origin: 50% 50%; }
+.dier[data-beweging="waggel"] { animation: dier-waggel 0.9s ease-in-out infinite; }
+.dier[data-beweging="kruip"] { animation: dier-kruip 3s ease-in-out infinite; }
+
+/* ---- De optocht: erin, een kunstje, en weer weg ---------------------- */
+.dierenparade {
+  position: fixed;
+  left: 0;
+  bottom: 5vh;
+  z-index: 7;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-size: max(64px, round(clamp(3rem, 7vw, 6rem), 32px));
+  transform: translateX(-20vw);
+}
+.dierenparade[data-fase="wacht"],
+.dierenparade[data-fase="klaar"] { visibility: hidden; }
+.dierenparade[data-fase="heen"] { animation: dier-heen var(--heen) cubic-bezier(0.2, 0.6, 0.35, 1) both; }
+.dierenparade[data-fase="actie"] { transform: translateX(calc(var(--stop) - 50%)); }
+.dierenparade[data-fase="weg"] { animation: dier-weg var(--weg) cubic-bezier(0.55, 0, 0.8, 0.45) both; }
+/* Tijdens het kunstje staat de gang stil; het kunstje zit op .actie. */
+.dierenparade[data-fase="actie"][data-gang] .dier { animation: none; }
+@keyframes dier-heen {
+  from { transform: translateX(-20vw); }
+  to { transform: translateX(calc(var(--stop) - 50%)); }
+}
+@keyframes dier-weg {
+  from { transform: translateX(calc(var(--stop) - 50%)); }
+  to { transform: translateX(110vw); }
+}
+
+/* ---- De kunstjes: het lijf ------------------------------------------- */
+.actie {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  transform-origin: 50% 85%;
+}
+.actie[data-lijf] { animation: var(--tel, 2.2s) ease-in-out both; }
+.actie[data-lijf="salto"] { animation-name: kunst-salto; transform-origin: 50% 50%; }
+.actie[data-lijf="dans"] { animation-name: kunst-dans; }
+.actie[data-lijf="pirouette"] { animation-name: kunst-pirouette; }
+.actie[data-lijf="boing"] { animation-name: kunst-boing; transform-origin: 50% 100%; }
+.actie[data-lijf="rol"] { animation-name: kunst-rol; transform-origin: 50% 50%; }
+.actie[data-lijf="rek"] { animation-name: kunst-rek; transform-origin: 50% 100%; }
+.actie[data-lijf="opblaas"] { animation-name: kunst-opblaas; }
+.actie[data-lijf="schud"] { animation-name: kunst-schud; }
+.actie[data-lijf="acht"] { animation-name: kunst-acht; }
+.actie[data-lijf="ondersteboven"] { animation-name: kunst-ondersteboven; transform-origin: 50% 0%; }
+.actie[data-lijf="balans"] { animation-name: kunst-balans; transform-origin: 50% 100%; }
+.actie[data-lijf="glij"] { animation-name: kunst-glij; }
+.actie[data-lijf="graaf"] { animation-name: kunst-graaf; }
+.actie[data-lijf="kronkel"] { animation-name: kunst-kronkel; }
+.actie[data-lijf="zak"] { animation-name: kunst-zak; transform-origin: 50% 100%; }
+.actie[data-lijf="omval"] { animation-name: kunst-omval; transform-origin: 20% 100%; }
+.actie[data-lijf="mok"] { animation-name: kunst-mok; }
+.actie[data-lijf="verstop"] { animation-name: kunst-verstop; transform-origin: 50% 100%; }
+/* Het feest: in schokjes van vier beeldjes per stuk, zodat het pixeldier op
+   zijn pixels blijft, ook midden in de sprong. */
+.actie[data-lijf="juich"] { animation-name: kunst-juich; animation-timing-function: steps(4, end); transform-origin: 50% 100%; }
+/* Knabbelen: kauwen in schokjes, terwijl het hapje voor de snuit kleiner wordt. */
+.actie[data-lijf="knabbel"] { animation-name: kunst-knabbel; animation-timing-function: steps(1, end); transform-origin: 50% 100%; }
+/* Spugen: bol opblazen, achterover leunen, en dan naar voren: pats. */
+.actie[data-lijf="spuug"] { animation-name: kunst-spuug; animation-timing-function: steps(2, end); transform-origin: 50% 100%; }
+
+@keyframes kunst-knabbel {
+  0%, 20%, 40%, 60%, 80%, 100% { transform: translateY(0) scale(1, 1); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(1.5%) scale(1.02, 0.97); }
+}
+@keyframes kunst-spuug {
+  0% { transform: translateX(0) scale(1, 1); }
+  18% { transform: translateX(-3%) scale(1.06, 0.96); }
+  34% { transform: translateX(-6%) rotate(-6deg) scale(1.1, 0.94); }
+  40% { transform: translateX(7%) rotate(5deg) scale(0.95, 1.05); }
+  52% { transform: translateX(2%) rotate(0) scale(1, 1); }
+  100% { transform: translateX(0) scale(1, 1); }
+}
+@keyframes kunst-juich {
+  0% { transform: translateY(0) scale(1, 1); }
+  10% { transform: translateY(0) scale(1.15, 0.85); }
+  22% { transform: translateY(-70%) scale(0.92, 1.1); }
+  32% { transform: translateY(-100%) scale(-1, 1); }
+  42% { transform: translateY(-70%) scale(1, 1); }
+  52% { transform: translateY(0) scale(1.15, 0.85); }
+  62% { transform: translateY(-35%) scale(1, 1); }
+  72% { transform: translateY(0) scale(1.1, 0.9); }
+  80%, 100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes kunst-salto {
+  0% { transform: translateY(0) rotate(0); }
+  15% { transform: translateY(8%) scale(1.1, 0.85); }
+  50% { transform: translateY(-110%) rotate(-360deg); }
+  70% { transform: translateY(0) rotate(-360deg) scale(1.1, 0.85); }
+  82%, 100% { transform: translateY(0) rotate(-360deg); }
+}
+@keyframes kunst-dans {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  12.5% { transform: translate(-12%, -12%) rotate(-14deg); }
+  25% { transform: translate(0, 0) rotate(0); }
+  37.5% { transform: translate(12%, -12%) rotate(14deg); }
+  50% { transform: translate(0, 0) rotate(0); }
+  62.5% { transform: translate(-12%, -12%) rotate(-14deg); }
+  75% { transform: translate(0, 0) rotate(0); }
+  87.5% { transform: translate(12%, -12%) rotate(14deg); }
+}
+@keyframes kunst-pirouette {
+  0%, 100% { transform: translateY(0) scaleX(1); }
+  12% { transform: translateY(-10%) scaleX(-1); }
+  24% { transform: translateY(-14%) scaleX(1); }
+  36% { transform: translateY(-16%) scaleX(-1); }
+  48% { transform: translateY(-16%) scaleX(1); }
+  60% { transform: translateY(-14%) scaleX(-1); }
+  72% { transform: translateY(-10%) scaleX(1); }
+  86% { transform: translateY(0) scaleX(1) scale(1.08); }
+}
+@keyframes kunst-boing {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  8%, 38%, 68% { transform: translateY(0) scale(1.2, 0.78); }
+  20% { transform: translateY(-70%) scale(0.9, 1.12); }
+  50% { transform: translateY(-50%) scale(0.92, 1.1); }
+  80% { transform: translateY(-30%) scale(0.95, 1.05); }
+  30%, 60%, 90% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes kunst-rol {
+  0% { transform: translateX(0) rotate(0) scale(1); }
+  15% { transform: translateX(0) rotate(0) scale(0.75); }
+  50% { transform: translateX(40%) rotate(540deg) scale(0.75); }
+  85% { transform: translateX(0) rotate(1080deg) scale(0.75); }
+  100% { transform: translateX(0) rotate(1080deg) scale(1); }
+}
+@keyframes kunst-rek {
+  0%, 100% { transform: scale(1, 1); }
+  20%, 40% { transform: scale(0.85, 1.6); }
+  50% { transform: scale(1.1, 0.9); }
+  65%, 80% { transform: scale(0.85, 1.6); }
+  90% { transform: scale(1.1, 0.9); }
+}
+@keyframes kunst-opblaas {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.55); }
+  55% { transform: scale(1.5) rotate(-6deg); }
+  62% { transform: scale(1.55) rotate(6deg); }
+  70% { transform: scale(0.85); }
+  80% { transform: scale(1.1); }
+  90% { transform: scale(0.97); }
+}
+@keyframes kunst-schud {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  5%, 25%, 45%, 65%, 85% { transform: translateX(-10%) rotate(-12deg); }
+  15%, 35%, 55%, 75%, 95% { transform: translateX(10%) rotate(12deg); }
+}
+@keyframes kunst-acht {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  12.5% { transform: translate(30%, -30%) rotate(15deg); }
+  25% { transform: translate(60%, 0) rotate(0); }
+  37.5% { transform: translate(30%, 30%) rotate(-15deg); }
+  50% { transform: translate(0, 0) rotate(0); }
+  62.5% { transform: translate(-30%, -30%) scaleX(-1) rotate(15deg); }
+  75% { transform: translate(-60%, 0) scaleX(-1); }
+  87.5% { transform: translate(-30%, 30%) scaleX(-1) rotate(-15deg); }
+}
+@keyframes kunst-ondersteboven {
+  0% { transform: rotate(0); }
+  20% { transform: translateY(-40%) rotate(180deg); }
+  35% { transform: translateY(-40%) rotate(160deg); }
+  50% { transform: translateY(-40%) rotate(200deg); }
+  65% { transform: translateY(-40%) rotate(165deg); }
+  80% { transform: translateY(-40%) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+@keyframes kunst-balans {
+  0%, 100% { transform: rotate(0) scaleX(1); }
+  15% { transform: rotate(-4deg) scaleX(0.8); }
+  30% { transform: rotate(18deg) scaleX(0.8); }
+  45% { transform: rotate(-20deg) scaleX(0.8); }
+  60% { transform: rotate(14deg) scaleX(0.8); }
+  75% { transform: rotate(-8deg) scaleX(0.8); }
+  88% { transform: rotate(0) scaleX(1) translateY(-10%); }
+}
+@keyframes kunst-glij {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(0) rotate(-80deg); }
+  45% { transform: translateX(60%) rotate(-90deg); }
+  75% { transform: translateX(-30%) rotate(-90deg); }
+  90% { transform: translateX(0) rotate(0); }
+}
+@keyframes kunst-graaf {
+  0%, 100% { transform: translateY(0) scaleY(1); opacity: 1; }
+  12% { transform: translateY(8%) rotate(24deg); }
+  18% { transform: translateY(12%) rotate(14deg); }
+  24% { transform: translateY(14%) rotate(26deg); }
+  40% { transform: translateY(70%) scaleY(0.3); opacity: 0; }
+  60% { transform: translateY(70%) scaleY(0.3); opacity: 0; }
+  75% { transform: translateY(-40%) scaleY(1.2); opacity: 1; }
+  88% { transform: translateY(5%) scaleY(0.9); }
+}
+@keyframes kunst-kronkel {
+  0%, 100% { transform: skewX(0) scaleY(1); }
+  12.5%, 62.5% { transform: skewX(-22deg) scaleY(1.15); }
+  25%, 75% { transform: skewX(0) scaleY(0.85); }
+  37.5%, 87.5% { transform: skewX(22deg) scaleY(1.15); }
+}
+@keyframes kunst-zak {
+  0%, 100% { transform: scale(1, 1) rotate(0); }
+  25% { transform: scale(1.05, 0.95) rotate(0); }
+  45%, 80% { transform: scale(1.12, 0.72) rotate(-10deg) translateY(8%); }
+}
+@keyframes kunst-omval {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-8deg); }
+  35% { transform: rotate(92deg); }
+  40% { transform: rotate(84deg); }
+  45%, 75% { transform: rotate(90deg); }
+  90% { transform: rotate(-6deg); }
+}
+@keyframes kunst-mok {
+  0%, 100% { transform: scaleX(1); }
+  15%, 80% { transform: scaleX(-1); }
+  30%, 50% { transform: scaleX(-1) translateX(4%) rotate(-5deg); }
+  40%, 60% { transform: scaleX(-1) translateX(-4%) rotate(5deg); }
+}
+@keyframes kunst-verstop {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  25% { transform: scale(0.2); opacity: 0.4; }
+  55% { transform: scale(0.2); opacity: 0.4; }
+  65% { transform: scale(0.45) translateY(-10%); opacity: 1; }
+  72% { transform: scale(0.2); opacity: 0.4; }
+  88% { transform: scale(1.1); opacity: 1; }
+}
+
+.actie[data-lijf="kijkrond"] { animation-name: kunst-kijkrond; }
+.actie[data-lijf="snuffel"] { animation-name: kunst-snuffel; transform-origin: 80% 100%; }
+.actie[data-lijf="trappel"] { animation-name: kunst-trappel; }
+.actie[data-lijf="schrik"] { animation-name: kunst-schrik; transform-origin: 50% 100%; }
+.actie[data-lijf="hik"] { animation-name: kunst-hik; transform-origin: 50% 100%; }
+.actie[data-lijf="zwaai"] { animation-name: kunst-zwaai; transform-origin: 50% 100%; }
+.actie[data-lijf="slaap"] { animation-name: kunst-slaap; transform-origin: 50% 100%; }
+@keyframes kunst-kijkrond {
+  0%, 22% { transform: none; }
+  23%, 45% { transform: scaleX(-1); }
+  46%, 68% { transform: none; }
+  69%, 88% { transform: scaleX(-1) translateY(-4%); }
+  89%, 100% { transform: none; }
+}
+@keyframes kunst-snuffel {
+  0%, 100% { transform: none; }
+  15%, 35%, 55%, 75% { transform: rotate(14deg) translateY(4%); }
+  25%, 45%, 65%, 85% { transform: rotate(9deg) translateY(2%); }
+}
+@keyframes kunst-trappel {
+  0%, 20%, 40%, 60%, 80%, 100% { transform: translateY(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(-8%); }
+}
+@keyframes kunst-schrik {
+  0% { transform: none; }
+  12% { transform: translateY(-45%) scale(0.9, 1.2); }
+  35% { transform: translateY(0) scale(1.2, 0.8); }
+  50% { transform: translateX(-3%) scale(1); }
+  60% { transform: translateX(3%); }
+  70%, 100% { transform: none; }
+}
+@keyframes kunst-hik {
+  0%, 25%, 50%, 75%, 100% { transform: none; }
+  8%, 58% { transform: translateY(-14%) scale(1.05, 0.95); }
+  33% { transform: translateY(-20%) scale(0.95, 1.08); }
+}
+@keyframes kunst-zwaai {
+  0%, 100% { transform: none; }
+  15%, 55% { transform: rotate(-12deg) translateY(-6%); }
+  35%, 75% { transform: rotate(12deg) translateY(-6%); }
+}
+@keyframes kunst-slaap {
+  0% { transform: none; }
+  15% { transform: translateY(10%) scale(1.08, 0.82) rotate(-4deg); }
+  40% { transform: translateY(10%) scale(1.1, 0.78) rotate(-4deg); }
+  65% { transform: translateY(10%) scale(1.06, 0.84) rotate(-4deg); }
+  90% { transform: translateY(10%) scale(1.1, 0.78) rotate(-4deg); }
+  100% { transform: translateY(10%) scale(1.08, 0.82) rotate(-4deg); }
+}
+
+/* ---- Het pixeldier (Pixeldier.svelte) -----------------------------------
+   Lagen die per pose aan of uit gaan. Een verplaatsing van 1px is binnen
+   het SVG precies één pixel van het dier.
+
+   Waar een dier groot staat (de wei, de optocht, het naambordje, de
+   spotlight), rondt de lettergrootte af op een veelvoud van 32px: dan is
+   elke pixel van het dier een heel aantal schermpixels. Bij 48px werd dat
+   anderhalf, en dan zijn de pixels om en om 1 en 2 breed en flikkeren ze als
+   het dier loopt. Een browser zonder round() houdt de regel ervoor. */
+.pixeldier {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  overflow: visible;
+}
+.px-poten.a,
+.px-poten.b,
+.px-vleugel.op,
+.px-arm.op,
+.px-romp-1,
+.px-romp-2,
+.px-blij,
+.px-blos { display: none; }
+/* Knipperen, elk dier op zijn eigen ritme. */
+.px-open { animation: px-knipper 4.3s linear infinite; animation-delay: calc(var(--knipper, 0ms) * -4); }
+@keyframes px-knipper {
+  0%, 94% { visibility: visible; }
+  95%, 98% { visibility: hidden; }
+  99%, 100% { visibility: visible; }
+}
+/* Blij: ogen tot boogjes geknepen (^^), een blos op de wangen, en een
+   huppeltje van twee pixels, pixel voor pixel. Slapen: ogen gewoon dicht. */
+.pixeldier[data-pose="blij"] .px-open,
+.pixeldier[data-pose="slaap"] .px-open { display: none; }
+.pixeldier[data-pose="blij"] .px-blij { display: inline; }
+.pixeldier[data-pose="blij"] .px-blos { display: inline; opacity: 0.85; }
+.pixeldier[data-pose="blij"] .px-alles { animation: px-huppel 0.8s steps(1, end) infinite; }
+/* De slinky (de worm), als hij stilstaat of kruipt: de staart trekt in twee
+   stapjes naar de kop toe en veert terug. Hele kolommen, geen uitsmeren. */
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp { animation: px-slinky-0 1.1s steps(1, end) infinite; }
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp-1 { display: inline; animation: px-slinky-1 1.1s steps(1, end) infinite; }
+.pixeldier[data-slinky]:is([data-pose="staan"], [data-pose="loop"]) .px-romp-2 { display: inline; animation: px-slinky-2 1.1s steps(1, end) infinite; }
+@keyframes px-slinky-0 { 0% { visibility: visible; } 25%, 100% { visibility: hidden; } }
+@keyframes px-slinky-1 { 0% { visibility: hidden; } 25% { visibility: visible; } 50% { visibility: hidden; } 75%, 100% { visibility: visible; } }
+@keyframes px-slinky-2 { 0%, 25% { visibility: hidden; } 50% { visibility: visible; } 75%, 100% { visibility: hidden; } }
+/* Wie armen heeft, juicht: om en om omhoog en omlaag. */
+.pixeldier[data-pose="blij"] .px-arm.neer { animation: px-stap 0.4s linear infinite; }
+.pixeldier[data-pose="blij"] .px-arm.op { display: inline; animation: px-stap 0.4s linear infinite reverse; }
+@keyframes px-huppel {
+  0%, 55%, 100% { transform: translateY(0); }
+  65% { transform: translateY(-1px); }
+  72% { transform: translateY(-2px); }
+  86% { transform: translateY(-1px); }
+}
+/* Lopen: om en om de helft van de poten van de grond. */
+.pixeldier[data-pose="loop"] .px-poten.rust { display: none; }
+.pixeldier[data-pose="loop"] .px-poten.a { display: inline; animation: px-stap 0.34s linear infinite; }
+.pixeldier[data-pose="loop"] .px-poten.b { display: inline; animation: px-stap 0.34s linear infinite reverse; }
+@keyframes px-stap {
+  0%, 49% { visibility: visible; }
+  50%, 100% { visibility: hidden; }
+}
+/* Vliegen: de vleugel om en om neer en op. Zonder vleugels (de vlinder)
+   klapt het hele lijf. */
+.pixeldier[data-vlieg][data-vleugels] .px-vleugel.neer { animation: px-stap 0.24s linear infinite; }
+.pixeldier[data-vlieg][data-vleugels] .px-vleugel.op { display: inline; animation: px-stap 0.24s linear infinite reverse; }
+.pixeldier[data-vlieg]:not([data-vleugels]) .px-lijf {
+  transform-origin: 16px 16px;
+  animation: px-fladder 0.3s steps(2, jump-none) infinite alternate;
+}
+@keyframes px-fladder { from { transform: scaleX(1); } to { transform: scaleX(0.45); } }
+/* Sip: een traan die uit het oog valt. */
+.px-traan { animation: px-traan 1.1s steps(6, jump-none) infinite; }
+@keyframes px-traan {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(6px); opacity: 0.2; }
+}
+/* Slapen: een z die opstijgt en weer opnieuw begint. */
+.px-zzz { animation: px-zzz 1.6s steps(4, jump-none) infinite; }
+@keyframes px-zzz {
+  from { transform: translate(-2px, 3px); opacity: 0.3; }
+  to { transform: translate(1px, -2px); opacity: 1; }
+}
+/* Schrikken: een knipperende uitroep. */
+.px-uitroep { animation: px-stap 0.3s linear infinite; }
+
+/* ---- De kunstjes: wat erbij komt -------------------------------------- */
+.ding {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  width: 1em;
+  margin-left: -0.5em;
+  text-align: center;
+  /* Hoe groot een emoji is naast het dier (het dier is 1em). */
+  font-size: calc(var(--ding, 0.42) * 1em);
+  line-height: 1;
+  opacity: 0;
+  animation: 1.8s ease-out calc(0.2s + var(--n, 0) * 0.35s) both;
+}
+.ding[data-gaat="op"] { animation-name: ding-op; }
+.ding[data-gaat="gooi"] { animation-name: ding-gooi; animation-duration: 1.4s; }
+.ding[data-gaat="val"] { animation-name: ding-val; animation-timing-function: ease-in; }
+.ding[data-gaat="rond"] { animation-name: ding-rond; animation-timing-function: linear; }
+/* Het hapje voor de snuit (de kop wijst naar rechts): hap voor hap weg. */
+.ding[data-gaat="knabbel"] { left: 90%; top: 38%; animation-name: ding-knabbel; animation-duration: 1.7s; animation-delay: 0.1s; animation-timing-function: steps(1, end); }
+/* De spuug: vliegt precies op het moment dat de lama naar voren schiet uit zijn bek. */
+.ding[data-gaat="spuug"] { left: 92%; top: 12%; animation-name: ding-spuug; animation-duration: var(--tel, 2.2s); animation-delay: 0s; animation-timing-function: linear; }
+@keyframes ding-op {
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 70%), 0) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 110%), -260%) scale(1.2); }
+}
+@keyframes ding-gooi {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  45% { opacity: 1; transform: translate(160%, -220%) rotate(360deg); }
+  100% { opacity: 0; transform: translate(300%, 120%) rotate(720deg); }
+}
+@keyframes ding-val {
+  0% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), -60%); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--n, 0) - 0.5) * 60%), 260%); }
+}
+@keyframes ding-knabbel {
+  0% { opacity: 0; clip-path: inset(0 0 0 0); }
+  6% { opacity: 1; clip-path: inset(0 0 0 0); }
+  26% { opacity: 1; clip-path: inset(0 0 0 22%); }
+  46% { opacity: 1; clip-path: inset(0 0 0 44%); }
+  66% { opacity: 1; clip-path: inset(0 0 0 64%); }
+  84% { opacity: 1; clip-path: inset(0 0 0 84%); }
+  96%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+}
+@keyframes ding-spuug {
+  0%, 38% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  40% { opacity: 1; transform: translate(15%, -10%) scale(0.8); }
+  55% { opacity: 1; transform: translate(80%, -50%) scale(1); }
+  70% { opacity: 1; transform: translate(140%, -20%) scale(1); }
+  85% { opacity: 1; transform: translate(180%, 50%) scale(0.9); }
+  100% { opacity: 0; transform: translate(200%, 120%) scale(0.8); }
+}
+@keyframes ding-rond {
+  0% { opacity: 0; transform: rotate(0) translateY(-180%) rotate(0); }
+  10%, 85% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(720deg) translateY(-180%) rotate(-720deg); }
+}
+.dierenparade .dier {
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
+}
+.lopernaam {
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: max(0.85rem, 0.2em);
+  line-height: 1.2;
+  color: var(--goud-licht);
+  background: rgba(8, 21, 17, 0.82);
+  border: 1px solid var(--goud-diep);
+  border-radius: 999px;
+  padding: 0.1em 0.7em;
+  white-space: nowrap;
+}
+.lopernaam::before {
+  content: attr(data-naam);
+}
+
+/* ---- Lijf en ledematen ---------------------------------------------------
+   De pixeldieren lopen op hun eigen poten en klapperen met hun eigen
+   vleugels (zie het pixeldier hieronder). Erbij komen alleen nog de dingen
+   die niet aan het dier vastzitten: stofwolkjes en fartlijnen. Geen decor:
+   het scherm blijft van de quiz. De kop wijst naar rechts: rechts is voor,
+   links is achter. */
+.dierenparade .dier { position: relative; }
+.dierenparade .dier > .pixeldier {
+  position: relative;
+  z-index: 1;
+  width: 1.2em;
+  height: 1.2em;
+}
+
+/* Fartlijnen achter een vlieger. */
+.fartlijnen {
+  position: absolute;
+  z-index: 0;
+  left: -0.45em;
+  top: 0.3em;
+  width: 0.4em;
+  height: 0.32em;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0 0.025em, transparent 0.025em 0.1em);
+  border-radius: 0.05em;
+  animation: fartlijnen 0.3s linear infinite;
+}
+@keyframes fartlijnen {
+  0%, 100% { opacity: 0.3; transform: translateX(0) scaleX(0.7); }
+  50% { opacity: 0.9; transform: translateX(-0.08em) scaleX(1); }
+}
+
+/* Stofwolkjes achter wie rent. */
+.stof {
+  position: absolute;
+  z-index: 0;
+  left: -0.35em;
+  bottom: 0;
+  font-size: 0.4em;
+  animation: stofje 0.44s ease-out infinite;
+}
+.stof::after { content: "💨"; display: inline-block; transform: scaleX(-1); }
+@keyframes stofje {
+  from { opacity: 0.9; transform: translateX(0) scale(0.6); }
+  to { opacity: 0; transform: translateX(-0.6em) scale(1.2); }
+}
+
+/* Onderweg beweegt elk dier op zijn eigen manier. */
+.dierenparade[data-gang="stap"] .dier { animation: dier-stap 0.45s ease-in-out infinite; }
+.dierenparade[data-gang="spring"] .dier { animation: dier-sprongen 1.05s cubic-bezier(0.3, 0, 0.5, 1) infinite; transform-origin: 50% 100%; }
+.dierenparade[data-gang="vlieg"] { bottom: auto; top: 14vh; }
+.dierenparade[data-gang="vlieg"] .dier { animation: dier-fladder 1.5s ease-in-out infinite; }
+.dierenparade[data-gang="zwem"] .dier { animation: dier-golf 1.2s ease-in-out infinite; }
+/* Wat erachteraan komt: bubbels, omgewoelde aarde, of een regenwolkje erboven. */
+.dierenparade[data-gang="zwem"]::before,
+.dierenparade[data-gang="sip"]::before {
+  position: absolute;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.dierenparade[data-gang="zwem"]::before {
+  content: "° ｡ °";
+  right: 100%;
+  top: 10%;
+  font-size: 0.4em;
+  color: rgba(200, 230, 255, 0.75);
+  animation: dier-bubbels 1.2s ease-in-out infinite;
+}
+/* Sip: sjokken in plaats van rennen, grijs, en een wolkje dat meeloopt. */
+.dierenparade[data-gang="sip"] .dier { animation: dier-sjok 1.1s ease-in-out infinite; filter: grayscale(0.7) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45)); }
+.dierenparade[data-gang="sip"]::before {
+  content: "🌧️";
+  top: -0.55em;
+  left: 50%;
+  font-size: 0.55em;
+  transform: translateX(-50%);
+  animation: dier-wolk 2s ease-in-out infinite;
+}
+
+@keyframes dier-stap {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-14%) rotate(6deg); }
+}
+@keyframes dier-spring {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.2, 0.75); }
+  45% { transform: translateY(-40%) scale(0.9, 1.15) rotate(-8deg); }
+  70% { transform: translateY(0) scale(1.15, 0.85); }
+  82% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes dier-sprongen {
+  0%, 100% { transform: translateY(0) scale(1.15, 0.8); }
+  50% { transform: translateY(-150%) scale(0.92, 1.1) rotate(-10deg); }
+}
+@keyframes dier-schommel {
+  0%, 100% { transform: rotate(-38deg); }
+  10% { transform: rotate(-30deg); }
+  45% { transform: rotate(34deg); }
+  50% { transform: rotate(38deg); }
+  60% { transform: rotate(30deg); }
+  95% { transform: rotate(-34deg); }
+}
+@keyframes dier-golf {
+  /* Een golf: neus omhoog als hij stijgt, neus omlaag als hij duikt, met een
+     staartslag (even korter) op het diepste en het hoogste punt. */
+  0%, 100% { transform: translate(0, 0) rotate(0) scaleX(1); }
+  12% { transform: translate(5%, -16%) rotate(-14deg) scaleX(1); }
+  25% { transform: translate(9%, -30%) rotate(0) scaleX(0.94); }
+  37% { transform: translate(5%, -18%) rotate(14deg) scaleX(1); }
+  50% { transform: translate(0, 4%) rotate(18deg) scaleX(1); }
+  62% { transform: translate(-5%, 18%) rotate(6deg) scaleX(0.94); }
+  75% { transform: translate(-9%, 22%) rotate(-4deg) scaleX(1); }
+  87% { transform: translate(-5%, 12%) rotate(-12deg) scaleX(1); }
+}
+@keyframes dier-bubbels {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-60%); opacity: 0.4; }
+}
+@keyframes dier-fladder {
+  0%, 100% { transform: translateY(0) rotate(-8deg) scaleY(1); }
+  12% { transform: translateY(-10%) rotate(-4deg) scaleY(0.75); }
+  25% { transform: translateY(-30%) rotate(6deg) scaleY(1); }
+  37% { transform: translateY(-20%) rotate(2deg) scaleY(0.75); }
+  50% { transform: translateY(35%) rotate(10deg) scaleY(1); }
+  62% { transform: translateY(50%) rotate(4deg) scaleY(0.75); }
+  75% { transform: translateY(25%) rotate(-6deg) scaleY(1); }
+  87% { transform: translateY(8%) rotate(-10deg) scaleY(0.75); }
+}
+/* Graven: kop omlaag, wroeten, weg onder de grond, weer omhoog ploppen. */
+@keyframes dier-graaf {
+  0%, 12% { transform: translateY(0) rotate(0) scaleY(1); opacity: 1; }
+  20% { transform: translateY(8%) rotate(24deg); }
+  26% { transform: translateY(12%) rotate(16deg) translateX(-4%); }
+  32% { transform: translateY(14%) rotate(26deg) translateX(4%); }
+  46% { transform: translateY(60%) scaleY(0.3); opacity: 0; }
+  66% { transform: translateY(60%) scaleY(0.3); opacity: 0; }
+  78% { transform: translateY(-20%) scaleY(1.15); opacity: 1; }
+  88%, 100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+@keyframes dier-draai {
+  0%, 60% { transform: rotate(0); }
+  80%, 100% { transform: rotate(360deg); }
+}
+@keyframes dier-waggel {
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(12deg); }
+}
+@keyframes dier-kruip {
+  0%, 100% { transform: scaleX(1) translateX(0); }
+  50% { transform: scaleX(1.15) translateX(4%); }
+}
+@keyframes dier-sjok {
+  0%, 100% { transform: translateY(4%) rotate(-4deg); }
+  50% { transform: translateY(10%) rotate(4deg); }
+}
+@keyframes dier-wolk {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -12%); }
+}
+
+.dierenroep {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  justify-content: center;
+}
+
+/* ---- De wei: de maatjes scharrelen rond (Dierenwei.svelte) -------------- */
+.wei {
+  position: relative;
+  overflow: hidden;
+  height: 2.3em;
+  font-size: 3rem;
+  /* Geen gras: een vilten podium met een dunne gouden rand, zoals de rest van de quiz. */
+  background:
+    linear-gradient(to top, rgba(201, 162, 39, 0.35) 0 1px, transparent 1px) 0 calc(100% - 0.14em) / 100% calc(100% - 0.14em) no-repeat,
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201, 162, 39, 0.12), transparent 70%),
+    linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+}
+.bewoner {
+  position: absolute;
+  bottom: 0.1em;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  transform: translateX(-50%);
+}
+.bewoner .actie { transform-origin: 50% 100%; }
+.bewoner .kijk { display: inline-block; position: relative; }
+.bewoner .kijk.links { transform: scaleX(-1); }
+.bewoner .ding { --ding: 0.36; }
+/* Hoe het lijf meebeweegt; via `translate`, zodat het niet botst met het kunstje. */
+.bewoner[data-doen="loop"] .kijk { animation: wei-hup 0.34s steps(2, jump-none) infinite; }
+.bewoner[data-doen="ren"] .kijk,
+.bewoner[data-doen="jaag"] .kijk,
+.bewoner[data-doen="vlucht"] .kijk { animation: wei-hup 0.2s steps(2, jump-none) infinite; }
+@keyframes wei-hup { from { translate: 0 0; } to { translate: 0 -0.0625em; } }
+.bewoner[data-soort="lucht"] { bottom: 0.7em; }
+.bewoner[data-soort="lucht"] .actie { animation: wei-zweef 1.8s ease-in-out infinite; }
+.bewoner[data-soort="lucht"][data-doen="slaap"] { bottom: 0.14em; }
+.bewoner[data-soort="water"] { bottom: 0.35em; }
+.bewoner[data-soort="water"] .actie:not([data-lijf]) { animation: wei-zwem 1.8s ease-in-out infinite; }
+@keyframes wei-zweef { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.3em; } }
+@keyframes wei-zwem {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 0 -0.28em; rotate: -14deg; }
+  50% { translate: 0 -0.06em; rotate: 12deg; }
+  75% { translate: 0 0.1em; rotate: 4deg; }
+}
+/* Graven: wroeten, de grond in zakken, weg zijn, en elders weer op. */
+.bewoner[data-doen="graaf"] .kijk { animation: wei-zak var(--tel) ease-in both; }
+@keyframes wei-zak {
+  0%, 55% { translate: 0 0; clip-path: inset(0 0 0 0); }
+  100% { translate: 0 1em; clip-path: inset(0 0 100% 0); }
+}
+.bewoner[data-doen="onder"] { visibility: hidden; }
+.weinaam {
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: max(0.7rem, 0.2em);
+  line-height: 1.2;
+  color: var(--goud-licht);
+  background: rgba(8, 21, 17, 0.82);
+  border: 1px solid var(--goud-diep);
+  border-radius: 999px;
+  padding: 0.05em 0.55em;
+  white-space: nowrap;
+  margin-bottom: 0.15em;
+}
+.weinaam::before { content: attr(data-naam); }
+/* Het naambordje komt pas als het dier iets doet (of net binnenkomt): anders
+   hangt er boven elk dier een bordje en wordt het een drukte van jewelste. */
+.weinaam {
+  opacity: 0;
+  transform: translateY(0.2em);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.bewoner:is([data-doen="groet"], [data-doen="kunstje"], [data-doen="op"], [data-doen="eet"], [data-doen="jaag"]) .weinaam {
+  opacity: 1;
+  transform: none;
+}
+/* Pixelplaatjes rond de dieren: net zo scherp als de dieren zelf, en met
+   pixels van dezelfde maat. Het plaatje is 9 pixels breed (7 plus de
+   omlijning), het dier 32, en `--ding` is hoe groot de emoji naast het dier
+   staat. */
+.pixelicoon {
+  display: block;
+  width: calc(9em / 32 / var(--ding, 0.42));
+  height: calc(9em / 32 / var(--ding, 0.42));
+  margin: 0 auto;
+}
+.aai {
+  display: inline-block;
+  font: inherit;
+  line-height: 1;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* Op de telefoon: je eigen dier op een eigen podiumpje. */
+.telefoonwei .wei {
+  margin-top: 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--rand);
+  height: 1.9em;
+  font-size: 3.4rem;
+  font-size: round(3.4rem, 32px);
+}
+
+/* ---- Je maatje iets laten doen (Maatjesknoppen.svelte) ------------------
+   Vijf knoppen onder je maatje op de telefoon, elk met een pixelplaatje.
+   Wat je kiest, doet het ook op de televisie. */
+.maatjesknoppen {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+.maatjesknoppen button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.2rem 0.45rem;
+  font: 600 0.78rem var(--ui);
+  color: var(--ivoor);
+  border-radius: 12px;
+  border: 1px solid var(--rand);
+  background: linear-gradient(180deg, var(--vilt-hoog), var(--vilt-diep));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 0.08s, border-color 0.2s;
+}
+.maatjesknoppen button:active { transform: scale(0.94); }
+.maatjesknoppen button[aria-disabled="true"] { opacity: 0.55; }
+.maatjesknoppen button.bezig {
+  opacity: 1;
+  border-color: var(--goud-licht);
+  box-shadow: 0 0 0 1px var(--goud), 0 8px 20px -12px rgba(201, 162, 39, 0.9);
+}
+.maatjesknoppen button:focus-visible { outline: 2px solid var(--goud-licht); outline-offset: 2px; }
+.maatjesknoppen .teken {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.maatjesknoppen .pixelicoon { width: 27px; height: 27px; }
+/* Na een vraag: je maatje naast de knoppen, zodat je weet wie je stuurt. */
+.maatjebalk {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+.maatjebalk-dier { font-size: 64px; line-height: 0; flex: 0 0 auto; }
+.maatjebalk .maatjesknoppen { flex: 1 1 auto; margin-top: 0; }
+
+/* Op de televisie: een maatje dat iemand stuurt zweeft omhoog als een
+   reactie, en doet onderweg zijn kunstje. */
+.maatjereactie .plaatmaatje {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  font-size: 64px;
+  font-size: max(64px, round(4.5vw, 32px));
+}
+
+/* ---- Het maatje op het naambordje (Plaatmaatje.svelte) -----------------
+   In de lobby op de televisie staat ieders maatje op zijn eigen bordje: het
+   knippert en ademt, en heel af en toe doet er één een kunstje. Wie er nog
+   niet is, heeft een maatje dat ligt te slapen. */
+.maatjesrij {
+  row-gap: 2.4em;
+  padding-top: 1.8em;
+}
+.naamplaat.metmaatje { position: relative; }
+.plaatmaatje {
+  position: absolute;
+  right: 0.5em;
+  bottom: calc(100% - 0.14em);
+  font-size: 2.2em;
+  font-size: max(32px, round(2.2em, 32px));
+  line-height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0.05em 0.04em rgba(0, 0, 0, 0.55));
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+.plaatmaatje .actie { transform-origin: 50% 100%; }
+.plaatmaatje .ding { --ding: 0.42; }
+/* Slapen zonder zzz: dat zou bij een hele rij slapers te druk worden. */
+.plaatmaatje .px-zzz { display: none; }
+.plaatmaatje .adem {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  animation: adem 3.4s ease-in-out infinite;
+}
+.naamplaat:nth-child(3n + 1) .adem { animation-delay: -1.1s; }
+.naamplaat:nth-child(3n + 2) .adem { animation-delay: -2.3s; }
+@keyframes adem {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.015, 1.035); }
+}
+.naamplaat:not(.aan) .plaatmaatje {
+  opacity: 0.4;
+  filter: grayscale(0.7) drop-shadow(0 0.05em 0.04em rgba(0, 0, 0, 0.55));
+}
+
+/* ---- De entree (Spotlight.svelte) --------------------------------------
+   Wie binnenkomt, krijgt even het podium: de zaal wordt iets donkerder, er
+   valt een zacht gouden licht, het maatje rent erin, doet een kunstje,
+   buigt, en is weer weg. */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 14vh;
+  animation: spot-aan 0.5s ease-out both;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 30% 45% at 50% 70%, rgba(4, 12, 9, 0.35), transparent 100%),
+    rgba(4, 12, 9, 0.78);
+}
+.spotlicht {
+  position: absolute;
+  left: 50%;
+  bottom: 9vh;
+  width: 56vh;
+  height: 90vh;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(240, 217, 140, 0) 0%, rgba(240, 217, 140, 0.13) 70%, rgba(240, 217, 140, 0.2) 100%);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+}
+.spotlicht::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -3vh;
+  height: 7vh;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(240, 217, 140, 0.38), transparent 70%);
+}
+.spotdier {
+  position: relative;
+  font-size: 22vh;
+  font-size: max(64px, round(22vh, 32px));
+  line-height: 0;
+}
+.spotdier .pixeldier { filter: drop-shadow(0 1vh 1.2vh rgba(0, 0, 0, 0.5)); }
+.spotdier .actie { transform-origin: 50% 100%; }
+.spotdier .ding { --ding: 0.3; }
+.spotlight[data-fase="in"] .spotdier { animation: spot-in var(--in) cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.spotlight[data-fase="uit"] { animation: spot-uit var(--uit) ease-in both; }
+.spotnaam {
+  position: relative;
+  margin: 3vh 0 0;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(1.4rem, 3.6vh, 2.8rem);
+  color: var(--goud-licht);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  animation: spot-naam 0.6s ease-out var(--in) both;
+}
+.spotentree {
+  position: relative;
+  margin: 0.6vh 0 0;
+  font-family: var(--ui);
+  font-size: clamp(0.9rem, 2vh, 1.4rem);
+  color: var(--ivoor-zacht);
+  animation: spot-naam 0.6s ease-out calc(var(--in) + 0.25s) both;
+}
+@keyframes spot-aan { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spot-in { from { transform: translateX(-70vw); } to { transform: none; } }
+@keyframes spot-uit { to { opacity: 0; transform: translateY(3vh) scale(0.96); } }
+@keyframes spot-naam { from { opacity: 0; transform: translateY(1vh); } to { opacity: 1; transform: none; } }
+
+/* De optocht: een zacht gouden schijnsel op de vloer onder elk dier, in plaats van decor. */
+.dierenparade:not([data-gang="vlieg"]) .dier::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 5%;
+  right: 5%;
+  bottom: -0.08em;
+  height: 0.16em;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(240, 217, 140, 0.32), transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dier,
+  .dier[data-beweging],
+  .dierenparade .dier,
+  .dierenparade::before,
+  .actie,
+  .ding,
+  .pixeldier *,
+  .bewoner .kijk,
+  .plaatmaatje .adem,
+  .eigenschap i.vol {
+    animation: none !important;
+  }
+  .dierenparade,
+  .spotlight {
+    display: none;
+  }
 }

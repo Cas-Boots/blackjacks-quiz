@@ -1,4 +1,17 @@
-import type { PubliekeStaat, Rol } from '$lib/shared/state';
+import { api } from './proef';
+import type { PubliekeStaat, Rol, Por } from '$lib/shared/state';
+import type { Opdracht } from '$lib/shared/dieren';
+
+/** Een maatje dat een speler vanaf zijn telefoon iets laat doen. Vluchtig, net als een reactie. */
+export interface MaatjeOpdracht {
+  id: number;
+  spelerId: number;
+  naam: string;
+  dierNaam: string | null;
+  dier: string | null;
+  opdracht: Opdracht;
+  x: number;
+}
 
 /**
  * De live verbinding met de server.
@@ -24,6 +37,15 @@ class Live {
   /** De punten zoals ze vóór de laatste wijziging stonden. Hiermee kan het
    *  scorebord van oud naar nieuw tellen in plaats van te springen. */
   vorigePunten = $state<Record<number, number>>({});
+  /** Reacties van telefoons die nu over het scherm zweven. Vluchtig. */
+  reacties = $state<{ id: number; emoji: string; naam: string; x: number }[]>([]);
+  /** Maatjes die spelers nu iets laten doen op de televisie. Vluchtig. */
+  maatjes = $state<MaatjeOpdracht[]>([]);
+  /** De laatste por van de quizmaster aan deze telefoon; verdwijnt vanzelf. */
+  por = $state<Por | null>(null);
+  #porTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Het laatste geluid van het geluidsbord. De televisie speelt het af. */
+  geluid = $state<{ id: number; geluid: string } | null>(null);
 
   #bron: EventSource | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -48,8 +70,9 @@ class Live {
     if ('rol' in pakket && pakket.rol) this.rol = pakket.rol;
     if ('spelerId' in pakket) this.spelerId = pakket.spelerId ?? null;
     if (!staat) return;
-    // Nooit terug in de tijd.
-    if (this.staat && staat.versie < this.staat.versie) return;
+    // Nooit terug in de tijd — binnen hetzelfde spel. Een nieuw spel begint
+    // weer bij versie 1, en dat pakketje moet juist wél door.
+    if (this.staat && staat.spelId === this.staat.spelId && staat.versie < this.staat.versie) return;
 
     // Bewaar de vorige punten zodra ze echt veranderen.
     if (this.staat) {
@@ -66,7 +89,7 @@ class Live {
 
   #verbind() {
     try {
-      const bron = new EventSource('/api/stream');
+      const bron = new EventSource(api('/api/stream'));
       this.#bron = bron;
 
       bron.addEventListener('staat', (e) => {
@@ -83,6 +106,52 @@ class Live {
 
       bron.addEventListener('hartslag', () => {
         this.verbonden = true;
+      });
+
+      bron.addEventListener('reactie', (e) => {
+        try {
+          const r = JSON.parse((e as MessageEvent).data);
+          this.reacties = [...this.reacties.slice(-24), r];
+          // Na de zweefanimatie mag hij weg.
+          setTimeout(() => (this.reacties = this.reacties.filter((x) => x.id !== r.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('maatje', (e) => {
+        try {
+          const m = JSON.parse((e as MessageEvent).data) as MaatjeOpdracht;
+          // Van elke speler maar één tegelijk: een nieuwe opdracht vervangt de vorige.
+          this.maatjes = [...this.maatjes.filter((x) => x.spelerId !== m.spelerId).slice(-11), m];
+          setTimeout(() => (this.maatjes = this.maatjes.filter((x) => x.id !== m.id)), 3200);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('geluid', (e) => {
+        try {
+          this.geluid = JSON.parse((e as MessageEvent).data);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
+      });
+
+      bron.addEventListener('por', (e) => {
+        try {
+          const por = JSON.parse((e as MessageEvent).data) as Por;
+          this.por = por;
+          try {
+            navigator.vibrate?.([80, 60, 80, 60, 160]);
+          } catch {
+            /* geen trilmotor */
+          }
+          if (this.#porTimer) clearTimeout(this.#porTimer);
+          this.#porTimer = setTimeout(() => (this.por = null), 5000);
+        } catch {
+          /* kapot pakketje, laat maar */
+        }
       });
 
       bron.onerror = () => {
@@ -111,13 +180,19 @@ class Live {
 
   async #haalOp() {
     try {
-      const r = await fetch('/api/state', { cache: 'no-store' });
+      const r = await fetch(api('/api/state'), { cache: 'no-store' });
       if (!r.ok) return;
       this.#neem(await r.json());
       this.verbonden = true;
     } catch {
       this.verbonden = false;
     }
+  }
+
+  /** Milliseconden tot middernacht (negatief als die al geweest is), volgens de servertijd. */
+  totMiddernachtMs(): number | null {
+    const op = this.staat?.nieuwjaar?.op;
+    return op == null ? null : op - (Date.now() + this.afwijking);
   }
 
   /** Milliseconden die er nog op de klok staan, gecorrigeerd voor de servertijd. */
@@ -128,7 +203,7 @@ class Live {
   }
 
   async opdracht(opdracht: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/host', {
+    const r = await fetch(api('/api/host'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ opdracht, ...extra }),
@@ -137,8 +212,25 @@ class Live {
     return r.json();
   }
 
+  async reageer(emoji: string) {
+    await fetch(api('/api/reactie'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ emoji }),
+    });
+  }
+
+  /** Laat je eigen maatje iets doen op de televisie. */
+  async laatMaatje(opdracht: Opdracht) {
+    await fetch(api('/api/maatje'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ opdracht }),
+    });
+  }
+
   async meld(rol: string, extra: Record<string, unknown> = {}) {
-    const r = await fetch('/api/join', {
+    const r = await fetch(api('/api/join'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ rol, ...extra }),

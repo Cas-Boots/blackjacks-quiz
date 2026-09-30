@@ -90,6 +90,7 @@ button{font-family:inherit}
   border-bottom:1px solid var(--rand-zacht);
   position:relative;z-index:20;
 }
+.rail[hidden]{display:none}
 .rail-suit{font-size:calc(var(--fs-railnaam) * 1.1);color:var(--goud);line-height:1}
 .rail-suit.is-rood{color:var(--rood-licht)}
 .rail-info{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
@@ -541,6 +542,26 @@ input[type=file]{display:none}
   box-shadow:0 14px 34px -12px rgba(0,0,0,.8);animation:opkomen .25s ease-out both;
 }
 
+/* ---- Pauze en middernacht -------------------------------------- */
+/* Ligt over de vraag heen; de confetti (z-index 40) valt eroverheen. */
+.pauzelaag{
+  position:absolute;inset:0;z-index:35;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:var(--sp-4);padding:clamp(18px,4vw,90px);text-align:center;
+  background:radial-gradient(120% 90% at 50% 0%, #17362B 0%, var(--vilt) 42%, var(--vilt-diep) 100%);
+}
+.pauzelaag[hidden]{display:none}
+.pauze-inhoud{display:flex;flex-direction:column;align-items:center;gap:var(--sp-3)}
+.pauze-aftel{
+  font-family:var(--display);font-weight:700;line-height:.9;margin:0;
+  font-size:clamp(4rem,18vw,16rem);font-variant-numeric:tabular-nums;color:var(--goud-licht);
+}
+.pauze-aftel.is-slot{font-size:clamp(8rem,40vh,28rem);text-shadow:0 0 60px rgba(235,210,124,.45)}
+.pauze-jaar{font-family:var(--display);font-weight:700;line-height:.9;margin:0;font-size:clamp(3rem,14vw,12rem);color:var(--goud)}
+.middernacht-melding{border-color:var(--goud-diep);color:var(--goud-licht)}
+.middernacht-melding[hidden]{display:none}
+.middernacht-melding.is-dringend{border-color:var(--rood);animation:pols .9s ease-in-out infinite}
+
 /* ---- Diversen --------------------------------------------------- */
 .scheiding{height:1px;background:var(--rand-zacht);border:none;margin:0;width:100%}
 .stapel{display:flex;flex-direction:column;gap:var(--sp-3)}
@@ -561,6 +582,63 @@ input[type=file]{display:none}
 }
 .schaalrij{display:flex;align-items:center;gap:var(--sp-2)}
 .schaalrij .waarde{font-family:var(--mono);font-size:.85rem;color:var(--goud-licht);min-width:3.5ch;text-align:center}
+
+/* ---- Het jaaroverzicht: de film waarmee de avond opent ----------- */
+.film{display:flex;flex-direction:column;gap:var(--sp-3);width:100%}
+.film-kaart{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+.film-kaart.is-titel{align-items:center;text-align:center;gap:var(--sp-3)}
+.film-jaartal{font-family:var(--display);font-size:calc(var(--fs-titel) * 1.1);line-height:.92;color:var(--goud-licht);margin:0}
+.film-jaartal.is-klein{font-size:var(--fs-kop);color:var(--ivoor)}
+.film-ondertitel{font-family:var(--display);font-size:var(--fs-lood);color:var(--ivoor);margin:0;max-width:32ch}
+.film-inleiding{font-size:calc(var(--fs-lood) * .96);color:var(--ivoor-zacht);margin:0;max-width:46ch;line-height:1.5}
+.film-maandkop{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.film-maand{font-family:var(--display);font-size:var(--fs-titel);line-height:.95;margin:0;color:var(--ivoor);text-transform:lowercase}
+.film-jaarschaduw{font-family:var(--display);font-size:calc(var(--fs-kop) * .85);color:var(--goud);opacity:.38;letter-spacing:.06em}
+.film-hoed{font-family:var(--display);font-size:calc(var(--fs-lood) * 1.12);color:var(--goud-licht);margin:0}
+.film-regels{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-1)}
+.film-regel{
+  display:grid;grid-template-columns:auto 1fr;align-items:start;gap:var(--sp-3);
+  padding:var(--sp-2) var(--sp-3);border-radius:12px;border-left:2px solid var(--goud-diep);
+  background:linear-gradient(90deg,rgba(255,255,255,.045),transparent 70%);
+}
+.film-regel .emoji{font-size:calc(var(--fs-lood) * 1.25);line-height:1.35}
+.film-regel .tekst{font-size:calc(var(--fs-lood) * 1.06);line-height:1.45;color:var(--ivoor)}
+.film-regel .bij{display:block;margin-top:.2rem;font-size:.82em;color:var(--salie)}
+/* Een antwoord van vanavond in de film: een messing streep eronder, en er
+   schuift een zwarte balk vanaf. (De klokbalk in de rail heet .balk; deze
+   heeft daarom een eigen naam.) In de trailer komt hij niet voor. */
+.film-balk{
+  display:inline-block;min-width:4.4em;height:1em;margin:0 .12em;
+  transform:translateY(.14em);border-radius:3px;background:#050806;
+  box-shadow:inset 0 0 0 1px rgba(201,162,39,.35),0 1px 0 rgba(255,255,255,.04);
+  background-image:repeating-linear-gradient(100deg,rgba(255,255,255,.05) 0 2px,transparent 2px 7px);
+}
+.is-onthuld .film-balk{
+  min-width:0;height:auto;transform:none;padding:0 .1em;border-radius:2px;
+  background:none;background-image:none;box-shadow:inset 0 -.42em 0 rgba(201,162,39,.24);
+  color:var(--goud-licht);
+}
+.film-onsjaar{display:flex;flex-direction:column;gap:.45rem;margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1px solid var(--rand)}
+.film-chips{display:flex;flex-wrap:wrap;gap:.45rem .6rem;align-items:center}
+.film-chip{
+  display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .85rem .3rem .6rem;border-radius:999px;
+  border:1px solid var(--rand);background:var(--vilt-hoog);font-size:calc(var(--fs-lood) * .82);
+  color:var(--ivoor-zacht);white-space:nowrap;
+}
+.film-chip b{font-family:var(--mono);color:var(--goud-licht);font-variant-numeric:tabular-nums}
+.film-chip small{color:var(--salie);font-size:.78em}
+.film-chip.is-stil{border-style:dashed;color:var(--salie)}
+.film-chip.is-top{border-color:var(--goud-diep);color:var(--ivoor)}
+.film-meeloop{display:flex;flex-wrap:wrap;gap:.2rem 1.1rem;font-family:var(--mono);font-size:.8rem;color:var(--salie);font-variant-numeric:tabular-nums}
+.film-strook{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(3px,.5vw,8px);margin-top:var(--sp-2)}
+.film-vak{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.film-vak i{display:block;width:100%;height:clamp(4px,.8vh,8px);border-radius:2px;background:rgba(255,255,255,.07)}
+.film-vak.is-mee i{background:rgba(255,255,255,.16)}
+.film-vak.is-gehad i{background:var(--goud-diep)}
+.film-vak.is-nu i{background:var(--goud-licht);box-shadow:0 0 12px rgba(235,210,124,.5)}
+.film-vak em{font-family:var(--mono);font-style:normal;font-size:.62rem;letter-spacing:.06em;color:rgba(255,255,255,.22);text-transform:uppercase}
+.film-vak.is-mee em{color:var(--salie)}
+.film-vak.is-nu em{color:var(--goud-licht)}
 
 @media (max-width:560px){
   .rail-teller{display:none}
@@ -586,6 +664,10 @@ input[type=file]{display:none}
   </header>
   <main id="podium" tabindex="-1"></main>
   <footer class="besturing" id="besturing" hidden></footer>
+  <div class="pauzelaag" id="pauzelaag" role="status" hidden>
+    <div class="pauze-inhoud" id="pauzeInhoud"></div>
+    <div class="knoprij" id="pauzeKnoppen" style="justify-content:center"></div>
+  </div>
 </div>
 <input type="file" id="fotoKiezer" accept="image/*">
 <input type="file" id="mediaKiezer" accept="image/*,video/*,audio/*" multiple>
@@ -601,7 +683,11 @@ input[type=file]{display:none}
 
 /* -----------------------------------------------------------------
    DE VRAGEN
-   Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij"
+   Pas ze aan in app/src/lib/content/packs.ts en draai daar
+   `npm run content:sync`; dit blok wordt dan overschreven.
+   Vraagtypes: "waarnietwaar" | "meerkeuze" | "open" | "dichtstbij" | "stem"
+   Bij "stem" beslist de groep aan tafel; in de meespeelversie stemmen
+   de telefoons.
    Extra per vraag: emoji, lyric, toelichting, tijd, punten, media
    Media:  media:{soort:"beeld"|"video"|"muziek", bron:"bestand.jpg",
                   bijschrift:"optioneel"}
@@ -615,174 +701,174 @@ const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 const PAKKETTEN = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
-    beschrijving: "De hoofdquiz. Elk feit komt precies één keer voor, de sportvragen gaan over de marges, en twee rondes komen rechtstreeks uit onze eigen cijfers.",
+    beschrijving: "De hoofdquiz, strak in een uur: negen korte rondes die om en om wisselen tussen het jaar en onszelf, tussen ieder voor zich en in teams. Elk feit komt precies één keer voor. De uitgevinkte rondes zijn extra's.",
     rondes: [
       {
         naam: "Warmdraaien",
         suit: "♠", thema: "Waar of niet waar", sfeer: "vilt",
-        type: "waarnietwaar", tijd: 20, punten: 1, teamModus: "individueel",
-        uitleg: "Iedereen voor zich. Let op: de makkelijke helft is niet altijd de ware.",
+        type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
+        uitleg: "Zes stellingen om in te komen. Iedereen voor zich.",
         vragen: [
           {v:"De WK-finale werd pas in de verlenging beslist.", goed:true,
            toelichting:"Na negentig minuten stond het nog 0-0."},
-          {v:"Engeland eindigde als derde op het WK.", goed:true,
-           toelichting:"Frankrijk werd vierde."},
           {v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
-           toelichting:"Hij evenaarde het. Vijf zeges, net als Merckx, Hinault, Anquetil en Indurain."},
-          {v:"De Formule 1 reed in 2026 met vrijwel ongewijzigde reglementen.", goed:false,
-           toelichting:"Compleet nieuwe motor-, chassis-, banden- en brandstofregels. Coureurs moesten opeens hun accu-inzet over de ronde verdelen."},
+           toelichting:"Hij evenaarde het. Met zijn vijfde zege staat hij naast Merckx, Hinault, Anquetil en Indurain."},
           {v:"Het kabinet-Jetten heeft een meerderheid in de Tweede Kamer.", goed:false,
            toelichting:"Een minderheidskabinet — samen 66 van de 150 zetels."},
-          {v:"Max Verstappen stond halverwege 2026 in de top drie van het Formule 1-kampioenschap.", goed:false,
-           toelichting:"Zesde, op ruim honderd punten van de koploper. Red Bull kreeg de nieuwe regels niet aan de praat."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
+          {v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
+           toelichting:"Omhoog, zoals elk half jaar."},
           {v:"Nederland won op de Winterspelen van 2026 meer dan tien keer goud.", goed:false,
-           toelichting:"Precies tien keer."}
+           toelichting:"Precies tien keer. Wie ‘waar’ zei: net niet."}
         ]
       },
       {
-        naam: "Sport: de Marges",
-        suit: "♥", thema: "Niet wie er won, maar hoe", sfeer: "gras",
-        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
+        naam: "Hoger of Lager",
+        suit: "♥", thema: "Onze eigen cijfers, geschat", sfeer: "staal",
+        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Ieder voor zich een getal over onszelf. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
+        // Net als bij de sportcompetitie rekent de meespeelversie deze getallen
+        // op de avond zelf uit; hier staat de stand van 18 september.
         vragen: [
-          {v:"Wie kwam er als invaller in en besliste daarmee de WK-finale?", a:"Ferran Torres"},
-          {v:"In welk stadion werd die finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
-          {v:"Tegen welk land ging Oranje eruit, en op welke manier?", a:"Marokko — na strafschoppen, bij 1-1"},
-          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
-          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
-          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
-          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"},
-          {v:"Welke ploeg won het ploegenklassement in de Tour?", a:"Lidl-Trek"}
+          {v:"Hoeveel keer hebben we dit jaar met z’n allen gesport?", getal:462, eenheid:"keer", live:"getal.sportSamen"},
+          {v:"Hoeveel keer stonden we dit jaar samen in de sportschool?", getal:269, eenheid:"keer", live:"getal.sportSamen:gym"},
+          {v:"Hoeveel keer noteerde Rik dit jaar padel?", getal:27, eenheid:"keer", live:"getal.sportVan:Rik/padel"},
+          {v:"Joris nam zich in januari voor om 105 keer te sporten. Hoeveel keer stond de teller in september?", getal:59, eenheid:"keer", live:"getal.doelVan:Joris"},
+          {v:"Hoeveel verschillende sporten hebben we dit jaar samen bijgehouden?", getal:20, eenheid:"sporten", live:"getal.sportSoorten"}
         ]
       },
       {
-        naam: "Dichtstbij Wint",
-        suit: "♦", thema: "2026 in cijfers", sfeer: "staal",
-        type: "dichtstbij", tijd: 30, punten: 3, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Elk team noemt één getal. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
-        vragen: [
-          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden"},
-          {v:"En hoeveel woningbranden waren dat diezelfde nacht?", getal:228, eenheid:"woningbranden"},
-          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
-          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
-          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"},
-          {v:"Op welke dag in juli werd de WK-finale gespeeld?", getal:19, eenheid:"juli"},
-          {v:"Hoeveel punten had de koploper van het Formule 1-kampioenschap na de Grand Prix van Spanje?", getal:292, eenheid:"punten"}
-        ]
-      },
-      {
-        naam: "Nederland in 2026",
-        suit: "♣", thema: "Meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 25, punten: 2, teamModus: "individueel",
-        uitleg: "Weer ieder voor zich. Schrijf A, B, C of D op.",
+        naam: "Vier Kaarten",
+        suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
+        type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
-           opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1},
-          {v:"Uit welke partijen bestaat dat kabinet?",
-           opties:["D66, VVD en CDA","D66, GroenLinks-PvdA en CDA","VVD, CDA en BBB","D66, VVD en JA21"], goed:0},
-          {v:"Op welke datum werd het beëdigd?",
-           opties:["30 januari 2026","3 februari 2026","23 februari 2026","1 maart 2026"], goed:2},
-          {v:"Wanneer waren de verkiezingen die tot dit kabinet leidden?",
-           opties:["29 oktober 2025","22 november 2025","18 maart 2026","6 juni 2025"], goed:0},
-          {v:"Wie werd er in november 2025 als verkenner aangesteld?",
-           opties:["Ronald Plasterk","Wouter Koolmees","Kim Putters","Herman Tjeenk Willink"], goed:1},
-          {v:"Wanneer presenteerden de drie partijen hun regeerakkoord?",
-           opties:["30 januari 2026","25 februari 2026","4 november 2025","12 december 2025"], goed:0},
-          {v:"Waardoor lagen het openbaar vervoer en het vliegverkeer begin 2026 grotendeels stil?",
-           opties:["Een landelijke staking","Overvloedige sneeuwval","Een computerstoring","Dichte mist"], goed:1},
-          {v:"Wat gebeurde er op 1 juli 2026 met de AOW?",
-           opties:["Die ging omhoog","Die ging omlaag","Die werd bevroren","De leeftijd ging omhoog"], goed:0}
-        ]
-      },
-      {
-        naam: "De Rest van de Wereld",
-        suit: "♠", thema: "Buiten de sport om", sfeer: "nacht",
-        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Nieuwe teams, nieuwe kansen.",
-        vragen: [
-          {v:"Welk land won het Songfestival, en met welk nummer?", a:"Bulgarije, met Bangaranga van Dara"},
-          {v:"De hoeveelste editie van het Songfestival was dat?", a:"De zeventigste"},
-          {v:"Welke Noorse langlaufer brak het record voor de meeste olympische gouden medailles?", a:"Johannes Høsflot Klæbo"},
-          {v:"In welke twee Italiaanse plaatsen waren de Winterspelen?", a:"Milaan en Cortina d’Ampezzo"},
-          {v:"Hoe heette de missie die in april vier astronauten om de maan bracht?", a:"Artemis II"},
-          {v:"Welke negentienjarige coureur voerde lange tijd het Formule 1-kampioenschap aan?", a:"Kimi Antonelli"},
-          {v:"Welke film was in 2026 de grootste kaskraker in de Amerikaanse bioscopen?", a:"Spider-Man: Brand New Day"}
-        ]
-      },
-      {
-        naam: "Onze Sportcompetitie",
-        suit: "♥", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Ieder voor zich.",
-        vragen: [
-          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 104 keer",
-           toelichting:"Daarna Liz met 90, Eva met 83, Bastiaan met 76, Joris met 58 en Rik met 45."},
-          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik"},
-          {v:"Welke sport deed Rik dan wel, vaker dan wie ook?", a:"Padel — 27 keer"},
-          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen"},
-          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz"},
-          {v:"Wie noteerde er twaalf keer fysio?", a:"Eva"},
-          {v:"Wie legde zichzelf in januari het hoogste doel op?", a:"Cas — 162 keer sporten"},
-          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan",
-           toelichting:"Eva 83 van 60, Liz 90 van 80, Bastiaan 76 van 70. Cas, Joris en Rik zaten er nog onder."}
-        ]
-      },
-      {
-        naam: "Taart & Verre Landen",
-        suit: "♦", thema: "Resolution Recap — de rest", sfeer: "suiker",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Dezelfde telling, andere categorieën. Ieder voor zich.",
-        vragen: [
-          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46"},
-          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten"},
-          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan"},
-          {v:"Op welke dag gingen er vijf taarten doorheen — de drukste taartdag van het jaar?", a:"30 januari"},
-          {v:"Wie bezocht de meeste landen?", a:"Cas — twaalf stuks"},
-          {v:"Hoeveel verschillende landen bezochten we samen?", a:"Dertien"},
-          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië"},
-          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan"}
-        ]
-      },
-      {
-        naam: "De Voorspellingen",
-        suit: "♣", thema: "Wat jullie in januari dachten", sfeer: "violet",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        teVullen: true,
-        uitleg: "Aan het begin van 2026 deed iedereen elf à twaalf voorspellingen — Cas incluis. Nu de afrekening.",
-        vragen: [
-          {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true},
-          {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true},
-          {v:"Hoeveel van alle voorspellingen zijn er samen uitgekomen?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true},
-          {v:"Wiens voorspelling verdient de prijs voor beste vooruitziende blik?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke voorspelling kan nog net uitkomen in de laatste dagen van het jaar?", a:"— nog invullen —", teVullen:true}
+           opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
+           toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
+          {v:"Wie kwam er als invaller in en besliste de WK-finale?",
+           opties:["Lamine Yamal","Ferran Torres","Álvaro Morata","Dani Olmo"], goed:1},
+          {v:"Tegen welk land ging Oranje eruit op het WK?",
+           opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
+           toelichting:"Na strafschoppen, bij 1-1."},
+          {v:"Met welk nummer won Bulgarije het Songfestival?",
+           opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
+           toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
+          {v:"Wie werd in Italië de succesvolste winterolympiër ooit?",
+           opties:["Johannes Høsflot Klæbo","Marit Bjørgen","Ole Einar Bjørndalen","Sven Kramer"], goed:0,
+           toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
+          {v:"Welke negentienjarige voerde lange tijd het Formule 1-kampioenschap aan?",
+           opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
+           toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
       },
       {
         naam: "De WK-poule",
-        suit: "♠", thema: "Blackjacks Cup", sfeer: "poule",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        teVullen: true,
-        uitleg: "Onze eigen poule. Vul deze ronde met de export uit blackjacks-cup.",
+        suit: "♣", thema: "Blackjacks Cup", sfeer: "poule",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
+        optioneel: true,
+        uitleg: "Onze eigen poule, uit de export van blackjacks-cup. Vink hem aan om mee te doen.",
         vragen: [
-          {v:"Wie won uiteindelijk de poule, en met hoeveel punten?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie eindigde er onderaan?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie had Spanje vooraf als wereldkampioen aangewezen?", a:"— nog invullen —", teVullen:true},
-          {v:"Bij welke vooraf-vraag was één van ons de enige met het goede antwoord?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie haalde de meeste punten uit een joker, en op welke wedstrijd?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie verspilde een joker aan een wedstrijd die niets opleverde?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke wedstrijd voorspelde niemand van ons goed?", a:"— nog invullen —", teVullen:true},
-          {v:"Wie pakte de meeste punten uit één enkele wedstrijd?", a:"— nog invullen —", teVullen:true}
+          {v:"Wie won uiteindelijk de poule, en met hoeveel punten?", a:"Liz — 221 punten", live:"poule.winnaar",
+           toelichting:"Daarna Bastiaan met 203, Cas met 187, Joris met 181, Eva met 152 en Rik met 142."},
+          {v:"Wie eindigde er onderaan?", a:"Rik — 142 punten", live:"poule.onderaan",
+           toelichting:"Nog 10 punten achter Eva."},
+          {v:"Iedereen op één na had Spanje vooraf als wereldkampioen aangewezen. Wie niet?", a:"Eva (Frankrijk)", live:"poule.kampioen",
+           toelichting:"Eva liet 20 punten liggen."},
+          {v:"Bij welke vooraf-vraag was één van ons de enige met het goede antwoord?", a:"Finalist (B) — Joris (Argentinië)", live:"poule.enigeGoed",
+           toelichting:"Ook goed: Winnaar Groep D — Liz (de Verenigde Staten) en Winnaar Groep K — Cas (Colombia)."},
+          {v:"Wie haalde de meeste punten uit een joker, en op welke wedstrijd?", a:"Bastiaan op Argentinië–Zwitserland (3-1) en Liz op Noorwegen–Engeland (1-2)", live:"poule.jokerBest",
+           toelichting:"12 punten elk: de uitslag precies goed, en dubbel door de joker."},
+          {v:"Drie van ons verspilden een joker aan een wedstrijd die niets opleverde. Wie?", a:"Bastiaan en Liz op Nederland–Marokko (1-1) en Joris op Duitsland–Paraguay (1-1)", live:"poule.jokerVerspild"},
+          {v:"Welke wedstrijd van de latere wereldkampioen Spanje voorspelde niemand van ons goed?", a:"Spanje–Kaapverdië (0-0)", live:"poule.niemandGoed",
+           toelichting:"In totaal leverden achttien wedstrijden niemand van ons iets op."},
+          {v:"Wie had de meeste uitslagen precies goed?", a:"Liz — negen keer", live:"poule.exact",
+           toelichting:"Daarna Bastiaan met 6, Cas met 6, Eva met 3, Joris met 3 en Rik met 2."}
+        ]
+      },
+      {
+        naam: "Onze Sportcompetitie",
+        suit: "♠", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
+        cijfers: "sport",
+        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
+        // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
+        // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
+        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
+        vragen: [
+          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
+           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
+          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
+          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
+          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
+        ]
+      },
+      {
+        naam: "Dichtstbij Wint",
+        suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
+        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
+        vragen: [
+          {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
+           toelichting:"Voor het eerst 48 in plaats van 32."},
+          {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
+           toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
+          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
+          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
+          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"}
+        ]
+      },
+      {
+        naam: "Sport: de Marges",
+        suit: "♦", thema: "Voor de echte kenners", sfeer: "gras",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        optioneel: true,
+        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
+        vragen: [
+          {v:"In welk stadion werd de WK-finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
+          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
+          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
+          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
+          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"}
+        ]
+      },
+      {
+        naam: "Taart & Verre Landen",
+        suit: "♣", thema: "Resolution Recap — de rest", sfeer: "suiker",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
+        cijfers: "taart",
+        uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
+        vragen: [
+          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
+          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
+          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
+          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
+          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
+        ]
+      },
+      {
+        naam: "2026 in Emoji",
+        suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
+        vragen: [
+          {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
+           toelichting:"Het openbaar vervoer en het vliegverkeer lagen grotendeels stil."},
+          {emoji:"🇮🇹 ⛷️ 🏔️ 🥇", v:"Welk sportfeest?", a:"De Olympische Winterspelen in Milaan en Cortina"},
+          {emoji:"🕷️ 🧑 🆕 🌅", v:"Welke film?", a:"Spider-Man: Brand New Day",
+           toelichting:"De grootste kaskraker van het jaar in de Amerikaanse bioscopen."},
+          {emoji:"⛵ 🌊 👁️ 🏛️", v:"Welke film?", a:"The Odyssey",
+           toelichting:"De verfilming van het Griekse epos was een van de grootste kaskrakers van 2026."},
+          {emoji:"🤠 🧑‍🚀 🧸 5️⃣", v:"Welke film?", a:"Toy Story 5"}
         ]
       },
       {
         naam: "Jullie Jaar in Beeld",
         suit: "♥", thema: "Eigen foto’s, video’s en muziek", sfeer: "bioscoop",
-        type: "open", tijd: 35, punten: 2, teamModus: "teams", aantalTeams: 2,
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true,
         uitleg: "Foto’s en filmpjes uit 2026. Laad ze in op het startscherm en vervang deze vragen door je eigen tekst.",
         vragen: [
@@ -798,64 +884,73 @@ const PAKKETTEN = {
         ]
       },
       {
-        naam: "2027",
-        suit: "♦", thema: "Vooruitkijken", sfeer: "vuurwerk",
-        type: "open", tijd: 25, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Genoeg teruggekeken. Wat staat er volgend jaar op de rol?",
-        vragen: [
-          {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
-           toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
-          {v:"Welk land organiseert het WK rugby?", a:"Australië"},
-          {v:"Wat is er op 2 augustus 2027 aan de hemel te zien?", a:"Een totale zonsverduistering",
-           toelichting:"Ruim zes minuten totaliteit, onder meer boven Noord-Afrika en Egypte — een van de langste van deze eeuw."},
-          {v:"In welke maand zijn de Franse presidentsverkiezingen?", a:"April"},
-          {v:"Welke drie landen organiseren samen het WK cricket?", a:"Zuid-Afrika, Zimbabwe en Namibië"},
-          {v:"Welke twee Europese landen houden landelijke verkiezingen?", a:"Italië en Polen"}
-        ]
-      },
-      {
         naam: "Bliksemronde",
-        suit: "♣", thema: "Tien seconden per vraag", sfeer: "bliksem",
-        type: "open", tijd: 10, punten: 1, teamModus: "individueel",
-        uitleg: "Tien vragen, tien seconden elk. Ieder voor zich, één punt per stuk. Tempo!",
+        suit: "♦", thema: "Korte vragen, snel punten", sfeer: "bliksem",
+        type: "open", tijd: 30, punten: 1, teamModus: "individueel",
+        optioneel: true,
+        uitleg: "Zes korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
         vragen: [
           {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
           {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
-          {v:"Welk land eindigde vierde op het WK?", a:"Frankrijk"},
-          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie"},
+          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie",
+           toelichting:"De Verenigde Staten, Canada en Mexico."},
           {v:"Tegen wie speelde Oranje de openingswedstrijd?", a:"Japan"},
-          {v:"In welke maand waren de Winterspelen?", a:"Februari"},
           {v:"Tegen welk Afrikaans land won Oranje in de groepsfase?", a:"Tunesië"},
-          {v:"De hoeveelste Tourzege was dit voor Pogačar?", a:"De vijfde"},
-          {v:"Welke verfilming van een Grieks epos was in 2026 een van de grootste kaskrakers?", a:"The Odyssey"},
-          {v:"Van welke Pixar-film verscheen in 2026 het vijfde deel?", a:"Toy Story"}
+          {v:"In welke maand waren de Winterspelen?", a:"Februari",
+           toelichting:"In Milaan en Cortina d’Ampezzo."}
+        ]
+      },
+      {
+        naam: "De Voorspellingen",
+        suit: "♣", thema: "Wat jullie in januari dachten", sfeer: "violet",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
+        teVullen: true, cijfers: "voorspellingen",
+        uitleg: "Aan het begin van 2026 deed iedereen veertien voorspellingen — Cas incluis. Nu de afrekening.",
+        // In de meespeelversie komen vraag en antwoord uit voorspellingen.ts;
+        // vul daar de uitkomsten in. De losse HTML-quiz wacht op handwerk.
+        vragen: [
+          {v:"Wiens voorspellingen kwamen dit jaar het vaakst uit?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.meesteGoed"},
+          {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.meesteFout"},
+          {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.tegenDeStroom"},
+          {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.bijnaIedereen"},
+          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.pijnlijkst"}
         ]
       },
       {
         naam: "Oktober tot december",
         suit: "♠", thema: "De staart van het jaar — zelf aanvullen", sfeer: "vuurwerk",
-        type: "open", tijd: 25, punten: 2, teamModus: "individueel",
+        type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         optioneel: true, teVullen: true,
         uitleg: "Deze maanden waren er nog niet toen de quiz werd gemaakt. Vul ze in december aan.",
         vragen: [
           {v:"Wie werd wereldkampioen Formule 1 in 2026?", a:"— nog invullen —", teVullen:true},
           {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
           {v:"Wat stond er dit jaar op nummer één in de Top 2000?", a:"— nog invullen —", teVullen:true},
-          {v:"Wat gebeurde er in december dat niemand zag aankomen?", a:"— nog invullen —", teVullen:true},
-          {v:"Welke film moest je dit najaar gezien hebben?", a:"— nog invullen —", teVullen:true},
           {v:"Welk woord werd gekozen tot woord van het jaar?", a:"— nog invullen —", teVullen:true}
         ]
       },
       {
-        naam: "Wie van de Blackjacks?",
-        suit: "♥", thema: "Slotronde", sfeer: "vilt",
-        type: "open", tijd: 30, punten: 3, teamModus: "individueel",
-        uitleg: "Iedereen schrijft een naam op. Daarna stemt de groep wie er gelijk heeft — de quizmaster deelt de punten uit.",
+        naam: "2027",
+        suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
-          {v:"Wie van de vijf heeft 2026 het best gebruikt?", a:"De groep beslist"},
+          {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
+           toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
+          {v:"Wat is er op 2 augustus 2027 aan de hemel te zien?", a:"Een totale zonsverduistering",
+           toelichting:"Ruim zes minuten totaliteit, onder meer boven Noord-Afrika en Egypte — een van de langste van deze eeuw."},
+          {v:"Welk land organiseert het WK rugby?", a:"Australië"},
+          {v:"In welke maand kiest Frankrijk een nieuwe president?", a:"April"}
+        ]
+      },
+      {
+        naam: "Wie van de Blackjacks?",
+        suit: "♦", thema: "Slotronde", sfeer: "vilt",
+        type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
+        uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
+        vragen: [
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},
           {v:"Wie heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
-          {v:"Wie belt er in 2027 als eerste met groot nieuws?", a:"De groep beslist"},
           {v:"Wie verbreekt zijn goede voornemen het snelst?", a:"De groep beslist"},
           {v:"Wie wint volgend jaar deze quiz?", a:"De groep beslist"}
         ]
@@ -865,22 +960,19 @@ const PAKKETTEN = {
 
   familie: {
     naam: "Familie Proefronde 2026",
-    beschrijving: "De generale repetitie. Zelfde jaar, makkelijkere vragen, geschikt voor alle leeftijden. Vink hieronder aan wat je gebruikt.",
+    beschrijving: "De generale repetitie. Zelfde jaar, makkelijkere vragen, geschikt voor alle leeftijden — in drie kwartier gespeeld. Vink hieronder aan wat je gebruikt.",
     rondes: [
       {
         naam: "Waar of Niet Waar",
         suit: "♠", thema: "Om warm te draaien", sfeer: "vilt",
-        type: "waarnietwaar", tijd: 25, punten: 1, teamModus: "individueel",
+        type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
         uitleg: "Ieder voor zich. Waar of niet waar — één punt per goed antwoord.",
         vragen: [
           {v:"Spanje won in 2026 het WK voetbal.", goed:true},
-          {v:"Het WK voetbal van 2026 werd in Europa gespeeld.", goed:false,
-           toelichting:"In de Verenigde Staten, Canada en Mexico."},
           {v:"Een struisvogel steekt bij gevaar zijn kop in het zand.", goed:false,
            toelichting:"Ze gaan plat op de grond liggen. Of ze rennen — tot 70 km per uur."},
           {v:"In 2026 vlogen er weer mensen om de maan heen.", goed:true,
            toelichting:"Vier astronauten, met de missie Artemis II."},
-          {v:"Een olifant is het enige dier dat niet kan springen.", goed:true},
           {v:"Honing kan na een paar jaar bederven.", goed:false,
            toelichting:"In Egyptische graven is honing gevonden die na 3000 jaar nog eetbaar was."},
           {v:"Een spin is een insect.", goed:false,
@@ -889,10 +981,24 @@ const PAKKETTEN = {
         ]
       },
       {
+        naam: "Emoji Raden",
+        suit: "♥", thema: "Films en sprookjes", sfeer: "bioscoop",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "In teams. Welk verhaal of welke film staat hier?",
+        vragen: [
+          {emoji:"❄️ 👭 ⛄", v:"Welke film?", a:"Frozen"},
+          {emoji:"🐷 🐷 🐷 🏠 🐺", v:"Welk sprookje?", a:"De drie biggetjes"},
+          {emoji:"🤖 🌱 🚀", v:"Welke film?", a:"WALL·E"},
+          {emoji:"🚗 ⚡ 🏁", v:"Welke film?", a:"Cars"},
+          {emoji:"🦁 👑 🌅", v:"Welke film?", a:"The Lion King"},
+          {emoji:"🐘 👂 🎪", v:"Welke film?", a:"Dumbo"}
+        ]
+      },
+      {
         naam: "Sport van het Jaar",
-        suit: "♥", thema: "Voor iedereen te doen", sfeer: "gras",
-        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Schrijf A, B, C of D op.",
+        suit: "♦", thema: "Voor iedereen te doen", sfeer: "gras",
+        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "individueel",
+        uitleg: "Ieder voor zich. Kies A, B, C of D.",
         vragen: [
           {v:"In welk land waren de Olympische Winterspelen van 2026?",
            opties:["Noorwegen","Italië","Frankrijk","Zwitserland"], goed:1},
@@ -900,8 +1006,6 @@ const PAKKETTEN = {
            opties:["Remco Evenepoel","Mathieu van der Poel","Tadej Pogačar","Jonas Vingegaard"], goed:2},
           {v:"Hoeveel landen organiseerden samen het WK voetbal?",
            opties:["Eén","Twee","Drie","Vier"], goed:2},
-          {v:"Welk land won de meeste medailles op de Winterspelen?",
-           opties:["Noorwegen","Nederland","Italië","De Verenigde Staten"], goed:0},
           {v:"In welke sport haalt Nederland op de Winterspelen zijn medailles vooral?",
            opties:["Schaatsen","Skiën","Bobsleeën","Curling"], goed:0},
           {v:"Tegen welk land werd Oranje op het WK uitgeschakeld?",
@@ -910,29 +1014,26 @@ const PAKKETTEN = {
       },
       {
         naam: "Dichtstbij Wint",
-        suit: "♦", thema: "Cijferronde", sfeer: "staal",
-        type: "dichtstbij", tijd: 40, punten: 3, teamModus: "teams", aantalTeams: 2,
+        suit: "♣", thema: "Cijferronde", sfeer: "staal",
+        type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel gouden medailles won Nederland op de Winterspelen van 2026?", getal:10, eenheid:"keer goud"},
-          {v:"Hoeveel dagen telt een schrikkeljaar?", getal:366, eenheid:"dagen"},
-          {v:"Hoeveel provincies heeft Nederland?", getal:12, eenheid:"provincies"},
           {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"},
-          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"}
+          {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"},
+          {v:"Hoeveel provincies heeft Nederland?", getal:12, eenheid:"provincies"}
         ]
       },
       {
         naam: "Nederland & de Wereld",
-        suit: "♣", thema: "Meerkeuze", sfeer: "oranje",
-        type: "meerkeuze", tijd: 30, punten: 2, teamModus: "individueel",
-        uitleg: "Ieder voor zich. Schrijf A, B, C of D op.",
+        suit: "♠", thema: "Meerkeuze", sfeer: "oranje",
+        type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        uitleg: "Nieuwe teams. Kies A, B, C of D.",
         vragen: [
           {v:"Wie werd in 2026 minister-president van Nederland?",
            opties:["Rob Jetten","Henri Bontenbal","Dilan Yeşilgöz","Caroline van der Plas"], goed:0},
           {v:"Welk land won in 2026 het Eurovisie Songfestival?",
            opties:["Zweden","Bulgarije","Italië","Nederland"], goed:1},
-          {v:"Wat is de hoofdstad van Nederland?",
-           opties:["Den Haag","Rotterdam","Amsterdam","Utrecht"], goed:2},
           {v:"Welk dier is het grootste ter wereld?",
            opties:["De olifant","De blauwe vinvis","De giraf","De witte haai"], goed:1},
           {v:"Welke planeet staat het dichtst bij de zon?",
@@ -940,31 +1041,13 @@ const PAKKETTEN = {
           {v:"Wie schilderde De Nachtwacht?",
            opties:["Vincent van Gogh","Rembrandt van Rijn","Johannes Vermeer","Piet Mondriaan"], goed:1},
           {v:"Wat eet een reuzenpanda vooral?",
-           opties:["Bamboe","Vis","Insecten","Vlees"], goed:0},
-          {v:"In welk werelddeel ligt Egypte?",
-           opties:["Azië","Afrika","Europa","Zuid-Amerika"], goed:1}
-        ]
-      },
-      {
-        naam: "Emoji Raden",
-        suit: "♥", thema: "Films en sprookjes", sfeer: "bioscoop",
-        type: "open", tijd: 40, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "In teams. Welk verhaal of welke film staat hier?",
-        vragen: [
-          {emoji:"❄️ 👭 ⛄", v:"Welke film?", a:"Frozen"},
-          {emoji:"🐷 🐷 🐷 🏠 🐺", v:"Welk sprookje?", a:"De drie biggetjes"},
-          {emoji:"👧 🔴 🧺 🐺", v:"Welk sprookje?", a:"Roodkapje"},
-          {emoji:"🤖 🌱 🚀", v:"Welke film?", a:"WALL·E"},
-          {emoji:"🧸 🍯 🐝", v:"Welk verhaal?", a:"Winnie de Poeh"},
-          {emoji:"🚗 ⚡ 🏁", v:"Welke film?", a:"Cars"},
-          {emoji:"🦁 👑 🌅", v:"Welke film?", a:"The Lion King"},
-          {emoji:"🐘 👂 🎪", v:"Welke film?", a:"Dumbo"}
+           opties:["Bamboe","Vis","Insecten","Vlees"], goed:0}
         ]
       },
       {
         naam: "Ons Jaar in Beeld",
-        suit: "♦", thema: "Eigen familiefoto’s", sfeer: "bioscoop",
-        type: "open", tijd: 40, punten: 2, teamModus: "teams", aantalTeams: 2,
+        suit: "♥", thema: "Eigen familiefoto’s", sfeer: "bioscoop",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         optioneel: true, teVullen: true,
         uitleg: "Oude familiefoto’s doen het hier altijd goed. Laad ze in op het startscherm.",
         vragen: [
@@ -977,23 +1060,389 @@ const PAKKETTEN = {
       },
       {
         naam: "Bliksemronde",
-        suit: "♠", thema: "Vijftien seconden per vraag", sfeer: "bliksem",
-        type: "open", tijd: 15, punten: 1, teamModus: "individueel",
-        uitleg: "Korte vragen. Ieder voor zich, één punt per stuk.",
+        suit: "♦", thema: "Korte vragen, snel punten", sfeer: "bliksem",
+        type: "open", tijd: 30, punten: 1, teamModus: "individueel",
+        uitleg: "Korte vragen. Ieder voor zich, één punt per stuk. Tempo!",
         vragen: [
           {v:"Welk land verloor de WK-finale?", a:"Argentinië"},
-          {v:"In welke maand was die finale?", a:"Juli"},
           {v:"Hoeveel poten heeft een spin?", a:"Acht"},
-          {v:"Wat is het grootste meer van Nederland?", a:"Het IJsselmeer"},
           {v:"Wat is de hoofdstad van België?", a:"Brussel"},
           {v:"Hoeveel is 7 × 8?", a:"56"},
-          {v:"In welk seizoen vallen de blaadjes van de bomen?", a:"De herfst"},
-          {v:"Hoeveel maanden heeft een jaar?", a:"Twaalf"},
-          {v:"Welke kleuren heeft de Nederlandse vlag?", a:"Rood, wit en blauw"},
-          {v:"Hoeveel dagen zitten er in een week?", a:"Zeven"}
+          {v:"Wat is het grootste meer van Nederland?", a:"Het IJsselmeer"},
+          {v:"Hoeveel dagen telt een schrikkeljaar?", a:"366"},
+          {v:"In welk werelddeel ligt Egypte?", a:"Afrika"},
+          {v:"Welke kleuren heeft de Nederlandse vlag?", a:"Rood, wit en blauw"}
         ]
       }
     ]
+  }
+};
+
+const JAAROVERZICHT = {
+  jaar: 2026,
+  // De trailer, vóór de quiz.
+  titel: "De trailer",
+  inleiding: "Alvast een voorproefje van ons jaar. Wat er in de wereld gebeurde, laten we nog even weg: dat vragen we jullie zo.",
+  slot: "De rest is een vraag van vanavond. Na de uitslag draait de hele film.",
+  // De film, na de uitslag.
+  titelNaAfloop: "Het jaar in twee minuten",
+  inleidingNaAfloop: "Het hele jaar, zo snel als het voorbijging. Wat onderstreept staat, werd vanavond gevraagd.",
+  slotNaAfloop: "Dat was het jaar, en dat was de quiz. Alles is gevraagd, alles is gezegd.",
+
+  maanden: [
+    {
+      nr: 1,
+      kop: "Het begint zoals het eindigt: met vuurwerk",
+      momenten: [
+        {emoji:"🎆", tekst:"De jaarwisseling levert [[361]] autobranden en [[228]] woningbranden op.",
+         bij:"Het jaar is elf uur oud en de teller staat al vol."},
+        {emoji:"🚆", tekst:"[[Sneeuw]] legt het openbaar vervoer en het vliegverkeer grotendeels plat."},
+        {emoji:"🤝", tekst:"Eind januari presenteren [[D66, VVD en CDA]] hun regeerakkoord."},
+        {emoji:"🔮", tekst:"En wij doen veertien voorspellingen over dit jaar.",
+         bij:"Opgeschreven, ondertekend, niet meer weg te praten."}
+      ]
+    },
+    {
+      nr: 2,
+      kop: "Op het bordes",
+      momenten: [
+        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]]."},
+        {emoji:"🥇", tekst:"Nederland wint [[tien]] keer goud; [[Noorwegen]] gaat met [[41]] medailles aan kop.",
+         bij:"Schaatsen, en nog eens schaatsen."},
+        {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels."},
+        {emoji:"🏛️", tekst:"Het kabinet-[[Jetten]] wordt beëdigd."},
+        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels."}
+      ]
+    },
+    {
+      nr: 3,
+      kop: "De motoren slaan aan",
+      momenten: [
+        {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels."},
+        {emoji:"🔋", tekst:"Coureurs moeten opeens hun accu-inzet over de hele ronde verdelen.",
+         bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true}
+      ]
+    },
+    {
+      nr: 4,
+      kop: "Terug op aarde",
+      momenten: [
+        {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig."},
+        {emoji:"🌊", tekst:"Een capsule plonst in zee, na [[tien]] dagen onderweg."}
+      ]
+    },
+    {
+      nr: 5,
+      kop: "Het Songfestival strijkt neer",
+      momenten: [
+        {emoji:"🎤", tekst:"[[Bulgarije]] wint, met [[Bangaranga van Dara]]."},
+        {emoji:"📣", tekst:"Goed voor [[516]] punten, in de [[zeventigste]] editie."}
+      ]
+    },
+    {
+      nr: 6,
+      kop: "Het WK begint",
+      momenten: [
+        {emoji:"⚽", tekst:"Het toernooi opent in [[de Verenigde Staten, Canada en Mexico]]."},
+        {emoji:"🇳🇱", tekst:"Oranje begint tegen [[Japan]] en wint in de groepsfase van [[Tunesië]]."},
+        {emoji:"🏎️", tekst:"Na de Grand Prix van Spanje leidt [[Kimi Antonelli]] met [[292]] punten; Verstappen staat [[zesde]]."}
+      ]
+    },
+    {
+      nr: 7,
+      kop: "De maand waarin alles tegelijk gebeurt",
+      momenten: [
+        {emoji:"💶", tekst:"De AOW gaat [[omhoog]]."},
+        {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+        {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale in het [[MetLife Stadium]], [[pas in de verlenging]].",
+         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]]."},
+        {emoji:"🚴", tekst:"In Parijs wint [[Pogačar]] zijn [[vijfde]] Tour."},
+        {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx, Hinault, Anquetil en Indurain.", pasNaAfloop:true},
+        {emoji:"⛰️", tekst:"[[Carapaz]] grijpt de bolletjestrui op [[Alpe d’Huez]], in etappe 20."}
+      ]
+    },
+    {
+      nr: 8,
+      kop: "Zomer, en de zalen zitten vol",
+      momenten: [
+        {emoji:"🎬", tekst:"[[Spider-Man: Brand New Day]] wordt de grootste kaskraker in de Amerikaanse bioscopen."},
+        {emoji:"🍿", tekst:"Ook vol: de verfilming van [[The Odyssey]], en een nieuw deel van [[Toy Story]]."}
+      ]
+    },
+    {
+      nr: 9,
+      kop: "Nog honderd dagen te gaan",
+      momenten: [
+        {emoji:"🗓️", tekst:"De voorspellingen van januari beginnen erom te spannen.",
+         bij:"Sommige staan er goed voor. Sommige echt niet."}
+      ]
+    },
+    {
+      nr: 10,
+      kop: "De staart van het jaar",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in oktober?", teVullen:true}
+      ]
+    },
+    {
+      nr: 11,
+      kop: "De donkere maanden",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in november?", teVullen:true}
+      ]
+    },
+    {
+      nr: 12,
+      kop: "En toen was het oud en nieuw",
+      momenten: [
+        {emoji:"📰", tekst:"Wat gebeurde er in december?", teVullen:true},
+        {emoji:"🥂", tekst:"En dan is het oud en nieuw, en zitten we hier."}
+      ]
+    }
+  ]
+};
+
+/* Onze eigen cijfers per maand: een momentopname uit resolution-recap,
+   uitgerekend door npm run content:sync. De meespeelversie rekent ze op
+   de avond zelf uit op de verse cijfers. */
+const ONS_JAAR = {
+  "peildatum": "2026-09-18",
+  "jaartotaal": {
+    "sport": 462,
+    "taart": 46,
+    "landen": 13,
+    "dagen": 195
+  },
+  "maanden": {
+    "1": {
+      "sport": 58,
+      "taart": 12,
+      "landen": [],
+      "bijStart": 4,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 19
+      },
+      "totaal": {
+        "sport": 58,
+        "taart": 12,
+        "landen": 4
+      }
+    },
+    "2": {
+      "sport": 55,
+      "taart": 12,
+      "landen": [
+        {
+          "vlag": "🇬🇧",
+          "naam": "het Verenigd Koninkrijk",
+          "wie": "Cas",
+          "datum": "2026-02-02"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 12
+      },
+      "totaal": {
+        "sport": 113,
+        "taart": 24,
+        "landen": 5
+      }
+    },
+    "3": {
+      "sport": 60,
+      "taart": 4,
+      "landen": [
+        {
+          "vlag": "🇫🇮",
+          "naam": "Finland",
+          "wie": "Cas",
+          "datum": "2026-03-03"
+        },
+        {
+          "vlag": "🇷🇸",
+          "naam": "Servië",
+          "wie": "Cas",
+          "datum": "2026-03-03"
+        },
+        {
+          "vlag": "🇧🇪",
+          "naam": "België",
+          "wie": "Cas & Joris",
+          "datum": "2026-03-16"
+        },
+        {
+          "vlag": "🇮🇹",
+          "naam": "Italië",
+          "wie": "Cas",
+          "datum": "2026-03-16"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 16
+      },
+      "totaal": {
+        "sport": 173,
+        "taart": 28,
+        "landen": 9
+      }
+    },
+    "4": {
+      "sport": 68,
+      "taart": 2,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 18
+      },
+      "totaal": {
+        "sport": 241,
+        "taart": 30,
+        "landen": 9
+      }
+    },
+    "5": {
+      "sport": 45,
+      "taart": 7,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 11
+      },
+      "totaal": {
+        "sport": 286,
+        "taart": 37,
+        "landen": 9
+      }
+    },
+    "6": {
+      "sport": 40,
+      "taart": 3,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Cas",
+        "aantal": 12
+      },
+      "totaal": {
+        "sport": 326,
+        "taart": 40,
+        "landen": 9
+      }
+    },
+    "7": {
+      "sport": 53,
+      "taart": 5,
+      "landen": [
+        {
+          "vlag": "🇫🇷",
+          "naam": "Frankrijk",
+          "wie": "Eva",
+          "datum": "2026-07-12"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 11
+      },
+      "totaal": {
+        "sport": 379,
+        "taart": 45,
+        "landen": 10
+      }
+    },
+    "8": {
+      "sport": 47,
+      "taart": 1,
+      "landen": [
+        {
+          "vlag": "🇦🇪",
+          "naam": "de Verenigde Arabische Emiraten",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        },
+        {
+          "vlag": "🇭🇷",
+          "naam": "Kroatië",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        },
+        {
+          "vlag": "🇸🇦",
+          "naam": "Saoedi-Arabië",
+          "wie": "Cas",
+          "datum": "2026-08-27"
+        }
+      ],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 14
+      },
+      "totaal": {
+        "sport": 426,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "9": {
+      "sport": 36,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": {
+        "naam": "Eva",
+        "aantal": 10
+      },
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "10": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "11": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    },
+    "12": {
+      "sport": 0,
+      "taart": 0,
+      "landen": [],
+      "bijStart": 0,
+      "koploper": null,
+      "totaal": {
+        "sport": 462,
+        "taart": 46,
+        "landen": 13
+      }
+    }
   }
 };
 
@@ -1020,6 +1469,9 @@ const LEEG = () => ({
   r: 0, v: 0,
   punten: {}, teams: {}, toegekend: {}, uitgedeeld: {},
   gissingen: {}, standVoorRonde: {},
+  /* Bij welke dia het jaaroverzicht staat, en of de uitslag geweest is —
+     daarvoor draait de trailer, daarna de hele film. */
+  film: 0, geeindigd: false,
   geluid: true, schaal: 1, gestartOp: null
 });
 
@@ -1390,6 +1842,9 @@ function stopKlok(){
   K.raf = 0;
 }
 function pauzeerKlok(){
+  // In de film is er altijd een klok: staat hij stil (na hervatten
+  // bijvoorbeeld), dan zet deze knop hem weer aan het lopen.
+  if(!K.totaal && S.fase === "jaaroverzicht"){ startKlok(filmSeconden()); return; }
   if(!K.totaal) return;
   if(K.loopt){ K.rest = Math.max(0, K.eind - Date.now()); stopKlok(); }
   else { K.eind = Date.now() + K.rest; K.loopt = true; lusKlok(); }
@@ -1422,7 +1877,13 @@ function toonKlok(){
   balkEl.style.transform = "scaleX(" + Math.max(0, over / (K.totaal * 1000)) + ")";
   if(K.loopt){
     if(sec <= 3 && sec > 0 && !K.gepiept[sec]){ K.gepiept[sec] = 1; piep(660,.07); }
-    if(over <= 0){ stopKlok(); piep(300,.5); meld("Tijd is om"); tekenBesturing(); }
+    if(over <= 0){
+      stopKlok();
+      // In het jaaroverzicht is de klok de speelduur van de dia: die telt
+      // niet af naar "tijd is om", hij schuift door naar de volgende.
+      if(S.fase === "jaaroverzicht"){ piep(196,.09); filmVolgende(); return; }
+      piep(300,.5); meld("Tijd is om"); tekenBesturing();
+    }
   }
 }
 
@@ -1551,13 +2012,14 @@ function koppelMedia(){
 function teken(){
   document.documentElement.style.setProperty("--schaal", S.schaal || 1);
   stopAlleMedia();
-  const metRail = S.fase !== "start";
+  const metRail = S.fase !== "start" && S.fase !== "jaaroverzicht";
   rail.hidden = !metRail;
   besturing.hidden = S.fase === "start";
   if(metRail) tekenRail();
   podium.scrollTop = 0;
 
   if(S.fase === "start")         podium.innerHTML = schermStart();
+  else if(S.fase === "jaaroverzicht") podium.innerHTML = schermJaaroverzicht();
   else if(S.fase === "ronde")    podium.innerHTML = schermRonde();
   else if(S.fase === "vraag")    podium.innerHTML = schermVraag();
   else if(S.fase === "antwoord") podium.innerHTML = schermAntwoord();
@@ -1756,7 +2218,8 @@ function schermStart(){
     </div>
 
     <div class="knoprij">
-      <button class="knop is-hoofd is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Start de quiz</button>
+      <button class="knop is-hoofd is-groot" data-actie="start-film"${telling.vragen ? "" : " disabled"}>&#127902; Begin met de trailer</button>
+      <button class="knop is-groot" data-actie="start-quiz"${telling.vragen ? "" : " disabled"}>Meteen naar ronde 1</button>
       <button class="knop is-stil" data-actie="menu">Menu &amp; sneltoetsen</button>
       ${telling.vragen ? "" : `<span class="fijn" style="color:var(--rood-licht)">Kies eerst minstens één vraag.</span>`}
     </div>
@@ -1986,9 +2449,199 @@ function schermEinde(){
 
     <div class="knoprij" style="justify-content:center">
       <button class="knop is-hoofd" data-actie="exporteer">Uitslag opslaan</button>
+      <button class="knop" data-actie="film-herhaling">&#127902; De film: het hele jaar</button>
       <button class="knop" data-actie="opnieuw">Nieuwe quiz</button>
     </div>
   </div>`;
+}
+
+/* -----------------------------------------------------------------
+   HET JAAROVERZICHT — een trailer vóór de quiz, de film erna
+
+   De trailer laat alleen zien wat de quiz niet vraagt: regels zonder
+   dubbele haken, geen maandkoppen, en van onze eigen cijfers alleen hoe
+   vaak er gesport is. Na de uitslag draait de hele film, met de antwoorden
+   van vanavond onderstreept. De tijdlijn staat in JAAROVERZICHT, onze eigen
+   cijfers per maand in ONS_JAAR; allebei geschreven door npm run
+   content:sync.
+   ----------------------------------------------------------------- */
+const MAANDEN_KORT = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+const MAANDEN_VOL = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+
+const onsVan = (nr) => (ONS_JAAR.maanden || {})[String(nr)] || null;
+function filmIetsGedaan(o){
+  return !!o && (o.sport > 0 || o.taart > 0 || (o.landen || []).length > 0);
+}
+/** In de trailer alleen regels zonder haken (en niet bewaard voor de film); in de film alles. */
+const filmInTrailer = (x) => !x.teVullen && !x.pasNaAfloop && !/\[\[/.test(x.tekst + " " + (x.bij || ""));
+const filmZichtbaar = (x) => filmOnthuld() ? !x.teVullen : filmInTrailer(x);
+/** De maanden die meedoen. In de trailer: met een regel die erin mag. In de film: ook met alleen onze cijfers. */
+function filmMaanden(){
+  return JAAROVERZICHT.maanden
+    .filter(m => filmOnthuld()
+      ? m.momenten.some(filmZichtbaar) || filmIetsGedaan(onsVan(m.nr))
+      : m.momenten.some(filmInTrailer))
+    .map(m => m.nr);
+}
+const filmStappen = () => filmMaanden().length + 2;
+const filmOnthuld = () => !!S.geeindigd;
+function filmSeconden(){
+  const nr = filmMaandNr();
+  if(nr === null) return S.film === 0 ? 7 : 12;
+  const m = JAAROVERZICHT.maanden.find(x => x.nr === nr);
+  const regels = m.momenten.filter(filmZichtbaar).length;
+  const o = onsVan(nr);
+  const eigen = filmOnthuld() ? filmIetsGedaan(o) : !!o && o.sport > 0;
+  return Math.min(18, Math.max(8, Math.round(5 + regels * 1.8 + (eigen ? 2 : 0))));
+}
+/** Het maandnummer bij de huidige dia, of null op de titel- en slotkaart. */
+function filmMaandNr(){
+  const lijst = filmMaanden();
+  if(S.film <= 0 || S.film > lijst.length) return null;
+  return lijst[S.film - 1];
+}
+
+/** Knipt een regel op de dubbele haken; wat eronder zit blijft weg tot de avond om is. */
+function filmTekst(tekst, onthuld){
+  let uit = "", laatste = 0;
+  const patroon = /\[\[(.+?)\]\]/g;
+  let m;
+  while((m = patroon.exec(tekst)) !== null){
+    uit += esc(tekst.slice(laatste, m.index));
+    uit += `<span class="film-balk">${onthuld ? esc(m[1]) : ""}</span>`;
+    laatste = m.index + m[0].length;
+  }
+  return uit + esc(tekst.slice(laatste));
+}
+
+function filmStrook(){
+  const mee = filmMaanden(), nu = filmMaandNr(), slot = S.film >= filmStappen() - 1;
+  return `<div class="film-strook" aria-hidden="true">${MAANDEN_KORT.map((naam,i) => {
+    const nr = i + 1;
+    const klas = "film-vak"
+      + (mee.includes(nr) ? " is-mee" : "")
+      + (nu === nr ? " is-nu" : "")
+      + (mee.includes(nr) && (slot || (nu !== null && nr < nu)) ? " is-gehad" : "");
+    return `<span class="${klas}"><i></i><em>${naam}</em></span>`;
+  }).join("")}</div>`;
+}
+
+function filmEigen(nr){
+  const o = onsVan(nr);
+  if(!filmIetsGedaan(o) && !(o && o.bijStart)) return "";
+  if(!filmOnthuld()){
+    // De trailer: alleen hoe vaak er gesport is. De taarten, de landen, de
+    // koploper en de stand van het jaar vragen de recap-rondes.
+    if(!o.sport) return "";
+    return `
+    <div class="film-onsjaar">
+      <p class="opschrift">Wij in ${esc(MAANDEN_VOL[nr-1])}</p>
+      <div class="film-chips">
+        <span class="film-chip">&#127939; <b>${o.sport}</b> keer gesport</span>
+      </div>
+    </div>`;
+  }
+  const landen = (o.landen || []).map(l =>
+    `<span class="film-chip"><span style="font-size:1.2em">${esc(l.vlag)}</span>${esc(l.naam)} <small>${esc(l.wie)} &middot; ${esc(datumKort(l.datum))}</small></span>`).join("");
+  const start = o.bijStart ? `<span class="film-chip is-stil">De lijst begon met ${o.bijStart} ${o.bijStart === 1 ? "land" : "landen"}</span>` : "";
+  const top = o.koploper ? `<span class="film-chip is-top">${esc(o.koploper.naam)} het vaakst — <b>${o.koploper.aantal}&times;</b></span>` : "";
+  return `
+    <div class="film-onsjaar">
+      <p class="opschrift">Wij in ${esc(MAANDEN_VOL[nr-1])}</p>
+      <div class="film-chips">
+        <span class="film-chip">&#127939; <b>${o.sport}</b> keer gesport</span>
+        <span class="film-chip">&#127856; <b>${o.taart}</b> ${o.taart === 1 ? "taart" : "taarten"}</span>
+        ${landen}${start}${top}
+      </div>
+      <div class="film-meeloop">
+        <span>${o.totaal.sport} keer gesport</span>
+        <span>${o.totaal.taart} taarten</span>
+        <span>${o.totaal.landen} landen</span>
+        <span>dit jaar tot hier</span>
+      </div>
+    </div>`;
+}
+
+function datumKort(datum){
+  return Number(datum.slice(8,10)) + " " + MAANDEN_KORT[Number(datum.slice(5,7)) - 1];
+}
+
+function schermJaaroverzicht(){
+  const onthuld = filmOnthuld();
+  const nr = filmMaandNr();
+  const slot = S.film >= filmStappen() - 1;
+  let binnen;
+
+  if(nr === null && !slot){
+    binnen = `
+      <div class="film-kaart is-titel">
+        <p class="opschrift">Het jaaroverzicht</p>
+        <h1 class="film-jaartal">${JAAROVERZICHT.jaar}</h1>
+        <hr class="scheiding" style="max-width:520px">
+        <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.titelNaAfloop : JAAROVERZICHT.titel)}</p>
+        <p class="film-inleiding">${filmTekst(onthuld ? JAAROVERZICHT.inleidingNaAfloop : JAAROVERZICHT.inleiding, onthuld)}</p>
+      </div>`;
+  } else if(slot){
+    const t = ONS_JAAR.jaartotaal;
+    // Het jaar in getallen komt pas in de film: de totalen zijn vragen.
+    const getallen = onthuld ? `
+        <div class="telkaarten" style="max-width:720px;width:100%">
+          <div class="telkaart"><span class="waarde">${t.sport}</span><span class="etiket">keer gesport</span></div>
+          <div class="telkaart"><span class="waarde">${t.taart}</span><span class="etiket">taarten</span></div>
+          <div class="telkaart"><span class="waarde">${t.landen}</span><span class="etiket">landen</span></div>
+          <div class="telkaart"><span class="waarde">${t.dagen}</span><span class="etiket">dagen met iets erop</span></div>
+        </div>
+        <p class="fijn">Onze cijfers lopen tot ${esc(datumKort(ONS_JAAR.peildatum))}.</p>` : "";
+    binnen = `
+      <div class="film-kaart is-titel">
+        <p class="opschrift">${onthuld ? "Aftiteling" : "Na de uitslag"}</p>
+        <h1 class="film-jaartal is-klein">${onthuld ? "Dat was " + JAAROVERZICHT.jaar : "Straks het hele jaar"}</h1>
+        <hr class="scheiding" style="max-width:520px">
+        <p class="film-ondertitel">${esc(onthuld ? JAAROVERZICHT.slotNaAfloop : JAAROVERZICHT.slot)}</p>${getallen}
+      </div>`;
+  } else {
+    const m = JAAROVERZICHT.maanden.find(x => x.nr === nr);
+    const regels = m.momenten.filter(filmZichtbaar).map(mo => `
+      <div class="film-regel">
+        <span class="emoji">${esc(mo.emoji || "")}</span>
+        <span class="tekst">${filmTekst(mo.tekst, onthuld)}${mo.bij ? `<span class="bij">${filmTekst(mo.bij, onthuld)}</span>` : ""}</span>
+      </div>`).join("");
+    binnen = `
+      <div class="film-kaart">
+        <div class="film-maandkop">
+          <h1 class="film-maand">${esc(MAANDEN_VOL[nr-1])}</h1>
+          <span class="film-jaarschaduw">${JAAROVERZICHT.jaar}</span>
+        </div>
+        ${onthuld ? `<p class="film-hoed">${esc(m.kop)}</p>` : ""}
+        ${regels ? `<div class="film-regels">${regels}</div>` : ""}
+        ${filmEigen(nr)}
+      </div>`;
+  }
+
+  return `<div class="vlak"><div class="film${onthuld ? " is-onthuld" : ""}">${binnen}${filmStrook()}</div></div>`;
+}
+
+/* ---- Door de film heen ---- */
+function naarFilm(stap){
+  stopKlok();
+  S.fase = "jaaroverzicht";
+  S.film = Math.max(0, Math.min(stap, filmStappen() - 1));
+  bewaar(); teken();
+  startKlok(filmSeconden());
+}
+function filmVolgende(){
+  if(S.film + 1 < filmStappen()){ naarFilm(S.film + 1); return; }
+  stopKlok(); K.totaal = 0;
+  // Na de laatste dia: de quiz in, of terug naar de uitslag bij de herhaling.
+  if(filmOnthuld()){ S.fase = "einde"; bewaar(); teken(); }
+  else if(S.spel && rondes().length) naarRonde(0);
+  else { S.fase = "start"; bewaar(); teken(); }
+}
+function filmVorige(){
+  if(S.film > 0){ naarFilm(S.film - 1); return; }
+  stopKlok(); K.totaal = 0;
+  S.fase = filmOnthuld() ? "einde" : "start";
+  bewaar(); teken();
 }
 
 /* -----------------------------------------------------------------
@@ -2001,7 +2654,15 @@ function tekenBesturing(){
   const f = S.fase;
   let h = knop("menu","&#9776; Menu","is-stil");
 
-  if(f === "ronde"){
+  if(f === "jaaroverzicht"){
+    const laatste = S.film + 1 >= filmStappen();
+    h += knop("film-terug","&larr; Terug","is-stil");
+    h += knop("pauze", K.loopt ? "&#10073;&#10073; Pauze" : "&#9654; Laat lopen");
+    if(!laatste && !filmOnthuld()) h += knop("film-over","De trailer overslaan","is-stil");
+    h += `<span class="rek"></span>`;
+    h += knop("film-verder", laatste ? (filmOnthuld() ? "Terug naar de uitslag &rarr;" : "Naar ronde 1 &rarr;") : "Volgende dia &rarr;","is-hoofd");
+  }
+  else if(f === "ronde"){
     const inTeams = (ronde().teamModus || "individueel") === "teams";
     h += knop("terug","&larr; Terug","is-stil");
     if(inTeams) h += knop("herverdeel","&#9850; Herverdeel");
@@ -2010,7 +2671,7 @@ function tekenBesturing(){
   else if(f === "vraag"){
     h += knop("terug","&larr; Terug","is-stil");
     h += K.totaal
-      ? knop("pauze", K.loopt ? "&#10073;&#10073; Pauze" : "&#9654; Hervat")
+      ? knop("pauze", K.loopt ? "&#10073;&#10073; Klok stil" : "&#9654; Klok verder")
       : knop("klok-start","&#9654; Klok starten");
     if(K.totaal) h += knop("plus30","+30s");
     h += `<span class="rek"></span>` + knop("toon-antwoord","Toon het antwoord &rarr;","is-hoofd");
@@ -2034,8 +2695,127 @@ function tekenBesturing(){
     h += knop("terug","&larr; Terug","is-stil");
     h += `<span class="rek"></span>` + knop("opnieuw","Nieuwe quiz");
   }
+  if(f !== "start"){
+    h += knop("pauze-quiz","&#9749; Pauze","is-stil");
+    h += `<button class="knop middernacht-melding" id="middernachtMelding" data-actie="pauze-nieuwjaar" title="Pauzeer en tel af naar middernacht" hidden></button>`;
+  }
   besturing.innerHTML = h;
+  tekenMiddernacht();
 }
+
+/* -----------------------------------------------------------------
+   PAUZE EN MIDDERNACHT
+   Om twaalf uur gaat de quiz even stil: aftellen, proosten, en dan
+   verder waar we waren. Het laatste uur voor middernacht staat onderin
+   hoe lang het nog is (de laatste tien minuten dringend), en één klik
+   pauzeert de quiz en telt af naar het nieuwe jaar.
+   Op 1 januari is het in Nederland altijd wintertijd (UTC+1), dus
+   middernacht is 23:00 UTC op oudejaarsdag.
+   Generale repetitie: open het bestand met ?nieuwjaar=+5 voor een
+   middernacht over vijf minuten.
+   ----------------------------------------------------------------- */
+const UUR_MS = 3600000;
+const NIEUWJAAR_REPETITIE = (function(){
+  let waarde = "";
+  try{ waarde = (new URLSearchParams(location.search).get("nieuwjaar") || "").trim(); }catch(e){}
+  if(!waarde) return null;
+  const minuten = /^\+?(\d+(?:\.\d+)?)$/.exec(waarde);
+  if(minuten) return Date.now() + Number(minuten[1]) * 60000;
+  const op = Date.parse(waarde);
+  return isFinite(op) ? op : null;
+})();
+function nieuwjaar(){
+  const nu = Date.now();
+  const jaarNu = new Date(nu + UUR_MS).getUTCFullYear();
+  const vorige = Date.UTC(jaarNu, 0, 1) - UUR_MS;
+  // Tot twee uur na middernacht blijft het de middernacht die net geweest is.
+  const echt = (nu >= vorige && nu - vorige < 2 * UUR_MS)
+    ? {op: vorige, jaar: jaarNu}
+    : {op: Date.UTC(jaarNu + 1, 0, 1) - UUR_MS, jaar: jaarNu + 1};
+  return NIEUWJAAR_REPETITIE === null ? echt : {op: NIEUWJAAR_REPETITIE, jaar: echt.jaar};
+}
+function aftelTekst(ms){
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  const u = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = String(t % 60).padStart(2, "0");
+  return u > 0 ? u + ":" + String(m).padStart(2, "0") + ":" + sec : m + ":" + sec;
+}
+function nogTekst(ms){
+  if(ms >= 60000){ const m = Math.ceil(ms / 60000); return "nog " + m + (m === 1 ? " minuut" : " minuten"); }
+  const sec = Math.max(0, Math.ceil(ms / 1000));
+  return "nog " + sec + (sec === 1 ? " seconde" : " seconden");
+}
+
+/* De pauze ligt over het scherm heen en hoort niet bij de opgeslagen
+   stand: na een herlaadbeurt staat de klok toch al stil. */
+const P = {soort:null, klokLiep:false, vorigeSec:null, inhoud:""};
+
+function pauzeer(soort){
+  if(S.fase === "start") return;
+  if(!P.soort){
+    P.klokLiep = K.loopt;
+    if(K.loopt){ K.rest = Math.max(0, K.eind - Date.now()); stopKlok(); }
+    stopAlleMedia();
+  }
+  P.soort = soort; P.vorigeSec = null; P.inhoud = "";
+  $("pauzeKnoppen").innerHTML =
+    knop("hervat-quiz","&#9654; Hervat de quiz","is-hoofd is-groot") +
+    (soort === "pauze"
+      ? knop("pauze-nieuwjaar","&#127878; Tel af naar middernacht")
+      : knop("pauze-quiz","Gewone pauze","is-stil"));
+  $("pauzelaag").hidden = false;
+  tekenPauze(); toonKlok(); tekenMiddernacht();
+}
+function hervatQuiz(){
+  if(!P.soort) return;
+  P.soort = null;
+  $("pauzelaag").hidden = true;
+  if(P.klokLiep && K.totaal && K.rest > 0){ K.eind = Date.now() + K.rest; K.loopt = true; lusKlok(); }
+  P.klokLiep = false;
+  tekenBesturing();
+  meld("De quiz gaat verder");
+}
+function tekenPauze(){
+  if(!P.soort) return;
+  const nj = nieuwjaar();
+  const rest = nj.op - Date.now();
+  const sec = Math.ceil(rest / 1000);
+  let h;
+  if(P.soort === "nieuwjaar" && rest <= 0){
+    h = `<p class="opschrift">Proost!</p>
+      <h1 class="titel">Gelukkig nieuwjaar</h1>
+      <p class="pauze-jaar">${nj.jaar}</p>
+      <p class="lood">De quiz gaat zo verder.</p>`;
+  } else if(P.soort === "nieuwjaar"){
+    h = `<p class="opschrift">Even pauze &middot; het is bijna twaalf uur</p>` + (sec <= 10
+      ? `<p class="pauze-aftel is-slot">${sec}</p>`
+      : `<p class="pauze-aftel">${aftelTekst(rest)}</p><p class="lood">tot ${nj.jaar}</p>`);
+  } else {
+    h = `<p class="opschrift">De quiz staat even stil</p>
+      <h1 class="titel">Even pauze</h1>
+      <p class="lood">Schenk nog wat in. We gaan zo verder waar we waren.</p>` +
+      (rest > 0 && rest <= UUR_MS ? `<p class="lood" style="color:var(--goud-licht)">&#127878; ${nogTekst(rest)} tot middernacht</p>` : "");
+  }
+  if(h !== P.inhoud){ $("pauzeInhoud").innerHTML = h; P.inhoud = h; }
+
+  // Een tik in de laatste tien seconden, en om twaalf uur feest.
+  if(P.soort === "nieuwjaar" && P.vorigeSec !== null && sec !== P.vorigeSec){
+    if(sec > 0 && sec <= 10) piep(sec <= 3 ? 1046 : 784, sec <= 3 ? .12 : .07);
+    if(sec <= 0 && P.vorigeSec > 0){ fanfare(); vierFeest(); }
+  }
+  P.vorigeSec = sec;
+}
+function tekenMiddernacht(){
+  const el = $("middernachtMelding");
+  if(!el) return;
+  const rest = nieuwjaar().op - Date.now();
+  const toon = !P.soort && rest > 0 && rest <= UUR_MS;
+  el.hidden = !toon;
+  if(!toon) return;
+  const tekst = "&#127878; " + nogTekst(rest) + " tot middernacht &mdash; tel af";
+  if(el.innerHTML !== tekst) el.innerHTML = tekst;
+  el.classList.toggle("is-dringend", rest <= 10 * 60000);
+}
+setInterval(() => { tekenPauze(); tekenMiddernacht(); }, 250);
 
 /* -----------------------------------------------------------------
    NAVIGATIE
@@ -2076,6 +2856,8 @@ function terug(){
 }
 function naarEinde(){
   stopKlok(); K.totaal = 0;
+  // Vanaf hier is alles gevraagd: het jaaroverzicht mag zijn balken laten vallen.
+  S.geeindigd = true;
   S.fase = "einde"; bewaar(); teken();
   fanfare(); vierFeest();
 }
@@ -2162,7 +2944,7 @@ function paneelMenu(){
       <div class="sneltoetsen">
         <span><kbd>spatie</kbd>volgende stap</span>
         <span><kbd>&larr;</kbd>een stap terug</span>
-        <span><kbd>P</kbd>klok pauzeren</span>
+        <span><kbd>P</kbd>klok stilzetten</span>
         <span><kbd>T</kbd>30 seconden erbij</span>
         <span><kbd>M</kbd>muziek of video afspelen</span>
         <span><kbd>Z</kbd>laatste actie ongedaan</span>
@@ -2315,12 +3097,31 @@ const ACTIES = {
   "herverdeel": () => { momentopname(); S.teams[S.r] = maakTeams(S.r); bewaar(); teken(); meld("Teams opnieuw verdeeld"); },
   "verplaats": (id) => { momentopname(); verplaatsSpeler(id); bewaar(); teken(); },
   "start-ronde": () => { wekGeluid(); startRonde(); },
+  "start-film": () => {
+    // Zelfde voorbereiding als 'start de quiz': de film loopt erin over.
+    wekGeluid();
+    S.spelers.forEach((p,i) => { if(!p.naam.trim()) p.naam = "Speler " + (i+1); });
+    S.spel = stelSamen();
+    if(!S.spel.rondes.length){ meld("Kies eerst minstens één vraag"); return; }
+    S.punten = {}; S.toegekend = {}; S.uitgedeeld = {}; S.gissingen = {};
+    S.teams = {}; S.standVoorRonde = {}; historie = [];
+    S.geeindigd = false;
+    S.gestartOp = Date.now();
+    naarFilm(0);
+  },
+  "film-herhaling": () => { wekGeluid(); naarFilm(0); },
+  "film-verder": filmVolgende,
+  "film-terug": filmVorige,
+  "film-over": () => { stopKlok(); K.totaal = 0; S.spel && rondes().length ? naarRonde(0) : (S.fase = "start", bewaar(), teken()); },
   "toon-antwoord": toonAntwoord,
   "volgende": volgendeVraag,
   "volgende-ronde": () => naarRonde(S.r + 1),
   "naar-einde": naarEinde,
   "terug": terug,
   "pauze": pauzeerKlok,
+  "pauze-quiz": () => { wekGeluid(); pauzeer("pauze"); },
+  "pauze-nieuwjaar": () => { wekGeluid(); pauzeer("nieuwjaar"); },
+  "hervat-quiz": hervatQuiz,
   "klok-start": () => { startKlok(vraagTijd()); },
   "plus30": () => verlengKlok(30),
   "ken-toe": (id) => wisselToekenning(id),
@@ -2439,17 +3240,20 @@ document.addEventListener("keydown", (e) => {
   if(tag === "input" || tag === "textarea" || tag === "select") return;
   if(e.key === "Escape"){ sluitPaneel(); return; }
   if(document.querySelector(".paneel-achtergrond")) return;
+  // Tijdens de pauze doet het toetsenbord niets: hervatten is een bewuste klik.
+  if(P.soort) return;
   if(e.key === " " || e.key === "Enter"){
     e.preventDefault();
-    if(S.fase === "start") ACTIES["start-quiz"]();
+    if(S.fase === "start") ACTIES["start-film"]();
+    else if(S.fase === "jaaroverzicht") filmVolgende();
     else if(S.fase === "ronde") startRonde();
     else if(S.fase === "vraag") toonAntwoord();
     else if(S.fase === "antwoord") volgendeVraag();
     else if(S.fase === "stand"){ S.r + 1 < rondes().length ? naarRonde(S.r + 1) : naarEinde(); }
   }
-  else if(e.key === "ArrowLeft"){ e.preventDefault(); if(S.fase !== "start") terug(); }
-  else if(e.key === "ArrowRight"){ e.preventDefault(); if(S.fase === "vraag") toonAntwoord(); else if(S.fase === "antwoord") volgendeVraag(); }
-  else if(e.key === "p" || e.key === "P"){ if(S.fase === "vraag") pauzeerKlok(); }
+  else if(e.key === "ArrowLeft"){ e.preventDefault(); if(S.fase === "jaaroverzicht") filmVorige(); else if(S.fase !== "start") terug(); }
+  else if(e.key === "ArrowRight"){ e.preventDefault(); if(S.fase === "jaaroverzicht") filmVolgende(); else if(S.fase === "vraag") toonAntwoord(); else if(S.fase === "antwoord") volgendeVraag(); }
+  else if(e.key === "p" || e.key === "P"){ if(S.fase === "vraag" || S.fase === "jaaroverzicht") pauzeerKlok(); }
   else if(e.key === "t" || e.key === "T"){ if(S.fase === "vraag") verlengKlok(30); }
   else if(e.key === "m" || e.key === "M"){ speelPauzeerMedia(null); }
   else if(e.key === "z" || e.key === "Z"){ herstel(); }

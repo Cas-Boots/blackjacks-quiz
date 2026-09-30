@@ -3,11 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "lokaal": "tsx scripts/lokaal.ts",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -16,8 +19,10 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "verify": "tsx scripts/verify.ts",
     "e2e": "playwright test",
-    "content:sync": "tsx scripts/sync-content.ts"
+    "content:sync": "tsx scripts/sync-content.ts",
+    "content:check": "tsx scripts/sync-content.ts --check"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
@@ -25,6 +30,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.9.1",
+    "@types/qrcode": "^1.5.6",
     "drizzle-kit": "^0.31.10",
     "svelte": "^5.55.2",
     "svelte-check": "^4.4.6",
@@ -36,6 +42,7 @@
   "dependencies": {
     "@sveltejs/adapter-node": "^5.5.4",
     "better-sqlite3": "^12.10.0",
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.2",
+    "qrcode": "^1.5.4"
   }
 }

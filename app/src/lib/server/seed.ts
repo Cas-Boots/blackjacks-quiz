@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { db } from './db/index';
 import { spelers, spellen, deelnemers } from './db/schema';
 import { standaardSamenstelling } from './spel';
+import { ontdubbelDieren } from './dieren';
 
 export const VASTE_SPELERS = ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva'];
 export const QUIZMASTER = 'Cas';
@@ -35,11 +36,13 @@ export function maakSpel(pakketId: string) {
     .returning()
     .get();
 
-  // Iedereen behalve de quizmaster doet mee.
+  // De vaste groep doet mee; de quizmaster niet, en een gast van een vorige
+  // avond ook niet — die schuift desgewenst opnieuw aan.
   const alle = db.select().from(spelers).all();
   for (const s of alle) {
-    if (s.isQuizmaster) continue;
+    if (s.isQuizmaster || s.isGast) continue;
     db.insert(deelnemers).values({ spelId: rij.id, spelerId: s.id }).run();
   }
+  ontdubbelDieren(rij.id);
   return rij;
 }

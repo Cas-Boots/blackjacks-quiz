@@ -25,6 +25,11 @@ function migratieMap(): string {
  * levert een app op die start en pas omvalt zodra iemand een vraag beantwoordt
  * — veel liever een container die weigert op te komen, want dat zie je meteen.
  */
+/** Zet het schema in een andere database, zoals die van een proefrit. */
+export function migreer(doel: Parameters<typeof migrate>[0]) {
+  migrate(doel, { migrationsFolder: migratieMap() });
+}
+
 export function zorgVoorMigraties() {
   if (gedaan) return;
   const map = migratieMap();

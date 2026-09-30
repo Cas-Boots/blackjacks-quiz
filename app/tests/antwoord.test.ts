@@ -33,6 +33,28 @@ describe('lijktOp', () => {
     expect(lijktOp('Evenepoel', 'Ferran Torres')).toBe(false);
     expect(lijktOp('', 'Spanje')).toBe(false);
   });
+  it('laat bij een opsomming geen halve of hagelschot-antwoorden door', () => {
+    const drie = 'Eva, Liz en Bastiaan';
+    expect(lijktOp('Liz', drie)).toBe(false);
+    expect(lijktOp('Cas Liz Eva Bastiaan Rik Joris', drie)).toBe(false);
+    expect(lijktOp('Cas, Liz, Eva en Bastiaan', drie)).toBe(false);
+    expect(lijktOp('liz, bastiaan en eva', drie)).toBe(true);
+    expect(lijktOp('Bastiaan & Liz & Eva', drie)).toBe(true);
+    expect(lijktOp('Kroatië', 'Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië')).toBe(false);
+    expect(lijktOp('6 minuten', '6 minuten en 26 seconden')).toBe(false);
+  });
+  it('splitst niet op een gewoon streepje en laat geen getal weg', () => {
+    expect(lijktOp('0', '1-0')).toBe(false);
+    expect(lijktOp('1', '1-0')).toBe(false);
+    expect(lijktOp('1-0', '1-0')).toBe(true);
+    expect(lijktOp('Saoedi', 'Saoedi-Arabië')).toBe(true);
+  });
+  it('keurt de uitleg achter het streepje niet goed als antwoord', () => {
+    expect(lijktOp('keer', 'Cas — 105 keer')).toBe(false);
+    expect(lijktOp('Cas', 'Cas — 105 keer')).toBe(true);
+    expect(lijktOp('Cas, 105 keer', 'Cas — 105 keer')).toBe(true);
+    expect(lijktOp('twee', 'Twee — 2010 en 2026')).toBe(true);
+  });
   it('keurt een typefout af in plaats van hem goed te praten', () => {
     // Bewust geen fuzzy match: dat zou het verkeerde antwoord kunnen goedkeuren.
     expect(lijktOp('Pogacer', 'Pogačar')).toBe(false);
@@ -90,6 +112,19 @@ describe('leesGetal', () => {
     expect(leesGetal('330')).toBe(330);
     expect(leesGetal('ongeveer 330 meter')).toBe(330);
     expect(leesGetal('1,5')).toBe(1.5);
+  });
+  it('leest getallen zoals Nederlanders ze schrijven', () => {
+    expect(leesGetal('1.000')).toBe(1000);
+    expect(leesGetal('12.500 punten')).toBe(12500);
+    expect(leesGetal('1.234,5')).toBe(1234.5);
+    expect(leesGetal('1.5')).toBe(1.5);
+    expect(leesGetal('1,000,000')).toBe(1_000_000);
+  });
+  it('pakt het eerste getal, ook achter een afkorting', () => {
+    expect(leesGetal('ca. 400')).toBe(400);
+    expect(leesGetal('10-12')).toBe(10);
+    expect(leesGetal('-5')).toBe(-5);
+    expect(leesGetal('ongeveer 450.')).toBe(450);
   });
   it('geeft null bij iets dat geen getal is', () => {
     expect(leesGetal('geen idee')).toBeNull();

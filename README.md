@@ -4,7 +4,9 @@ Een complete quizavond in één HTML-bestand. Geen server, geen internet, geen
 installatie, geen PowerPoint. Je opent `index.html` in een browser en je kunt
 beginnen.
 
-Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
+Alle vragen gaan over 2026 of over wat 2027 gaat brengen. De avond opent met
+een trailer van het jaar, zonder één antwoord van vanavond; na de uitslag
+draait de hele film.
 
 ## Snel starten
 
@@ -12,38 +14,59 @@ Alle vragen gaan over 2026 of over wat 2027 gaat brengen.
 2. Dubbelklik het bestand — het opent in je browser.
 3. Vul je naam als quizmaster in, pas de spelersnamen aan, kies de vragen.
 4. Zet je scherm op volledig scherm (`F11`, of `ctrl`+`cmd`+`F` op een Mac).
+5. Begin met de trailer, of ga met *Meteen naar ronde 1* de quiz in.
 
 Sluit je laptop met een HDMI-kabel op de tv aan, of cast het tabblad. Oogt de
 tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 ## De twee pakketten
 
-| Pakket | Rondes | Vragen |
+| Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 14 | 105 |
-| Familie Proefronde 2026 | 7 | 50 |
+| Blackjacks 2026 — Het Jaaroverzicht | 10 rondes, 50 vragen (± een uur en een kwartier) | 15 rondes, 77 vragen |
+| Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
+
+De avond is bewust kort gehouden. Rondes van vier tot acht vragen, dertig
+seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
+dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
+naar de laatste vijf seconden), en het ritme wisselt steeds: een ronde over
+het jaar, dan een over onszelf, en om en om ieder voor zich en in teams. Rondes
+die nog leeg zijn, alleen voor kenners of extra (*Sport: de Marges*, *De WK-poule*,
+*Jullie Jaar in Beeld*, *Bliksemronde*, *Oktober tot december*) staan
+uitgevinkt. Vink ze aan in de
+vragenkiezer als je ze wilt spelen.
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
 
 ### Rondes over de groep zelf
 
-Twee rondes zijn **al gevuld** met de echte cijfers uit
+Drie rondes zijn **al gevuld** met de echte cijfers uit
 [`resolution-recap`](https://github.com/Cas-Boots/resolution-recap), overgenomen
-uit de dagelijkse back-up van 16 september:
+uit de dagelijkse back-up van 18 september. In de meespeelversie in `app/`
+worden deze vragen op de avond zelf live uitgerekend (zie
+[`app/README.md`](app/README.md)); in dit losse bestand staan ze als
+momentopname:
 
 - **Onze Sportcompetitie** — wie het vaakst sportte, wie nooit in de sportschool
   kwam, welke sport iedereen precies één keer deed, wie zijn jaardoel al haalde.
 - **Taart & Verre Landen** — de taartteller, de landenteller, de drukste
   taartdag van het jaar.
+- **Hoger of Lager** — dichtstbij wint, over onszelf: hoe vaak we samen
+  sportten, hoe vaak Rik padelde, hoe ver Joris van zijn jaardoel af zat.
 
-Twee rondes wachten nog op gegevens:
+Nog twee rondes over de groep:
 
-- **De Voorspellingen** — de elf à twaalf voorspellingen van januari.
-- **De WK-poule** — te vullen met de export uit `blackjacks-cup` (`/api/quiz-export`).
+- **De Voorspellingen** — de veertien voorspellingen van januari. In de
+  meespeelversie leven ze in `app/src/lib/content/voorspellingen.ts`, met de
+  uitkomsten; hier wachten ze op handwerk.
+- **De WK-poule** — acht vragen over onze eigen poule, uit de export van
+  `blackjacks-cup` (momentopname van 29 september; het WK is voorbij, dus die
+  verandert niet meer). Staat uitgevinkt: vink hem aan in de vragenkiezer.
+  Tot die tijd staat hij uitgevinkt.
 
-Daarnaast is er een lege ronde **Oktober tot december**, want die maanden hadden
-bij het schrijven nog niet plaatsgevonden.
+Daarnaast is er een lege, uitgevinkte ronde **Oktober tot december**, want die
+maanden hadden bij het schrijven nog niet plaatsgevonden.
 
 Werk je de cijfers bij? Draai dan de analyse opnieuw tegen de nieuwste back-up in
 `resolution-recap/backups/` en pas de antwoorden aan.
@@ -52,6 +75,28 @@ De openstaande vragen dragen de markering `teVullen`. Je ziet ze terug als een r
 label in de vragenkiezer, en de controle vooraf telt hoeveel gekozen vragen
 nog een antwoord missen — zodat je niet per ongeluk met een onbeantwoordbare
 vraag de avond in gaat.
+
+## De avond begint met een trailer, en eindigt met de film
+
+De quiz gaat over het jaar, dus een overzicht van het jaar vóór de eerste
+vraag verklapt al snel de antwoorden. Daarom zijn het er twee:
+
+- **De trailer**, vóór ronde 1. Alleen wat de quiz *niet* vraagt: momenten
+  van onszelf, en per maand hoe vaak er gesport is. Geen wereldnieuws, geen
+  maandkoppen (die noemen de onderwerpen), geen taarten of landen (die
+  vragen de rondes over onszelf).
+- **De film**, na de uitslag. Het hele jaar maand voor maand: wat er in de
+  wereld gebeurde, onze sporten, taarten, landen en wie er het vaakst ging,
+  en de stand van het jaar. Wat er die avond gevraagd werd, staat
+  onderstreept, zodat je in één oogopslag ziet waar de quiz over ging.
+
+Beide lopen vanzelf door; met **Pauze** (`P`) zet je ze stil, met `spatie`
+ga je sneller, met `←` een stap terug, en *De trailer overslaan* brengt je
+meteen naar ronde 1. De knop voor de film staat bij de eindstand.
+
+De trailer is zo lang als wat erin mag staan. Nu zijn dat nog maar een paar
+regels; die schrijf je zelf bij, zie hieronder. Een maand zonder regel voor
+de trailer slaat hij over.
 
 ## Hoe de avond verloopt
 
@@ -108,7 +153,13 @@ gewoon door.
 - **Eén plek waar punten veranderen.** Elke toekenning wordt per vraag
   vastgelegd en is omkeerbaar, dus de stand kan niet stilletjes scheef lopen.
 - **Ongedaan maken.** Elke scoringsactie is terug te draaien (`Z`).
-- **Noodknoppen.** Klok pauzeren, 30 seconden erbij, terug naar een vorige
+- **Pauze voor middernacht.** Het laatste uur voor twaalf staat onderin hoe
+  lang het nog is (Nederlandse tijd), de laatste tien minuten in het rood.
+  Eén klik pauzeert de quiz en telt in het groot af naar het nieuwe jaar;
+  daarna hervat je waar je was, met de klok op dezelfde seconde. **☕ Pauze**
+  doet hetzelfde zonder aftellen. Oefenen: open het bestand met
+  `?nieuwjaar=+5` voor een middernacht over vijf minuten.
+- **Noodknoppen.** Klok stilzetten, 30 seconden erbij, terug naar een vorige
   vraag, naar een willekeurige ronde springen, punten handmatig bijstellen.
 - **Geen afhankelijkheden.** Geen accounts, geen externe diensten. Alleen de
   lettertypes komen van Google Fonts; vallen die weg, dan kiest de browser een
@@ -120,9 +171,9 @@ Neem het bestand mee op een usb-stick als extra back-up.
 
 | Toets | Doet |
 |---|---|
-| `spatie` | volgende stap |
+| `spatie` | volgende stap (in het jaaroverzicht: volgende dia) |
 | `←` | een stap terug |
-| `P` | klok pauzeren of hervatten |
+| `P` | klok stilzetten of laten doorlopen |
 | `T` | 30 seconden erbij |
 | `M` | muziek of video afspelen of pauzeren |
 | `Z` | laatste actie ongedaan |
@@ -130,15 +181,18 @@ Neem het bestand mee op een usb-stick als extra back-up.
 
 ## Eigen vragen toevoegen
 
-Open `index.html` in een teksteditor en zoek `const PAKKETTEN`. Elke ronde ziet
-er zo uit:
+De vragen staan op één plek: `app/src/lib/content/packs.ts`. Pas ze daar aan
+en draai in `app/` `npm run content:sync`; dat schrijft hetzelfde blok naar
+`index.html`. (Zonder Node kun je ook rechtstreeks in `index.html` werken, bij
+`const PAKKETTEN`, maar dan lopen de twee versies uit elkaar tot je synct.)
+Elke ronde ziet er zo uit:
 
 ```js
 {
   naam: "Mijn ronde",
   suit: "♠",                  // ♠ ♥ ♦ ♣
   thema: "Korte ondertitel",
-  type: "open",               // waarnietwaar | meerkeuze | open | dichtstbij
+  type: "open",               // waarnietwaar | meerkeuze | open | dichtstbij | stem
   tijd: 30,                   // seconden per vraag
   punten: 2,                  // punten per goed antwoord
   teamModus: "teams",         // individueel | teams | samen
@@ -168,6 +222,10 @@ En per vraagtype:
 // dichtstbij — dichtstbij wint, precies goed geeft bonuspunten
 {v:"Hoeveel...?", getal:206, eenheid:"botten"}
 
+// stem — iedereen kiest een medespeler; in de meespeelversie beslist de
+// meerderheid vanzelf, in dit bestand beslist de groep aan tafel
+{v:"Wie kwam het vaakst te laat?", a:"De groep beslist"}
+
 // met een eigen bestand erbij
 {v:"Wie zie je hier?", a:"...", media:{soort:"beeld", bron:"2026-01.jpg"}}
 {v:"Welk nummer?",     a:"...", media:{soort:"muziek", bron:"intro-01.mp3"}}
@@ -178,6 +236,50 @@ En per vraagtype:
 ```
 
 Optioneel per vraag: `tijd` en `punten` overschrijven die van de ronde.
+
+## Het jaaroverzicht bijschrijven
+
+De tijdlijn staat bij de vragen, in `app/src/lib/content/jaaroverzicht.ts`,
+en gaat met dezelfde `npm run content:sync` mee naar dit bestand (zonder Node
+kun je hier rechtstreeks bij `const JAAROVERZICHT` werken). Een maand ziet er
+zo uit:
+
+```js
+{
+  nr: 7,
+  kop: "De maand waarin alles tegelijk gebeurt",
+  momenten: [
+    {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
+    {emoji:"🎂", tekst:"Een regel over onszelf, zonder haken: die komt ook in de trailer."},
+    {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx en Hinault.", pasNaAfloop:true},
+    {emoji:"📰", tekst:"Wat gebeurde er nog meer?", teVullen:true}
+  ]
+}
+```
+
+De afspraken:
+
+- **Wat de quiz vraagt, gaat tussen dubbele haken.** Zo'n regel komt alleen
+  in de film, met het antwoord onderstreept. Elke bewering met haken staat
+  ook ergens in de vragen: de film voegt geen feiten toe.
+- **Een regel zonder haken is ook voor de trailer.** Iets wat de quiz niet
+  vraagt, vaak iets van onszelf. Er mag geen antwoord van de quiz in staan,
+  ook niet via het emoji: ❄️ zegt sneeuw.
+- **Raakt een regel zonder haken toch de quiz**, zoals een zin die in z'n
+  geheel een waar-of-niet-waar beantwoordt, zet er dan `pasNaAfloop: true`
+  bij. Dan blijft hij uit de trailer.
+- **De kop van een maand** staat alleen in de film.
+- Een regel die nog op invulling wacht krijgt `teVullen: true`; die slaat
+  alles over.
+
+In de meespeelversie tellen `npm run verify` en de tests hoeveel regels de
+trailer heeft, en of er een antwoord van de quiz letterlijk in staat. Of een
+zin iets *verraadt*, blijft mensenwerk.
+
+Onze eigen cijfers per maand hoef je niet bij te houden: `npm run content:sync`
+schrijft ze in `const ONS_JAAR`, uitgerekend op dezelfde momentopname uit
+`resolution-recap` als de rondes over onszelf. De meespeelversie rekent ze op
+de avond zelf uit, dus daar kloppen ze tot op de dag.
 
 ## Bronnen voor de vragen over 2026
 
@@ -190,11 +292,42 @@ De algemene vragen zijn nagezocht, niet uit het hoofd geschreven:
 - [Het kabinet-Jetten](https://www.rijksoverheid.nl/regering/over-de-regering/kabinetten-sinds-1945/kabinet-jetten)
 - [De Formule 1 van 2026](https://www.motorsportweek.com/2026/08/16/max-verstappen-explains-frustrations-behind-major-f1-2026-regulatory-shift/)
 
+## De meespeelversie: televisie plus telefoons
+
+In de map [`app/`](app/) staat dezelfde quiz als live meespeelversie: de vragen
+op de grote televisie, iedereen op zijn eigen telefoon, en een hostscherm voor
+de quizmaster. De televisie toont een QR-code om mee te doen, een gast schuift
+aan met alleen zijn naam, bij de onthulling zie je wat iedereen had ingetikt,
+je telefoon zegt of je het goed had, de slotronde is een echte stemronde, en
+aan het eind staan er portretten op het podium met prijzen eronder. Elke avond
+blijft bewaard op een uitslagpagina die je kunt delen. Buiten de avond om is
+er een beheerscherm voor de spelers, de oude spellen, de telefoons en de
+controle of de bestanden bij de vragen er echt staan. Zie
+[`app/README.md`](app/README.md) voor het starten en het draaiboek.
+
+Thuis proefdraaien met de echte televisie en de echte telefoons: `npm run
+lokaal` in `app/` (op Windows: dubbelklik `app/lokaal.cmd`) start de quiz op
+het thuisnetwerk en zegt welk adres je op de televisie tikt, met een QR-code
+voor de telefoons erbij. Zie [Op je eigen
+pc](app/README.md#op-je-eigen-pc-voor-de-televisie-en-de-telefoons). Daarna
+loopt `npm run verify` elke vraag na op telefoon en televisie, zodat je weet
+dat ze goed doorkomen — zie [Komen de vragen goed
+door?](app/README.md#komen-de-vragen-goed-door).
+
+Beide versies draaien dezelfde vragen: ze staan in
+`app/src/lib/content/packs.ts`, en `npm run content:sync` in `app/` schrijft ze
+naar dit `index.html`. Dit losse bestand blijft de achtervang die zonder
+netwerk werkt.
+
+Wil je de meespeelversie op een echte server in plaats van op een laptop, dan
+staat de uitrol klaar: de `docker-compose.yml` in deze map is gemaakt voor
+Dokploy, en [`app/README.md`](app/README.md#naar-productie) beschrijft stap voor
+stap wat de server nodig heeft. Zet in elk geval je eigen `HOST_PIN` — zonder
+eigen pincode weigert de container gezond te worden, zodat er nooit een
+hostscherm online staat dat voor iedereen openstaat.
+
 ## Wat er nog aan komt
 
-- **Antwoordbriefjes op de telefoon.** Dezelfde quiz, op elke telefoon te openen
+- **Antwoordbriefjes zonder server.** Dezelfde quiz, op elke telefoon te openen
   in spelersmodus: genummerde antwoordvelden per ronde, lokaal opgeslagen, zonder
-  netwerk. In de groepsfase deelt een team één telefoon.
-- **Een meespeelversie met server.** Live meespelen op alle telefoons, met een
-  overzicht voor de quizmaster. Draait op dezelfde leest als `blackjacks-cup`.
-  Papier blijft daarbij de achtervang.
+  netwerk. Voor als er geen laptop met server in de buurt is.
