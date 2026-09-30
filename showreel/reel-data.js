@@ -86,15 +86,17 @@
    *   bpm, tel: tempo and the time of a downbeat; leave them out and
    *             `node muziek.js tempo` measures them for you (written to tempo.js)
    *
+   *   db, lowpass: optional; lower the chapter by db and muffle it above lowpass Hz
+   *
    * A chapter without a file uses the synthesized score at 100 BPM.
    */
   const MUZIEK = [
-    // the year's Dutch Top 40 number ones and the Dutch hit of the year; set vanaf to where the good part starts
+    // only songs released in 2026: the year's Dutch Top 40 number ones and the Dutch hit of the year
     { bestand: 'mr-know-it-all.mp3', van: 'HET AFTELLEN', tot: 'HET JAAR IN BEELD', vanaf: 'auto' },   // Teddy Swims, ±126 BPM
     { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL', vanaf: 'auto' },                    // Bruno Mars, #1 jan–apr
     { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS', vanaf: 'auto' },                          // Shakira & Burna Boy, #1 all summer
     { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER', vanaf: 'auto' },                // Alex Warren
-    { bestand: 'niemand.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 'auto' },               // Suzan & Freek; optional
+    { bestand: 'cheerio.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 70, db: -7, lowpass: 900 }, // muffled, then it opens up
     { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE KWIS', vanaf: 'auto' },                   // Justen de Wildt: goodbye, 2026
   ];
   // measured tempos, written by `node muziek.js tempo`
@@ -122,14 +124,14 @@
       add('maand', STING_BARS + ITEM_BARS * items.length, { naam: MAANDEN[m], m, prevM, items });
       prevM = m;
     }
-    add('memoriam', 3, { naam: 'IN MEMORIAM' });
+    add('memoriam', 4, { naam: 'IN MEMORIAM' });
     add('dossier', 3, { naam: 'HET DOSSIER' });
     add('finale', 5, { naam: 'DE KWIS' });
     // each chapter with a song runs at that song's tempo
     const find = n => plan.findIndex(p => p.naam === n);
     const liedjes = [];
     MUZIEK.forEach(mz => {
-      const tp = TEMPO[mz.bestand];
+      const tp = TEMPO[`${mz.bestand}@${mz.van}`] || TEMPO[mz.bestand];
       const bpm = mz.bpm || (tp && tp.bpm);
       if (!bpm) return;
       const a = find(mz.van), b = find(mz.tot);

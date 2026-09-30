@@ -1,6 +1,6 @@
 # Muziek
 
-Put the songs here as mp3 (m4a and wav work too). They stay on your computer: git ignores them.
+Only songs released in 2026. Put them here as mp3 (m4a and wav work too). They stay on your computer: git ignores them.
 
 | File | Song | Under |
 | --- | --- | --- |
@@ -8,8 +8,7 @@ Put the songs here as mp3 (m4a and wav work too). They stay on your computer: gi
 | `i-just-might.mp3` | Bruno Mars – I Just Might | January to April |
 | `dai-dai.mp3` | Shakira & Burna Boy – Dai Dai | May to August |
 | `fever-dream.mp3` | Alex Warren – Fever Dream | September to December |
-| `niemand.mp3` | Suzan & Freek – Niemand (optional) | in memoriam |
-| `cheerio.mp3` | Justen de Wildt – Cheerio | the dossier and the countdown |
+| `cheerio.mp3` | Justen de Wildt – Cheerio | in memoriam (muffled), then the dossier and the countdown |
 
 Other songs work too: change the file names in `MUZIEK` in `../reel-data.js`.
 

@@ -126,8 +126,10 @@ function tempo() {
       vanaf = autoStart(f, bars * 240 / (mz.bpm || probe.bpm) + 1);
     }
     const m = measure(f, vanaf);
-    T[mz.bestand] = { bpm: mz.bpm || m.bpm, tel: mz.tel !== undefined ? mz.tel : m.tel };
-    console.log(`  ✓  ${mz.bestand}: ${T[mz.bestand].bpm} BPM, begint op ${T[mz.bestand].tel.toFixed(1)} s`);
+    // keyed per chapter: the same song may play in two chapters, from different places
+    const key = `${mz.bestand}@${mz.van}`;
+    T[key] = { bpm: mz.bpm || m.bpm, tel: mz.tel !== undefined ? mz.tel : m.tel };
+    console.log(`  ✓  ${mz.bestand} (${mz.van}): ${T[key].bpm} BPM, begint op ${T[key].tel.toFixed(1)} s`);
   }
   fs.writeFileSync(path.join(here, 'tempo.js'),
     `// Tempo and first downbeat per song, measured by \`node muziek.js tempo\`. Leave empty to use the score.\n(function (root) {\n  const TEMPO = ${JSON.stringify(T, null, 2).replace(/\n/g, '\n  ')};\n  if (typeof module !== 'undefined' && module.exports) module.exports = TEMPO; else root.TEMPO = TEMPO;\n})(this);\n`);
@@ -212,7 +214,9 @@ function mix() {
     const file = ch.type === 'song' ? song(ch.bestand) : path.join(here, 'score.wav');
     const from = ch.type === 'song' ? ch.tel - lead : t0;
     const x = decodeStereo(file, from, dur);
-    const g = Math.pow(10, (TARGET - lufs(file, from + lead, ch.end - ch.start)) / 20);
+    // matched loudness, plus the chapter's own offset (db) and an optional muffle (lowpass, in Hz)
+    const g = Math.pow(10, (TARGET + (ch.db || 0) - lufs(file, from + lead, ch.end - ch.start)) / 20);
+    const top = ch.lowpass || 20000;
     const lpL = biquad('lp'), lpR = biquad('lp'), hpL = biquad('hp'), hpR = biquad('hp');
     const n = x.length / 2, outBar = next ? bar : 0;
     const echoFrom = n - Math.round(beat * MSR);      // the last beat feeds the echo
@@ -220,10 +224,11 @@ function mix() {
     for (let i = 0; i < n; i++) {
       const t = i / MSR;
       let l = x[2 * i] * g, r = x[2 * i + 1] * g;
+      if (ch.lowpass && i >= lead * MSR) { l = lpL(l, top, i); r = lpR(r, top, i); }
       let vol = 1;
       if (t < lead) {                                        // lead-in: low-pass opens, level rises
         const q = t / lead;
-        const f = 220 * Math.pow(20000 / 220, q * q);
+        const f = 220 * Math.pow(top / 220, q * q);
         l = lpL(l, f, i); r = lpR(r, f, i);
         vol = Math.sin(q * Math.PI / 2) * 0.9 + 0.1 * q;
       }
