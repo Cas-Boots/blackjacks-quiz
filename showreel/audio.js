@@ -1,11 +1,14 @@
-// Synthesizes soundtrack.wav for the whole reel at 120 BPM. It reads the scene
-// order from reel-data.js, so every hit stays locked to the picture.
+// Synthesizes the soundtrack at 100 BPM. It reads the scene order from reel-data.js,
+// so every hit stays locked to the picture. It writes three files:
+//   score.wav       the full synthesized score
+//   sfx.wav         only the effects (whooshes, hits, ticks, risers), to lay over songs
+//   soundtrack.wav  the score; mix.js replaces it with your songs when muziek/ has them
 // Pure JS, no dependencies: node audio.js
 const fs = require('fs');
 const path = require('path');
 const REEL = require('./reel-data.js');
 
-const { B, BAR } = REEL;
+let B = REEL.B, BAR = REEL.BAR; // set per scene below: a chapter can follow a song's tempo
 const { seq: SEQ, total: DUR } = REEL.sequence();
 const SR = 44100, N = Math.ceil(SR * DUR);
 const SWOOSH = 0.32; // matches the swoosh between shots in index.html
@@ -14,6 +17,8 @@ const L = new Float32Array(N), R = new Float32Array(N);      // dry bus
 const PL = new Float32Array(N), PR = new Float32Array(N);    // sidechained bus (pads, bass)
 const RL = new Float32Array(N), RR = new Float32Array(N);    // reverb send
 const duck = new Float32Array(N).fill(1);
+const XL = new Float32Array(N), XR = new Float32Array(N);    // the effects stem
+let FX = false;
 
 let seed = 2026;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
@@ -24,6 +29,7 @@ function out(i, v, p = 0, send = 0, bus = 'dry') {
   if (i < 0 || i >= N) return;
   const [gl, gr] = pan(p);
   if (bus === 'dry') { L[i] += v * gl; R[i] += v * gr; } else { PL[i] += v * gl; PR[i] += v * gr; }
+  if (FX) { XL[i] += v * gl; XR[i] += v * gr; }
   if (send) { RL[i] += v * gl * send; RR[i] += v * gr * send; }
 }
 function svf() {
@@ -172,6 +178,10 @@ function tick(t0, amp = 1, fr = 2600, p = 0) {
 }
 const lerp = (a, b, t) => a + (b - a) * t;
 
+// the effects also go to their own stem
+const asFx = f => (...a) => { FX = true; f(...a); FX = false; };
+whoosh = asFx(whoosh); riser = asFx(riser); impact = asFx(impact); tick = asFx(tick);
+
 // ---------------------------------------------------------------- score
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const P = (t, a, b) => clamp((t - a) / (b - a));
@@ -210,7 +220,8 @@ function chime(t0, lift = 0) {
 }
 
 // the reel ticks: the same curve as index.html, stretched to one bar
-const OB = 60 / 128, K = BAR / (4 * OB);
+const OB = 60 / 128;
+let K = BAR / (4 * OB);
 const reelV = (i, t) => {
   let v = [2, 0, 2, 5][i] - (i + 1) * 10 * (1 - outExpo(P(t, 0.25, 0.95 + 0.14 * i)));
   if (i === 3) v += outBack(P(t, 1.46, 1.66));
@@ -220,6 +231,7 @@ const reelV = (i, t) => {
 let progI = 0;
 for (const sc of SEQ) {
   const t0 = sc.start, bars = sc.bars;
+  BAR = sc.bar; B = sc.beat; K = BAR / (4 * OB);
   const at = k => t0 + k * BAR;
   switch (sc.kind) {
     case 'rol': {
@@ -365,12 +377,20 @@ for (let i = 0; i < N; i++) {
   mix[2 * i] = l * fade; mix[2 * i + 1] = r * fade;
   peak = Math.max(peak, Math.abs(l), Math.abs(r));
 }
-const g = 0.8 / peak;
-const buf = Buffer.alloc(44 + N * 4);
-buf.write('RIFF', 0); buf.writeUInt32LE(36 + N * 4, 4); buf.write('WAVE', 8);
-buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(2, 22);
-buf.writeUInt32LE(SR, 24); buf.writeUInt32LE(SR * 4, 28); buf.writeUInt16LE(4, 32); buf.writeUInt16LE(16, 34);
-buf.write('data', 36); buf.writeUInt32LE(N * 4, 40);
-for (let i = 0; i < N * 2; i++) buf.writeInt16LE(Math.round(clamp(mix[i] * g, -1, 1) * 32767), 44 + i * 2);
-fs.writeFileSync(path.join(__dirname, 'soundtrack.wav'), buf);
-console.log('soundtrack.wav written, peak before normalize', peak.toFixed(3));
+function writeWav(file, data, gain) {
+  const n = data.length / 2;
+  const buf = Buffer.alloc(44 + n * 4);
+  buf.write('RIFF', 0); buf.writeUInt32LE(36 + n * 4, 4); buf.write('WAVE', 8);
+  buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(2, 22);
+  buf.writeUInt32LE(SR, 24); buf.writeUInt32LE(SR * 4, 28); buf.writeUInt16LE(4, 32); buf.writeUInt16LE(16, 34);
+  buf.write('data', 36); buf.writeUInt32LE(n * 4, 40);
+  for (let i = 0; i < n * 2; i++) buf.writeInt16LE(Math.round(clamp(data[i] * gain, -1, 1) * 32767), 44 + i * 2);
+  fs.writeFileSync(path.join(__dirname, file), buf);
+}
+writeWav('score.wav', mix, 0.8 / peak);
+fs.copyFileSync(path.join(__dirname, 'score.wav'), path.join(__dirname, 'soundtrack.wav'));
+const fx = new Float32Array(N * 2);
+let fpeak = 1e-9;
+for (let i = 0; i < N; i++) { fx[2 * i] = Math.tanh(XL[i] * 0.8); fx[2 * i + 1] = Math.tanh(XR[i] * 0.8); fpeak = Math.max(fpeak, Math.abs(fx[2 * i]), Math.abs(fx[2 * i + 1])); }
+writeWav('sfx.wav', fx, 0.8 / fpeak);
+console.log('score.wav, sfx.wav and soundtrack.wav written');

@@ -19,6 +19,7 @@
 <body>
 <canvas id="c" width="1920" height="1080"></canvas>
 <script src="geo.js"></script>
+<script src="tempo.js"></script>
 <script src="reel-data.js"></script>
 <script>
 /*
@@ -27,7 +28,9 @@
  * timing all come from reel-data.js; the music is locked to 120 BPM.
  */
 const W = 1920, H = 1080, FPS = 60;
-const { B, BAR, MAANDEN, MEMORIAM } = REEL;
+// the tempo can change per chapter (the film follows the song), so these are set per scene
+let B = REEL.B, BAR = REEL.BAR;
+const { MAANDEN, MEMORIAM } = REEL;
 const { seq: SEQ, total: DUR } = REEL.sequence();
 const C = {
   ink: '#0B0B0E', paper: '#F2ECE1', fire: '#FF4A1C', blue: '#2F4BFF',
@@ -131,7 +134,8 @@ function dateOf(day) {
 // ================================================================ INTRO
 // The five intro scenes keep the timing of the first 15-second cut (128 BPM),
 // played a touch slower: each one fills one bar at 100 BPM.
-const OB = 60 / 128, OBAR = 4 * OB, K = BAR / OBAR;
+const OB = 60 / 128, OBAR = 4 * OB;
+let K = BAR / OBAR;
 const oPulse = (t, k = 7) => { const u = ((t % OB) + OB) % OB; return Math.exp(-u * k); };
 
 // ---- 1 · het aftellen
@@ -481,7 +485,7 @@ function sGetallen(lt) {
 // ======================================================= THE NEWS NETWORK
 // "BJ Journaal": ident, month stings, a picture per headline with a chyron,
 // a ticker, and a swoosh between every shot.
-const ITEM = REEL.ITEM_BARS * BAR, STING = REEL.STING_BARS * BAR;
+let ITEM = REEL.ITEM_BARS * BAR, STING = REEL.STING_BARS * BAR;
 const SW = 0.32; // half the length of a swoosh
 function sweep(p) {
   if (p <= 0 || p >= 1) return;
@@ -760,7 +764,7 @@ const NLB = (() => {
   NL_SHAPE.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
   return { x0, x1, y0, y1 };
 })();
-const ZON_T = 1.25 * BAR; // totality, 3 s into the eclipse shot
+let ZON_T = 1.25 * BAR; // totality, five beats into the eclipse shot
 const BEELD = {
   default(u) { rect(0, 0, W, H, C.ink); globe(W * 0.68, H * 0.42, 380, u * 10, 0.3, C.paper, 0.8); },
 
@@ -1794,7 +1798,11 @@ function sFinale(lt, sc) {
 // ============================================================ sequencing
 const DRAW = { rol: sRol, knal: sKnal, raster: sRaster, baan: sBaan, getallen: sGetallen, opening: sOpening, maand: sMaand, memoriam: sMemoriam, dossier: sDossier, finale: sFinale };
 function sceneIndex(t) { let i = 0; while (i < SEQ.length - 1 && t >= SEQ[i + 1].start) i++; return i; }
-function drawScene(i, lt) { const sc = SEQ[i]; DRAW[sc.kind](lt, sc, SEQ[i + 1]); }
+function setTempo(sc) {
+  BAR = sc.bar; B = BAR / 4; K = BAR / OBAR;
+  ITEM = REEL.ITEM_BARS * BAR; STING = REEL.STING_BARS * BAR; ZON_T = 1.25 * BAR;
+}
+function drawScene(i, lt) { const sc = SEQ[i]; setTempo(sc); DRAW[sc.kind](lt, sc, SEQ[i + 1]); }
 const WIPE_IN = { dossier: true };
 function wipeClip(kind, p) {
   ctx.beginPath();
@@ -1825,7 +1833,7 @@ function hud(t) {
   txt(`TC 00:${pad2(Math.floor(sec / 60))}:${pad2(sec % 60)}:${pad2(f % FPS)}`, W - m - 26, m + 39, { f: FM, size: 16, weight: 700, color: colr, align: 'right', track: 3 });
   const i = sceneIndex(t);
   txt(`${pad2(i + 1)}/${pad2(SEQ.length)}  ${SEQ[i].naam}`, m + 26, H - m - 40, { f: FM, size: 16, weight: 700, color: colr, align: 'left', track: 4 });
-  txt('1920×1080 · 60 FPS · 100 BPM', W - m - 26, H - m - 40, { f: FM, size: 16, color: colr, align: 'right', track: 3 });
+  txt(`1920×1080 · 60 FPS · ${Math.round(240 / SEQ[i].bar)} BPM`, W - m - 26, H - m - 40, { f: FM, size: 16, color: colr, align: 'right', track: 3 });
   const px0 = m + 26, px1 = W - m - 26, py = H - m - 16;
   line(px0, py, px1, py, colr, 1, 0.3);
   line(px0, py, lerp(px0, px1, t / DUR), py, colr, 3);
@@ -1858,6 +1866,7 @@ function post(t) {
 const IMPACTS = (() => {
   const out = [];
   SEQ.forEach(sc => {
+    setTempo(sc);
     if (sc.kind === 'knal') out.push([sc.start, 16]);
     if (sc.kind === 'getallen') out.push([sc.start, 10]);
     if (sc.kind === 'opening') out.push([sc.start, 12]);
@@ -1868,6 +1877,7 @@ const IMPACTS = (() => {
     if (sc.kind === 'dossier') out.push([sc.start + 1.5 * BAR, 12]);
     if (sc.kind === 'finale') { const cd = sc.start + sc.dur - BAR; out.push([sc.start + BAR, 12], [cd, 8], [cd + B, 8], [cd + 2 * B, 8], [cd + 3 * B, 14]); }
   });
+  setTempo(SEQ[0]);
   return out;
 })();
 function shake(t) {
@@ -1900,6 +1910,7 @@ function render(t) {
     drawScene(i, lt);
     ctx.restore();
   } else drawScene(i, lt);
+  setTempo(sc);
   ctx.restore();
   hud(t);
   post(t);
@@ -1942,6 +1953,7 @@ async function boot() {
 async function ensureMedia(t) {
   const i = sceneIndex(t), sc = SEQ[i];
   if (sc.kind !== 'maand') return;
+  setTempo(sc);
   const lt = t - sc.start;
   if (lt < STING) return;
   const k = Math.min(sc.items.length - 1, Math.floor((lt - STING) / ITEM));

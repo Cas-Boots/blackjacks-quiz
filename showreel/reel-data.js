@@ -16,7 +16,7 @@
  * films, the New Year's fireworks damage and the January snow) stay out of the reel.
  */
 (function (root) {
-  const BPM = 100;
+  const BPM = 100;             // the tempo of the synthesized score
   const B = 60 / BPM;          // one beat, 0.6 s
   const BAR = 4 * B;           // one bar, 2.4 s
 
@@ -76,12 +76,37 @@
     { naam: 'Jerney Kaagman', wie: 'zangeres' },
   ];
 
-  const ITEM_BARS = 2;   // one headline: 4.8 s
-  const STING_BARS = 0.5; // one month title: 1.2 s
+  /*
+   * Music. Put your songs in muziek/ and list them here: each one plays under a
+   * chapter of the film, from scene `van` up to and including scene `tot` (scene names
+   * as in the sequence below). The film follows the song: that chapter runs at the
+   * song's tempo, so every cut lands on its beat.
+   *
+   *   vanaf: where in the song to start, in seconds (say, the chorus)
+   *   bpm, tel: tempo and the time of a downbeat; leave them out and
+   *             `node muziek.js tempo` measures them for you (written to tempo.js)
+   *
+   * A chapter without a file uses the synthesized score at 100 BPM.
+   */
+  const MUZIEK = [
+    // the year's Dutch Top 40 number ones and the Dutch hit of the year; set vanaf to where the good part starts
+    { bestand: 'mr-know-it-all.mp3', van: 'HET AFTELLEN', tot: 'HET JAAR IN BEELD', vanaf: 0 },   // Teddy Swims, ±126 BPM
+    { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL', vanaf: 0 },                    // Bruno Mars, #1 jan–apr
+    { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS', vanaf: 0 },                          // Shakira & Burna Boy, #1 all summer
+    { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER', vanaf: 0 },                // Alex Warren
+    { bestand: 'niemand.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 0 },               // Suzan & Freek; optional
+    { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE KWIS', vanaf: 0 },                   // Justen de Wildt: goodbye, 2026
+  ];
+  // measured tempos, written by `node muziek.js tempo`
+  let TEMPO = {};
+  try { TEMPO = typeof module !== 'undefined' && module.exports ? require('./tempo.js') : (root.TEMPO || {}); } catch (e) { TEMPO = {}; }
+
+  const ITEM_BARS = 2;   // one headline: two bars (4.8 s at 100 BPM)
+  const STING_BARS = 0.5; // one month title: half a bar
   function sequence() {
-    const seq = [];
-    let t = 0;
-    const add = (kind, bars, extra = {}) => { seq.push({ kind, bars, start: t, dur: bars * BAR, ...extra }); t += bars * BAR; };
+    // the scenes, in bars
+    const plan = [];
+    const add = (kind, bars, extra = {}) => plan.push({ kind, bars, ...extra });
     // the intro: one bar per scene, a touch slower than the first 15-second cut
     add('rol', 1, { naam: 'HET AFTELLEN' });
     add('knal', 1, { naam: 'TWEEDUIZEND ZESENTWINTIG' });
@@ -100,10 +125,30 @@
     add('memoriam', 3, { naam: 'IN MEMORIAM' });
     add('dossier', 3, { naam: 'HET DOSSIER' });
     add('finale', 5, { naam: 'DE KWIS' });
-    return { seq, total: t };
+    // each chapter with a song runs at that song's tempo
+    const find = n => plan.findIndex(p => p.naam === n);
+    const liedjes = [];
+    MUZIEK.forEach(mz => {
+      const tp = TEMPO[mz.bestand];
+      const bpm = mz.bpm || (tp && tp.bpm);
+      if (!bpm) return;
+      const a = find(mz.van), b = find(mz.tot);
+      if (a < 0 || b < a) return;
+      for (let i = a; i <= b; i++) plan[i].bar = 240 / bpm;
+      liedjes.push({ ...mz, bpm, tel: mz.tel !== undefined ? mz.tel : tp.tel, a, b });
+    });
+    let t = 0;
+    const seq = plan.map(p => {
+      const bar = p.bar || BAR;
+      const sc = { ...p, bar, beat: bar / 4, start: t, dur: p.bars * bar };
+      t += sc.dur;
+      return sc;
+    });
+    liedjes.forEach(l => { l.start = seq[l.a].start; l.end = seq[l.b].start + seq[l.b].dur; });
+    return { seq, total: t, liedjes };
   }
 
-  const REEL = { BPM, B, BAR, MAANDEN, NIEUWS, MEMORIAM, ITEM_BARS, STING_BARS, sequence };
+  const REEL = { BPM, B, BAR, MAANDEN, NIEUWS, MEMORIAM, MUZIEK, ITEM_BARS, STING_BARS, sequence };
   if (typeof module !== 'undefined' && module.exports) module.exports = REEL;
   else root.REEL = REEL;
 })(this);

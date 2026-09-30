@@ -1,6 +1,6 @@
 # Jaaroverzicht 2026: de openingsfilm
 
-A motion piece of 3:50 that opens the quiz night: 1920×1080, 60 fps, 100 BPM.
+A motion piece of about 3:50 (the exact length depends on the songs' tempos) that opens the quiz night: 1920×1080, 60 fps, 100 BPM.
 
 1. **A fast intro.** 2025 rolls over to 2026, then 365 days, one lap around the sun and the year in numbers. It takes 12 seconds.
 2. **"Het jaar in beeld".** The news told the way a news network does it, as the fictional *BJ Journaal*. Each month opens with a sting of 1.2 seconds. Every headline gets 4.8 seconds: a full-screen picture, a chyron and a ticker, with a swoosh between shots. The news slides show no figures. Dutch news comes first, then the world.
@@ -51,13 +51,22 @@ media: { video: 'darts', frames: 216, fps: 30, bron: 'NOS' }
 - `x` and `y` (from -1 to 1) shift a photo's crop.
 - A missing file falls back to the drawing.
 
+## Music: the year's hits
+
+Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.md`. The default plan uses the year's Dutch Top 40 number ones, with *Cheerio* under the countdown.
+
+**The film follows the song.** Each chapter runs at its song's tempo, so every cut lands on the beat and the songs play at their real speed and pitch. The whooshes, hits and ticks sit on top, and the music dips slightly under them. A chapter without a song keeps the synthesized score at 100 BPM.
+
+`npm run audio` measures the tempos (`tempo.js`), builds the score and effects, and mixes everything into `soundtrack.wav`. `npm run render` does that too, then renders the film.
+
 ## Files
 
 | File | What it does |
 | --- | --- |
 | `reel-data.js` | The headlines, the in-memoriam list and the scene order. **Edit this to change the content.** |
 | `index.html` | Draws every frame. Open it in a browser to watch it live; click it to play it with sound. |
-| `audio.js` | Synthesizes `soundtrack.wav` on the same beat grid. |
+| `audio.js` | Synthesizes the score and an effects-only track (`sfx.wav`) on the film's beat grid. |
+| `muziek.js` | Measures the songs' tempos and mixes them under the film. |
 | `render.js` | Renders `jaaroverzicht-2026.mp4` in parallel with headless Chromium and ffmpeg. |
 | `geo.js` | Outline of the Netherlands and a dot map of the world (Natural Earth, public domain). |
 | `fonts/` | Anton, Space Grotesk and JetBrains Mono (SIL Open Font License). |
@@ -80,7 +89,7 @@ You need Node.js 18 or newer. From this folder:
 
 ```sh
 npm install          # installs Playwright, its Chromium and its own ffmpeg
-npm run render       # soundtrack + jaaroverzicht-2026.mp4
+npm run render       # soundtrack (with your songs, if any) + jaaroverzicht-2026.mp4
 npm run stills 20 42.5   # optional: check a few frames first (they land in stills/)
 ```
 

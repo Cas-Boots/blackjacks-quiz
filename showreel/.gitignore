@@ -4,3 +4,7 @@ sheet.png
 render.log
 *.mp4
 node_modules/
+muziek/*
+!muziek/LEESMIJ.md
+score.wav
+sfx.wav
