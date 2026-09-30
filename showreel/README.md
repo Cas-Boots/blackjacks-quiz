@@ -88,13 +88,17 @@ Give it a drawn `beeld` that exists in `index.html`, or a `media` file.
 You need Node.js 18 or newer. From this folder:
 
 ```sh
+git pull             # get the latest version
 npm install          # installs Playwright, its Chromium and its own ffmpeg
-npm run render       # soundtrack (with your songs, if any) + jaaroverzicht-2026.mp4
-npm run stills 20 42.5   # optional: check a few frames first (they land in stills/)
+npm run check        # tests everything and estimates how long a render takes
+npm run render       # soundtrack (with your songs) + jaaroverzicht-2026.mp4 at 60 fps
+npm run render:snel  # the same at 30 fps: about half the time
 ```
 
-- It works on Windows, macOS and Linux.
-- It uses all but one CPU core. Four cores take about 50 minutes.
-- To watch it live instead, open `index.html` in a browser and click it to play it with sound. Your browser may block local files; if so, run `npx serve` in this folder and open the address it gives you.
+- The render shows a progress bar with the time remaining.
+- Everything is also written to `render-log.txt`. If something fails, the last lines say what went wrong; send that file along.
+- On Linux, Chromium may need system libraries. If `npm run check` says Chromium won't start, run `npx playwright install --with-deps chromium`. It asks for your password.
+- `node render.js --jobs 1` uses a single browser: slower, but light on a laptop.
+- To watch the film live instead, open `index.html` in a browser and click it to play it with sound.
 
 The finished video is larger than GitHub's 100 MB limit, so it is not committed.

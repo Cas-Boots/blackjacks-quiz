@@ -11,6 +11,7 @@ const REEL = require('./reel-data.js');
 let B = REEL.B, BAR = REEL.BAR; // set per scene below: a chapter can follow a song's tempo
 const { seq: SEQ, total: DUR } = REEL.sequence();
 const SR = 44100, N = Math.ceil(SR * DUR);
+console.log(`score en effecten maken (${DUR.toFixed(0)} s)…`);
 const SWOOSH = 0.32; // matches the swoosh between shots in index.html
 
 const L = new Float32Array(N), R = new Float32Array(N);      // dry bus

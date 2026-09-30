@@ -4,8 +4,10 @@
   "description": "De openingsfilm van de Blackjacks Kwis: het jaar 2026 in beeld.",
   "scripts": {
     "postinstall": "playwright install chromium",
+    "check": "node render.js --check",
     "audio": "node muziek.js tempo && node audio.js && node muziek.js mix",
     "render": "npm run audio && node render.js",
+    "render:snel": "npm run audio && node render.js --fps 30",
     "stills": "node render.js --stills"
   },
   "dependencies": {

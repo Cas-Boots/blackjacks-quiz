@@ -179,6 +179,6 @@ function mix() {
 }
 
 const cmd = process.argv[2];
-if (cmd === 'tempo') tempo();
-else if (cmd === 'mix') mix();
+if (cmd === 'tempo') { console.log('tempo van de liedjes meten…'); tempo(); }
+else if (cmd === 'mix') { console.log('liedjes onder de film mixen…'); mix(); }
 else { console.log('gebruik: node muziek.js tempo | mix'); process.exit(1); }
