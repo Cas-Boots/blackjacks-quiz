@@ -1,6 +1,6 @@
 // Renders index.html frame by frame to jaaroverzicht-2026.mp4.
 //   npm run render                   -> soundtrack plus the whole film, in parallel
-//   node render.js --jobs 3          -> choose the number of parallel browsers (default: cores - 1)
+//   node render.js --jobs 2          -> choose the number of parallel browsers (default: 3, or fewer cores)
 //   node render.js --stills 1 4.2    -> PNG stills at the given times, for checking
 // ffmpeg comes from the ffmpeg-static package; set FFMPEG to use another one.
 const { chromium } = require('playwright');
@@ -17,8 +17,9 @@ const OUT = path.join(here, 'jaaroverzicht-2026.mp4');
 const clip = { x: 0, y: 0, width: 1920, height: 1080 };
 
 async function openPage() {
-  const browser = await chromium.launch({ args: ['--font-render-hinting=none'] });
+  const browser = await chromium.launch({ args: ['--font-render-hinting=none'], timeout: 0 });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  page.setDefaultTimeout(0); // a slow laptop may need more than Playwright's 30 s for a heavy frame
   page.on('pageerror', e => { console.error('[page error]', e); process.exit(1); });
   await page.goto(pathToFileURL(path.join(here, 'index.html')).href + '?capture=1');
   await page.evaluate(() => window.__ready);
@@ -63,7 +64,7 @@ async function segment(from, to, file) {
   }
   if (args[0] === '--segment') { await segment(+args[1], +args[2], args[3]); return; }
 
-  const jobs = args[0] === '--jobs' ? +args[1] : Math.max(1, os.cpus().length - 1);
+  const jobs = args[0] === '--jobs' ? +args[1] : Math.max(1, Math.min(3, os.cpus().length - 1));
   const { browser, page } = await openPage();
   const dur = await page.evaluate(() => window.__duration);
   await browser.close();

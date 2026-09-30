@@ -82,7 +82,7 @@
    * as in the sequence below). The film follows the song: that chapter runs at the
    * song's tempo, so every cut lands on its beat.
    *
-   *   vanaf: where in the song to start, in seconds (say, the chorus)
+   *   vanaf: where in the song to start, in seconds, or 'auto' for its loudest stretch
    *   bpm, tel: tempo and the time of a downbeat; leave them out and
    *             `node muziek.js tempo` measures them for you (written to tempo.js)
    *
@@ -90,12 +90,12 @@
    */
   const MUZIEK = [
     // the year's Dutch Top 40 number ones and the Dutch hit of the year; set vanaf to where the good part starts
-    { bestand: 'mr-know-it-all.mp3', van: 'HET AFTELLEN', tot: 'HET JAAR IN BEELD', vanaf: 0 },   // Teddy Swims, ±126 BPM
-    { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL', vanaf: 0 },                    // Bruno Mars, #1 jan–apr
-    { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS', vanaf: 0 },                          // Shakira & Burna Boy, #1 all summer
-    { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER', vanaf: 0 },                // Alex Warren
-    { bestand: 'niemand.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 0 },               // Suzan & Freek; optional
-    { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE KWIS', vanaf: 0 },                   // Justen de Wildt: goodbye, 2026
+    { bestand: 'mr-know-it-all.mp3', van: 'HET AFTELLEN', tot: 'HET JAAR IN BEELD', vanaf: 'auto' },   // Teddy Swims, ±126 BPM
+    { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL', vanaf: 'auto' },                    // Bruno Mars, #1 jan–apr
+    { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS', vanaf: 'auto' },                          // Shakira & Burna Boy, #1 all summer
+    { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER', vanaf: 'auto' },                // Alex Warren
+    { bestand: 'niemand.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 'auto' },               // Suzan & Freek; optional
+    { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE KWIS', vanaf: 'auto' },                   // Justen de Wildt: goodbye, 2026
   ];
   // measured tempos, written by `node muziek.js tempo`
   let TEMPO = {};

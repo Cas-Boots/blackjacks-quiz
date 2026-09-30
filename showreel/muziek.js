@@ -66,6 +66,16 @@ function measure(file, vanaf) {
   // refine it with a comb over the whole window
   let bpm = bestBpm, fit = comb(o, 60 * FPS / bpm);
   for (let b = bestBpm - 1.5; b <= bestBpm + 1.5; b += 0.02) { const c = comb(o, 60 * FPS / b); if (c.score > fit.score) { fit = c; bpm = b; } }
+  // guard against the classic mistakes: half, double, or a triplet feel (2/3, 3/2)
+  const fitAt = b => { let best = { score: -1 }; for (let d = -0.6; d <= 0.6; d += 0.02) { const c = comb(o, 60 * FPS / (b + d)); if (c.score > best.score) best = { ...c, bpm: b + d }; } return best; };
+  let pick = { ...fit, bpm };
+  for (const k of [1.5, 2 / 3, 2, 0.5]) {
+    const b = bpm * k;
+    if (b < 80 || b > 160) continue;
+    const c = fitAt(b);
+    if (c.score > pick.score) pick = c;
+  }
+  bpm = pick.bpm;
   if (Math.abs(bpm - Math.round(bpm)) < 0.15) bpm = Math.round(bpm);
   const P = 60 * FPS / bpm;
   const ph = comb(o, P).phase;
@@ -75,16 +85,49 @@ function measure(file, vanaf) {
   return { bpm: +bpm.toFixed(2), tel: +(vanaf + (ph + down * P) / FPS).toFixed(3) };
 }
 
+function duration(file) {
+  const r = spawnSync(FFMPEG, ['-hide_banner', '-i', file], { encoding: 'utf8' });
+  const m = /Duration: (\d+):(\d+):([\d.]+)/.exec(r.stderr || '');
+  return m ? +m[1] * 3600 + +m[2] * 60 + +m[3] : 0;
+}
+// 'auto': the loudest stretch of the song that is long enough for its chapter (usually the choruses)
+function autoStart(file, need) {
+  const len = duration(file);
+  const x = decode(file, 0, len);
+  const sr = 10, hop = Math.floor(SR / sr), rms = [];
+  for (let i = 0; i + hop <= x.length; i += hop) { let s = 0; for (let k = i; k < i + hop; k++) s += x[k] * x[k]; rms.push(Math.sqrt(s / hop)); }
+  const win = Math.min(Math.round(need * sr), rms.length - 1);
+  // smooth over 3 s, then score each window by its average and, twice as hard, its quietest moment
+  const sm = rms.map((_, i) => { let s = 0, c = 0; for (let k = Math.max(0, i - 15); k < Math.min(rms.length, i + 15); k++) { s += rms[k]; c++; } return s / c; });
+  let best = 0, bestV = -1;
+  for (let i = 0; i + win < rms.length; i += 2) {
+    let sum = 0, low = Infinity;
+    for (let k = i; k < i + win; k++) { sum += sm[k]; if (sm[k] < low) low = sm[k]; }
+    const v = sum / win + 2 * low;
+    if (v > bestV) { bestV = v; best = i; }
+  }
+  return Math.max(0, best / sr - 1);
+}
+
 function tempo() {
   const REEL = require('./reel-data.js');
   const T = {};
+  const plan = REEL.sequence().seq; // scene lengths in bars, for how long each chapter lasts
   for (const mz of REEL.MUZIEK) {
     const f = song(mz.bestand);
     if (!fs.existsSync(f)) { console.log(`  –  ${mz.van}: muziek/${mz.bestand} ontbreekt, de score speelt`); continue; }
     if (mz.bpm && mz.tel !== undefined) { console.log(`  ✓  ${mz.bestand}: ${mz.bpm} BPM (zelf opgegeven)`); continue; }
-    const m = measure(f, mz.vanaf || 0);
+    let vanaf = mz.vanaf || 0;
+    if (mz.vanaf === 'auto' || mz.vanaf === undefined) {
+      // the tempo first (anywhere in the song), then how long the chapter will be at that tempo
+      const probe = measure(f, Math.max(0, duration(f) / 2 - 20));
+      const a = plan.findIndex(p => p.naam === mz.van), b = plan.findIndex(p => p.naam === mz.tot);
+      const bars = plan.slice(a, b + 1).reduce((s, p) => s + p.bars, 0);
+      vanaf = autoStart(f, bars * 240 / (mz.bpm || probe.bpm) + 1);
+    }
+    const m = measure(f, vanaf);
     T[mz.bestand] = { bpm: mz.bpm || m.bpm, tel: mz.tel !== undefined ? mz.tel : m.tel };
-    console.log(`  ✓  ${mz.bestand}: ${T[mz.bestand].bpm} BPM, eerste tel op ${T[mz.bestand].tel} s`);
+    console.log(`  ✓  ${mz.bestand}: ${T[mz.bestand].bpm} BPM, begint op ${T[mz.bestand].tel.toFixed(1)} s`);
   }
   fs.writeFileSync(path.join(here, 'tempo.js'),
     `// Tempo and first downbeat per song, measured by \`node muziek.js tempo\`. Leave empty to use the score.\n(function (root) {\n  const TEMPO = ${JSON.stringify(T, null, 2).replace(/\n/g, '\n  ')};\n  if (typeof module !== 'undefined' && module.exports) module.exports = TEMPO; else root.TEMPO = TEMPO;\n})(this);\n`);
