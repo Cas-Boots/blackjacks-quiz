@@ -1,7 +1,6 @@
 // Synthesizes the soundtrack at 100 BPM. It reads the scene order from reel-data.js,
 // so every hit stays locked to the picture. It writes three files:
 //   score.wav       the full synthesized score
-//   sfx.wav         only the effects (whooshes, hits, ticks, risers), to lay over songs
 //   soundtrack.wav  the score; mix.js replaces it with your songs when muziek/ has them
 // Pure JS, no dependencies: node audio.js
 const fs = require('fs');
@@ -18,8 +17,6 @@ const L = new Float32Array(N), R = new Float32Array(N);      // dry bus
 const PL = new Float32Array(N), PR = new Float32Array(N);    // sidechained bus (pads, bass)
 const RL = new Float32Array(N), RR = new Float32Array(N);    // reverb send
 const duck = new Float32Array(N).fill(1);
-const XL = new Float32Array(N), XR = new Float32Array(N);    // the effects stem
-let FX = false;
 
 let seed = 2026;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
@@ -30,7 +27,6 @@ function out(i, v, p = 0, send = 0, bus = 'dry') {
   if (i < 0 || i >= N) return;
   const [gl, gr] = pan(p);
   if (bus === 'dry') { L[i] += v * gl; R[i] += v * gr; } else { PL[i] += v * gl; PR[i] += v * gr; }
-  if (FX) { XL[i] += v * gl; XR[i] += v * gr; }
   if (send) { RL[i] += v * gl * send; RR[i] += v * gr * send; }
 }
 function svf() {
@@ -178,10 +174,6 @@ function tick(t0, amp = 1, fr = 2600, p = 0) {
   }
 }
 const lerp = (a, b, t) => a + (b - a) * t;
-
-// the effects also go to their own stem
-const asFx = f => (...a) => { FX = true; f(...a); FX = false; };
-whoosh = asFx(whoosh); riser = asFx(riser); impact = asFx(impact); tick = asFx(tick);
 
 // ---------------------------------------------------------------- score
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -390,8 +382,4 @@ function writeWav(file, data, gain) {
 }
 writeWav('score.wav', mix, 0.8 / peak);
 fs.copyFileSync(path.join(__dirname, 'score.wav'), path.join(__dirname, 'soundtrack.wav'));
-const fx = new Float32Array(N * 2);
-let fpeak = 1e-9;
-for (let i = 0; i < N; i++) { fx[2 * i] = Math.tanh(XL[i] * 0.8); fx[2 * i + 1] = Math.tanh(XR[i] * 0.8); fpeak = Math.max(fpeak, Math.abs(fx[2 * i]), Math.abs(fx[2 * i + 1])); }
-writeWav('sfx.wav', fx, 0.8 / fpeak);
-console.log('score.wav, sfx.wav and soundtrack.wav written');
+console.log('score.wav en soundtrack.wav geschreven');

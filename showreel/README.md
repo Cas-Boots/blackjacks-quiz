@@ -55,9 +55,16 @@ media: { video: 'darts', frames: 216, fps: 30, bron: 'NOS' }
 
 Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.md`. The default plan uses the year's Dutch Top 40 number ones, with *Cheerio* under the countdown.
 
-**The film follows the song.** Each chapter runs at its song's tempo, so every cut lands on the beat and the songs play at their real speed and pitch. The whooshes, hits and ticks sit on top, and the music dips slightly under them. A chapter without a song keeps the synthesized score at 100 BPM.
+**The film follows the song.** Each chapter runs at its song's tempo, so every cut lands on the beat and the songs play at their real speed and pitch. A chapter without a song keeps the synthesized score at 100 BPM.
 
-`npm run audio` measures the tempos (`tempo.js`), builds the score and effects, and mixes everything into `soundtrack.wav`. `npm run render` does that too, then renders the film.
+**The mix** (`muziek.js mix`) is done in plain JS:
+
+- **Matched levels.** Every chapter is set to the same loudness.
+- **DJ-style transitions.** The outgoing song thins out over its last bar, and its last beat echoes away in eighth notes at its own tempo. The incoming song fades in muffled for one bar and opens up on the downbeat.
+- **Effects** (`effecten.js`). Airy swooshes sit between shots, soft thumps on the month titles, and five real hits: the 2026 slam, the ident, the eclipse, the dossier stamp and START. They all share one reverb. The music dips smoothly under each effect, most under the hits.
+- **Master.** Gentle bus compression, -16 LUFS, and a look-ahead limiter at -1 dBFS.
+
+`npm run audio` measures the tempos (`tempo.js`), builds the score and the effects, and mixes everything into `soundtrack.wav`. `npm run render` does that too, then renders the film.
 
 ## Files
 
@@ -65,7 +72,8 @@ Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.m
 | --- | --- |
 | `reel-data.js` | The headlines, the in-memoriam list and the scene order. **Edit this to change the content.** |
 | `index.html` | Draws every frame. Open it in a browser to watch it live; click it to play it with sound. |
-| `audio.js` | Synthesizes the score and an effects-only track (`sfx.wav`) on the film's beat grid. |
+| `audio.js` | Synthesizes the score, used for chapters without a song. |
+| `effecten.js` | Makes the effects that sit on top of the songs (`sfx.wav`). |
 | `muziek.js` | Measures the songs' tempos and mixes them under the film. |
 | `render.js` | Renders `jaaroverzicht-2026.mp4` in parallel with headless Chromium and ffmpeg. |
 | `geo.js` | Outline of the Netherlands and a dot map of the world (Natural Earth, public domain). |
