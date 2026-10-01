@@ -17,9 +17,9 @@
       "bpm": 108,
       "tel": 41.009
     },
-    "cheerio.mp3@IN MEMORIAM": {
-      "bpm": 130,
-      "tel": 71.46
+    "fever-dream.mp3@IN MEMORIAM": {
+      "bpm": 108,
+      "tel": 1.57
     },
     "cheerio.mp3@HET DOSSIER": {
       "bpm": 130,

@@ -96,7 +96,7 @@
     { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL', vanaf: 'auto' },                    // Bruno Mars, #1 jan–apr
     { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS', vanaf: 'auto' },                          // Shakira & Burna Boy, #1 all summer
     { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER', vanaf: 'auto' },                // Alex Warren
-    { bestand: 'cheerio.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 70, db: -7, lowpass: 900 }, // muffled, then it opens up
+    { bestand: 'fever-dream.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 1.5, db: -7, lowpass: 6000 }, // its quiet opening, warm
     { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE KWIS', vanaf: 'auto' },                   // Justen de Wildt: goodbye, 2026
   ];
   // measured tempos, written by `node muziek.js tempo`

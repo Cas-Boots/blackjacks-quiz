@@ -7,8 +7,8 @@ Only songs released in 2026. Put them here as mp3 (m4a and wav work too). They s
 | `mr-know-it-all.mp3` | Teddy Swims – Mr. Know It All | the intro and the ident |
 | `i-just-might.mp3` | Bruno Mars – I Just Might | January to April |
 | `dai-dai.mp3` | Shakira & Burna Boy – Dai Dai | May to August |
-| `fever-dream.mp3` | Alex Warren – Fever Dream | September to December |
-| `cheerio.mp3` | Justen de Wildt – Cheerio | in memoriam (muffled), then the dossier and the countdown |
+| `fever-dream.mp3` | Alex Warren – Fever Dream | September to December, and its quiet opening under the in memoriam |
+| `cheerio.mp3` | Justen de Wildt – Cheerio | the dossier and the countdown |
 
 Other songs work too: change the file names in `MUZIEK` in `../reel-data.js`.
 
