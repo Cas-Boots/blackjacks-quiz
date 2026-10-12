@@ -58,6 +58,8 @@ export const JAAROVERZICHT: Jaaroverzicht = {
          bij:"Het jaar is elf uur oud en de teller staat al vol."},
         {emoji:"🚆", tekst:"[[Sneeuw]] legt het openbaar vervoer en het vliegverkeer grotendeels plat."},
         {emoji:"🤝", tekst:"Eind januari presenteren [[D66, VVD en CDA]] hun regeerakkoord."},
+        {emoji:"✉️", tekst:"Een postzegel kost voortaan [[€1,40]]."},
+        {emoji:"🏜️", tekst:"[[Nasser Al-Attiyah]] wint de [[Dakar Rally]], voor de zesde keer."},
         {emoji:"🔮", tekst:"En wij doen veertien voorspellingen over dit jaar.",
          bij:"Opgeschreven, ondertekend, niet meer weg te praten."}
       ]
@@ -66,12 +68,14 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       nr: 2,
       kop: "Op het bordes",
       momenten: [
-        {emoji:"🏔️", tekst:"De Winterspelen beginnen in [[Milaan en Cortina d’Ampezzo]]."},
-        {emoji:"🥇", tekst:"Nederland wint [[tien]] keer goud; [[Noorwegen]] gaat met [[41]] medailles aan kop.",
-         bij:"Schaatsen, en nog eens schaatsen."},
+        {emoji:"🎶", tekst:"[[Bad Bunny]] wint de Grammy voor album van het jaar, als eerste in het Spaans."},
+        {emoji:"🏈", tekst:"[[Seattle]] wint de Super Bowl met [[29]]-13."},
+        {emoji:"🏔️", tekst:"De Winterspelen beginnen in Milaan en Cortina d’Ampezzo.", pasNaAfloop:true},
+        {emoji:"🥇", tekst:"Nederland wint tien keer goud; Noorwegen gaat met 41 medailles aan kop.",
+         bij:"Schaatsen, en nog eens schaatsen.", pasNaAfloop:true},
         {emoji:"⛷️", tekst:"Langlaufer [[Johannes Høsflot Klæbo]] breekt het record voor de meeste olympische titels."},
         {emoji:"🏛️", tekst:"Het kabinet-[[Jetten]] wordt beëdigd."},
-        {emoji:"🧮", tekst:"Een [[minderheids]]kabinet: samen 66 van de 150 zetels."}
+        {emoji:"🧮", tekst:"Een minderheidskabinet: samen 66 van de 150 zetels.", pasNaAfloop:true}
       ]
     },
     {
@@ -80,7 +84,9 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       momenten: [
         {emoji:"🏎️", tekst:"Het seizoen start met [[compleet nieuwe]] motor-, chassis-, banden- en brandstofregels."},
         {emoji:"🔋", tekst:"Coureurs moeten opeens hun accu-inzet over de hele ronde verdelen.",
-         bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true}
+         bij:"Wie te vroeg vol gaat, staat op het rechte stuk stil.", pasNaAfloop:true},
+        {emoji:"🎞️", tekst:"[[One Battle After Another]] wint de Oscar voor beste film."},
+        {emoji:"📚", tekst:"Het Boekenweekgeschenk is [[Piaggio]], van [[Hendrik Groen]]."}
       ]
     },
     {
@@ -88,7 +94,7 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       kop: "Terug op aarde",
       momenten: [
         {emoji:"🚀", tekst:"[[Artemis II]] brengt vier astronauten om de maan — de eerste sinds de jaren zeventig."},
-        {emoji:"🌊", tekst:"Een capsule plonst in zee, na [[tien]] dagen onderweg."}
+        {emoji:"🌊", tekst:"Een capsule plonst in zee, na tien dagen onderweg.", pasNaAfloop:true}
       ]
     },
     {
@@ -96,15 +102,17 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       kop: "Het Songfestival strijkt neer",
       momenten: [
         {emoji:"🎤", tekst:"[[Bulgarije]] wint, met [[Bangaranga van Dara]]."},
-        {emoji:"📣", tekst:"Goed voor [[516]] punten, in de [[zeventigste]] editie."}
+        {emoji:"📣", tekst:"Goed voor 516 punten, in de zeventigste editie.", pasNaAfloop:true},
+        {emoji:"⚽", tekst:"[[Paris Saint-Germain]] wint de Champions League, na strafschoppen tegen [[Arsenal]]."},
+        {emoji:"🎮", tekst:"[[GTA VI]] zou nu uitkomen. Het wordt [[19 november]]."}
       ]
     },
     {
       nr: 6,
       kop: "Het WK begint",
       momenten: [
-        {emoji:"⚽", tekst:"Het toernooi opent in [[de Verenigde Staten, Canada en Mexico]]."},
-        {emoji:"🇳🇱", tekst:"Oranje begint tegen [[Japan]] en wint in de groepsfase van [[Tunesië]]."},
+        {emoji:"⚽", tekst:"Het toernooi opent in de Verenigde Staten, Canada en Mexico.", pasNaAfloop:true},
+        {emoji:"🇳🇱", tekst:"Oranje begint tegen Japan en wint in de groepsfase van Tunesië.", pasNaAfloop:true},
         {emoji:"🏎️", tekst:"Na de Grand Prix van Spanje leidt [[Kimi Antonelli]] met [[292]] punten; Verstappen staat [[zesde]]."}
       ]
     },
@@ -114,11 +122,14 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       momenten: [
         {emoji:"💶", tekst:"De AOW gaat [[omhoog]]."},
         {emoji:"😞", tekst:"Oranje gaat eruit tegen [[Marokko]], [[na strafschoppen, bij 1-1]]."},
-        {emoji:"🏆", tekst:"Op [[19]] juli wint [[Spanje]] de finale in het [[MetLife Stadium]], [[pas in de verlenging]].",
-         bij:"Invaller [[Ferran Torres]] beslist hem: [[1-0]]."},
+        {emoji:"🏆", tekst:"Op 19 juli wint Spanje de finale in het MetLife Stadium, pas in de verlenging.",
+         bij:"Invaller Ferran Torres beslist hem: 1-0.", pasNaAfloop:true},
+        {emoji:"🎾", tekst:"Op Wimbledon wint [[Linda Nosková]] een Tsjechische finale; [[Jannik Sinner]] prolongeert."},
+        {emoji:"🚶", tekst:"[[42137]] wandelaars halen de finish van de Vierdaagse.",
+         bij:"Er gingen er [[45.761]] van start."},
         {emoji:"🚴", tekst:"In Parijs wint [[Pogačar]] zijn [[vijfde]] Tour."},
         {emoji:"📚", tekst:"Daarmee evenaart hij het record van Merckx, Hinault, Anquetil en Indurain.", pasNaAfloop:true},
-        {emoji:"⛰️", tekst:"[[Carapaz]] grijpt de bolletjestrui op [[Alpe d’Huez]], in etappe 20."}
+        {emoji:"⛰️", tekst:"Carapaz grijpt de bolletjestrui op Alpe d’Huez, in etappe 20.", pasNaAfloop:true}
       ]
     },
     {
@@ -126,7 +137,7 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       kop: "Zomer, en de zalen zitten vol",
       momenten: [
         {emoji:"🎬", tekst:"[[Spider-Man: Brand New Day]] wordt de grootste kaskraker in de Amerikaanse bioscopen."},
-        {emoji:"🍿", tekst:"Ook vol: de verfilming van [[The Odyssey]], en een nieuw deel van [[Toy Story]]."}
+        {emoji:"🍿", tekst:"Ook vol: de verfilming van The Odyssey, en een nieuw deel van Toy Story.", pasNaAfloop:true}
       ]
     },
     {
