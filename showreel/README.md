@@ -113,10 +113,11 @@ Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.m
 - Every song is levelled to the same loudness on the stretch that plays, with a fixed gain, so nothing pumps.
 - The music ducks a few dB under the effects.
 - The master gets a gentle glue compressor and a true-peak limiter. It ends at -14 LUFS with peaks under -1 dBTP.
+- Under the in memoriam, Fever Dream comes back with its quiet opening, muffled and 7 dB down.
 
 A chapter without a song plays the synthesized score: a bouncy chiptune-pop theme that follows the same beat grid.
 
-**Not the right bit of a song?** Run `npm run luister`. It puts every chapter change in a row in `muziek/overgangen.wav`, and `npm run audio` prints where each song starts. To start a song somewhere else, set `vanaf` in `MUZIEK` in `reel-data.js`: the song then starts on the first downbeat after that time. To change how a song leaves, set `uit`.
+**Not the right bit of a song?** Run `npm run luister`. It puts every chapter change in a row in `muziek/overgangen.wav`, and `npm run audio` prints where each song starts. To start a song somewhere else, set `vanaf` in `MUZIEK` in `reel-data.js`: the song then starts on the first downbeat after that time. To change how a song leaves, set `uit`; to make it softer or more muffled, set `db` or `lowpass`.
 
 ## October to December
 
@@ -136,17 +137,22 @@ Or write it its own sketch, as above. A filled month gets its own opening trick 
 You need Node.js 18 or newer (and 22.18 or newer for `npm run maatjes`, which reads the app's TypeScript). From this folder:
 
 ```sh
+git pull             # get the latest version
 npm install          # installs Playwright, its Chromium and its own ffmpeg
-npm run render       # soundtrack (with your songs, if any) + jaaroverzicht-2026.mp4
-npm run stills 20 42.5   # optional: check a few frames first (they land in stills/)
+npm run check        # tests everything and estimates how long a render takes
+npm run render       # soundtrack (with your songs) + jaaroverzicht-2026.mp4 at 60 fps
+npm run render:snel  # the same at 30 fps: about half the time
 ```
 
 - It works on Windows, macOS and Linux.
-- It uses all but one CPU core. Four cores take about 25 minutes.
-- If Playwright cannot download its browser, point `CHROMIUM` at an installed Chrome or Chromium.
-- To watch it live instead, open `index.html` in a browser and click it to play it with sound. Your browser may block local files; if so, run `npx serve` in this folder and open the address it gives you.
+- The render shows a progress bar with the time remaining.
+- Everything is also written to `render-log.txt`. If something fails, the last lines say what went wrong; send that file along.
+- On Linux, Chromium may need system libraries. If `npm run check` says Chromium won't start, run `npx playwright install --with-deps chromium`. It asks for your password.
+- If Playwright cannot download its browser at all, point `CHROMIUM` at an installed Chrome or Chromium.
+- `node render.js --jobs 1` uses a single browser: slower, but light on a laptop.
+- To watch the film live instead, open `index.html` in a browser and click it to play it with sound. Your browser may block local files; if so, run `npx serve` in this folder and open the address it gives you.
 
-The finished video is larger than GitHub's 100 MB limit, so it is not committed.
+The finished video is larger than GitHub's 100 MB limit, so it is not committed. Neither is `soundtrack.wav`: it holds your songs, and every render makes it again.
 
 ## Files
 

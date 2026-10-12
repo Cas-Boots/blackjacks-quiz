@@ -1,14 +1,13 @@
 # Muziek
 
-Put the songs here as mp3 (m4a and wav work too). They stay on your computer: git ignores them.
+Only songs released in 2026. Put them here as mp3 (m4a and wav work too). They stay on your computer: git ignores them.
 
 | File | Song | Under |
 | --- | --- | --- |
 | `mr-know-it-all.mp3` | Teddy Swims – Mr. Know It All | the cold open (muffled, from the tv), then 2026 and the ident |
 | `i-just-might.mp3` | Bruno Mars – I Just Might | January to April |
 | `dai-dai.mp3` | Shakira & Burna Boy – Dai Dai | May to August |
-| `fever-dream.mp3` | Alex Warren – Fever Dream | September to December |
-| `niemand.mp3` | Suzan & Freek – Niemand (optional) | in memoriam |
+| `fever-dream.mp3` | Alex Warren – Fever Dream | September to December, and its quiet opening under the in memoriam |
 | `cheerio.mp3` | Justen de Wildt – Cheerio | the dossier and the finale |
 
 Other songs work too: change the file names in `MUZIEK` in `../reel-data.js`.

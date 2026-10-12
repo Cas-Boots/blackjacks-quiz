@@ -145,27 +145,31 @@
    * stretch that starts with a jump, nearly always the chorus) and starts it there,
    * on the chapter's first downbeat.
    *
-   *   vanaf: start from the first downbeat after this time (seconds) instead of the hook
-   *   tel:   start exactly here (seconds, on a downbeat); with bpm, skips the measuring
-   *   voor:  bars of the song to play before the chapter, muffled, as if from far away
-   *   gain:  in dB, on top of the automatic levelling
-   *   uit:   how it leaves: echo, spin (a backspin), stop (a tape stop), fade or stil (dead
-   *          quiet on the last beat); left out, the mixer picks one
+   *   vanaf:   start from the first downbeat after this time (seconds); 'auto' or left
+   *            out: the hook
+   *   tel:     start exactly here (seconds, on a downbeat); with bpm, skips the measuring
+   *   voor:    bars of the song to play before the chapter, muffled, as if from far away
+   *   db:      in dB, on top of the automatic levelling
+   *   lowpass: muffle the chapter above this many Hz
+   *   uit:     how it leaves: echo, spin (a backspin), stop (a tape stop), fade or stil
+   *            (dead quiet on the last beat); left out, the mixer picks one
    *
-   * A chapter without a file uses the synthesized score.
+   * The same song may play under two chapters. Only songs released in 2026. A chapter
+   * without a file uses the synthesized score.
    */
   const MUZIEK = [
-    // the year's Dutch Top 40 number ones and the Dutch hit of the year
+    // only songs released in 2026: the year's Dutch Top 40 number ones and the Dutch hit of the year
     { bestand: 'mr-know-it-all.mp3', van: 'TWEEDUIZEND ZESENTWINTIG', tot: 'HET JAAR IN BEELD', voor: 2 }, // Teddy Swims: comes out of the tv, drops on 2026
     { bestand: 'i-just-might.mp3', van: 'JANUARI', tot: 'APRIL' },                                        // Bruno Mars, #1 jan–apr
     { bestand: 'dai-dai.mp3', van: 'MEI', tot: 'AUGUSTUS' },                                              // Shakira & Burna Boy, #1 all summer
     { bestand: 'fever-dream.mp3', van: 'SEPTEMBER', tot: 'DECEMBER' },                                    // Alex Warren
-    { bestand: 'niemand.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', uit: 'fade', gain: -2 },                                   // Suzan & Freek; optional
+    { bestand: 'fever-dream.mp3', van: 'IN MEMORIAM', tot: 'IN MEMORIAM', vanaf: 1.5, db: -7, lowpass: 6000, uit: 'fade' }, // its quiet opening, warm
     { bestand: 'cheerio.mp3', van: 'HET DOSSIER', tot: 'DE QUIZ' },                                       // Justen de Wildt: goodbye, 2026
   ];
-  // measured tempos and hooks, written by `node muziek.js tempo`
+  // measured tempos and hooks, written by `node muziek.js tempo`, per song and chapter
   let TEMPO = {};
   try { TEMPO = typeof module !== 'undefined' && module.exports ? require('./tempo.js') : (root.TEMPO || {}); } catch (e) { TEMPO = {}; }
+  const tempoSleutel = mz => `${mz.bestand}@${mz.van}`;
 
   const STING = 2;              // beats: the trick that opens a month
   const KORT = 1.8;             // seconds: a headline lasts at least this long (a hero one beat pair longer)
@@ -241,7 +245,7 @@
     };
     const liedjes = [];
     MUZIEK.forEach(mz => {
-      const tp = opts.alle ? { bpm: (opts.bpm && opts.bpm[mz.bestand]) || BPM } : TEMPO[mz.bestand];
+      const tp = opts.alle ? { bpm: (opts.bpm && opts.bpm[mz.bestand]) || BPM } : TEMPO[tempoSleutel(mz)] || TEMPO[mz.bestand];
       const bpm = (!opts.alle && mz.bpm) || (tp && tp.bpm);
       if (!bpm) return;
       const a = find(mz.van, false), b = find(mz.tot, true);
@@ -292,7 +296,7 @@
   }
 
 
-  const REEL = { BPM, B, BAR, MAANDEN, NIEUWS, MEMORIAM, MUZIEK, STING, SCHETS, momenten, sequence, filmBpm, gagTel };
+  const REEL = { BPM, B, BAR, MAANDEN, NIEUWS, MEMORIAM, MUZIEK, STING, SCHETS, momenten, sequence, filmBpm, gagTel, tempoSleutel };
   if (typeof module !== 'undefined' && module.exports) module.exports = REEL;
   else root.REEL = REEL;
 })(this);

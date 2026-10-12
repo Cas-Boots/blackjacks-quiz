@@ -145,7 +145,18 @@ function tempoVan(o, a, b) {
   }
   let bpm = bestBpm, fit = comb(o, 60 * FPS / bpm, a, b);
   for (let x = bestBpm - 1.5; x <= bestBpm + 1.5; x += 0.02) { const c = comb(o, 60 * FPS / x, a, b); if (c.score > fit.score) { fit = c; bpm = x; } }
-  return bpm;
+  // guard against the classic mistakes: half, double, or a triplet feel (2/3, 3/2)
+  const fitAt = t => { let best = { score: -1 }; for (let d = -0.6; d <= 0.6; d += 0.02) { const c = comb(o, 60 * FPS / (t + d), a, b); if (c.score > best.score) best = { score: c.score, bpm: t + d }; } return best; };
+  // (each candidate gets the same fine search, the measured one included)
+  let pick = fitAt(bpm);
+  if (pick.score < fit.score) pick = { score: fit.score, bpm };
+  for (const k of [1.5, 2 / 3, 2, 0.5]) {
+    const t = bpm * k;
+    if (t < 80 || t > 160) continue;
+    const c = fitAt(t);
+    if (c.score > pick.score) pick = c;
+  }
+  return pick.bpm;
 }
 // a song's tempo, measured in the middle of the song where it is steadiest
 function luisterNaar(file, mz) {
@@ -177,7 +188,7 @@ function meet(an, mz, nodig, voor) {
   for (let j = 0; j < 4; j++) { let s = 0; for (let k = j; k < nBeats; k += 4) s += at(low, ph + k * Pf); if (s > dBest) { dBest = s; down = j; } }
   const nb = nodig * 4, vb = voor * 4;
   let start;
-  if (mz.vanaf !== undefined) {
+  if (mz.vanaf !== undefined && mz.vanaf !== 'auto') {
     // from a given time: the first downbeat after it
     start = down; while (start < nBeats && beatT(start) < mz.vanaf - 0.02) start += 4;
   } else {
@@ -236,7 +247,7 @@ function tempo() {
   const an = {}, bpm = {};
   for (const mz of REEL.MUZIEK) {
     const f = song(mz.bestand);
-    if (!fs.existsSync(f) || (mz.bpm && mz.tel !== undefined)) continue;
+    if (!fs.existsSync(f) || (mz.bpm && mz.tel !== undefined) || an[mz.bestand]) continue;
     an[mz.bestand] = luisterNaar(f, mz);
     bpm[mz.bestand] = an[mz.bestand].bpm;
   }
@@ -246,9 +257,9 @@ function tempo() {
     const f = song(mz.bestand);
     if (!fs.existsSync(f)) { console.log(`  –  ${mz.van}: muziek/${mz.bestand} ontbreekt, de score speelt`); continue; }
     if (mz.bpm && mz.tel !== undefined) { console.log(`  ✓  ${mz.bestand}: ${mz.bpm} BPM, vanaf ${mz.tel} s (zelf opgegeven)`); continue; }
-    const pl = plan.find(l => l.bestand === mz.bestand) || { bars: 16, voor: 0 };
+    const pl = plan.find(l => l.bestand === mz.bestand && l.van === mz.van) || { bars: 16, voor: 0 };
     const m = meet(an[mz.bestand], mz, pl.bars, pl.voor);
-    T[mz.bestand] = m;
+    T[REEL.tempoSleutel(mz)] = m;
     const mmss = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
     console.log(`  ✓  ${mz.bestand}: ${m.bpm} BPM, start op ${mmss(m.tel)} (${pl.bars} maten${pl.voor ? `, ${pl.voor} ervoor` : ''})`);
   }
@@ -419,11 +430,13 @@ function mix() {
     const uit = l.uit || (!next ? 'stil' : next.kind === 'memoriam' ? 'stop' : k % 2 ? 'spin' : 'echo');
     // level it on the stretch that plays
     const off = l.tel - l.start;
-    const gain = dB(DOEL + (l.gain || 0) - lufs(src.L, src.R, (l.preStart + off) * SR, (l.end + off) * SR));
+    const gain = dB(DOEL + (l.db || 0) - lufs(src.L, src.R, (l.preStart + off) * SR, (l.end + off) * SR));
     // the score makes room: a short fade at both ends
     const a = Math.round(l.preStart * SR), e = Math.round(l.end * SR), f = Math.round(0.005 * SR);
     for (let i = Math.max(0, a - f); i < Math.min(n, e + f); i++) { const g = i < a ? (a - i) / f : i >= e ? (i - e) / f : 0; bus.L[i] *= g; bus.R[i] *= g; }
     staarten.push(legIn(bus, l, src, gain, beat, uit));
+    // muffled, if the chapter asks for it
+    if (l.lowpass) { const fL = svf(), fR = svf(); for (let i = Math.max(0, a); i < Math.min(n, e); i++) { bus.L[i] = fL(bus.L[i], l.lowpass, 1.4).lp; bus.R[i] = fR(bus.R[i], l.lowpass, 1.4).lp; } }
     console.log(`  ♪  ${l.van} – ${l.tot}: ${l.bestand} (${l.bpm} BPM, vanaf ${l.tel.toFixed(2)} s, eruit met ${uit})`);
   });
   if (!aanwezig.length) console.log('geen liedjes in muziek/: de gesynthetiseerde score speelt');
