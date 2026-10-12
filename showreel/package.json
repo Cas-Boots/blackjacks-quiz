@@ -5,6 +5,8 @@
   "scripts": {
     "postinstall": "playwright install chromium",
     "audio": "node muziek.js tempo && node audio.js && node muziek.js mix",
+    "luister": "node muziek.js luister",
+    "maatjes": "node maatjes-bouw.js",
     "render": "npm run audio && node render.js",
     "stills": "node render.js --stills"
   },
