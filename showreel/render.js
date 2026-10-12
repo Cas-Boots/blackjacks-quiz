@@ -11,13 +11,14 @@ const os = require('os');
 const { pathToFileURL } = require('url');
 
 const FPS = 60;
-const FFMPEG = process.env.FFMPEG || (() => { try { return require('ffmpeg-static'); } catch { return 'ffmpeg'; } })();
+const FFMPEG = process.env.FFMPEG || (() => { try { const p = require('ffmpeg-static'); if (p && require('fs').existsSync(p)) return p; } catch { } return 'ffmpeg'; })();
 const here = __dirname;
 const OUT = path.join(here, 'jaaroverzicht-2026.mp4');
 const clip = { x: 0, y: 0, width: 1920, height: 1080 };
 
 async function openPage() {
-  const browser = await chromium.launch({ args: ['--font-render-hinting=none'] });
+  // CHROMIUM: use this browser instead of Playwright's own (if its download is blocked, say)
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--font-render-hinting=none'] });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('pageerror', e => { console.error('[page error]', e); process.exit(1); });
   await page.goto(pathToFileURL(path.join(here, 'index.html')).href + '?capture=1');

@@ -1,12 +1,12 @@
 # Jaaroverzicht 2026: de openingsfilm
 
-A motion piece of about 3:50 (the exact length depends on the songs' tempos) that opens the quiz night: 1920×1080, 60 fps, 100 BPM.
+A goofy, fast motion piece of about two minutes that opens the quiz night: 1920×1080, 60 fps. It is hosted by the *maatjes*, the quiz's own pixel animals, and it runs on the beat of the year's hits.
 
-1. **A fast intro.** 2025 rolls over to 2026, then 365 days, one lap around the sun and the year in numbers. It takes 12 seconds.
-2. **"Het jaar in beeld".** The news told the way a news network does it, as the fictional *BJ Journaal*. Each month opens with a sting of 1.2 seconds. Every headline gets 4.8 seconds: a full-screen picture, a chyron and a ticker, with a swoosh between shots. The news slides show no figures. Dutch news comes first, then the world.
-3. **In memoriam**, a **secret dossier** ("de rest hoor je vanavond") and a countdown into the quiz.
+1. **A cold open and a fast intro.** The penguin anchor taps the microphone ("staat dit aan?"). The year loads to 99% and gets stuck until the hippo bumps it to 2026, and every maatje jumps into the frame. Then 365 days, one lap around the sun (in a hamster ball, the sun in sunglasses) and the year in numbers (including how much of it the sloth slept). One bar per scene.
+2. **"Het jaar in beeld".** The news as the *BJ Journaal*, hosted by the penguin. Each month opens with a tear-off calendar: a maatje rips last month's page off. Every headline is a picture, a sticker headline that pops in word by word, and a maatje that reacts to it with a speech bubble and its own sound effect. A headline lasts about two seconds, a hero headline one beat pair longer. The shots change on the beat, in turn with a flash, a whip pan, a cartoon iris or a giant animal running across. A few headlines come as a tv in a living room (with the gang on the couch), a spinning newspaper or a breaking-news slam. Dutch news comes first, then the world.
+3. **In memoriam** (quiet, no gags), a **secret dossier** that the raccoon steals ("de rest hoor je vanavond"), and a **finale**: 2026 from a cloud of sparks, a conga line, a kick line and a countdown into the quiz.
 
-Everything is generated from code. The picture and the soundtrack both read their timing from `reel-data.js`, so they stay in sync.
+Everything is generated from code. The picture and the sound both read their timing from `reel-data.js`, so every gag sound lands on its frame.
 
 ## No spoilers
 
@@ -23,11 +23,29 @@ The film is meant to be shown **before** the quiz, so it must not answer or hint
 - the New Year's Eve damage figures
 - the January snow
 
-Before adding news, check it against the quiz.
+Before adding news, check it against the quiz. The jokes count too: a speech bubble or a ticker line must not give anything away either.
+
+## The news and the maatjes
+
+Each headline in `NIEUWS` in `reel-data.js` says what it shows and who reacts to it:
+
+```js
+{ m: 3, tag: 'NL', datum: '5 april', beeld: 'kampioen', kop: 'PSV kampioen, vroeger dan ooit',
+  sub: 'De derde titel op rij is al in april binnen.',
+  maatje: 'zeehond', doet: 'klap', zegt: 'ALWEER?!', geluid: 'applaus' }
+```
+
+- `maatje` is any animal from the quiz (`maatjes.js`). `doet` is what it does: `juich`, `val`, `paniek`, `slaap`, `dans`, `kijk`, `ren`, `klap`, `spring`, `graaf`, `huil`, `zweet`, `schud`, `poets`, `zwaai`, `salueer`, `hang` (from the top of the frame) or `vlieg` (flies in).
+- `zegt` is its speech bubble: a few words. `geluid` is its sound effect (the list is `GELUID` in `audio.js`).
+- `held: true` makes it a hero headline: a longer slot, and its `sub` is shown.
+- `vorm` sets how it comes on: `vol` (full screen, the default), `tv`, `krant` or `breaking`.
+- `ernstig: true` is for serious news: no animal, no gag, no bouncing, a plain cut in and out, and the music drops to a pad.
+
+The animals come straight from the app: `node maatjes-bouw.js` reads `app/src/lib/shared/pixeldieren.ts` and writes `maatjes.js`. Run it again after an animal is redrawn there.
 
 ## Pictures: drawn, photo or video
 
-Every headline has a drawn scene (`beeld`). To use real material instead, put the file in `media/` and add `media` to the item in `reel-data.js`.
+Every headline has a drawn scene (`beeld`, in `film/beelden.js`). To use real material instead, put the file in `media/` and add `media` to the item in `reel-data.js`.
 
 A **photo** fills the frame with a slow zoom:
 
@@ -38,54 +56,58 @@ media: { foto: 'darts.jpg', bron: 'ANP' }
 A **video clip** is a folder of numbered frames, so the render stays frame-exact. Make one with ffmpeg:
 
 ```sh
-ffmpeg -ss 12 -t 7.2 -i clip.mp4 -vf "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30" -q:v 3 media/darts/%04d.jpg
+ffmpeg -ss 12 -t 4 -i clip.mp4 -vf "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30" -q:v 3 media/darts/%04d.jpg
 ```
 
 Then point the item at it:
 
 ```js
-media: { video: 'darts', frames: 216, fps: 30, bron: 'NOS' }
+media: { video: 'darts', frames: 120, fps: 30, bron: 'NOS' }
 ```
 
-- `bron` is the credit shown in the corner.
+- `bron` is the credit.
 - `x` and `y` (from -1 to 1) shift a photo's crop.
 - A missing file falls back to the drawing.
 
 ## Music: the year's hits
 
-Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.md`. The default plan uses the year's Dutch Top 40 number ones, with *Cheerio* under the countdown.
+Put the songs in `muziek/`. The file names and the plan are in `muziek/LEESMIJ.md`. The default plan uses the year's Dutch Top 40 number ones, with *Cheerio* under the dossier and the finale.
 
-**The film follows the song.** Each chapter runs at its song's tempo, so every cut lands on the beat and the songs play at their real speed and pitch. The whooshes, hits and ticks sit on top, and the music dips slightly under them. A chapter without a song keeps the synthesized score at 100 BPM.
+`npm run audio` does three things:
 
-`npm run audio` measures the tempos (`tempo.js`), builds the score and effects, and mixes everything into `soundtrack.wav`. `npm run render` does that too, then renders the film.
+1. `node muziek.js tempo` measures each song's tempo and finds its **hook**: the loudest stretch of the song that starts with a jump in energy, which is nearly always the chorus. The song starts there, on a downbeat, to the millisecond. No intros, no first verses.
+2. `node audio.js` synthesizes the score and the effects on the film's beat grid.
+3. `node muziek.js mix` mixes everything into `soundtrack.wav`.
 
-## Files
+**The film follows the song.** Each chapter runs at its song's tempo, so every cut lands on the beat and the songs play at their real speed and pitch. A slow song counts in double time, so the picture keeps moving, and a headline always lasts long enough to read.
 
-| File | What it does |
-| --- | --- |
-| `reel-data.js` | The headlines, the in-memoriam list and the scene order. **Edit this to change the content.** |
-| `index.html` | Draws every frame. Open it in a browser to watch it live; click it to play it with sound. |
-| `audio.js` | Synthesizes the score and an effects-only track (`sfx.wav`) on the film's beat grid. |
-| `muziek.js` | Measures the songs' tempos and mixes them under the film. |
-| `render.js` | Renders `jaaroverzicht-2026.mp4` in parallel with headless Chromium and ffmpeg. |
-| `geo.js` | Outline of the Netherlands and a dot map of the world (Natural Earth, public domain). |
-| `fonts/` | Anton, Space Grotesk and JetBrains Mono (SIL Open Font License). |
+**The mix**
+
+- A song can run in early, muffled as if from the tv, and then drop. The first song does this under the cold open and drops on 2026.
+- Each song leaves on a DJ trick on its last beat: an echo-out, a backspin, a tape stop (into in memoriam) or a fade. The last one stops dead on START. Two songs never play over each other.
+- Every song is levelled to the same loudness on the stretch that plays, with a fixed gain, so nothing pumps.
+- The music ducks a few dB under the effects.
+- The master gets a gentle glue compressor and a true-peak limiter. It ends at -14 LUFS with peaks under -1 dBTP.
+
+A chapter without a song plays the synthesized score: a bouncy chiptune-pop theme that follows the same beat grid.
+
+**Not the right bit of a song?** Run `npm run luister`. It puts every chapter change in a row in `muziek/overgangen.wav`, and `npm run audio` prints where each song starts. To start a song somewhere else, set `vanaf` in `MUZIEK` in `reel-data.js`: the song then starts on the first downbeat after that time. To change how a song leaves, set `uit`.
 
 ## October to December
 
-The news is researched up to 30 September 2026. October, November and December hold **placeholders** (a test card with "Nieuws volgt"), so the film already has its final length and pacing. December also has tonight's fireworks ban.
+The news is researched up to 30 September 2026. October, November and December hold **placeholders**. As long as a month has only placeholders, it folds into one short "nog in de maak" gag: the calendar pages fly by, and the goldfish forgets where it was. December also has tonight's fireworks ban.
 
-To fill in a placeholder, replace one of the generated test-card items at the bottom of `NIEUWS` in `reel-data.js` with a real one:
+To fill in a month, replace one of the generated placeholder items at the bottom of `NIEUWS` in `reel-data.js` with a real one:
 
 ```js
-{ m: 9, tag: 'NL', datum: '14 oktober', beeld: 'darts', kop: 'Short headline', sub: 'One sentence of context.' }
+{ m: 9, tag: 'NL', datum: '14 oktober', beeld: 'darts', kop: 'Short headline', sub: 'One sentence of context.', maatje: 'kip', doet: 'juich', zegt: 'JAAA!', geluid: 'ping' }
 ```
 
-Give it a drawn `beeld` that exists in `index.html`, or a `media` file.
+Give it a drawn `beeld` that exists in `film/beelden.js`, or a `media` file. A filled month gets its own calendar page and adds about eight seconds.
 
 ## Rendering it yourself
 
-You need Node.js 18 or newer. From this folder:
+You need Node.js 18 or newer (and 22.18 or newer for `npm run maatjes`, which reads the app's TypeScript). From this folder:
 
 ```sh
 npm install          # installs Playwright, its Chromium and its own ffmpeg
@@ -94,7 +116,22 @@ npm run stills 20 42.5   # optional: check a few frames first (they land in stil
 ```
 
 - It works on Windows, macOS and Linux.
-- It uses all but one CPU core. Four cores take about 50 minutes.
+- It uses all but one CPU core. Four cores take about 25 minutes.
+- If Playwright cannot download its browser, point `CHROMIUM` at an installed Chrome or Chromium.
 - To watch it live instead, open `index.html` in a browser and click it to play it with sound. Your browser may block local files; if so, run `npx serve` in this folder and open the address it gives you.
 
 The finished video is larger than GitHub's 100 MB limit, so it is not committed.
+
+## Files
+
+| File | What it does |
+| --- | --- |
+| `reel-data.js` | The headlines and their gags, the in-memoriam list, the songs and the scene order in beats. **Edit this to change the content.** |
+| `index.html` | Loads the film. Open it in a browser to watch it live; click it to play it with sound. |
+| `film/` | The film itself: `kern.js` (drawing, beat clock), `dieren.js` (the maatjes and their actions), `intro.js`, `nieuws.js` (calendar, headlines, layouts, transitions), `beelden.js` (the drawn pictures), `einde.js` (memoriam, dossier, finale), `main.js` (sequencing and rendering). |
+| `maatjes.js` | The pixel animals, generated from the app by `maatjes-bouw.js`. |
+| `audio.js` | Synthesizes the score (`score.wav`) and the effects (`sfx.wav`) on the film's beat grid. |
+| `muziek.js` | Finds each song's tempo and hook, and mixes and masters `soundtrack.wav`. |
+| `render.js` | Renders `jaaroverzicht-2026.mp4` in parallel with headless Chromium and ffmpeg. |
+| `geo.js` | Outline of the Netherlands and a dot map of the world (Natural Earth, public domain). |
+| `fonts/` | Anton, Space Grotesk and JetBrains Mono (SIL Open Font License), and Luckiest Guy (Apache License 2.0). |
