@@ -10,6 +10,7 @@ function setTempo(sc) { BAR = sc.bar; B = sc.beat; K = BAR / OBAR; }
 function drawScene(i, lt) { const sc = SEQ[i]; setTempo(sc); DRAW[sc.kind](lt, sc, SEQ[i + 1]); }
 
 // ---------------------------------------------------------------- the slams
+const SCHOK = { tok: 12, glas: 14, pets: 12, bam: 18, plons: 10, zoemer: 10, plof: 10, flits: 8, airhorn: 8, klak: 6 };
 const IMPACTS = (() => {
   const out = [];
   SEQ.forEach(sc => {
@@ -20,15 +21,17 @@ const IMPACTS = (() => {
     if (sc.kind === 'getallen') out.push([t0, 10]);
     if (sc.kind === 'opening') out.push([t0, 12], [t0 + sc.dur - B, 10]);
     if (sc.kind === 'maand') {
-      out.push([t0, 9]);
+      const st = { kalender: 0, stempel: 0.35, trein: 0.8, val: 1.2 }[sc.sting];
+      if (st !== undefined) out.push([t0 + st * B, sc.sting === 'stempel' ? 16 : 9]);
       sc.slots.forEach(s => {
-        const it = s.it, at = t0 + s.start;
-        if (it.ernstig) return;
-        if (it.beeld === 'zon' && !it.media) out.push([at + 3 * B, 16]);
-        if (it.vorm === 'breaking') out.push([at + 0.25 * B, 14]);
-        if (it.vorm === 'krant') out.push([at + 0.75 * B, 12]);
-        if (s.overgang === 'flits') out.push([at, 7]);
-        if (it.doet === 'val') out.push([at + (gagTel(it) + 0.6) * B + 0.3, 8]);
+        const it = s.it, at = t0 + s.start, sch = REEL.SCHETS[it.beeld];
+        if (it.ernstig || !sch || it.media) return;
+        // the heavy sounds of a sketch shake the picture too
+        sch.klank.forEach(([wanneer, geluid]) => {
+          const amp = SCHOK[geluid];
+          if (amp) out.push([at + (typeof wanneer === 'number' ? wanneer : sch.m[wanneer]) * B, amp]);
+        });
+        if (it.beeld === 'zon') out.push([at + sch.m.nacht * B, 16]);
       });
     }
     if (sc.kind === 'vervolgd') sc.maanden.forEach((m, i) => out.push([t0 + i * B, 6]));

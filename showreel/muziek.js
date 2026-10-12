@@ -24,7 +24,7 @@ const FFMPEG = process.env.FFMPEG || (() => { try { const p = require('ffmpeg-st
 const song = f => path.join(here, 'muziek', f);
 const SR = 44100;
 const DOEL = -14;          // LUFS: the loudness of the music and of the master
-const PIEK = -1.2;         // dBTP: the limiter's ceiling, between samples too
+const PIEK = -1.6;         // dBTP: the limiter's ceiling, between samples too
 const dB = x => Math.pow(10, x / 20);
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 
@@ -257,12 +257,14 @@ function tempo() {
 }
 
 // ================================================================ the mix
+// a state-variable filter (the stable, trapezoidal kind); q is the damping: 1.4 is soft, 0.1 rings
 function svf() {
-  let lp = 0, bp = 0;
+  let ic1 = 0, ic2 = 0;
   return (x, f, q = 0.7) => {
-    const F = 2 * Math.sin(Math.PI * Math.min(f, SR / 6.5) / SR);
-    const hp = x - lp - q * bp; bp += F * hp; lp += F * bp;
-    return { lp, bp, hp };
+    const g = Math.tan(Math.PI * Math.min(f, SR * 0.45) / SR), a1 = 1 / (1 + g * (g + q)), a2 = g * a1, a3 = g * a2;
+    const v3 = x - ic2, v1 = a1 * ic1 + a2 * v3, v2 = ic2 + a2 * ic1 + a3 * v3;
+    ic1 = 2 * v1 - ic1; ic2 = 2 * v2 - ic2;
+    return { lp: v2, bp: v1, hp: x - q * v1 - v2 };
   };
 }
 // read a song at a fractional position, in samples

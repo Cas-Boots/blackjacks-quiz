@@ -142,6 +142,11 @@ function around(x, y, s, rot, f) {
   ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot); if (s !== 1) ctx.scale(s, s); ctx.translate(-x, -y);
   f(); ctx.restore();
 }
+// a colour between two hex colours
+function mix(a, b, q) {
+  const h = s => [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16)), x = h(a), y = h(b);
+  return 'rgb(' + x.map((v, i) => Math.round(lerp(v, y[i], clamp(q)))).join(',') + ')';
+}
 const pad2 = n => String(n).padStart(2, '0');
 const nl = n => Math.round(n).toLocaleString('nl-NL');
 

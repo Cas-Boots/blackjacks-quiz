@@ -39,13 +39,14 @@ function out(i, v, p = 0, send = 0, sc = false) {
   if (sc) { PL[i] += v * gl; PR[i] += v * gr; } else { ML[i] += v * gl; MR[i] += v * gr; }
   if (send) { RL[i] += v * gl * send; RR[i] += v * gr * send; }
 }
-// a state-variable filter
+// a state-variable filter (the stable, trapezoidal kind); q is the damping: 1.4 is soft, 0.1 rings
 function svf() {
-  let lp = 0, bp = 0;
+  let ic1 = 0, ic2 = 0;
   return (x, f, q = 0.7) => {
-    const F = 2 * Math.sin(Math.PI * Math.min(f, SR / 6.5) / SR);
-    const hp = x - lp - q * bp; bp += F * hp; lp += F * bp;
-    return { lp, bp, hp };
+    const g = Math.tan(Math.PI * Math.min(f, SR * 0.45) / SR), a1 = 1 / (1 + g * (g + q)), a2 = g * a1, a3 = g * a2;
+    const v3 = x - ic2, v1 = a1 * ic1 + a2 * v3, v2 = ic2 + a2 * ic1 + a3 * v3;
+    ic1 = 2 * v1 - ic1; ic2 = 2 * v2 - ic2;
+    return { lp: v2, bp: v1, hp: x - q * v1 - v2 };
   };
 }
 const S = t => Math.round(t * SR);
@@ -440,12 +441,113 @@ const bloep = sfx((t0, amp = 1, up = false) => { // uh-oh
   });
 });
 
+// the sketches' own sounds
+const zwiep = (t0, amp = 1) => whoosh(t0 - 0.1, 0.24, 900, 7500, 0.8 * amp, -0.5, 0.5);
+const tok = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.25 * SR; i++) {
+    const t = i / SR;
+    const v = Math.sin(TAU * 310 * t) * Math.exp(-t * 45) * 0.6 + Math.sin(TAU * (110 + 60 * Math.exp(-t * 30)) * t) * Math.exp(-t * 18) * 0.8 + f(noise(), 3000, 0.7).bp * Math.exp(-t * 200) * 0.6;
+    out(s0 + i, v * 0.6 * amp, 0.2, 0.25);
+  }
+});
+const veeg = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.35 * SR; i++) { const t = i / SR; out(s0 + i, f(noise(), 2200 + 1500 * Math.sin(TAU * 6 * t), 1.2).bp * Math.sin(Math.PI * t / 0.35) * (0.6 + 0.4 * Math.sin(TAU * 13 * t)) * 0.5 * amp, lerp(-0.5, 0.5, t / 0.35), 0.15); }
+});
+const zoem = sfx((t0, amp = 1, dur = 0.55) => {
+  const s0 = S(t0), f = svf(); let ph = 0;
+  for (let i = 0; i < dur * SR; i++) { const t = i / SR; ph += (105 + 30 * t / dur) / SR; const v = (2 * (ph % 1) - 1) + 0.6 * (2 * ((ph * 1.5) % 1) - 1); out(s0 + i, f(v, 900, 1).bp * Math.sin(Math.PI * t / dur) * 0.3 * amp, 0, 0.1); }
+});
+const klak = sfx((t0, amp = 1, fr = 1800) => {
+  const s0 = S(t0);
+  for (let i = 0; i < 0.06 * SR; i++) { const t = i / SR; out(s0 + i, ((t < 0.003 ? noise() : 0) * 0.8 + Math.sin(TAU * fr * t) * Math.exp(-t * 90) * 0.5 + Math.sin(TAU * fr * 0.5 * t) * Math.exp(-t * 60) * 0.4) * 0.6 * amp, (rnd() - 0.5) * 0.6, 0.1); }
+});
+const galop = (t0, dur, amp = 1) => { for (let t = 0; t < dur; t += B / 2) { stap(t0 + t, 0.7 * amp, -0.3); stap(t0 + t + B / 8, 0.5 * amp, 0.3); stap(t0 + t + B / 4, 0.9 * amp, 0); } };
+const vuur = sfx((t0, amp = 1, dur = 1.6) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < dur * SR; i++) { const t = i / SR, c = rnd() < 0.002 ? 4 : 1; out(s0 + i, f(noise(), 700, 0.5).lp * c * Math.sin(Math.PI * t / dur) * 0.6 * amp, Math.sin(t * 3) * 0.5, 0.2); }
+});
+const glas = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.05 * SR; i++) { const t = i / SR; out(s0 + i, f(noise(), 3500, 0.6).bp * Math.exp(-t * 60) * 0.9 * amp, 0, 0.3); }
+  for (let k = 0; k < 40; k++) {
+    const at = t0 + 0.02 + Math.pow(rnd(), 2) * 0.5, s1 = S(at), g = svf(), fr = 2500 + rnd() * 6000, p = rnd() * 1.6 - 0.8;
+    for (let i = 0; i < 0.03 * SR; i++) { const t = i / SR; out(s1 + i, (g(noise(), fr, 3).bp + Math.sin(TAU * fr * t) * 0.3) * Math.exp(-t * 140) * 0.35 * amp, p, 0.3); }
+  }
+});
+const pets = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.12 * SR; i++) { const t = i / SR; out(s0 + i, (f(noise(), 1600, 0.8).bp * Math.exp(-t * 70) + Math.sin(TAU * 140 * t) * Math.exp(-t * 30) * 0.6) * 0.8 * amp, 0, 0.25); }
+});
+const teller = (t0, dur, amp = 1) => { let t = 0, d = 0.12; while (t < dur) { tick(t0 + t, 0.6 * amp, 2200 + 1400 * t / dur); t += d; d = Math.max(0.025, d * 0.9); } };
+const zoemer = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.6 * SR; i++) { const t = i / SR; const v = ((t * 148) % 1 < 0.5 ? 1 : -1) + ((t * 156) % 1 < 0.5 ? 1 : -1); out(s0 + i, f(v, 1400, 0.6).lp * Math.min(1, t / 0.01) * (t > 0.5 ? Math.exp(-(t - 0.5) * 60) : 1) * 0.2 * amp, 0, 0.15); }
+});
+const kraak = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf(); let ph = 0;
+  for (let i = 0; i < 0.5 * SR; i++) { const t = i / SR; ph += (220 + 160 * Math.sin(t * 9) + 40 * noise()) / SR; out(s0 + i, f((2 * (ph % 1) - 1), 1200, 3).bp * Math.sin(Math.PI * t / 0.5) * (0.5 + 0.5 * Math.abs(Math.sin(t * 70))) * 0.4 * amp, -0.2, 0.3); }
+});
+const bam = (t0, amp = 1) => { impact(t0, 0.9 * amp); bonk(t0, 0.8 * amp); pets(t0, 0.7 * amp); };
+const blaas = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.7 * SR; i++) { const t = i / SR; out(s0 + i, f(noise(), 1300, 0.6).lp * Math.sin(Math.PI * t / 0.7) * 0.8 * amp, lerp(0.5, -0.5, t / 0.7), 0.2); }
+});
+const vuurwerk = (t0, amp = 1) => { for (let k = 0; k < 4; k++) { const at = t0 + k * 0.17 + rnd() * 0.05; impact(at, 0.4 * amp); sis(at + 0.05, 0.6 * amp); } };
+const plof = sfx((t0, amp = 1) => {
+  const s0 = S(t0), f = svf();
+  for (let i = 0; i < 0.25 * SR; i++) { const t = i / SR; out(s0 + i, (Math.sin(TAU * (90 + 80 * Math.exp(-t * 30)) * t) * Math.exp(-t * 16) + f(noise(), 600, 0.8).lp * Math.exp(-t * 25)) * 0.8 * amp, 0.1, 0.2); }
+});
+const flap = (t0, dur, amp = 1) => { for (let t = 0; t < dur; t += 0.022 + rnd() * 0.02) klak(t0 + t, 0.35 * amp, 2400 + rnd() * 1500); };
+const flits = sfx((t0, amp = 1) => {
+  [0, 0.05].forEach(o => { const s0 = S(t0 + o); for (let i = 0; i < 0.03 * SR; i++) { const t = i / SR; out(s0 + i, noise() * Math.exp(-t * 200) * 0.6 * amp, 0, 0.1); } });
+  const s1 = S(t0 + 0.08); let ph = 0;
+  for (let i = 0; i < 0.6 * SR; i++) { const t = i / SR; ph += (1800 + 5000 * t / 0.6) / SR; out(s1 + i, Math.sin(TAU * ph) * Math.sin(Math.PI * t / 0.6) * 0.04 * amp, 0, 0.2); }
+});
+const propeller = sfx((t0, dur, amp = 1) => {
+  const s0 = S(t0), f = svf(); let ph = 0;
+  for (let i = 0; i < dur * SR; i++) { const t = i / SR, q = t / dur; ph += 95 * lerp(1.08, 0.9, q) / SR; const v = (2 * (ph % 1) - 1) * (0.6 + 0.4 * Math.sin(TAU * 38 * t)); out(s0 + i, f(v, 1100, 0.8).lp * Math.sin(Math.PI * q) * 0.35 * amp, lerp(-0.8, 0.8, q), 0.15); }
+});
+// the dramatic chord: two short stabs, then the long one, a semitone down, trembling
+const dun = sfx((t0, amp = 1, lang = false) => {
+  const dur = lang ? 0.9 : 0.22, root = lang ? 45 : 46;
+  [0, 3, 7, 12].forEach((iv, k) => {
+    const s0 = S(t0), f = svf(), fr = mtof(root + iv); let ph = rnd();
+    for (let i = 0; i < (dur + 0.1) * SR; i++) {
+      const t = i / SR; ph += fr / SR;
+      const env = Math.min(1, t / 0.006) * (t > dur ? Math.exp(-(t - dur) * 30) : 1) * (lang ? 1 - 0.35 * (0.5 + 0.5 * Math.sin(TAU * 7 * t)) * P(t, 0.15, 0.3) : 1);
+      out(s0 + i, f(2 * (ph % 1) - 1, 500 + 2500 * Math.exp(-t * 6), 0.6).lp * env * 0.07 * amp, (k - 1.5) * 0.3, 0.3);
+    }
+  });
+  impact(t0, 0.35 * amp);
+});
+// a clock in time-lapse: tick, tock, faster and faster
+const tiktak = (t0, dur, amp = 1) => { let t = 0, d = 0.16, k = 0; while (t < dur) { tick(t0 + t, 0.55 * amp, k++ % 2 ? 1500 : 2100, k % 2 ? -0.3 : 0.3); t += d; d = Math.max(0.03, d * 0.88); } };
+// a desk fan: a whirr that steps up at every click, the blades chopping the air
+const ventilator = sfx((t0, stappen, t1, amp = 1) => {
+  const s0 = S(t0), f = svf(); let ph = 0;
+  for (let i = 0; i < (t1 - t0 + 0.15) * SR; i++) {
+    const t = t0 + i / SR, lvl = stappen.filter(s => t >= s).length, toeren = [2.5, 7, 12, 22][lvl];
+    ph += 3 * toeren / SR;
+    const chop = 0.6 + 0.4 * Math.sin(TAU * ph), fc = 300 + lvl * 380;
+    const env = Math.min(1, (t - t0) / 0.05) * (t > t1 ? Math.exp(-(t - t1) * 25) : 1);
+    out(s0 + i, f(noise(), fc, 0.8).bp * chop * env * (0.25 + 0.12 * lvl) * amp, 0.4, 0.1);
+  }
+});
+
 // the gag sounds by name, as reel-data.js uses them
 const GELUID = {
   toeter: t => toeter(t), piep: t => piep(t), toet: t => toet(t), juichen: t => juichen(t), ping: t => ping(t),
   plop: t => plop(t, 1.2, 700, 140, 0.09), kwek: t => kwek(t), tuut: t => tuut(t), applaus: t => applaus(t, 1.5),
   'fluit-neer': t => fluit(t, 1700, 380, 0.42), 'fluit-op': t => fluit(t, 420, 1800, 0.38), kassa: t => kassa(t),
   trombone: t => trombone(t), sis: t => sis(t), boing: t => boing(t), plons: t => plons(t), bel: t => bel(t), airhorn: t => airhorn(t),
+  zwiep: (t, a) => zwiep(t, a), tok: (t, a) => tok(t, a), veeg: (t, a) => veeg(t, a), zoem: (t, a) => zoem(t, a), klak: (t, a) => klak(t, a),
+  galop: (t, a) => galop(t, 4 * B, a), vuur: (t, a) => vuur(t, a), glas: (t, a) => glas(t, a), pets: (t, a) => pets(t, a),
+  teller: (t, a) => teller(t, 2.5 * B, a), zoemer: (t, a) => zoemer(t, a), kraak: (t, a) => kraak(t, a), bam: (t, a) => bam(t, a),
+  blaas: (t, a) => blaas(t, a), vuurwerk: (t, a) => vuurwerk(t, a), plof: (t, a) => plof(t, a), flap: (t, a) => flap(t, 1.6 * B, a),
+  flits: (t, a) => flits(t, a), stap: (t, a) => stap(t, a), rip: (t, a) => rip(t, a), snurk: (t, a) => snurk(t, a), juichen2: t => juichen(t),
+  dun: (t, a) => dun(t, a), dunnn: (t, a) => dun(t, a, true), tiktak: (t, a) => tiktak(t, 3 * B, a), propeller: (t, a) => propeller(t, 1.5 * B, a),
 };
 
 // ================================================================ the score
@@ -572,18 +674,28 @@ for (const sc of SEQ) {
     case 'maand': {
       const lift = [0, 0, 0, 0, 2, 2, 2, 2, 4, 4, 4, 4][sc.m];
       const ST = REEL.STING * B;
-      // the calendar: a rip, a slam, a fill
-      rip(t0 + 0.04, 1); impact(t0, 0.55); kick(t0, 1); crash(t0, 0.7);
-      stab(t0, CH.C.p.map(m => m + 12 + lift), 1.0);
+      // the opening trick
+      kick(t0, 1); stab(t0, CH.C.p.map(m => m + 12 + lift), 1.0);
       pad(t0, ST, tr(CH.C, lift).p, 1.0, 1.2); bass(t0, B * 0.9, 36 + lift, 1);
-      fill(t0 + B, 1, 0.9);
+      fill(t0 + B, 1, 0.8);
+      const naam = REEL.MAANDEN[sc.m];
+      ({
+        kalender: () => { rip(t0 + 0.04, 1); impact(t0, 0.55); crash(t0, 0.7); },
+        neon: () => { zoem(t0, 0.8, ST); for (let k = 0; k < 6; k++) tick(t0 + k * 0.05 + rnd() * 0.04, 0.8, 4000); },
+        stempel: () => { whoosh(t0, B * 0.35, 300, 2000, 0.6, 0, 0); impact(t0 + B * 0.35, 1.0); pets(t0 + B * 0.35, 1.2); },
+        trein: () => { whoosh(t0, B * 0.8, 200, 3000, 1, 0.8, -0.2); fluit(t0 + B * 0.5, 2600, 2200, B * 0.35, 0.4); tuut(t0 + B * 1.1, 0.9); whoosh(t0 + B * 1.55, B * 0.45, 400, 4000, 0.8, -0.2, -0.9); },
+        val: () => { for (let k = 0; k < naam.length; k++) bonk(t0 + (k * 0.18 + 0.45) * B, 0.5 + 0.5 * k / naam.length); bonk(t0 + ((naam.length - 1) * 0.18 + 0.47) * B, 1.2); },
+        vliegtuig: () => propeller(t0, ST + B * 0.4, 1),
+        opblaas: () => { for (let k = 0; k < naam.length; k++) fluit(t0 + k * 0.2 * B, 300, 900 + k * 60, 0.3 * B, 0.35); plop(t0 + ST - 0.1, 1, 900, 200, 0.07); },
+        typ: () => { const per = B * 1.2 / naam.length; for (let k = 0; k < naam.length; k++) klak(t0 + k * per, 1, 1500); ping(t0 + B * 1.2, 1, 3136); },
+      }[sc.sting] || (() => rip(t0 + 0.04, 1)))();
       let bar = 0;
       sc.slots.forEach((s, k) => {
         const i0 = t0 + s.start, it = s.it;
-        const nb = s.beats / 4; // bars in this shot (can be 1.5)
-        // the transition into the shot
+        const nb = s.beats / 4; // bars in this sketch (can be 1.5)
+        // the transition into it
         if (s.overgang === 'zweep') whoosh(i0 - B * 0.22, B * 0.44, 600, 7500, 0.8, k % 2 ? 0.8 : -0.8, k % 2 ? -0.8 : 0.8);
-        if (s.overgang === 'flits' || s.overgang === 'kalender') { impact(i0, 0.45); crash(i0, 0.35); }
+        if (s.overgang === 'snede') kick(i0, 0.4, false);
         if (s.overgang === 'iris') { fluit(i0 - B * 0.45, 1500, 600, B * 0.4, 0.5); plop(i0, 0.9, 400, 90, 0.08); }
         if (s.overgang === 'wis') { for (let q = 0; q < 4; q++) stap(i0 - B * 0.35 + q * B * 0.18, 1.3, 0.8 - q * 0.5); whoosh(i0 - B * 0.3, B * 0.6, 300, 4000, 0.7, 0.8, -0.8); }
         // the music under it
@@ -592,36 +704,35 @@ for (const sc of SEQ) {
           const c = tr(CH[PROG[(bar + q) % 4]], lift);
           if (it.ernstig) { pad(tb, BAR * frac - 0.05, c.p, 0.9, 0.6); continue; }
           if (frac < 1) {
-            // half a bar: keep the groove going
             pad(tb, BAR * frac - 0.05, c.p, 0.85);
             for (let b = 0; b < frac * 4; b++) { kick(tb + b * B, 0.9); hat(tb + b * B + B / 2, true, 0.7); for (let s2 = 0; s2 < 2; s2++) bass(tb + b * B + s2 * B / 2, B / 2 - 0.04, c.b + (s2 ? 12 : 0), s2 ? 0.65 : 0.9); if (b % 2) clap(tb + b * B, 0.7); }
             continue;
           }
-          grooveBar(tb, c, it.held ? 3 : 2, { hook: it.held ? (bar + q) % 4 : undefined, lift, arp: it.held ? 0 : 0.55, hookAmp: 0.85 });
+          const big = s.beats >= 6;
+          grooveBar(tb, c, big ? 3 : 2, { hook: big ? (bar + q) % 4 : undefined, lift, arp: big ? 0 : 0.55, hookAmp: 0.85 });
         }
         bar += Math.ceil(nb);
-        if (it.ernstig) return;
-        // the gag
-        const g = i0 + REEL.gagTel(it) * B;
-        plop(g, 0.5, 300, 900, 0.05);
-        if (it.geluid && GELUID[it.geluid]) GELUID[it.geluid](g + 0.08);
-        if (it.zegt) plop(g + 0.12, 0.35, 900, 1500, 0.04);
-        if (it.doet === 'val') { fluit(g + 0.1, 1700, 300, B * 0.5 + 0.2, 0.7); bonk(g + B * 0.6 + 0.3, 1.1); }
-        if (it.doet === 'spring') boing(g + 0.12, 0.9);
-        if (it.doet === 'ren' || it.doet === 'paniek') for (let q = 0; q < s.dur / (B / 2); q++) stap(i0 + q * B / 2, 0.35, (q % 2 ? 0.3 : -0.3));
-        if (it.doet === 'slaap') snurk(g + 0.2, 0.9, Math.min(1.6, s.dur - REEL.gagTel(it) * B - 0.2));
-        if (it.doet === 'klap') applaus(g + 0.1, s.dur - REEL.gagTel(it) * B, 0.8);
-        if (it.doet === 'graaf') { rip(g, 0.4, 0.2); plop(g + 0.3, 0.6, 400, 120, 0.06); }
-        if (it.doet === 'poets') for (let q = 0; q < 4; q++) piep(g + q * B / 2, 0.5);
-        if (it.vorm === 'breaking') { [0, 0.5, 1].forEach((b, q) => stab(i0 + b * B * 0.5, [69, 72, 76].map(m => m - q * 2), 1.2, 0.3)); impact(i0 + B * 0.25, 0.9); }
-        if (it.vorm === 'krant') { whoosh(i0, B * 0.75, 300, 5000, 0.9, -0.5, 0.5); impact(i0 + B * 0.75, 0.8); }
-        if (it.vorm === 'tv') { tik(i0, 0.6); whoosh(i0 + B * 0.4, B * 1.2, 2000, 400, 0.4, 0, 0); }
-        if (it.beeld === 'zon' && !it.media) { riser(i0 + 0.1, i0 + 3 * B, 1.0); impact(i0 + 3 * B, 1.0); crash(i0 + 3 * B, 0.8); [76, 80, 83, 88].forEach((m, q) => glock(i0 + 3 * B + q * 0.05, m + lift, 0.8, q % 2 ? 0.5 : -0.5)); }
-        if (it.beeld === 'darts') [0.5, 1, 1.5].forEach(b => { tick(i0 + b * B, 1.4, 1400); whoosh(i0 + b * B - 0.12, 0.14, 2000, 6000, 0.4); });
-        if (it.beeld === 'atletiek') { tick(i0 + 2 * B, 1.2, 1600); ping(i0 + 2.5 * B, 0.9, 2093); }
-        if (it.beeld === 'mol') bloep(i0 + 2 * B, 1.2);
+        if (it.ernstig || it.media) return;
+        // the sketch's own sounds, at its own moments
+        const sch = REEL.SCHETS[it.beeld];
+        if (!sch) return;
+        sch.klank.forEach(([wanneer, geluid, amp]) => {
+          const tt = i0 + (typeof wanneer === 'number' ? wanneer : sch.m[wanneer]) * B;
+          if (GELUID[geluid]) GELUID[geluid](tt, amp || 1);
+        });
+        if (it.beeld === 'boedapest') {
+          // a clack for every falling letter, a bonk for the llama
+          const n = it.kop.replace(/ /g, '').length;
+          for (let q = 0; q <= n; q++) klak(i0 + (sch.m.val + q * sch.m.stap) * B + 0.1, 1.1, 1400 - q * 40);
+          const tf = i0 + (sch.m.val + n * sch.m.stap) * B + 0.02;
+          fluit(tf - 0.05, 1600, 400, 0.3, 0.6); bonk(tf + 0.3, 1.2); impact(tf + 0.3, 0.6);
+        }
+        if (it.beeld === 'zon') { const tn = i0 + sch.m.nacht * B; riser(i0 + 0.1, tn, 1.0); impact(tn, 1.0); crash(tn, 0.8); [76, 80, 83, 88].forEach((m, q) => glock(tn + q * 0.05, m + lift, 0.8, q % 2 ? 0.5 : -0.5)); }
+        if (it.beeld === 'concert') for (let q = 0; q < 4; q++) glock(i0 + q * B, [72, 74, 76, 79][q] + lift, 0.8);
+        if (it.beeld === 'zomer') ventilator(i0 + sch.m.k1 * B, [sch.m.k1, sch.m.k2, sch.m.k3].map(k => i0 + k * B), i0 + sch.m.los * B, 1);
+        if (it.beeld === 'trekkers') for (let q = 0; q < s.beats; q++) stap(i0 + q * B, 0.4 + q / s.beats, 0);
+        if (it.beeld === 'staking') { const n = 6; for (let q = 0; q < n; q++) flap(i0 + (sch.m.flap + q * 0.25) * B, 0.3, 0.8); }
       });
-      maandNr++;
       break;
     }
     case 'vervolgd': {

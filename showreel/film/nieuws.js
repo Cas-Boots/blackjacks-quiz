@@ -1,12 +1,12 @@
 /*
- * The BJ Journaal: the ident with the penguin anchor and his crew, a tear-off
- * calendar for every month, and the headlines. A headline is a picture, a sticker
- * headline that pops in word by word, and a maatje that reacts. The shots change
- * on the beat, in turn with a flash, a whip pan, a cartoon iris or a giant animal
- * running across. Some headlines come as a tv in a living room, a spinning
- * newspaper or a breaking-news slam instead of full screen.
+ * The BJ Journaal: the ident with the penguin anchor and his crew, the tear-off
+ * calendar, and the month: its sting (stings.js), then its headlines one after the
+ * other, each as its own sketch (schetsen*.js), cut on the beat with a snap, a
+ * flash, a whip pan, a cartoon iris or a giant animal running across. A headline
+ * without a sketch, or with a photo or clip from media/, falls back to the simple
+ * template: a picture, a sticker headline popping in word by word, a maatje.
  */
-const FLOOR = H - 58;          // the ticker; the maatjes stand on it
+const FLOOR = H - 58;          // where the maatjes stand
 const ROLL = ['aap', 'kip', 'kangoeroe', 'lama', 'hond', 'kikker', 'eekhoorn', 'hamster', 'flamingo', 'papegaai', 'konijn', 'egel'];
 const STING_BG = [C.fire, C.blue, C.sun, C.mint, C.pink, C.purple];
 
@@ -24,37 +24,6 @@ function globe(cx, cy, R, rotLon, tilt, color, alpha = 1) {
   }
   ctx.globalAlpha = alpha * 0.25; ctx.strokeStyle = color; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
-  ctx.restore();
-}
-
-// ---------------------------------------------------------------- the frame
-function bug(t, a = 1) {
-  if (a <= 0) return;
-  ctx.save(); ctx.globalAlpha = a;
-  ctx.save(); ctx.beginPath(); ctx.roundRect(56, 44, 84, 84, 18); ctx.fillStyle = C.fire; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = C.ink; ctx.stroke(); ctx.restore();
-  dier('pinguin', 98, 122, 74, { pose: { ogen: (t * 0.6) % 1 < 0.05 ? 'dicht' : 'open' }, schaduw: false });
-  sticker('BJ JOURNAAL', 158, 100, { size: 40, shadow: C.fire });
-  txt('HET JAAR IN BEELD · 2026', 160, 124, { f: FM, size: 14, weight: 700, color: C.paper, align: 'left', track: 3, alpha: 0.8 });
-  const on = Math.floor(t / B) % 2 === 0;
-  ctx.save(); ctx.beginPath(); ctx.roundRect(W - 250, 58, 120, 44, 10); ctx.fillStyle = C.fire; ctx.fill(); ctx.restore();
-  circle(W - 228, 80, 8, C.paper, on ? 1 : 0.35);
-  txt('LIVE', W - 210, 82, { f: FL, size: 30, color: C.paper, align: 'left' });
-  txt('(NIET ECHT)', W - 190, 120, { f: FM, size: 13, weight: 700, color: C.paper, align: 'center', track: 2, alpha: 0.7 });
-  ctx.restore();
-}
-const TICKER_TXT = REEL.TICKER.join('   ★   ') + '   ★   ';
-function ticker(t, a = 1) {
-  if (a <= 0) return;
-  const y = FLOOR, h = H - FLOOR;
-  ctx.save(); ctx.globalAlpha = a;
-  rect(0, y, W, h, C.ink);
-  rect(0, y, W, 5, C.sun);
-  const tw = measure(TICKER_TXT, font(FL, 30), 1);
-  ctx.save(); clipRect(250, y, W - 250, h);
-  for (let x = 250 - ((t * 150) % tw); x < W; x += tw) txt(TICKER_TXT, x, y + h / 2 + 4, { f: FL, size: 30, color: C.paper, align: 'left', track: 1 });
-  ctx.restore();
-  rect(0, y + 5, 240, h - 5, C.sun);
-  txt('MAATJESNIEUWS', 120, y + h / 2 + 4, { f: FL, size: 25, color: C.ink });
   ctx.restore();
 }
 
@@ -250,10 +219,10 @@ function koptekst(it, u, k, o = {}) {
 }
 // when the maatje of a headline comes in, in seconds from the start of the shot
 const { gagTel } = REEL;
-function plekVan(it, u = 0) { const p = PLEK[it.beeld]; return { x: W - 310, y: FLOOR, h: 300, flip: true, ...(typeof p === 'function' ? p(u) : p || {}), ...(it.plek || {}) }; }
+function plekVan(it) { return { x: W - 310, y: FLOOR, h: 300, flip: true, ...(it.plek || {}) }; }
 function gag(it, u, s, o = {}) {
   if (!it.maatje || it.ernstig) return null;
-  const pl = { ...plekVan(it, u), ...o };
+  const pl = { ...plekVan(it), ...o };
   const g = u - gagTel(it) * B;
   const hd = acteur(it.maatje, it.doet, g, pl.x, pl.y, pl.h, { flip: pl.flip, dur: s.dur - gagTel(it) * B, t0: hash(it.kop) % 10 });
   if (hd && it.zegt) ballon(it.zegt, hd.x, hd.y, g - 0.12, { side: pl.side || (pl.x > W / 2 ? 1 : -1), onder: hd.onder });
@@ -265,6 +234,7 @@ function shot(sc, k, u) {
   const s = sc.slots[k], it = s.it, vorm = it.vorm || 'vol';
   D = s.dur;
   u = clamp(u, 0, s.dur);
+  if (SCHETSEN[it.beeld] && !it.media) return it.ernstig ? SCHETSEN[it.beeld](u, it) : around(W / 2, H / 2, 1 + 0.012 * beatPulse(u, 10), 0, () => SCHETSEN[it.beeld](u, it));
   if (vorm === 'tv') return shotTv(sc, k, u);
   if (vorm === 'krant') return shotKrant(sc, k, u);
   if (vorm === 'breaking') return shotBreaking(sc, k, u);
@@ -381,7 +351,7 @@ function shotBreaking(sc, k, u) {
 // draws the month at lt, going from shot to shot on the beat
 function sMaand(lt, sc) {
   const ST = REEL.STING * sc.beat;
-  if (lt < ST) { kalender(sc, lt); return; }
+  if (lt < ST) { stingVan(sc, lt); return; }
   const slots = sc.slots;
   let k = 0; while (k < slots.length - 1 && lt >= slots[k + 1].start) k++;
   const s = slots[k], u = lt - s.start;
@@ -392,10 +362,8 @@ function sMaand(lt, sc) {
     out.teken(sc, k, k + 1, (lt - next.start + out.voor) / (out.voor + out.na), lt);
   } else if (into && k > 0 && u < into.na) {
     into.teken(sc, k - 1, k, (u + into.voor) / (into.voor + into.na), lt);
-  } else shot(sc, k, u);
-  if (k === 0 && u < 0.09) rect(0, 0, W, H, '#FFFFFF', 0.7 * (1 - u / 0.09));
-  bug(sc.start + lt);
-  ticker(sc.start + lt);
+  } else if (into && into.kick && u < 0.2) around(W / 2, H / 2, 1 + 0.07 * Math.exp(-u * 18), 0, () => shot(sc, k, u));
+  else shot(sc, k, u);
 }
 // each transition: how long before and after the cut it runs, and how to draw it
 // p runs from 0 to 1 over the transition; the cut is at voor / (voor + na)
@@ -408,7 +376,8 @@ const both = (sc, a, b, lt, f) => {
   return { oud: () => shot(sc, a, lt - sa.start), nieuw: () => shot(sc, b, lt - sb.start), f };
 };
 const OVERGANG = {
-  snede: { voor: 0, na: 0, teken: (sc, a, b, p, lt) => shot(sc, p < 0.5 ? a : b, lt - sc.slots[p < 0.5 ? a : b].start) },
+  // a cut on the beat, with a kick of the camera
+  snede: { voor: 0, na: 0, kick: true, teken: (sc, a, b, p, lt) => shot(sc, p < 0.5 ? a : b, lt - sc.slots[p < 0.5 ? a : b].start) },
   flits: {
     voor: 0, na: 0.25,
     teken(sc, a, b, p, lt) {
@@ -441,7 +410,7 @@ const OVERGANG = {
       // the cartoon iris closes on the old shot and opens on the new one
       const cut = p < 0.53;
       const sa = sc.slots[a];
-      const pl = plekVan(sa.it, lt - sa.start);
+      const pl = plekVan(sa.it);
       const cx = cut ? pl.x - 20 : W / 2, cy = cut ? pl.y - pl.h * 0.6 : H / 2;
       const r = cut ? lerp(1300, 0, E.inCubic(clamp(p / 0.53))) : lerp(0, 1300, E.outCubic(clamp((p - 0.53) / 0.47)));
       rect(0, 0, W, H, C.ink);
@@ -483,9 +452,19 @@ function sVervolgd(lt, sc) {
     ctx.restore();
     sticker('▶▶', 120, 200, { size: 110, shadow: C.ink, f: FL, alpha: Math.floor(u * 4) % 2 ? 1 : 0.4 });
     around(W / 2 - 200, 820, E.outPop(P(u, beat * 0.5, beat * 0.5 + 0.25)), -0.04, () => sticker('WORDT VERVOLGD', W / 2 - 200, 860, { size: 150, shadow: C.fire, align: 'center' }));
-    const hd = acteur('goudvis', 'kijk', u - beat * 0.25, W - 280, FLOOR, 300, { flip: true, t0: 4 });
-    if (hd) ballon('WAAR WAREN WE?', hd.x, hd.y - 120, u - beat * 1.2, { side: 1 });
+    // the goldfish in its bowl: every lap it sees the sign again, and is amazed again
+    const bx = W - 330, by = 770, br = 220, pop = E.outPop(P(u, 0, 0.3));
+    around(bx, by + br, pop, 0, () => {
+      ctx.save(); ctx.beginPath(); ctx.arc(bx, by, br, 0, TAU); ctx.clip();
+      rect(bx - br, by - br * 0.55, br * 2, br * 1.6, '#5FB6E8', 0.75);
+      for (let k = 0; k < 5; k++) { const q = (u * 0.8 + k / 5) % 1; ring(bx - 80 + k * 40, by + br * 0.8 - q * br * 1.3, 6 + k % 3 * 3, '#FFFFFF', 3, 1 - q); }
+      const a = u * TAU / (beat * 2), fx = bx + Math.cos(a) * 110, fy = by + 40 + Math.sin(a) * 50, links = Math.sin(a) > 0;
+      dier('goudvis', fx, fy + 70, 150, { flip: links, schaduw: false, pose: { ogen: links && Math.sin(a) > 0.6 ? 'open' : 'blij' } });
+      ctx.restore();
+      ring(bx, by, br, '#DDF2FF', 10, 0.9); rect(bx - 130, by - br - 10, 260, 24, '#DDF2FF', 0.9);
+      ctx.save(); ctx.globalAlpha = 0.5; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(bx, by, br - 30, -2.4, -1.8); ctx.stroke(); ctx.restore();
+      const a2 = u * TAU / (beat * 2);
+      if (Math.sin(a2) > 0.6) uitroep(bx + Math.cos(a2) * 110 - 20, by - 60, 1.1, C.sun);
+    });
   }
-  bug(sc.start + lt);
-  ticker(sc.start + lt);
 }

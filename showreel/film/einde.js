@@ -1,7 +1,7 @@
 /*
  * The end of the film: in memoriam (quiet, no gags), the secret dossier (which the
  * raccoon steals) and the finale: 2026 from a cloud of sparks, the Blackjacks
- * Kwis, every maatje in a conga line and a kick line, and the countdown into the quiz.
+ * Quiz, every maatje in a conga line and a kick line, and the countdown into the quiz.
  */
 
 // ---- in memoriam (4 bars)
@@ -91,7 +91,7 @@ function sDossier(lt, sc) {
   ctx.restore();
 }
 
-// ---- de kwis (4 bars)
+// ---- de quiz (4 bars)
 let PARTS = null;
 const FINAL = { size: 560, y: H / 2 - 60 };
 function buildParticles() {
@@ -167,7 +167,7 @@ function sFinale(lt, sc) {
   // the invitation
   const ia = P(lt, INV + 0.2, INV + 0.5);
   if (ia > 0) {
-    const tl = 'BLACKJACKS KWIS', TL = layout(tl, font(FL, 170));
+    const tl = 'BLACKJACKS QUIZ', TL = layout(tl, font(FL, 170));
     TL.chars.forEach((c, i) => {
       const p = E.outPop(P(lt, INV + 0.2 + i * 0.025, INV + 0.5 + i * 0.025));
       if (p <= 0) return;
