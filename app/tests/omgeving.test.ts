@@ -46,7 +46,7 @@ describe('omgevingsWaarschuwingen', () => {
 
   it('zwijgt als ORIGIN er staat', () => {
     process.env.NODE_ENV = 'production';
-    process.env.ORIGIN = 'https://kwis.example.nl';
+    process.env.ORIGIN = 'https://quiz.example.nl';
     expect(omgevingsWaarschuwingen()).toEqual([]);
   });
 });

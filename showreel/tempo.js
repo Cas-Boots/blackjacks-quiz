@@ -1,7 +1,7 @@
-// Tempo and first downbeat per song, measured by `node muziek.js tempo`. Leave empty to use the score.
+// Tempo and starting downbeat per song, measured by `node muziek.js tempo`. Leave empty to use the score.
 (function (root) {
   const TEMPO = {
-    "mr-know-it-all.mp3@HET AFTELLEN": {
+    "mr-know-it-all.mp3@TWEEDUIZEND ZESENTWINTIG": {
       "bpm": 126,
       "tel": 155.797
     },

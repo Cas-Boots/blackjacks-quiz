@@ -1,7 +1,5 @@
 *.mp4
-.mix-tmp.wav
 .segments/
-fx-events.json
 muziek/*
 node_modules/
 render-log.txt

@@ -34,11 +34,12 @@ process.on('uncaughtException', e => fail('Er ging iets mis:', e));
 
 let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { fail('Playwright is niet geïnstalleerd. Draai eerst: npm install', e); }
-const FFMPEG = process.env.FFMPEG || (() => { try { return require('ffmpeg-static'); } catch { return 'ffmpeg'; } })();
+const FFMPEG = process.env.FFMPEG || (() => { try { const p = require('ffmpeg-static'); if (p && fs.existsSync(p)) return p; } catch { } return 'ffmpeg'; })();
 
 async function openPage() {
   let browser;
-  try { browser = await chromium.launch({ args: ['--font-render-hinting=none'], timeout: 0 }); }
+  // CHROMIUM: use this browser instead of Playwright's own (if its download is blocked, say)
+  try { browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--font-render-hinting=none'], timeout: 0 }); }
   catch (e) { fail('Chromium start niet. Draai: npx playwright install --with-deps chromium', e); }
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.setDefaultTimeout(0); // a slow laptop may need more than Playwright's 30 s for a heavy frame
