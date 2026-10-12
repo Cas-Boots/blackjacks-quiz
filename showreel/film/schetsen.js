@@ -288,6 +288,7 @@ function noot(x, y, s, kleur) {
 const ZANGERS = ['kikker', 'kip', 'hond', 'pinguin', 'aap', 'nijlpaard', 'lama', 'octopus', 'uil', 'konijn', 'giraf', 'zeehond', 'kameel', 'flamingo', 'egel', 'wasbeer', 'eenhoorn', 'hamster', 'kangoeroe', 'papegaai', 'luiaard', 'krokodil', 'eekhoorn', 'das', 'dolfijn', 'goudvis', 'bij', 'vlinder', 'kreeft', 'slak', 'worm'];
 const VAKKLEUR = ['#3A1030', '#2F4BFF', '#8FC3EA', '#7B4BFF', '#3DDC97', '#FF6F91', '#FFD23F', '#00A6A6', '#E85D04'];
 function zanger(i, x, y, w, h, u, feest) {
+  if (w < 12 || h < 12) return;
   ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, Math.min(w, h) * 0.06); ctx.clip();
   const decor = i % 5, bg = VAKKLEUR[i % VAKKLEUR.length], s = h / 900;
   rect(x, y, w, h, feest && Math.floor(u / (B / 2) + i) % 2 ? mix(bg, '#FFFFFF', 0.3) : bg);
