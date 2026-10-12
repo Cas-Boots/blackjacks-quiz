@@ -43,7 +43,7 @@ test('een proefrit met bots en een telefoon, zonder de echte avond te raken', as
   await expect(tafel.filter({ hasText: 'Liz' })).toContainText('telefoon', { timeout: 10_000 });
 
   // Rechtstreeks naar de eerste vraag: de telefoon kan antwoorden, de bots ook.
-  await page.locator('.sprong button', { hasText: '1. De WK' }).click();
+  await page.locator('.sprong button', { hasText: '1. Arsenal' }).click();
   await telefoon.getByRole('button', { name: 'Waar', exact: true }).click({ timeout: 15_000 });
   const host = page.frameLocator('iframe[title="Hostscherm van de proefrit"]');
   await expect(host.getByRole('button', { name: 'Toon het antwoord' })).toBeVisible({ timeout: 15_000 });
