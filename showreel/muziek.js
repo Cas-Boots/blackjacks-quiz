@@ -24,7 +24,7 @@ const FFMPEG = process.env.FFMPEG || (() => { try { const p = require('ffmpeg-st
 const song = f => path.join(here, 'muziek', f);
 const SR = 44100;
 const DOEL = -14;          // LUFS: the loudness of the music and of the master
-const PIEK = -1.6;         // dBTP: the limiter's ceiling, between samples too
+const PIEK = -2.0;         // dBTP: the limiter's ceiling, between samples too
 const dB = x => Math.pow(10, x / 20);
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 
