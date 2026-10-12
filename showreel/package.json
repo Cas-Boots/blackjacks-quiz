@@ -1,7 +1,7 @@
 {
   "name": "jaaroverzicht-2026",
   "private": true,
-  "description": "De openingsfilm van de Blackjacks Kwis: het jaar 2026 in beeld.",
+  "description": "De openingsfilm van de Blackjacks Quiz: het jaar 2026 in beeld.",
   "scripts": {
     "postinstall": "playwright install chromium",
     "audio": "node muziek.js tempo && node audio.js && node muziek.js mix",

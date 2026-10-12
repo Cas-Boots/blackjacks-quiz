@@ -1,10 +1,10 @@
-<title>Blackjacks Kwis</title>
+<title>Blackjacks Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700&family=DM+Mono:wght@400;500&display=swap">
 <style>
 /* ---------------------------------------------------------------
-   Blackjacks Kwis — een kaarttafel om middernacht.
+   Blackjacks Quiz — een kaarttafel om middernacht.
    Bewust één visuele wereld (donker vilt): dit is een presentatie-
    scherm voor een donkere kamer, bedoeld voor een grote televisie.
    Alle kleuren expliciet gezet.
@@ -674,7 +674,7 @@ input[type=file]{display:none}
 
 <script>
 /* =================================================================
-   BLACKJACKS KWIS — quizmotor
+   BLACKJACKS QUIZ — quizmotor
    Werkt volledig offline. Geen server, geen internet, geen account.
    Alles staat in dit ene bestand; media en portretjes komen van je
    eigen apparaat en blijven in de browser.
@@ -1458,6 +1458,7 @@ const TEAMNAMEN = [
 /* -----------------------------------------------------------------
    STAAT
    ----------------------------------------------------------------- */
+// De oude spelling blijft hier staan: een nieuwe sleutel zou opgeslagen spellen kwijtraken.
 const OPSLAGSLEUTEL = "blackjacks-kwis-v3";
 const LEEG = () => ({
   pakket: "jaar2026",
@@ -2078,7 +2079,7 @@ function schermStart(){
   <div class="vlak stapel-ruim">
     <div class="stapel">
       <p class="opschrift">Quizmaster &middot; ${esc(S.quizmaster || "niet ingevuld")}</p>
-      <h1 class="titel">Blackjacks Kwis</h1>
+      <h1 class="titel">Blackjacks Quiz</h1>
       <p class="lood">Een quiz die volledig in dit ene scherm draait. Geen internet nodig, geen PowerPoint, geen installatie. De stand wordt na elke handeling bewaard, dus een dichtgeklapte laptop kost je niets.</p>
     </div>
 
@@ -2956,7 +2957,7 @@ function paneelMenu(){
 function bouwUitslag(){
   const lijst = klassement();
   const regels = [];
-  regels.push("BLACKJACKS KWIS — " + (S.spel ? S.spel.naam : PAKKETTEN[S.pakket].naam));
+  regels.push("BLACKJACKS QUIZ — " + (S.spel ? S.spel.naam : PAKKETTEN[S.pakket].naam));
   regels.push(new Date().toLocaleString("nl-NL"));
   regels.push("Quizmaster: " + (S.quizmaster || "—"));
   regels.push("");
@@ -3159,7 +3160,7 @@ const ACTIES = {
   "download": async () => {
     if(!downloadsCap) return;
     try{
-      await downloadsCap.save({filename:"blackjacks-kwis-uitslag.txt", data: bouwUitslag()});
+      await downloadsCap.save({filename:"blackjacks-quiz-uitslag.txt", data: bouwUitslag()});
       meld("Bestand aangeboden");
     }catch(e){ meld("Opslaan lukte niet — gebruik Kopieer"); }
   },
