@@ -136,7 +136,7 @@ export const JAAROVERZICHT: Jaaroverzicht = {
       nr: 8,
       kop: "Zomer, en de zalen zitten vol",
       momenten: [
-        {emoji:"🌑", tekst:"Op 12 augustus wordt het even nacht: boven [[Palma de Mallorca]] is de zon helemaal weg.",
+        {emoji:"🌑", tekst:"Op 12 augustus wordt het even nacht: boven [[Bilbao]] is de zon een halve minuut helemaal weg.",
          bij:"In Amsterdam blijft er een randje over: zo'n 88 procent van de zon is bedekt."},
         {emoji:"🎬", tekst:"[[Spider-Man: Brand New Day]] wordt de grootste kaskraker in de Amerikaanse bioscopen."},
         {emoji:"🍿", tekst:"Ook vol: de verfilming van The Odyssey, en een nieuw deel van Toy Story.", pasNaAfloop:true}
