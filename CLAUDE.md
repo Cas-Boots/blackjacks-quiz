@@ -48,12 +48,11 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   Echte kennersvragen zijn uitzondering, en dan met extra punten.
 - **Muziek is er voor iedereen**: emoji's, meezingen, vragen over onszelf
   (Spotify Wrapped). Niet alleen herkennen voor kenners.
-- **Warmdraaien is "Klinkt verzonnen"**: vreemd nieuws uit 2026 waarvan je
-  denkt "dat kan niet waar zijn", gemengd met een geloofwaardige nep. Geen
-  droge feiten (een heffing, een zonsverduistering): die zijn niet leuk als
-  waar-of-niet-waar. Omdat bijna niemand het kent, gokt iedereen op gevoel.
-  Houd stellingen kort, rond de tien woorden: ze moeten in één keer te
-  lezen zijn. Het verhaal eromheen gaat in de toelichting, ook kort.
+- **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
+  meegekregen, ook wie het nieuws nauwelijks volgt (de premier, het WK, het
+  Songfestival, Albert Heijn). Geen obscure weetjes of een losse grabbelton
+  van rariteiten. Formuleer kort en ondubbelzinnig, rond de tien woorden; het
+  verhaal eromheen gaat in een korte toelichting.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026); tot dan staat de vraag in *Warmdraaien* als
   `teVullen`. Haal hem niet weg bij het inkorten.
