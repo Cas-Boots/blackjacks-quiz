@@ -167,7 +167,8 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   gebeurtenis; een paar zijn al uitgekomen). Daarna samen kijken hoe we
   de ronde het leukst maken. 2 en 3 zijn ingevuld; 7, 9, 10 en 14 rekent
   de app zelf uit.
-- **De twee Hitparades**: negen muziekfragmenten in `app/media/`. Wat er in elk fragment moet, en de
+- **De twee Hitparades**: de vragen en vormen samen nog verder uitwerken
+  (stand van november: zie de rondes in `packs.ts`), en negen muziekfragmenten in `app/media/`. Wat er in elk fragment moet, en de
   tekst voor het AI-lied, staat in `app/media/README.md`.
 - **Warmdraaien**: een fragment van de Songfestivalwinnaar
   (`songfestival-2026-winnaar.mp4`) in `app/media/`.
