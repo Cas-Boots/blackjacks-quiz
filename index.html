@@ -840,16 +840,23 @@ const PAKKETTEN = {
         // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
         // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
         vragen: [
-          {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
-           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
-          {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
-          {reserve:true, v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
-          {reserve:true, v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
-          {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
-           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."},
+          {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 140 procent", live:"sport.doelProcent",
+           toelichting:"84 keer sporten op een doel van 60. Daarna Liz met 114 procent."},
+          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
            toelichting:"Daarna maart met 60."},
-          {v:"Welke van deze sporten heeft niemand van ons dit jaar gedaan: boulderen, fietsen, hockey of kajakken?", a:"Hockey", live:"sport.nietGedaan",
+          {v:"Welke sport deden we samen het vaakst, als je de sportschool niet meetelt?", a:"Hardlopen — 65 keer", live:"sport.naGym",
+           toelichting:"Daarna padel met 61."},
+          {v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst",
+           toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
+          // Reserve: niet sterk genoeg, of zonder referentie om te raden.
+          {reserve:true, v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
+           toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
+          {reserve:true, v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
+          {reserve:true, v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
+          {reserve:true, v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."},
+          {reserve:true, v:"Welke van deze sporten heeft niemand van ons dit jaar gedaan: boulderen, fietsen, hockey of kajakken?", a:"Hockey", live:"sport.nietGedaan",
            toelichting:"De rest deed wel iemand: boulderen (Rik), fietsen (Cas) en kajakken (Cas)."}
         ]
       },

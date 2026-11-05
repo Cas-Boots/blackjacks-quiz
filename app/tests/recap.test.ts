@@ -289,6 +289,25 @@ describe('sportmaanden en sporten die niemand deed', () => {
   });
 });
 
+describe('jaardoelen en sporten na de sportschool', () => {
+  it('vindt het hoogste en laagste percentage van het jaardoel', () => {
+    expect(beantwoord('sport.doelProcent', analyse)?.a).toBe('Eva — 140 procent');
+    expect(beantwoord('sport.doelProcent:laagst', analyse)?.a).toBe('Rik — 43 procent');
+  });
+  it('vindt wie als eerste zijn jaardoel binnen had', () => {
+    const uit = beantwoord('sport.doelEerst', analyse);
+    expect(uit?.a).toBe('Eva — op 27 juli');
+    expect(uit?.toelichting).toBe('Daarna Liz op 10 augustus en Bastiaan op 23 augustus.');
+  });
+  it('valt terug op het percentage als nog niemand zijn doel haalde', () => {
+    const a = analyseer(klein({ goals: [{ id: 1, season_id: 1, person_id: 1, metric_id: 1, target: 50 }] }));
+    expect(beantwoord('sport.doelEerst', a)?.v).toBe('Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?');
+  });
+  it('vindt de populairste sport na de sportschool', () => {
+    expect(beantwoord('sport.naGym', analyse)?.a).toBe('Hardlopen — 65 keer');
+  });
+});
+
 describe('getallen over onszelf', () => {
   it('geeft een dichtstbij-vraag een getal uit de cijfers', () => {
     expect(beantwoord('getal.sportSamen', analyse)?.getal).toBe(analyse.personen.reduce((n, p) => n + p.sport.totaal, 0));

@@ -196,6 +196,60 @@ const OPLOSSERS: Record<string, Oplosser> = {
     };
   },
 
+  /** Wie het hoogste percentage van zijn jaardoel haalde, of met 'laagst' het laagste. */
+  'sport.doelProcent': (a, arg) => {
+    const met = a.personen.filter((p) => p.sport.doel);
+    if (!met.length) return { v: 'Wie kwam het dichtst bij zijn jaardoel?', a: 'Niemand had een doel' };
+    const pct = (p: Persoon) => Math.round((100 * p.sport.totaal) / (p.sport.doel || 1));
+    const laagst = arg.trim() === 'laagst';
+    const lijst = gesorteerd({ ...a, personen: met }, (p) => (laagst ? -1 : 1) * (p.sport.totaal / (p.sport.doel || 1)));
+    const [eerste, tweede] = lijst;
+    return {
+      v: laagst
+        ? 'Wie zat er dit jaar, gemeten aan zijn eigen jaardoel, het verst vanaf?'
+        : 'Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?',
+      a: `${eerste.naam} — ${pct(eerste)} procent`,
+      toelichting: `${eerste.sport.totaal} keer sporten op een doel van ${eerste.sport.doel}.${tweede ? ` Daarna ${tweede.naam} met ${pct(tweede)} procent.` : ''}`,
+    };
+  },
+
+  /** Wie als eerste zijn jaardoel binnen had, en op welke dag. */
+  'sport.doelEerst': (a) => {
+    const gehaald = a.personen
+      .filter((p) => p.sport.doel)
+      .map((p) => {
+        let som = 0;
+        const dag = Object.entries(p.sport.dagen)
+          .sort(([x], [y]) => x.localeCompare(y))
+          .find(([, n]) => (som += n) >= (p.sport.doel ?? Infinity))?.[0];
+        return { p, dag };
+      })
+      .filter((x): x is { p: Persoon; dag: string } => !!x.dag)
+      .sort((x, y) => x.dag.localeCompare(y.dag) || x.p.naam.localeCompare(y.p.naam));
+    if (!gehaald.length) {
+      return OPLOSSERS['sport.doelProcent'](a, '');
+    }
+    const [eerste, ...rest] = gehaald;
+    return {
+      v: 'Wie had als eerste zijn jaardoel binnen?',
+      a: `${eerste.p.naam} — op ${datumTekst(eerste.dag)}`,
+      toelichting: rest.length ? `Daarna ${opsomming(rest.map((x) => `${x.p.naam} op ${datumTekst(x.dag)}`))}.` : undefined,
+    };
+  },
+
+  /** De sport die we samen het vaakst deden, de sportschool niet meegerekend. */
+  'sport.naGym': (a) => {
+    const lijst = [...a.sporten.entries()]
+      .filter(([t]) => !['gym', 'physio', 'other', 'onbekend'].includes(t))
+      .sort((x, y) => y[1] - x[1] || sportNaam(x[0]).localeCompare(sportNaam(y[0])));
+    const [[tag, n] = ['onbekend', 0], tweede] = lijst;
+    return {
+      v: 'Welke sport deden we samen het vaakst, als je de sportschool niet meetelt?',
+      a: `${sportNaam(tag)} — ${keer(n)}`,
+      toelichting: tweede ? `Daarna ${sportNaam(tweede[0]).toLowerCase()} met ${tweede[1]}.` : undefined,
+    };
+  },
+
   /** De drukste sportmaand, van ons samen of (met een naam erachter) van één persoon. */
   'sport.drukkeMaand': (a, arg) => {
     const p = arg ? a.personen.find((x) => x.naam.toLowerCase() === arg.trim().toLowerCase()) : undefined;
