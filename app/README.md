@@ -291,20 +291,25 @@ invulling wachten.
    zekerheid goed vond. De vinkjes en de stand bewegen overal meteen mee, en
    op elk goed kaartje landt een fiche met de punten.
 
-### De telling: zoals Kahoot
+### De telling
 
-Het scorebord telt in grote getallen, en wie sneller goed zit krijgt meer. De
-bedoeling: het blijft tot de laatste vraag spannend wie er wint.
+Het scorebord telt in grote getallen. Ieder voor zich telt snelheid mee,
+zoals bij Kahoot; in teams juist niet, zodat overleggen nooit punten kost.
+De bedoeling: het blijft tot de laatste vraag spannend wie er wint.
 
-- **Snelheid.** Elk punt van een vraag is 500 waard op het scorebord, maal
-  het deel van de klok dat nog over was: meteen goed is alles, op de valreep
-  de helft. Een vraag van 2 punten levert dus 500 tot 1000 op. In een
-  teamronde telt de tijd van het team. Bij een stemvraag telt snelheid niet
-  (dat is een mening), en wat de quizmaster met de hand toekent zonder
-  antwoord van een telefoon telt als op de valreep.
-- **Op dreef.** Vanaf de tweede vraag op rij met punten komt er +100 bij, dan
-  +200, en zo verder tot +500 per vraag. De reeks is van de persoon en loopt
-  door als de teams wisselen; een vraag zonder punten begint hem opnieuw.
+- **Ieder voor zich: snelheid.** Elk punt van een vraag is 500 waard op het
+  scorebord, maal het deel van de klok dat nog over was: meteen goed is
+  alles, op de valreep de helft. Een vraag van 2 punten levert dus 500 tot
+  1000 op. Wat de quizmaster met de hand toekent zonder antwoord van een
+  telefoon telt als op de valreep.
+- **In teams: een vast bedrag.** Een goed antwoord is altijd evenveel waard,
+  hoe lang het team ook overlegt: een vraag van 2 punten levert 1000 op, voor
+  elk teamlid. De televisie zegt bij de vraag dan ook "1.000 punten" in plaats
+  van "tot 1.000 punten". Bij een stemvraag telt snelheid evenmin (dat is een
+  mening).
+- **Geen reeksbonus.** Met teams die per ronde wisselen is een reeks niet
+  eerlijk te belonen. Hij wordt wel bijgehouden: een vlammetje in de
+  tussenstand vanaf twee op rij, en de prijs voor de langste reeks.
 - **De gouden kaart.** In elke ronde van drie vragen of meer telt één
   willekeurige vraag dubbel. Televisie en telefoons laten het zien zodra de
   vraag opengaat. De kaart ligt vast per avond: dezelfde avond geeft steeds
@@ -313,10 +318,11 @@ bedoeling: het blijft tot de laatste vraag spannend wie er wint.
   van de voorspellingen niet meegerekend). Een gouden kaart in een slotronde
   telt vier keer.
 - **Je plek na elke vraag.** Zoals bij Kahoot ziet elke telefoon na de
-  onthulling je plek, en hoeveel je achter de volgende staat.
+  onthulling je plek, met een pijltje als je steeg of zakte, en hoeveel je
+  achter de volgende staat.
 
 De vragen zelf houden hun kleine punten (1, 2, 3); pas op het scorebord gaan
-er snelheid, reeks en vermenigvuldigers overheen. De afrekening van de
+er snelheid en vermenigvuldigers overheen. De afrekening van de
 voorspellingen telt 500 per punt, zonder snelheid. De knoppen bij de stand op
 het hostscherm corrigeren met 100 tegelijk.
 
@@ -324,9 +330,7 @@ Niets hiervan wordt opgeslagen: de server leidt het bij elke telling af uit
 de uitdelingen, de antwoordtijden en de samenstelling
 (`src/lib/server/bonus.ts` en `src/lib/server/vermenigvuldiger.ts`).
 Corrigeert de quizmaster een eerdere vraag of draait hij iets terug, dan
-schuiven de reeksen vanzelf mee. De televisie laat de reeksen zien bij de
-onthulling, met een vlammetje in de tussenstand; de telefoon noemt ze onder
-je punten.
+klopt alles daarna vanzelf weer.
 
 De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
 manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.

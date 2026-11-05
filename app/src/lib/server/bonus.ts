@@ -1,32 +1,38 @@
 /**
- * Van uitdeling naar scorebord: snelheid, reeksen en vermenigvuldigers.
+ * Van uitdeling naar scorebord: snelheid en vermenigvuldigers.
  *
  * Niets hiervan wordt opgeslagen. Het volgt uit wat er al vastligt — de
  * uitdeling per vraag (in de kleine punten van de vragen), de antwoorden met
  * hun tijd en de teamindeling — en wordt bij elke telling opnieuw afgeleid.
  * Daardoor blijft de regel uit scoring.ts overeind: corrigeert de quizmaster
- * een vraag van twee rondes terug, dan schuiven de reeksen daarna vanzelf
- * mee, en een ongedaan gemaakte uitdeling neemt alles mee terug.
+ * een vraag van twee rondes terug, dan klopt alles daarna vanzelf weer, en een
+ * ongedaan gemaakte uitdeling neemt alles mee terug.
  *
- * De telling, zoals bij Kahoot (de getallen staan in shared/bonus.ts):
- * - Elk punt uit de vraag is PUNT_WAARDE waard, maal het deel van de klok dat
- *   nog over was: meteen goed is alles, op de valreep de helft. In een
- *   teamronde telt de tijd van het team. Bij een stemvraag telt snelheid
- *   niet: dat is een mening, geen kennis.
- * - Op dreef: vanaf de tweede vraag op rij met punten komt er een oplopende
- *   bonus bij. De reeks is van de persoon en loopt door over teamwissels heen.
+ * De telling (de getallen staan in shared/bonus.ts):
+ * - Elk punt uit de vraag is PUNT_WAARDE waard.
+ * - Ieder voor zich telt snelheid mee, zoals bij Kahoot: maal het deel van de
+ *   klok dat nog over was, dus meteen goed is alles en op de valreep de helft.
+ * - In een teamronde telt snelheid niet: een goed antwoord is altijd evenveel
+ *   waard, zodat overleggen nooit punten kost. Bij een stemvraag ook niet: dat
+ *   is een mening, geen kennis.
  * - Daarna de vermenigvuldiger: de slotrondes en de gouden kaart tellen
  *   dubbel, samen zelfs vier keer.
+ * - Een reeks goede antwoorden levert geen punten op: met teams die per ronde
+ *   wisselen is dat niet eerlijk te belonen. Hij wordt wel bijgehouden, voor
+ *   het vlammetje in de stand en de prijs voor de langste reeks.
  */
 import type { Verdeling } from './scoring';
-import {
-  PUNT_WAARDE, MINIMUM_DEEL, REEKS_VANAF, REEKS_STAP, REEKS_MAX, reeksBonus, snelheidsDeel,
-} from '$lib/shared/bonus';
+import { PUNT_WAARDE, MINIMUM_DEEL, REEKS_VANAF, snelheidsDeel } from '$lib/shared/bonus';
 
-export { PUNT_WAARDE, MINIMUM_DEEL, REEKS_VANAF, REEKS_STAP, REEKS_MAX };
+export { PUNT_WAARDE, MINIMUM_DEEL, REEKS_VANAF };
 
 /** Rondetypes waar snelheid niets zegt. */
 const ZONDER_SNELHEID = new Set(['stem']);
+
+/** Telt snelheid mee bij deze vraag? Ieder voor zich wel, in teams en bij stemmen niet. */
+export function telSnelheid(v: Pick<BonusVraag, 'type' | 'teamModus'>): boolean {
+  return v.teamModus !== 'teams' && !ZONDER_SNELHEID.has(v.type);
+}
 
 export interface BonusVraag {
   sleutel: string;
@@ -46,9 +52,7 @@ export interface BonusVraag {
 export interface VraagBonus {
   /** Per speler: de punten op het scorebord, alles inbegrepen. */
   punten: Verdeling;
-  /** Per speler: het deel daarvan dat van de reeks komt. */
-  reeks: Verdeling;
-  /** Per speler met punten: de hoeveelste vraag op rij dit is. */
+  /** Per speler met punten: de hoeveelste vraag op rij dit is (alleen voor de stand). */
   opRij: Record<number, number>;
   vermenigvuldiger: number;
 }
@@ -78,7 +82,7 @@ export function berekenBonussen(vragen: BonusVraag[]): BonusUitslag {
 
   for (const v of vragen) {
     if (!v.verdeling && !v.antwoorden.length) continue;
-    const bonus: VraagBonus = { punten: {}, reeks: {}, opRij: {}, vermenigvuldiger: v.vermenigvuldiger };
+    const bonus: VraagBonus = { punten: {}, opRij: {}, vermenigvuldiger: v.vermenigvuldiger };
 
     // Reeksen. Wie bij deze vraag geen punten kreeg, begint opnieuw.
     for (const idTekst of Object.keys(lopend)) {
@@ -99,10 +103,8 @@ export function berekenBonussen(vragen: BonusVraag[]): BonusUitslag {
       // Zonder antwoord van de telefoon (de quizmaster kende het met de
       // hand toe) is er geen tijd: dan telt het als op de valreep.
       const antwoord = v.antwoorden.find((a) => a.leden.includes(id));
-      const deel = ZONDER_SNELHEID.has(v.type) ? 1 : snelheidsDeel(antwoord?.naMs ?? null, v.duurMs);
-      const reeks = reeksBonus(n) * v.vermenigvuldiger;
-      bonus.punten[id] = Math.round(basis * PUNT_WAARDE * deel) * v.vermenigvuldiger + reeks;
-      if (reeks > 0) bonus.reeks[id] = reeks;
+      const deel = telSnelheid(v) ? snelheidsDeel(antwoord?.naMs ?? null, v.duurMs) : 1;
+      bonus.punten[id] = Math.round(basis * PUNT_WAARDE * deel) * v.vermenigvuldiger;
     }
 
     perVraag.set(v.sleutel, bonus);

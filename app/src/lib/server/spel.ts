@@ -466,13 +466,6 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       }))
     : [];
   const uitdeling: Record<number, number> = onthuld ? (bonussen.verdelingen.get(sleutel) ?? {}) : {};
-  const vraagBonus = onthuld ? bonussen.bonus.perVraag.get(sleutel) : undefined;
-  const bonusLijst: PubliekeStaat['bonussen'] = [];
-  if (vraagBonus) {
-    for (const id of Object.keys(vraagBonus.reeks)) {
-      bonusLijst.push({ spelerId: Number(id), soort: 'reeks', punten: vraagBonus.reeks[Number(id)], opRij: vraagBonus.opRij[Number(id)] });
-    }
-  }
 
   // Waar/niet waar is óók een keuzevraag. Door hier twee opties mee te
   // sturen ziet de kamer op de televisie waar tussen gekozen wordt, in
@@ -586,7 +579,6 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     ingeleverd,
     inzendingen,
     uitdeling,
-    bonussen: bonusLijst,
     reeksen: bonussen.bonus.lopend,
   };
   geheugen = { sleutel: sleutelGeheugen, op: nu, staat };

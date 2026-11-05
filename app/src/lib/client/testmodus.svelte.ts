@@ -218,7 +218,6 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     ingeleverd: [],
     inzendingen: [],
     uitdeling: {},
-    bonussen: [],
     reeksen: {},
     cijfers: null,
     jaaroverzicht: null,
@@ -682,7 +681,7 @@ export const DIAS: Dia[] = [
   /* ── Onthulling ── */
   {
     id: 'antwoord-gemengd', hoofdstuk: 'Onthulling', titel: 'Gemengd: goed en fout',
-    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en pakt de meeste punten; Joris zit op vier op rij en krijgt een reeksbonus. Tom leverde niets in.',
+    let: 'De goede keuze klapt om, de rest valt één voor één af. Daaronder de kaartjes met wat iedereen intikte, met vinkje of kruisje en een fiche met de punten. Liz was het snelst en pakt de meeste punten; Joris zit op vier op rij (een vlammetje in de stand, geen extra punten). Tom leverde niets in.',
     vorigePunten: START,
     maak: () => antwoord(
       R.waar, V.waar,
@@ -691,9 +690,6 @@ export const DIAS: Dia[] = [
       {
         stand: stand(erbij({ 1: 474, 3: 743, 5: 400 })),
         uitdeling: { 1: 474, 3: 743, 5: 400 },
-        bonussen: [
-          { spelerId: 3, soort: 'reeks', punten: 300, opRij: 4 },
-        ],
         reeksen: { 1: 1, 3: 4, 5: 1 },
       },
     ),

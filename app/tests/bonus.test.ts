@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { berekenBonussen, opScorebord, PUNT_WAARDE, REEKS_VANAF, REEKS_STAP, REEKS_MAX, type BonusVraag } from '../src/lib/server/bonus';
+import { berekenBonussen, opScorebord, PUNT_WAARDE, telSnelheid, type BonusVraag } from '../src/lib/server/bonus';
 import { vermenigvuldigers, vermenigvuldigerVan } from '../src/lib/server/vermenigvuldiger';
 import { ingekort, LAATSTE_MS } from '../src/lib/server/klok';
 import type { Ronde } from '../src/lib/content/types';
@@ -40,7 +40,7 @@ function solovraag(sleutel: string, goed: number[], tijden: Record<number, numbe
   };
 }
 
-describe('snelheid, zoals bij Kahoot', () => {
+describe('snelheid, ieder voor zich', () => {
   it('geeft wie meteen antwoordt de volle punten en wie op de valreep antwoordt de helft', () => {
     const { perVraag } = berekenBonussen([solovraag('0:0', [1, 2, 3], { 1: 0, 2: DUUR / 2, 3: DUUR })]);
     expect(perVraag.get('0:0')!.punten).toEqual({ 1: PUNT_WAARDE, 2: 0.75 * PUNT_WAARDE, 3: 0.5 * PUNT_WAARDE });
@@ -56,9 +56,20 @@ describe('snelheid, zoals bij Kahoot', () => {
     expect(perVraag.get('0:0')!.punten).toEqual({ 1: 0.5 * PUNT_WAARDE });
   });
 
-  it('geeft in een teamronde elk lid de tijd van het team', () => {
+  it('telt in een teamronde niet: overleggen kost nooit punten', () => {
     const { perVraag } = berekenBonussen([teamvraag('0:0', ['a', 'b'], { a: 0, b: DUUR })]);
-    expect(perVraag.get('0:0')!.punten).toEqual({ 1: 500, 2: 500, 3: 250, 4: 250 });
+    expect(perVraag.get('0:0')!.punten).toEqual({ 1: 500, 2: 500, 3: 500, 4: 500 });
+  });
+
+  it('geeft een team ook zonder antwoord van de telefoon de volle punten', () => {
+    const { perVraag } = berekenBonussen([teamvraag('0:0', ['a'])]);
+    expect(perVraag.get('0:0')!.punten).toEqual({ 1: 500, 2: 500 });
+  });
+
+  it('weet per vraag of snelheid meetelt', () => {
+    expect(telSnelheid({ type: 'meerkeuze', teamModus: 'individueel' })).toBe(true);
+    expect(telSnelheid({ type: 'meerkeuze', teamModus: 'teams' })).toBe(false);
+    expect(telSnelheid({ type: 'stem', teamModus: 'individueel' })).toBe(false);
   });
 
   it('telt een toekenning zonder antwoord als op de valreep', () => {
@@ -78,13 +89,11 @@ describe('snelheid, zoals bij Kahoot', () => {
   });
 });
 
-describe('op dreef', () => {
-  it(`groeit vanaf de ${REEKS_VANAF}e vraag op rij met ${REEKS_STAP} per vraag, tot ${REEKS_MAX}`, () => {
+describe('reeksen: bijgehouden, maar zonder punten', () => {
+  it('telt hoeveel vragen op rij goed, en geeft daar niets extra voor', () => {
     const vragen = Array.from({ length: 9 }, (_, i) => solovraag(`0:${i}`, [1]));
     const { perVraag, lopend } = berekenBonussen(vragen);
-    const reeks = vragen.map((v) => perVraag.get(v.sleutel)!.reeks[1] ?? 0);
-    expect(reeks).toEqual([0, 100, 200, 300, 400, 500, 500, 500, 500]);
-    expect(perVraag.get('0:3')!.punten).toEqual({ 1: PUNT_WAARDE + 300 });
+    for (const v of vragen) expect(perVraag.get(v.sleutel)!.punten).toEqual({ 1: PUNT_WAARDE });
     expect(perVraag.get('0:3')!.opRij[1]).toBe(4);
     expect(lopend[1]).toBe(9);
   });
@@ -93,33 +102,22 @@ describe('op dreef', () => {
     const fout: BonusVraag = { ...solovraag('0:2', [], { 1: 1000 }), verdeling: null };
     const vragen = [solovraag('0:0', [1]), solovraag('0:1', [1]), fout, solovraag('0:3', [1])];
     const { perVraag, lopend } = berekenBonussen(vragen);
-    expect(perVraag.get('0:3')!.reeks).toEqual({});
+    expect(perVraag.get('0:3')!.opRij[1]).toBe(1);
     expect(lopend[1]).toBe(1);
   });
 
   it('slaat vragen over die niet gespeeld zijn', () => {
     const leeg: BonusVraag = { ...solovraag('0:1', []), verdeling: null, antwoorden: [] };
     const vragen = [solovraag('0:0', [1]), leeg, solovraag('1:0', [1])];
-    expect(berekenBonussen(vragen).perVraag.get('1:0')!.reeks).toEqual({ 1: 100 });
-  });
-
-  it('loopt door over teamwissels heen, want de reeks is van de persoon', () => {
-    const vragen = [
-      teamvraag('0:0', ['a'], { a: 0 }), // 1 en 2 samen
-      // Nieuwe ronde, andere teams: 1 zit nu bij 3.
-      { ...teamvraag('1:0', []), verdeling: { 1: 1, 3: 1 } },
-    ];
-    const { perVraag } = berekenBonussen(vragen);
-    expect(perVraag.get('1:0')!.reeks).toEqual({ 1: 100 });
+    expect(berekenBonussen(vragen).perVraag.get('1:0')!.opRij[1]).toBe(2);
   });
 });
 
 describe('vermenigvuldigers', () => {
-  it('verdubbelt punten en reeks samen', () => {
+  it('vermenigvuldigt de punten na de snelheid', () => {
     const vragen = [solovraag('0:0', [1]), { ...solovraag('0:1', [1], { 1: DUUR / 2 }), vermenigvuldiger: 4 }];
     const { perVraag } = berekenBonussen(vragen);
-    expect(perVraag.get('0:1')!.punten).toEqual({ 1: (0.75 * PUNT_WAARDE + 100) * 4 });
-    expect(perVraag.get('0:1')!.reeks).toEqual({ 1: 400 });
+    expect(perVraag.get('0:1')!.punten).toEqual({ 1: 0.75 * PUNT_WAARDE * 4 });
   });
 
   const ronde = (naam: string, n: number, cijfers?: Ronde['cijfers']): Ronde => ({

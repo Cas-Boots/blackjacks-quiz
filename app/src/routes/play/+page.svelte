@@ -84,7 +84,6 @@
     return 'wacht';
   });
 
-  let mijnBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.spelerId === live.spelerId));
 
   /* Bij een vraag met opties: welke kaart je speelde, en welke de goede was. */
   function optieVan(tekst: string, opties: string[]): number {
@@ -509,7 +508,7 @@
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
         <div class="tafelkaart" data-suit={ronde?.suit} data-rang={rang(vraag.index)} style="padding:1.2rem 1.2rem 1.2rem 2.6rem;--kanteling:{kantelingNu}deg">
-          <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · tot {fmt(vraag.maximaal)} punten</p>
+          <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · {teamRonde || vraag.type === 'stem' ? '' : 'tot '}{fmt(vraag.maximaal)} punten</p>
           {#if vraag.goud}
             <p class="gouden-kaart">🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
           {:else if vraag.vermenigvuldiger > 1}
@@ -596,13 +595,6 @@
             <span class="uitslagkop"><span class="teken">✓</span><strong>{kwinkslag}</strong></span>
             <span class="plus">+{fmt(mijnPunten)}</span>
             <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
-            {#if mijnBonussen.length}
-              <span class="bonusfiches">
-                {#each mijnBonussen as b (b.soort)}
-                  <span class="bonusregel">🔥 {b.opRij} op rij · +{fmt(b.punten)}</span>
-                {/each}
-              </span>
-            {/if}
             {#if mijnKaart}
               <span class="kaartjes">
                 <span class="minikaart goed" data-suit={KLEUREN[mijnKaart.i % 4]}><b>{String.fromCharCode(65 + mijnKaart.i)}{KLEUREN[mijnKaart.i % 4]}</b>{mijnKaart.tekst}<i aria-label="goed">✓</i></span>

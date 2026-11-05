@@ -107,7 +107,7 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
 
   // Zonder een extra knop: precies goed is 3 + 2 punten, voor het hele team.
-  // Op het scorebord is dat 5 × 500, en snel geantwoord houdt daar bijna alles van over.
+  // Op het scorebord is dat 5 × 500 = 2.500: in een teamronde telt snelheid niet.
   await expect(tv.pagina.locator('.getallenlijn')).toBeVisible({ timeout: 15_000 });
   await expect(tv.pagina.locator('.getallenlijn .gok.wint')).toHaveCount(1);
   await expect(a.pagina.locator('.uitslag[data-uitslag="goed"]')).toContainText(/\+2\.\d{3}/, { timeout: 15_000 });
@@ -195,7 +195,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
   for (const x of [a, b, qm]) await x.ctx.close();
 });
 
-test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de meeste punten', async ({ browser }) => {
+test('teamronde: iedereen binnen kort de klok in, en overleggen kost geen punten', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await nieuwSpel(qm, { '2027': [0] }); // 2027, twee teams
   const tv = await nieuwApparaat(browser, '/tv');
@@ -223,8 +223,9 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de mee
 
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
   await qm.pagina.getByRole('button', { name: /Vink de 2 aan/ }).click();
-  // Beide teams goed, twee punten per persoon: tot 1000 op het scorebord,
-  // en het team dat eerder inleverde houdt daar meer van over.
+  // Beide teams goed, twee punten per persoon: 1000 op het scorebord, voor
+  // allebei. In een teamronde telt snelheid niet, dus het latere team krijgt
+  // precies evenveel als het team dat meteen inleverde.
   const plus = async (t: typeof snel) => {
     const tekst = await t.pagina.locator('.uitslag[data-uitslag="goed"] .plus').textContent({ timeout: 15_000 });
     return Number((tekst ?? '').replace(/\D/g, ''));
@@ -232,11 +233,10 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de mee
   await expect(snel.pagina.locator('.uitslag[data-uitslag="goed"]')).toBeVisible({ timeout: 15_000 });
   await expect(traag.pagina.locator('.uitslag[data-uitslag="goed"]')).toBeVisible({ timeout: 15_000 });
   const [a, b] = [await plus(snel), await plus(traag)];
-  expect(a).toBeLessThanOrEqual(1000);
-  expect(b).toBeGreaterThanOrEqual(500);
-  expect(a).toBeGreaterThan(b);
-  // Na de onthulling ziet elke telefoon zijn plek, zoals bij Kahoot.
-  await expect(traag.pagina.locator('.mijnplek')).toContainText(/achter/);
+  expect(a).toBe(1000);
+  expect(b).toBe(1000);
+  // Na de onthulling ziet elke telefoon zijn plek; hier staat iedereen gelijk.
+  await expect(traag.pagina.locator('.mijnplek')).toContainText(/gelijk/);
 
   for (const x of [snel, traag, tv, qm]) await x.ctx.close();
 });

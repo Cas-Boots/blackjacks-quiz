@@ -18,7 +18,7 @@
   import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
-  import { REEKS_VANAF, REEKS_STAP, REEKS_MAX, DUBBELE_SLOTRONDES } from '$lib/shared/bonus';
+  import { REEKS_VANAF, DUBBELE_SLOTRONDES } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
   import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
@@ -468,7 +468,8 @@
   function naamVanSpeler(id: number): string {
     return staat?.spelers.find((s) => s.id === id)?.naam ?? '?';
   }
-  let reeksBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.soort === 'reeks'));
+  /** Ieder voor zich telt snelheid mee; in teams en bij stemmen is goed altijd evenveel waard. */
+  let snelheidTelt = $derived(!inTeams && ronde?.type !== 'stem');
 
   /* ---- Geluidsmomenten -------------------------------------------------
      Elk geluid hangt aan een overgang, niet aan een toestand. Zonder deze
@@ -494,12 +495,6 @@
   $effect(() => {
     if (alleBinnen && !vorigAlleBinnen) geluid.iedereenBinnen();
     vorigAlleBinnen = alleBinnen;
-  });
-  let vorigAantalBonussen = 0;
-  $effect(() => {
-    const n = onthulKlaar ? (live.staat?.bonussen.length ?? 0) : 0;
-    if (n > vorigAantalBonussen) setTimeout(() => geluid.bonus(), 1200);
-    vorigAantalBonussen = n;
   });
   /* Het geluidsbord van de quizmaster. */
   let vorigBordgeluid = 0;
@@ -886,8 +881,8 @@
               </p>
             {:else}
               <p class="fijn" in:fade={{ duration: 500, delay: 700 }} style="font-size:var(--fs-etiket);color:var(--goud-licht)">
-                {#if ronde?.type !== 'stem'}⚡ Hoe sneller goed, hoe meer punten ·{/if}
-                🔥 Op dreef: +{REEKS_STAP} per vraag op rij, tot +{REEKS_MAX} ·
+                {#if inTeams}🤝 Neem de tijd: in teams is goed altijd evenveel waard ·
+                {:else if ronde?.type !== 'stem'}⚡ Hoe sneller goed, hoe meer punten ·{/if}
                 🃏 Eén vraag is de gouden kaart: dubbele punten
               </p>
               {#if ronde?.dubbel}
@@ -938,7 +933,7 @@
               {#if tijdOm}
                 <span class="stempel rechtsboven" style="--hoek:-11deg">Tijd!</span>
               {/if}
-              <p class="etiket">Vraag {vraag.index + 1} · tot {vraag.maximaal.toLocaleString('nl-NL')} punten</p>
+              <p class="etiket">Vraag {vraag.index + 1} · {snelheidTelt ? 'tot ' : ''}{vraag.maximaal.toLocaleString('nl-NL')} punten</p>
               {#if vraag.goud}
                 <p class="gouden-kaart" in:scale={{ start: 0.6, duration: 560, easing: cubicOut }}>🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
               {:else if vraag.vermenigvuldiger > 1}
@@ -1103,16 +1098,6 @@
                   {/each}
                 </div>
               {/if}
-            {/if}
-            {#if reeksBonussen.length}
-              <div class="bonusrij">
-                {#each reeksBonussen as b, n (b.spelerId)}
-                  <span class="bonus" style="--wacht:{1.3 + n * 0.18}s">
-                    🔥 <strong>{naamVanSpeler(b.spelerId)}</strong> {b.opRij} op rij
-                    <span class="fiche"><span>+{b.punten}</span></span>
-                  </span>
-                {/each}
-              </div>
             {/if}
             {/if}
           </div>

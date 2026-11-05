@@ -145,9 +145,7 @@ export interface PubliekeStaat {
   inzendingen: PubliekeInzending[];
   /** Punten die bij de huidige vraag zijn uitgedeeld, per speler. Alleen in de fase 'antwoord'. */
   uitdeling: Record<number, number>;
-  /** De reeksbonussen bij de huidige vraag, al inbegrepen in `uitdeling`. Alleen in de fase 'antwoord'. */
-  bonussen: { spelerId: number; soort: 'reeks'; punten: number; opRij?: number }[];
-  /** Per speler: hoeveel vragen op rij goed, tot en met de laatst gespeelde vraag. */
+  /** Per speler: hoeveel vragen op rij goed, tot en met de laatst gespeelde vraag. Alleen voor de stand; het levert geen punten op. */
   reeksen: Record<number, number>;
   /** De cijfers van het jaar. Alleen gevuld in de fase 'cijfers'. */
   cijfers: Cijfers | null;
