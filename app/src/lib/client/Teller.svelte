@@ -45,4 +45,4 @@
   });
 </script>
 
-{getoond}
+{getoond.toLocaleString('nl-NL')}

@@ -1178,7 +1178,7 @@
                 <h1 class="mega winnaar">{winZin}</h1>
               </div>
               <p class="lood na-winnaar" style="text-align:center">
-                Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
+                Met {(staat.stand[0]?.punten ?? 0).toLocaleString('nl-NL')} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
                 {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
               </p>
 

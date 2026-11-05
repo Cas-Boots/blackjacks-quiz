@@ -551,7 +551,10 @@ export interface Dia {
 }
 
 const NA_STAND: Punten = { 1: 6110, 2: 5170, 3: 7050, 4: 3760, 5: 4700, 6: 1410 };
-const EIND: Punten = { 1: 19, 2: 16, 3: 21, 4: 10, 5: 12, 6: 4 };
+/* De eindstand, in dezelfde scorebordpunten als de rest van de avond (de
+   kleine vraagpunten maal 500, met snelheid en bonussen): na NA_STAND nog
+   acht rondes erbij, met de twee dubbele slotrondes. */
+const EIND: Punten = { 1: 19480, 2: 16950, 3: 21370, 4: 10240, 5: 12110, 6: 4060 };
 
 const PRIJZEN: PubliekeStaat['prijzen'] = [
   { sleutel: 'scherpschutter', titel: 'Scherpschutter', namen: ['Joris'], detail: '11 van de 14 vragen goed' },
@@ -835,7 +838,7 @@ export const DIAS: Dia[] = [
     id: 'einde-gelijk', hoofdstuk: 'Uitslag', titel: 'Gelijkspel bovenaan',
     let: '“Joris & Liz winnen” — twee winnaars, één trede.',
     vorigePunten: NA_STAND,
-    maak: () => basis({ fase: 'einde', rondeIndex: RONDE_AANTAL - 1, stand: stand({ ...EIND, 1: 21 }), prijzen: PRIJZEN.slice(0, 3) }),
+    maak: () => basis({ fase: 'einde', rondeIndex: RONDE_AANTAL - 1, stand: stand({ ...EIND, 1: 21370 }), prijzen: PRIJZEN.slice(0, 3) }),
   },
 
   /* ── Pauze en middernacht ── */
