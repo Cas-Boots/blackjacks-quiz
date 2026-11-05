@@ -91,6 +91,39 @@ export const PAKKETTEN: Pakketten = {
         ]
       },
       {
+        naam: "Hitparade 1: Wat hoor je?",
+        suit: "♥", thema: "De muziek van 2026: herkennen", sfeer: "violet",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
+        kennis: MUZIEK,
+        uitleg: "In teams. Luisteren, raden en gokken: je hoeft geen kenner te zijn.",
+        // Elke vraag met muziek erbij. Wat er in welk fragment moet, staat in
+        // app/media/README.md (Draaiboek De Hitparade). Nummers die onder de
+        // openingsfilm liggen (showreel/muziek/LEESMIJ.md) staan hier niet in.
+        vragen: [
+          {v:"Raad het intro: welk nummer, en van wie?", a:"Pijnstiller — Suzan & Freek", teVullen:true,
+           ookGoed:["Pijnstiller", "Suzan en Freek", "Suzan & Freek"],
+           media:{soort:"muziek", bron:"hitparade-intro-1.mp3", bijschrift:"Drie seconden"},
+           toelichting:"In oktober nummer 1 in de Top 40."},
+          {v:"Raad het intro: welk nummer, en van wie?", a:"100 Tranen — Qlas, Antoon en Boef", teVullen:true,
+           ookGoed:["100 Tranen", "Honderd tranen", "Qlas", "Antoon", "Boef"],
+           media:{soort:"muziek", bron:"hitparade-intro-2.mp3", bijschrift:"Drie seconden"},
+           toelichting:"Stootte in september Dai Dai van de eerste plek."},
+          {v:"Deze carnavalskraker belandde dit jaar voor de rechter. Op welk wereldberoemd nummer leek hij te veel?", a:"Take a Chance on Me — ABBA", teVullen:true,
+           ookGoed:["ABBA", "Take a chance on me", "Take a chance"],
+           media:{soort:"muziek", bron:"hitparade-carnaval.mp3"},
+           toelichting:"Dikke Pens van De Kapotte Kachels. ABBA won in juli: het nummer bleef van Spotify en de band betaalde bijna 22.000 euro aan kosten."},
+          {reserve:true, v:"Alleen de muziek, zonder zang. Welk nummer is dit?", a:"Schijn Je Licht Op Mij — Ronnie Flex en ADF Samski", teVullen:true,
+           ookGoed:["Schijn je licht op mij", "Ronnie Flex", "ADF Samski"],
+           media:{soort:"muziek", bron:"hitparade-zonder-zang.mp3"},
+           toelichting:"In oktober nummer 1 in de Streaming Top 40."},
+          {v:"Twee hits uit 2026 door elkaar. Welke twee nummers hoor je?", a:"The Fate of Ophelia en Mi Chico", teVullen:true,
+           ookGoed:["Fate of Ophelia en Mi Chico", "Mi Chico en The Fate of Ophelia", "Ophelia en Mi Chico", "Taylor Swift en DJ Goja"],
+           media:{soort:"muziek", bron:"hitparade-mashup.mp3"},
+           toelichting:"Taylor Swift en DJ Goja met Jason Derulo: allebei nummer 1 in 2026. Alleen allebei goed telt."},
+        ]
+      },
+      {
         naam: "Hoger of Lager",
         suit: "♥", thema: "Onze eigen cijfers, geschat", sfeer: "staal",
         type: "dichtstbij", tijd: 30, punten: 3, teamModus: "individueel",
@@ -370,8 +403,8 @@ export const PAKKETTEN: Pakketten = {
         ]
       },
       {
-        naam: "De Hitparade",
-        suit: "♥", thema: "De muziek van 2026", sfeer: "violet",
+        naam: "Hitparade 2: Wie, wat en wanneer?",
+        suit: "♥", thema: "De muziek van 2026: de verhalen", sfeer: "violet",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
         kennis: MUZIEK,
@@ -380,21 +413,17 @@ export const PAKKETTEN: Pakketten = {
         // app/media/README.md (Draaiboek De Hitparade). Nummers die onder de
         // openingsfilm liggen (showreel/muziek/LEESMIJ.md) staan hier niet in.
         vragen: [
-          {v:"Raad het intro: welk nummer, en van wie?", a:"Pijnstiller — Suzan & Freek", teVullen:true,
-           ookGoed:["Pijnstiller", "Suzan en Freek", "Suzan & Freek"],
-           media:{soort:"muziek", bron:"hitparade-intro.mp3", bijschrift:"Drie seconden"},
-           toelichting:"In oktober nummer 1 in de Top 40."},
           {v:"Een nummer dat je nooit op de radio hoorde, van een wereldster. Wie zingt dit?", a:"Harry Styles", teVullen:true,
            ookGoed:["Harry", "Styles"],
-           media:{soort:"muziek", bron:"hitparade-artiest.mp3"},
+           media:{soort:"muziek", bron:"hitparade-artiest-1.mp3"},
            toelichting:"Carla’s Song, het slotnummer van zijn album uit maart."},
+          {v:"Een nieuw nummer dat bijna niemand kent, van een stem die iedereen kent. Wie zingt dit?", a:"Taylor Swift", teVullen:true,
+           ookGoed:["Taylor", "Swift"],
+           media:{soort:"muziek", bron:"hitparade-artiest-2.mp3"},
+           toelichting:"Pink Clouding, een van de vier nieuwe nummers op The Life of a Showgirl: The Encore, uit september."},
           {v:"Dit nummer stond in 2026 opeens weer in de hitlijsten. Uit welk jaar is het origineel? Wie het dichtst zit, wint.", a:"1983 — Billie Jean", teVullen:true,
            media:{soort:"muziek", bron:"hitparade-origineel.mp3"},
            toelichting:"Billie Jean van Michael Jackson. Door de film Michael kwam het 43 jaar later terug in de hitlijsten."},
-          {v:"Twee hits uit 2026 door elkaar. Welke twee nummers hoor je?", a:"The Fate of Ophelia en Mi Chico", teVullen:true,
-           ookGoed:["Fate of Ophelia en Mi Chico", "Mi Chico en The Fate of Ophelia", "Ophelia en Mi Chico", "Taylor Swift en DJ Goja"],
-           media:{soort:"muziek", bron:"hitparade-mashup.mp3"},
-           toelichting:"Taylor Swift en DJ Goja met Jason Derulo: allebei nummer 1 in 2026. Alleen allebei goed telt."},
           {v:"Een AI-zanger zingt over het nieuws. Over welk nieuws uit 2026 gaat dit lied?", a:"De sneeuw in januari", teVullen:true,
            ookGoed:["Sneeuw", "sneeuwval", "sneeuwchaos", "het sneeuwde", "winterweer"],
            media:{soort:"muziek", bron:"hitparade-ai.mp3"},

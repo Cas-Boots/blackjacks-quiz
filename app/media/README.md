@@ -28,26 +28,40 @@ quiz gewoon door.
 
 ## Draaiboek De Hitparade
 
-Vijf fragmenten, allemaal mp3. Knippen kan met elke audio-app, of met
-`ffmpeg` (voorbeelden hieronder: pas de begintijd `-ss` en de lengte `-t`
-aan). Het bronbestand van het nummer heb je zelf; de quiz levert alleen de
-vraag.
+Twee muziekrondes, acht fragmenten, allemaal mp3. Knippen kan met elke
+audio-app, of met `ffmpeg` (voorbeelden hieronder: pas de begintijd `-ss` en
+de lengte `-t` aan). Het bronbestand van het nummer heb je zelf; de quiz
+levert alleen de vraag.
+
+**Hitparade 1: Wat hoor je?**
 
 | Bestand | Wat | Hoe lang |
 |---|---|---|
-| `hitparade-intro.mp3` | *Pijnstiller* — Suzan & Freek, vanaf de allereerste seconde | 3 s |
-| `hitparade-artiest.mp3` | *Carla's Song* — Harry Styles (slotnummer van zijn album uit maart). Kies een stuk zónder de titel in de tekst | ± 20 s |
-| `hitparade-origineel.mp3` | *Billie Jean* — Michael Jackson, de bekende baslijn aan het begin | ± 12 s |
+| `hitparade-intro-1.mp3` | *Pijnstiller* — Suzan & Freek, vanaf de allereerste seconde | 3 s |
+| `hitparade-intro-2.mp3` | *100 Tranen* — Qlas, Antoon & Boef, vanaf de allereerste seconde | 3 s |
+| `hitparade-carnaval.mp3` | *Dikke Pens* — De Kapotte Kachels (staat niet meer op Spotify; een live-opname mag wel). Het refrein, waar ABBA in doorklinkt | ± 20 s |
 | `hitparade-mashup.mp3` | *The Fate of Ophelia* (Taylor Swift) en *Mi Chico* (DJ Goja, Jason Derulo) tegelijk, elk vanaf het refrein | ± 20 s |
+
+**Hitparade 2: Wie, wat en wanneer?**
+
+| Bestand | Wat | Hoe lang |
+|---|---|---|
+| `hitparade-artiest-1.mp3` | *Carla's Song* — Harry Styles (slotnummer van zijn album uit maart). Kies een stuk zónder de titel in de tekst | ± 20 s |
+| `hitparade-artiest-2.mp3` | *Pink Clouding* — Taylor Swift (van *The Life of a Showgirl: The Encore*, september). Zonder de titel in de tekst | ± 20 s |
+| `hitparade-origineel.mp3` | *Billie Jean* — Michael Jackson, de bekende baslijn aan het begin | ± 12 s |
 | `hitparade-ai.mp3` | Het AI-lied hieronder | ± 30 s |
 
 ```bash
-ffmpeg -ss 0 -t 3 -i pijnstiller.mp3 hitparade-intro.mp3
-ffmpeg -ss 60 -t 20 -i carlas-song.mp3 hitparade-artiest.mp3
+ffmpeg -ss 0 -t 3 -i pijnstiller.mp3 hitparade-intro-1.mp3
+ffmpeg -ss 0 -t 3 -i 100-tranen.mp3 hitparade-intro-2.mp3
+ffmpeg -ss 60 -t 20 -i carlas-song.mp3 hitparade-artiest-1.mp3
 ffmpeg -ss 0 -t 12 -i billie-jean.mp3 hitparade-origineel.mp3
 ffmpeg -ss 50 -t 20 -i fate-of-ophelia.mp3 -ss 45 -t 20 -i mi-chico.mp3 \
   -filter_complex "amix=inputs=2:duration=shortest" hitparade-mashup.mp3
 ```
+
+Reserve, mocht er een fragment niet lukken: *Schijn Je Licht Op Mij* van
+Ronnie Flex en ADF Samski zonder zang (`hitparade-zonder-zang.mp3`).
 
 ### Het AI-lied
 

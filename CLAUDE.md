@@ -46,9 +46,10 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   je zonder het nieuws te volgen op kunt redeneren (meerkeuze met
   onmogelijke opties, "de titel telt vier woorden", "een Italiaan").
   Echte kennersvragen zijn uitzondering, en dan met extra punten.
-- **De Hitparade draait om muziek die je hoort**: elke vraag heeft een
-  fragment (intro, onbekend nummer van een wereldster, een oud nummer dat
-  terugkwam, een mash-up, een AI-lied). Geen meezingen (past niet bij de
+- **Muziek krijgt twee rondes, met muziek die je hoort**: *Hitparade 1: Wat
+  hoor je?* (vroeg op de avond: intro's, een carnavalscover, een mash-up) en
+  *Hitparade 2: Wie, wat en wanneer?* (later: onbekende nummers van
+  wereldsterren, een oud nummer dat terugkwam, een AI-lied). Geen meezingen (past niet bij de
   telefoons) en geen "wiens Wrapped" (de eigenaar weet het meteen).
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
   meegekregen, ook wie het nieuws nauwelijks volgt (de premier, de Winterspelen,
@@ -100,8 +101,8 @@ daarom met praattijd, niet alleen met de klok:
 | Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
 
 **Het doel: ± 2 uur, en vóór middernacht klaar.** De quiz is op
-oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 8
-rondes en 33 vragen eindigt hij volgens het model hierboven om ± 23:25, ruim
+oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 9
+rondes en 36 vragen eindigt hij volgens het model hierboven om ± 23:33, ruim
 voor het aftellen. `app/tests/keuze.test.ts` rekent dat na en faalt boven de
 125 minuten.
 
@@ -158,8 +159,7 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   gebeurtenis; een paar zijn al uitgekomen). Daarna samen kijken hoe we
   de ronde het leukst maken. 2 en 3 zijn ingevuld; 7, 9, 10 en 14 rekent
   de app zelf uit.
-- **De Hitparade**: vijf muziekfragmenten in `app/media/` (intro, artiest,
-  origineel, mash-up en het AI-lied). Wat er in elk fragment moet, en de
+- **De twee Hitparades**: acht muziekfragmenten in `app/media/`. Wat er in elk fragment moet, en de
   tekst voor het AI-lied, staat in `app/media/README.md`.
 - **Warmdraaien**: een fragment van de Songfestivalwinnaar
   (`songfestival-2026-winnaar.mp4`) in `app/media/`.
