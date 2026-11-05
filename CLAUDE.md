@@ -48,9 +48,10 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   Echte kennersvragen zijn uitzondering, en dan met extra punten.
 - **Muziek krijgt twee rondes, met muziek die je hoort**: *Hitparade 1: Wat
   hoor je?* (vroeg op de avond) en *Hitparade 2: Wie, wat en wanneer?*
-  (later). Elke ronde heeft één intro en één onbekend nummer van een
-  wereldster, aangevuld met een carnavalscover en een mash-up (1) of een oud
-  nummer dat terugkwam en een AI-lied (2). Nooit twee keer dezelfde vorm
+  (later). Ronde 1: een intro, een carnavalscover, een
+  onbekend nummer van een wereldster en een mash-up. Ronde 2: het TikTok-geluid
+  van het jaar, een oud nummer dat terugkwam, een hit achterstevoren en een
+  AI-lied. Elke vorm komt één keer voor. Nooit twee keer dezelfde vorm
   achter elkaar. Geen meezingen (past niet bij de
   telefoons) en geen "wiens Wrapped" (de eigenaar weet het meteen).
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
@@ -161,7 +162,7 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   gebeurtenis; een paar zijn al uitgekomen). Daarna samen kijken hoe we
   de ronde het leukst maken. 2 en 3 zijn ingevuld; 7, 9, 10 en 14 rekent
   de app zelf uit.
-- **De twee Hitparades**: acht muziekfragmenten in `app/media/`. Wat er in elk fragment moet, en de
+- **De twee Hitparades**: negen muziekfragmenten in `app/media/`. Wat er in elk fragment moet, en de
   tekst voor het AI-lied, staat in `app/media/README.md`.
 - **Warmdraaien**: een fragment van de Songfestivalwinnaar
   (`songfestival-2026-winnaar.mp4`) in `app/media/`.

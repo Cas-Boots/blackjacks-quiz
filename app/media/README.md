@@ -28,7 +28,7 @@ quiz gewoon door.
 
 ## Draaiboek De Hitparade
 
-Twee muziekrondes, acht fragmenten, allemaal mp3. Knippen kan met elke
+Twee muziekrondes, negen fragmenten, allemaal mp3. Knippen kan met elke
 audio-app, of met `ffmpeg` (voorbeelden hieronder: pas de begintijd `-ss` en
 de lengte `-t` aan). Het bronbestand van het nummer heb je zelf; de quiz
 levert alleen de vraag.
@@ -46,16 +46,17 @@ levert alleen de vraag.
 
 | Bestand | Wat | Hoe lang |
 |---|---|---|
-| `hitparade-artiest-2.mp3` | *Nothing Left* — Bruno Mars (van *The Romantic*, februari). Een stuk zónder de titel in de tekst | ± 20 s |
+| `hitparade-tiktok.mp3` | De saxofoon uit *Boyz n the Hood* (1991): het TikTok-geluid "the saxophones are getting louder" | ± 10 s |
 | `hitparade-origineel.mp3` | *Billie Jean* — Michael Jackson, de bekende baslijn aan het begin | ± 12 s |
-| `hitparade-intro-2.mp3` | *100 Tranen* — Qlas, Antoon & Boef, vanaf de allereerste seconde | 3 s |
+| `hitparade-achterstevoren.mp3` | *100 Tranen* — Qlas, Antoon & Boef, het refrein **achterstevoren** | ± 15 s |
+| `hitparade-achterstevoren-goed.mp3` | Hetzelfde stuk de goede kant op, voor na de onthulling | ± 15 s |
 | `hitparade-ai.mp3` | Het AI-lied hieronder | ± 30 s |
 
 ```bash
 ffmpeg -ss 0 -t 3 -i pijnstiller.mp3 hitparade-intro-1.mp3
-ffmpeg -ss 0 -t 3 -i 100-tranen.mp3 hitparade-intro-2.mp3
+ffmpeg -ss 40 -t 15 -i 100-tranen.mp3 hitparade-achterstevoren-goed.mp3
+ffmpeg -i hitparade-achterstevoren-goed.mp3 -af areverse hitparade-achterstevoren.mp3
 ffmpeg -ss 60 -t 20 -i olivia-rodrigo-albumnummer.mp3 hitparade-artiest-1.mp3
-ffmpeg -ss 60 -t 20 -i nothing-left.mp3 hitparade-artiest-2.mp3
 ffmpeg -ss 0 -t 12 -i billie-jean.mp3 hitparade-origineel.mp3
 ffmpeg -ss 50 -t 20 -i fate-of-ophelia.mp3 -ss 45 -t 20 -i mi-chico.mp3 \
   -filter_complex "amix=inputs=2:duration=shortest" hitparade-mashup.mp3
