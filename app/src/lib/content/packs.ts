@@ -145,7 +145,8 @@ export const PAKKETTEN: Pakketten = {
         naam: "Dichtstbij Wint",
         suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
-        kennis: NIEUWS,
+        // Bewust zonder kennis: hier gokt iedereen, dus mogen Joris en Rik
+        // ook samen. In de andere nieuwsrondes kan dat niet.
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
