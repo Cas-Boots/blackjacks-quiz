@@ -70,7 +70,7 @@
     { m: 6, tag: 'WERELD', datum: '3 juli', beeld: 'bruiloft', maatje: 'flamingo', kop: 'Taylor Swift trouwt', sub: 'Met Travis Kelce, in Madison Square Garden. Adam Sandler leidt de ceremonie.' },
     { m: 6, tag: 'WERELD', datum: '4 juli', beeld: 'amerika', maatje: 'aap', overgang: 'zweep', kop: 'Amerika wordt 250', sub: 'Tweehonderdvijftig jaar na de onafhankelijkheid staat het land in vuur en vlam.' },
 
-    { m: 7, tag: 'WERELD', datum: '12 augustus', beeld: 'zon', maatje: 'uil', kop: 'Het wordt even nacht', sub: 'Een totale zonsverduistering trekt over Spanje en IJsland.' },
+    { m: 7, tag: 'WERELD', datum: '12 augustus', beeld: 'zon', maatje: 'uil', kop: 'Het wordt even nacht', sub: 'Een totale zonsverduistering: midden in de zomer wordt het even nacht.' },
     { m: 7, tag: 'NL', datum: 'augustus', beeld: 'atletiek', maatje: 'kangoeroe', kop: 'Goudregen op het EK atletiek', sub: 'Visser, Schilder, Nillessen en Bol: het beste EK ooit voor Nederland.' },
     { m: 7, tag: 'NL', datum: '27 augustus', beeld: 'zomer', maatje: 'nijlpaard', overgang: 'iris', kop: 'Warmste zomer ooit gemeten', sub: 'Het oude record uit 2018 sneuvelt ruim. En het is ook nog eens kurkdroog.' },
 
