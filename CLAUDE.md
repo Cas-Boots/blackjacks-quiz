@@ -134,7 +134,17 @@ voor de geheime stand wint maar de helft van de avonden; de ondergrens van
 de snelheid (50% of 75%) maakt geen verschil, en zonder snelheid eindigt het
 minder vaak nek aan nek. Hiermee willen we later verder kijken of het nog
 spannender kan: breid het script uit met een nieuwe regel als variant naast
-de huidige, en vergelijk.
+de huidige, en vergelijk. Het model (de profielen en hoe een ronde uitpakt)
+staat in `scripts/spanning-model.ts` en is gedeeld.
+
+`npm run volgorde` rekent alle 5.040 volgordes van de rondes door (Warmdraaien
+blijft voorop). De volgorde bepaalt welke twee rondes als slotronde dubbel
+tellen. Uitkomst in november 2026: de huidige volgorde staat rond plek 1.200;
+de koploper na ronde 6 wint dan 49%. Het spannendst (40%) zijn de rondes met
+veel toeval als dubbele slotrondes (*Dichtstbij Wint* en *Wie van de
+Blackjacks?*), met de kennisrondes en de voorspellingen ervoor. Kennisrondes
+als slotronde maken het juist minder spannend: daar loopt wie al voorstaat
+verder uit. Let op: meer toeval aan het eind is ook meer loterij.
 
 ## Nog te doen in december
 
