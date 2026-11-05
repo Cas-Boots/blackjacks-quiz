@@ -65,21 +65,26 @@ export function maakTeams(
     volgorde.forEach((s, i) => teams[i % aantal].leden.push(s.id));
     return teams;
   };
-  if (!ronde.kennis) return deel(husselen(spelers, toeval));
+  if (!ronde.kennis && !ronde.samen?.length) return deel(husselen(spelers, toeval));
 
-  // Husselen tot de teams even sterk zijn. De eerste eerlijkste indeling
-  // wint; omdat er gehusseld wordt, is dat elke ronde een andere.
-  const kennis = new Map(Object.entries(ronde.kennis).map(([n, k]) => [n.trim().toLowerCase(), k]));
-  const sterkte = new Map(spelers.map((s) => [s.id, kennis.get(s.naam.trim().toLowerCase()) ?? 1]));
-  let beste: Team[] = [];
+  // Husselen tot de teams even sterk zijn (en wie samen hoort, samen zit).
+  // De eerste eerlijkste indeling wint; omdat er gehusseld wordt, is dat
+  // elke ronde een andere, en voelen de teams willekeurig.
+  const sleutel = (naam: string) => naam.trim().toLowerCase();
+  const kennis = new Map(Object.entries(ronde.kennis ?? {}).map(([n, k]) => [sleutel(n), k]));
+  const sterkte = new Map(spelers.map((s) => [s.id, kennis.get(sleutel(s.naam)) ?? 1]));
+  const samen = new Set((ronde.samen ?? []).map(sleutel));
+  const samenIds = spelers.filter((s) => samen.has(sleutel(s.naam))).map((s) => s.id);
+  let beste: Team[] | null = null;
   let besteVerschil = Infinity;
   for (let poging = 0; poging < POGINGEN && besteVerschil > 0; poging++) {
     const teams = deel(husselen(spelers, toeval));
+    if (samenIds.length > 1 && !teams.some((t) => samenIds.every((id) => t.leden.includes(id)))) continue;
     const totalen = teams.map((t) => t.leden.reduce((n, id) => n + (sterkte.get(id) ?? 1), 0));
-    const verschil = Math.max(...totalen) - Math.min(...totalen);
+    const verschil = ronde.kennis ? Math.max(...totalen) - Math.min(...totalen) : 0;
     if (verschil < besteVerschil) [beste, besteVerschil] = [teams, verschil];
   }
-  return beste;
+  return beste ?? deel(husselen(spelers, toeval));
 }
 
 /** Schuift één speler naar het volgende team. Voor handmatig bijsturen. */

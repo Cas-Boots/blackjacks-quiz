@@ -60,6 +60,12 @@ export interface Ronde {
    * eerlijkste indelingen kiest het toeval, zodat de teams blijven wisselen.
    */
   kennis?: Record<string, number>;
+  /**
+   * Spelers die in deze ronde juist wél samen in een team zitten. Voor de
+   * ronde waar kennis het minst uitmaakt: zo zie je de kenners ook eens
+   * samen, en voelen de teams de rest van de avond willekeurig.
+   */
+  samen?: string[];
   uitleg: string;
   /** Standaard uitgevinkt bij het samenstellen. */
   optioneel?: boolean;

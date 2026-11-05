@@ -87,6 +87,20 @@ describe('kennis', () => {
     }
   });
 
+  it('zet wie samen hoort altijd samen, en husselt de rest', () => {
+    const gokronde = ronde({ aantalTeams: 2, samen: ['Joris', 'Rik'] });
+    const derde = new Set<number>();
+    for (let k = 0; k < 100; k++) {
+      const teams = maakTeams(gokronde, vijf);
+      const duo = teams.find((t) => t.leden.includes(1));
+      expect(duo?.leden).toContain(2);
+      expect(teams.map((t) => t.leden.length).sort()).toEqual([2, 3]);
+      duo?.leden.filter((id) => id > 2).forEach((id) => derde.add(id));
+    }
+    // Soms met z'n tweeën, soms met een derde erbij: dat voelt willekeurig.
+    expect(derde.size).toBeGreaterThan(1);
+  });
+
   it('laat niemand vallen, ook geen gast die niet in de lijst staat', () => {
     const teams = maakTeams(nieuws, [...vijf, { id: 6, naam: 'Gast' }], vast([0.3, 0.7, 0.1]));
     expect(teams.flatMap((t) => t.leden).sort()).toEqual([1, 2, 3, 4, 5, 6]);
