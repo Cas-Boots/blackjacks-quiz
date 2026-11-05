@@ -1,4 +1,13 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { PAKKETTEN } from '../src/lib/content/packs';
+
+/**
+ * Dichtstbij Wint en zijn eerste vraag, opgezocht in de inhoud zelf: de
+ * vragen veranderen nog tot de avond, de proef moet dat overleven.
+ */
+const DICHTSTBIJ = String(PAKKETTEN.jaar2026.rondes.findIndex((r) => r.naam === 'Dichtstbij Wint'));
+const EERSTE_GETAL = PAKKETTEN.jaar2026.rondes[Number(DICHTSTBIJ)].vragen.find((v) => !v.reserve && !v.teVullen)!.getal!;
+const EERSTE_INDEX = PAKKETTEN.jaar2026.rondes[Number(DICHTSTBIJ)].vragen.findIndex((v) => !v.reserve && !v.teVullen);
 
 /**
  * De rest van de avond: dichtstbij, een teamronde, een beeldvraag, de
@@ -56,7 +65,7 @@ async function telefoon(browser: Browser, naam: string): Promise<Apparaat & { na
 
 test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '5': [0] }); // Dichtstbij Wint, eerste vraag: de postzegel van 140 cent
+  await nieuwSpel(qm, { [DICHTSTBIJ]: [EERSTE_INDEX] }); // Dichtstbij Wint, de eerste echte vraag
   const tv = await nieuwApparaat(browser, '/tv');
 
   await qm.doe('naar-ronde', { ronde: 0 });
@@ -68,9 +77,9 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
 
   await qm.doe('start-ronde');
   await expect(a.pagina.getByPlaceholder('Jullie getal')).toBeVisible({ timeout: 15_000 });
-  await a.pagina.getByPlaceholder('Jullie getal').fill('140');
+  await a.pagina.getByPlaceholder('Jullie getal').fill(String(EERSTE_GETAL).replace('.', ','));
   await a.pagina.getByRole('button', { name: 'Versturen' }).click();
-  await b.pagina.getByPlaceholder('Jullie getal').fill('100');
+  await b.pagina.getByPlaceholder('Jullie getal').fill(String(Math.round(EERSTE_GETAL / 2)));
   await b.pagina.getByRole('button', { name: 'Versturen' }).click();
   await expect(qm.pagina.getByText(/Ingeleverd — 2 van/)).toBeVisible({ timeout: 15_000 });
 
@@ -89,7 +98,7 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
 
 test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij was', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '5': [0, 1] }); // Dichtstbij Wint: een getal intikken, met twee vragen
+  await nieuwSpel(qm, { [DICHTSTBIJ]: [0, 1] }); // Dichtstbij Wint: een getal intikken, met twee vragen
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
