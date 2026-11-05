@@ -38,17 +38,17 @@ levert alleen de vraag.
 | Bestand | Wat | Hoe lang |
 |---|---|---|
 | `hitparade-intro-1.mp3` | *Pijnstiller* — Suzan & Freek, vanaf de allereerste seconde | 3 s |
-| `hitparade-intro-2.mp3` | *100 Tranen* — Qlas, Antoon & Boef, vanaf de allereerste seconde | 3 s |
 | `hitparade-carnaval.mp3` | *Dikke Pens* — De Kapotte Kachels (staat niet meer op Spotify; een live-opname mag wel). Het refrein, waar ABBA in doorklinkt | ± 20 s |
+| `hitparade-artiest-1.mp3` | *Carla's Song* — Harry Styles (slotnummer van zijn album uit maart). Kies een stuk zónder de titel in de tekst | ± 20 s |
 | `hitparade-mashup.mp3` | *The Fate of Ophelia* (Taylor Swift) en *Mi Chico* (DJ Goja, Jason Derulo) tegelijk, elk vanaf het refrein | ± 20 s |
 
 **Hitparade 2: Wie, wat en wanneer?**
 
 | Bestand | Wat | Hoe lang |
 |---|---|---|
-| `hitparade-artiest-1.mp3` | *Carla's Song* — Harry Styles (slotnummer van zijn album uit maart). Kies een stuk zónder de titel in de tekst | ± 20 s |
 | `hitparade-artiest-2.mp3` | *Pink Clouding* — Taylor Swift (van *The Life of a Showgirl: The Encore*, september). Zonder de titel in de tekst | ± 20 s |
 | `hitparade-origineel.mp3` | *Billie Jean* — Michael Jackson, de bekende baslijn aan het begin | ± 12 s |
+| `hitparade-intro-2.mp3` | *100 Tranen* — Qlas, Antoon & Boef, vanaf de allereerste seconde | 3 s |
 | `hitparade-ai.mp3` | Het AI-lied hieronder | ± 30 s |
 
 ```bash

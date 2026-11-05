@@ -47,9 +47,11 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   onmogelijke opties, "de titel telt vier woorden", "een Italiaan").
   Echte kennersvragen zijn uitzondering, en dan met extra punten.
 - **Muziek krijgt twee rondes, met muziek die je hoort**: *Hitparade 1: Wat
-  hoor je?* (vroeg op de avond: intro's, een carnavalscover, een mash-up) en
-  *Hitparade 2: Wie, wat en wanneer?* (later: onbekende nummers van
-  wereldsterren, een oud nummer dat terugkwam, een AI-lied). Geen meezingen (past niet bij de
+  hoor je?* (vroeg op de avond) en *Hitparade 2: Wie, wat en wanneer?*
+  (later). Elke ronde heeft één intro en één onbekend nummer van een
+  wereldster, aangevuld met een carnavalscover en een mash-up (1) of een oud
+  nummer dat terugkwam en een AI-lied (2). Nooit twee keer dezelfde vorm
+  achter elkaar. Geen meezingen (past niet bij de
   telefoons) en geen "wiens Wrapped" (de eigenaar weet het meteen).
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
   meegekregen, ook wie het nieuws nauwelijks volgt (de premier, de Winterspelen,
