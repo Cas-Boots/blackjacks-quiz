@@ -47,7 +47,10 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Een halve minuut maar: Bilbao lag vlak bij de rand van de schaduw. In Lyon en Belfast bleef het bij zo'n 93 procent van de zon."},
           {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
            toelichting:"Omhoog, zoals elk half jaar."},
-          {v:"GTA VI kwam in mei 2026 uit, zoals beloofd.", goed:false,
+          // GTA VI hoort er hoe dan ook in. De vorm volgt na de release op
+          // 19 november; tot dan staat hij als nog in te vullen, zodat de
+          // controle vooraf eraan herinnert. Pas dan ook de film aan.
+          {v:"GTA VI kwam in mei 2026 uit, zoals beloofd.", goed:false, teVullen:true,
            toelichting:"Rockstar stelde de game nog een keer uit, naar 19 november."}
         ]
       },
