@@ -1,4 +1,4 @@
-# Blackjacks Kwis
+# Blackjacks Quiz
 
 Een complete quizavond in één HTML-bestand. Geen server, geen internet, geen
 installatie, geen PowerPoint. Je opent `index.html` in een browser en je kunt
