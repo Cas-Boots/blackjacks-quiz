@@ -168,14 +168,19 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 140 procent", live:"sport.doelProcent",
            toelichting:"84 keer sporten op een doel van 60. Daarna Liz met 114 procent."},
-          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 91 tegen 84", live:"sport.duel:Liz/Eva"},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
            toelichting:"Daarna maart met 60."},
-          {v:"Welke sport deden we samen het vaakst, als je de sportschool niet meetelt?", a:"Hardlopen — 65 keer", live:"sport.naGym",
-           toelichting:"Daarna padel met 61."},
-          {v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst",
-           toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
+          {v:"Welke van deze sporten staat níet in onze top vier: hardlopen, klimmen, padel, skiën of sportschool?", a:"Klimmen — 6 keer", live:"sport.nietInTop",
+           toelichting:"De top vier: sportschool (269), hardlopen (65), padel (61) en skiën (17)."},
+          // Is het antwoord dezelfde als bij de eerste vraag, dan vraagt de app
+          // vanzelf wie er het verst van zijn doel af zat ('anders').
+          {v:"Wie zat er dit jaar, gemeten aan zijn eigen jaardoel, het verst vanaf?", a:"Rik — 43 procent", live:"sport.doelEerst:anders",
+           toelichting:"45 keer sporten op een doel van 104. Daarna Joris met 56 procent."},
           // Reserve: niet sterk genoeg, of zonder referentie om te raden.
+          {reserve:true, v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {reserve:true, v:"Welke sport deden we samen het vaakst, als je de sportschool niet meetelt?", a:"Hardlopen — 65 keer", live:"sport.naGym",
+           toelichting:"Daarna padel met 61."},
           {reserve:true, v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
            toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
           {reserve:true, v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},

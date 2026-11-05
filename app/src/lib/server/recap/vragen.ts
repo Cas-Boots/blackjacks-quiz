@@ -214,7 +214,7 @@ const OPLOSSERS: Record<string, Oplosser> = {
   },
 
   /** Wie als eerste zijn jaardoel binnen had, en op welke dag. */
-  'sport.doelEerst': (a) => {
+  'sport.doelEerst': (a, arg) => {
     const gehaald = a.personen
       .filter((p) => p.sport.doel)
       .map((p) => {
@@ -230,10 +230,51 @@ const OPLOSSERS: Record<string, Oplosser> = {
       return OPLOSSERS['sport.doelProcent'](a, '');
     }
     const [eerste, ...rest] = gehaald;
+    // Met 'anders': is dit dezelfde als wie het hoogste percentage haalde
+    // (sport.doelProcent), vraag dan wie er het verst vanaf zat.
+    if (arg.trim() === 'anders') {
+      const hoogste = gesorteerd({ ...a, personen: a.personen.filter((p) => p.sport.doel) }, (p) => p.sport.totaal / (p.sport.doel || 1))[0];
+      if (hoogste === eerste.p) return OPLOSSERS['sport.doelProcent'](a, 'laagst');
+    }
     return {
       v: 'Wie had als eerste zijn jaardoel binnen?',
       a: `${eerste.p.naam} — op ${datumTekst(eerste.dag)}`,
       toelichting: rest.length ? `Daarna ${opsomming(rest.map((x) => `${x.p.naam} op ${datumTekst(x.dag)}`))}.` : undefined,
+    };
+  },
+
+  /** Een duel tussen twee van ons: 'sport.duel:Liz/Eva'. */
+  'sport.duel': (a, arg) => {
+    const [x, y] = arg.split('/').map((n) => a.personen.find((p) => p.naam.toLowerCase() === n.trim().toLowerCase()));
+    if (!x || !y) throw new Error(`onbekend duel: ${arg}`);
+    const [winnaar, verliezer] = x.sport.totaal >= y.sport.totaal ? [x, y] : [y, x];
+    return {
+      v: `Wie sportte dit jaar vaker: ${x.naam} of ${y.naam}?`,
+      a: winnaar.sport.totaal === verliezer.sport.totaal
+        ? `Gelijk — allebei ${keer(winnaar.sport.totaal)}`
+        : `${winnaar.naam} — ${winnaar.sport.totaal} tegen ${verliezer.sport.totaal}`,
+    };
+  },
+
+  /**
+   * Vier of vijf sporten uit onze top, en één die er net buiten valt: welke
+   * hoort er niet bij? De top is zo groot als kan zonder gelijkspel op de
+   * grens, zodat het antwoord altijd eenduidig is.
+   */
+  'sport.nietInTop': (a) => {
+    const lijst = [...a.sporten.entries()]
+      .filter(([t]) => !['physio', 'other', 'onbekend'].includes(t))
+      .sort((x, y) => y[1] - x[1] || sportNaam(x[0]).localeCompare(sportNaam(y[0])));
+    let k = Math.min(5, lijst.length - 1);
+    while (k > 2 && lijst[k - 1][1] === lijst[k][1]) k--;
+    if (k < 3) throw new Error('te weinig verschillende sporten voor een top');
+    const top = lijst.slice(0, k);
+    const [buiten, n] = lijst[k];
+    const opties = [...top.map(([t]) => t), buiten].map(sportNaam).sort((p, q) => p.localeCompare(q));
+    return {
+      v: `Welke van deze sporten staat níet in onze top ${telwoord(k)}: ${opsomming(opties.map((o) => o.toLowerCase())).replace(/ en ([^ ]+)$/, ' of $1')}?`,
+      a: `${sportNaam(buiten)} — ${keer(n)}`,
+      toelichting: `De top ${telwoord(k)}: ${opsomming(top.map(([t, m]) => `${sportNaam(t).toLowerCase()} (${m})`))}.`,
     };
   },
 

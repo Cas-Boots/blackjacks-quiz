@@ -303,6 +303,18 @@ describe('jaardoelen en sporten na de sportschool', () => {
     const a = analyseer(klein({ goals: [{ id: 1, season_id: 1, person_id: 1, metric_id: 1, target: 50 }] }));
     expect(beantwoord('sport.doelEerst', a)?.v).toBe('Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?');
   });
+  it('laat twee van ons duelleren', () => {
+    expect(beantwoord('sport.duel:Liz/Eva', analyse)).toMatchObject({ v: 'Wie sportte dit jaar vaker: Liz of Eva?', a: 'Liz — 91 tegen 84' });
+  });
+  it('zoekt een top zonder gelijkspel op de grens, en de sport er net buiten', () => {
+    const uit = beantwoord('sport.nietInTop', analyse);
+    // Klimmen en skeeleren staan gelijk op plek vijf, dus wordt het een top vier.
+    expect(uit?.v).toBe('Welke van deze sporten staat níet in onze top vier: hardlopen, klimmen, padel, skiën of sportschool?');
+    expect(uit?.a).toBe('Klimmen — 6 keer');
+  });
+  it('vraagt iets anders als de eerste met zijn doel ook het hoogste percentage haalde', () => {
+    expect(beantwoord('sport.doelEerst:anders', analyse)?.a).toBe('Rik — 43 procent');
+  });
   it('vindt de populairste sport na de sportschool', () => {
     expect(beantwoord('sport.naGym', analyse)?.a).toBe('Hardlopen — 65 keer');
   });
