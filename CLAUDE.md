@@ -110,6 +110,30 @@ overal één vraag. Gooi een nagezochte vraag niet weg: zet er
 `reserve: true` bij (standaard uitgevinkt), of `optioneel: true` op de ronde.
 Werk de aantallen in `README.md` bij als je rondes of vragen verandert.
 
+## Spanning: de telling en de simulatie
+
+Het doel van de telling is dat het **zo lang mogelijk spannend blijft wie er
+wint**. Wat er nu staat, en waarom:
+
+- Ieder voor zich telt snelheid (meteen goed is alles, op de valreep 50%);
+  in teamrondes is goed altijd evenveel waard, zodat overleggen nooit punten
+  kost. Geen reeksbonus: met wisselende teams niet eerlijk te belonen.
+- Het laatste kwart tot derde van de avond blijft de stand geheim
+  (`eersteGeheimeRonde` in `app/src/lib/shared/bonus.ts`): op de televisie
+  alleen goed of fout, op de telefoon wel je eigen winst maar geen totaal.
+- Gouden kaart en dubbele slotrondes blijven.
+
+Toets een idee voor de telling eerst met de simulatie: `npm run spanning`
+(in `app/`, `scripts/spanning.ts`). Die speelt de standaardavond duizenden
+keren na met de echte teams en telling, op basis van de kennisprofielen
+bovenaan het script (aannames, bij te stellen). Uitkomst in november 2026:
+Joris en Rik winnen elk ± 30%, de anderen elk 12–14%; de koploper vlak
+voor de geheime stand wint maar de helft van de avonden; de ondergrens van
+de snelheid (50% of 75%) maakt geen verschil, en zonder snelheid eindigt het
+minder vaak nek aan nek. Hiermee willen we later verder kijken of het nog
+spannender kan: breid het script uit met een nieuwe regel als variant naast
+de huidige, en vergelijk.
+
 ## Nog te doen in december
 
 Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:

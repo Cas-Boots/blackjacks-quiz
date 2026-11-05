@@ -341,6 +341,20 @@ de uitdelingen, de antwoordtijden en de samenstelling
 Corrigeert de quizmaster een eerdere vraag of draait hij iets terug, dan
 klopt alles daarna vanzelf weer.
 
+Hoe spannend de telling uitpakt, toets je met een simulatie:
+
+```bash
+npm run spanning                         # 20.000 avonden
+npm run spanning -- --minimum 0.5,0.75   # verschillende ondergrenzen van de snelheid
+```
+
+Die speelt de standaardavond uit `packs.ts` duizenden keren na, met de echte
+teamindeling, gouden kaarten, dubbele slotrondes en telling. Wie wat goed heeft
+en hoe snel, komt uit de kennisprofielen bovenaan `scripts/spanning.ts`. Het
+meet de winkans per speler, hoe vaak de koploper halverwege of vlak voor de
+geheime stand ook wint, hoeveel kanshebbers er dan nog zijn, en hoe vaak het
+nek aan nek eindigt.
+
 De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
 manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.
 
