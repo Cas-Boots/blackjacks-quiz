@@ -1,6 +1,7 @@
 <script lang="ts">
   import { api, metProef } from '$lib/client/proef';
   import { onMount } from 'svelte';
+  import { page } from '$app/state';
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { live } from '$lib/client/live.svelte';
@@ -29,6 +30,9 @@
   let melding = $state('');
   let laatsteSleutel = $state('');
 
+  /* De vaste kaartkleuren van de keuzes, gelijk aan de televisie: A♠ B♥ C♦ D♣. */
+  const KLEUREN = ['♠', '♥', '♦', '♣'];
+  const rang = (i: number) => ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][i] ?? String(i + 1);
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
   let ronde = $derived(staat?.ronde ?? null);
@@ -45,8 +49,11 @@
   let alGestuurd = $derived(mijnTeam ? (staat?.ingeleverd ?? []).includes(mijnTeam.id) : false);
   let teamRonde = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
   /* Dezelfde sfeer als op de televisie, zodat de telefoon meekleurt. */
+  /* Een decor bekijken zonder spel: /play?sfeer=bioscoop. Verandert alleen hoe deze telefoon eruitziet. */
+  let sfeerProef = $derived(page.url.searchParams.get('sfeer'));
   let sfeer = $derived(
-    staat?.fase === 'jaaroverzicht' ? 'bioscoop'
+    sfeerProef ? sfeerProef
+    : staat?.fase === 'jaaroverzicht' ? 'bioscoop'
       : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
         : 'vilt',
   );
@@ -477,7 +484,7 @@
       </div>
     {:else if staat.fase === 'vraag' && vraag}
       {#key sleutel}
-        <div class="tafelkaart" data-suit={ronde?.suit} style="padding:1.2rem;--kanteling:{kantelingNu}deg">
+        <div class="tafelkaart" data-suit={ronde?.suit} data-rang={rang(vraag.index)} style="padding:1.2rem 1.2rem 1.2rem 2.6rem;--kanteling:{kantelingNu}deg">
           <p class="etiket">Vraag {vraag.index + 1} van {vraag.aantal} · tot {fmt(vraag.maximaal)} punten</p>
           {#if vraag.goud}
             <p class="gouden-kaart">🃏 Gouden kaart · ×{vraag.vermenigvuldiger}</p>
@@ -494,9 +501,13 @@
       {/key}
 
       {#if vraag.type === 'waarnietwaar'}
-        <div class="knoprij" style="gap:.7rem">
-          <button class="knop groot" class:gekozen={antwoord === 'Waar'} style="flex:1" onclick={() => stuur('Waar')}>Waar</button>
-          <button class="knop groot" class:gekozen={antwoord === 'Niet waar'} style="flex:1" onclick={() => stuur('Niet waar')}>Niet waar</button>
+        <div class="kaartknoppen" data-aantal="2">
+          {#each ['Waar', 'Niet waar'] as optie, i (optie)}
+            <button class="kaartknop" data-suit={KLEUREN[i]} class:gekozen={antwoord === optie} onclick={() => stuur(optie)}>
+              <span class="letter" aria-hidden="true">{String.fromCharCode(65 + i)}<i>{KLEUREN[i]}</i></span>
+              <span class="optie">{optie}</span>
+            </button>
+          {/each}
         </div>
       {:else if vraag.type === 'stem' && vraag.opties}
         <p class="fijn">Tik op een naam. Wie met de meerderheid meestemt, krijgt de punten.</p>
@@ -510,19 +521,16 @@
           {/each}
         </div>
       {:else if vraag.opties}
-        <div style="display:flex;flex-direction:column;gap:.6rem">
+        <div class="kaartknoppen" data-aantal={vraag.opties.length}>
           {#each vraag.opties as optie, i}
             <button
-              class="knop"
+              class="kaartknop"
+              data-suit={KLEUREN[i % 4]}
               class:gekozen={antwoord === String.fromCharCode(65 + i)}
-              style="justify-content:flex-start;gap:.9rem;padding:1rem;text-align:left;white-space:normal"
               onclick={() => stuur(String.fromCharCode(65 + i))}
             >
-              <span class="letter" style="background:var(--goud);color:#1a1405;width:2rem;height:2rem;
-                           display:grid;place-items:center;border-radius:50%;font-family:var(--mono);flex:0 0 auto">
-                {String.fromCharCode(65 + i)}
-              </span>
-              <span>{optie}</span>
+              <span class="letter" aria-hidden="true">{String.fromCharCode(65 + i)}<i>{KLEUREN[i % 4]}</i></span>
+              <span class="optie">{optie}</span>
             </button>
           {/each}
         </div>

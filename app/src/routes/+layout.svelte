@@ -1,5 +1,6 @@
 <script lang="ts">
   import '../app.css';
+  import '../decor.css';
   import { page } from '$app/state';
   let { children } = $props();
   /* Een scherm van een proefrit draagt altijd dit etiket, zodat niemand het

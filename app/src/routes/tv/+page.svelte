@@ -52,6 +52,11 @@
     inTest && testmodus.paneelOpen && vensterBreedte >= 900 ? (vensterBreedte - TESTPANEEL) / vensterBreedte : null
   );
 
+  /* De vaste kaartkleuren van de keuzes: A is altijd schoppen, B harten, C ruiten, D klaveren. */
+  const KLEUREN = ['♠', '♥', '♦', '♣'];
+  /** De vraag als speelkaart: vraag 1 is een aas, vraag 11 een boer. */
+  const rang = (i: number) => ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][i] ?? String(i + 1);
+
   let staat = $derived(live.staat);
   let vraag = $derived(staat?.vraag ?? null);
   let ronde = $derived(staat?.ronde ?? null);
@@ -62,8 +67,11 @@
   let inTeams = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
   /* Buiten een ronde om — aanmelden en uitslag — staat de tafel in zijn
      eigen kleuren, zodat begin en eind herkenbaar bij elkaar horen. */
+  /* In de testmodus kun je elk decor op elke dia zetten: /tv?test=vraag-meerkeuze&sfeer=bioscoop. */
+  let sfeerProef = $derived(inTest ? page.url.searchParams.get('sfeer') : null);
   let sfeer = $derived(
-    staat?.fase === 'jaaroverzicht' ? 'bioscoop'
+    sfeerProef ? sfeerProef
+    : staat?.fase === 'jaaroverzicht' ? 'bioscoop'
       : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
         : 'vilt',
   );
@@ -816,7 +824,7 @@
           <!-- ══ De vraag ═══════════════════════════════════════════════ -->
         {:else if staat.fase === 'vraag' && vraag}
           <div style="display:flex;flex-direction:column;gap:clamp(.8rem,2vh,1.6rem)">
-            <div class="tafelkaart" data-suit={ronde?.suit} style="--vraagmaat:{vraagmaat};--kanteling:{kantelingNu}deg">
+            <div class="tafelkaart" data-suit={ronde?.suit} data-rang={rang(vraag.index)} style="--vraagmaat:{vraagmaat};--kanteling:{kantelingNu}deg">
               {#if tijdOm}
                 <span class="stempel rechtsboven" style="--hoek:-11deg">Tijd!</span>
               {/if}
@@ -832,25 +840,27 @@
               {#if vraag.media}
                 <Media media={vraag.media} speelt={staat.mediaSpeelt} />
               {/if}
-              {#if vraag.opties}
-                <div class="keuzes">
-                  {#each vraag.opties as optie, i}
-                    <div class="keuze" in:fly={{ y: 14, duration: 380, delay: 220 + i * 80, easing: cubicOut }}>
-                      <span class="letter">{String.fromCharCode(65 + i)}</span><span>{optie}</span>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
               {#if vraag.eenheid}
-                <p class="fijn" style="color:rgba(19,31,26,.55)">Antwoord in {vraag.eenheid}.</p>
+                <p class="fijn eenheid">Antwoord in {vraag.eenheid}.</p>
               {/if}
             </div>
+
+            <!-- De keuzes: vier kaarten op tafel, altijd A♠ B♥ C♦ D♣ — op de televisie én op de telefoon. -->
+            {#if vraag.opties}
+              <div class="keuzes" data-aantal={vraag.opties.length}>
+                {#each vraag.opties as optie, i}
+                  <div class="keuze" data-suit={KLEUREN[i % 4]} style="--i:{i}" in:fly={{ y: 40, duration: 520, delay: 260 + i * 110, easing: cubicOut }}>
+                    <span class="letter" aria-hidden="true">{String.fromCharCode(65 + i)}<i>{KLEUREN[i % 4]}</i></span><span class="optie">{optie}</span>
+                  </div>
+                {/each}
+              </div>
+            {/if}
 
             <!-- Wie is er al binnen. Geen antwoorden, alleen namen. -->
             <div class="inleverrij" in:fade={{ duration: 400, delay: 400 }}>
               {#each staat.teams as t (t.id)}
                 <span class="vak" class:binnen={staat.ingeleverd.includes(t.id)}>
-                  {t.naam}
+                  <i class="fichetje" aria-hidden="true">{t.naam.slice(0, 1)}</i>{t.naam}
                 </span>
               {/each}
             </div>
@@ -862,30 +872,31 @@
           <!-- ══ De onthulling ══════════════════════════════════════════ -->
         {:else if staat.fase === 'antwoord' && vraag}
           <div style="display:flex;flex-direction:column;gap:clamp(.8rem,2vh,1.4rem)">
-            <div class="tafelkaart" data-suit={ronde?.suit} style="padding-block:clamp(16px,2vw,32px);--vraagmaat:{vraagmaat};--kanteling:{kantelingNu}deg">
+            <div class="tafelkaart" data-suit={ronde?.suit} data-rang={rang(vraag.index)} style="padding-block:clamp(16px,2vw,32px);--vraagmaat:{vraagmaat};--kanteling:{kantelingNu}deg">
               {#if vraag.emoji}<div class="emoji klein">{vraag.emoji}</div>{/if}
               {#if vraag.lyric}<p class="lyric klein">“{vraag.lyric}”</p>{/if}
               <p class="vraagtekst klein">{vraag.tekst}</p>
               {#if vraag.media}
                 <Media media={vraag.media} speelt={staat.mediaSpeelt} klein />
               {/if}
-              {#if vraag.opties}
-                <div class="keuzes">
-                  {#each vraag.opties as optie, i}
-                    <div
-                      class="keuze"
-                      class:goed={onthulKlaar && i === staat.onthulling?.goedeOptie}
-                      class:fout={onthulKlaar && staat.onthulling?.goedeOptie !== undefined && i !== staat.onthulling?.goedeOptie}
-                      class:omklappen={i === staat.onthulling?.goedeOptie}
-                      class:afvallen={i !== staat.onthulling?.goedeOptie}
-                      style="--n:{beurt(i)}"
-                    >
-                      <span class="letter">{String.fromCharCode(65 + i)}</span><span>{optie}</span>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
             </div>
+            {#if vraag.opties}
+              <div class="keuzes" data-aantal={vraag.opties.length}>
+                {#each vraag.opties as optie, i}
+                  <div
+                    class="keuze"
+                    data-suit={KLEUREN[i % 4]}
+                    class:goed={onthulKlaar && i === staat.onthulling?.goedeOptie}
+                    class:fout={onthulKlaar && staat.onthulling?.goedeOptie !== undefined && i !== staat.onthulling?.goedeOptie}
+                    class:omklappen={i === staat.onthulling?.goedeOptie}
+                    class:afvallen={i !== staat.onthulling?.goedeOptie}
+                    style="--n:{beurt(i)};--i:{i}"
+                  >
+                    <span class="letter" aria-hidden="true">{String.fromCharCode(65 + i)}<i>{KLEUREN[i % 4]}</i></span><span class="optie">{optie}</span>
+                  </div>
+                {/each}
+              </div>
+            {/if}
 
             {#if !onthulKlaar}
               <div class="trommel">

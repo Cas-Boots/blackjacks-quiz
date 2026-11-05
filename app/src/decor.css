@@ -1,0 +1,1133 @@
+/* ===================================================================
+   DECORS — één spel, elke ronde een ander podium.
+
+   De rode draad blijft in elke ronde precies hetzelfde, zodat niemand
+   aan tafel opnieuw hoeft te leren kijken:
+
+   - de vraag ligt altijd op een speelkaart, met hoekwaarden (vraag 1 is
+     een aas) en de kaartkleur van de ronde;
+   - de keuzes zijn altijd vier kaarten: A♠ B♥ C♦ D♣, in een vierkleurig
+     spel (schoppen zwart, harten rood, ruiten blauw, klaveren groen), op
+     de televisie én op de telefoon;
+   - de klok is een fiche, wie heeft ingeleverd legt een fiche neer;
+   - de vraag staat altijd in dezelfde zware letter, op dezelfde plek.
+
+   Wat per ronde wisselt is het decor eromheen: de achtergrond, het
+   materiaal van de kaart, de accentkleur en de letter van de rondetitel.
+   Een decor zet daarvoor alleen variabelen en een paar decorstukken op
+   `.motief`; de schermen zelf weten nergens van.
+
+   Dit bestand komt na app.css en wint dus bij gelijke specificiteit.
+   =================================================================== */
+
+:root {
+  /* De letter van de vragen: zwaar, met korte schreven, leesbaar van de bank. */
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --vraagletter: "Fraunces", Georgia, serif;
+
+  /* Vierkleurig spel: elke keuze herken je aan kleur én teken. */
+  --kleur-schop: #17171c;
+  --kleur-hart: #d42a3a;
+  --kleur-ruit: #2563d6;
+  --kleur-klaver: #13915a;
+
+  /* Groter dan voorheen: de televisie staat drie meter verderop. */
+  --fs-vraag: calc(var(--schaal) * clamp(1.6rem, 4.5vw, 5.4rem));
+  --fs-keuze: calc(var(--schaal) * clamp(1.05rem, 2vw, 2.5rem));
+  --fs-mega: calc(var(--schaal) * clamp(3rem, 9.5vw, 10rem));
+
+  /* ---- Wat een decor mag zetten (hier: de kaarttafel) ---- */
+  --decor-letter: "Fraunces", Georgia, serif;
+  --decor-gewicht: 900;
+  --decor-kast: none;
+  --decor-spatie: -0.02em;
+  --decor-stijl: normal;
+  --decor-breedte: 100%;
+
+  --kaart-vlak: #fffdf6;
+  --kaart-vlak-diep: #f3ecd8;
+  --kaart-inkt: #14110d;
+  --kaart-zacht: #9a7a22;
+  --kaart-rand: rgba(0, 0, 0, 0.06);
+  --kaart-hoek: var(--kleur-hart);
+
+  --optie-vlak: #fffdf6;
+  --optie-inkt: #14110d;
+  --optie-schop: var(--kleur-schop);
+
+  --fiche: #c62f2a;
+  --fiche-rand: #ffffff;
+  --fiche-inkt: #ffffff;
+}
+
+/* ===== Gedeelde onderdelen ======================================== */
+
+/* -- De rondetitel draagt de letter van het decor ------------------ */
+.mega,
+.rail .titel h2 {
+  font-family: var(--decor-letter);
+  font-weight: var(--decor-gewicht);
+  text-transform: var(--decor-kast);
+  letter-spacing: var(--decor-spatie);
+  font-style: var(--decor-stijl);
+  font-stretch: var(--decor-breedte);
+}
+.mega {
+  line-height: 0.95;
+  text-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* -- De kop: kaartkleur in een fiche, titel, klok ------------------ */
+.rail {
+  border-bottom: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent);
+  min-height: clamp(84px, 11vh, 150px);
+}
+.rail .suit {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: clamp(48px, 4.6vw, 88px);
+  height: clamp(48px, 4.6vw, 88px);
+  border-radius: 50%;
+  background: var(--kaart-vlak);
+  color: var(--kleur-schop);
+  font-size: clamp(1.6rem, 2.8vw, 3.3rem);
+  box-shadow:
+    0 0 0 4px var(--goud),
+    0 0 0 8px rgba(0, 0, 0, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.45);
+}
+.rail .suit.rood {
+  color: var(--kleur-hart);
+}
+.rail .titel .etiket {
+  color: var(--goud);
+  opacity: 0.95;
+}
+.rail .titel h2 {
+  font-size: calc(var(--fs-naam) * 1.05);
+  line-height: 1.05;
+}
+.rail .teller {
+  color: var(--goud);
+  font-weight: 600;
+}
+.vorderingen i.nu {
+  background: var(--goud);
+}
+
+/* -- De klok als fiche --------------------------------------------- */
+.rail .ring {
+  width: clamp(72px, 7vw, 140px);
+  height: clamp(72px, 7vw, 140px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--fiche) 0 60%, rgba(255, 255, 255, 0.85) 60.5% 63%, transparent 63.5%),
+    repeating-conic-gradient(var(--fiche) 0 15deg, var(--fiche-rand) 15deg 30deg);
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.3),
+    0 14px 30px rgba(0, 0, 0, 0.45);
+  overflow: visible;
+}
+.rail .ring .baan {
+  stroke: rgba(0, 0, 0, 0.28);
+  stroke-width: 9;
+}
+.rail .ring .voortgang {
+  stroke: var(--goud-licht);
+  stroke-width: 9;
+}
+.rail .ring text {
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: 48px;
+  fill: var(--fiche-inkt);
+}
+.rail .ring.krap {
+  animation: fichetik 1s ease-in-out infinite;
+}
+.rail .ring.krap .voortgang {
+  stroke: #ff5a4a;
+}
+.rail .ring.krap text {
+  fill: var(--fiche-inkt);
+}
+.rail .ring.stil text {
+  fill: var(--fiche-inkt);
+  opacity: 0.6;
+}
+@keyframes fichetik {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* -- De vraagkaart: een echte speelkaart --------------------------- */
+.tafelkaart {
+  max-width: 1440px;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  border-radius: clamp(14px, 1.6vw, 30px);
+  padding-block: clamp(22px, 3.4vw, 64px);
+  padding-inline: clamp(46px, 6.2vw, 130px);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 2px 0 rgba(255, 255, 255, 0.4) inset,
+    0 3px 0 rgba(0, 0, 0, 0.08),
+    0 7px 0 rgba(0, 0, 0, 0.06),
+    0 40px 90px -20px rgba(0, 0, 0, 0.7);
+}
+/* Hoekwaarden linksboven en, op zijn kop, rechtsonder. */
+.tafelkaart[data-suit]::before,
+.tafelkaart[data-suit]::after {
+  content: attr(data-rang) "\A" attr(data-suit) / "";
+  white-space: pre;
+  position: absolute;
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: clamp(1.05rem, 2.2vw, 2.6rem);
+  line-height: 0.95;
+  text-align: center;
+  color: var(--kleur-schop);
+  pointer-events: none;
+}
+.tafelkaart[data-suit="♥"]::before,
+.tafelkaart[data-suit="♥"]::after,
+.tafelkaart[data-suit="♦"]::before,
+.tafelkaart[data-suit="♦"]::after {
+  color: var(--kaart-hoek);
+}
+.tafelkaart[data-suit]::before {
+  left: clamp(12px, 1.5vw, 30px);
+  top: clamp(10px, 1.3vw, 26px);
+}
+.tafelkaart[data-suit]::after {
+  right: clamp(12px, 1.5vw, 30px);
+  bottom: clamp(10px, 1.3vw, 26px);
+  transform: rotate(180deg);
+}
+.tafelkaart:not([data-rang])::before,
+.tafelkaart:not([data-rang])::after {
+  content: attr(data-suit) / "";
+}
+.tafelkaart .etiket {
+  color: var(--kaart-zacht);
+  font-weight: 700;
+}
+.vraagtekst,
+.lyric {
+  font-family: var(--vraagletter);
+  color: var(--kaart-inkt);
+}
+.vraagtekst {
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144;
+}
+.vraagtekst.klein {
+  font-size: calc(var(--fs-vraag) * 0.58 * var(--vraagmaat, 1));
+}
+.tafelkaart .eenheid {
+  color: var(--kaart-inkt);
+  opacity: 0.6;
+}
+
+/* -- De keuzes: vier kaarten, gedeeld op tafel --------------------- */
+.keuzes {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  gap: clamp(0.6rem, 1.6vw, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  perspective: 1400px;
+}
+.keuzes[data-aantal="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 1200px;
+}
+.keuzes[data-aantal="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.keuzes[data-aantal="4"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.keuze {
+  --pip: var(--optie-schop);
+  position: relative;
+  min-height: clamp(96px, 17vh, 220px);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0;
+  padding: clamp(0.8rem, 1.6vw, 1.8rem) clamp(0.9rem, 1.6vw, 1.8rem);
+  padding-top: clamp(3.4rem, 6.2vw, 7rem);
+  background: var(--optie-vlak);
+  color: var(--optie-inkt);
+  border: none;
+  border-radius: clamp(12px, 1.3vw, 22px);
+  font-family: var(--vraagletter);
+  font-weight: 700;
+  font-size: var(--fs-keuze);
+  line-height: 1.08;
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 4px 0 rgba(0, 0, 0, 0.12),
+    0 24px 44px -16px rgba(0, 0, 0, 0.6);
+  transform: rotate(calc((var(--i, 0) - 1.5) * 1.4deg));
+}
+.keuze[data-suit="♥"] {
+  --pip: var(--kleur-hart);
+}
+.keuze[data-suit="♦"] {
+  --pip: var(--kleur-ruit);
+}
+.keuze[data-suit="♣"] {
+  --pip: var(--kleur-klaver);
+}
+/* Het grote teken als watermerk rechtsboven. */
+.keuze::before {
+  content: attr(data-suit) / "";
+  position: absolute;
+  right: clamp(0.6rem, 1.2vw, 1.4rem);
+  top: clamp(0.2rem, 0.6vw, 0.8rem);
+  font-size: clamp(3rem, 6vw, 7.5rem);
+  line-height: 1;
+  color: var(--pip);
+  opacity: 0.14;
+  pointer-events: none;
+}
+.keuze .letter {
+  position: absolute;
+  left: clamp(0.7rem, 1.3vw, 1.5rem);
+  top: clamp(0.55rem, 1vw, 1.2rem);
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border-radius: 0;
+  color: var(--pip);
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 2.6vw, 3.2rem);
+  line-height: 0.9;
+}
+.keuze .letter i {
+  font-style: normal;
+  font-size: 0.8em;
+}
+.keuze .optie {
+  position: relative;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* Goed: de kaart komt naar voren en krijgt een gouden rand. */
+.keuze.goed {
+  background: var(--optie-vlak);
+  border-color: transparent;
+  transform: translateY(-10px) scale(1.04);
+  box-shadow:
+    0 0 0 4px #3ddc84,
+    0 0 0 9px rgba(61, 220, 132, 0.25),
+    0 30px 60px -12px rgba(0, 0, 0, 0.7);
+}
+.keuze.goed .letter {
+  background: none;
+}
+.keuze.goed::after {
+  border-radius: inherit;
+}
+.keuze.fout {
+  opacity: 0.35;
+}
+/* Omdraaien als een kaart, niet als een rolluik. */
+@keyframes omdraaien {
+  0% {
+    transform: rotateY(0deg);
+  }
+  45% {
+    transform: rotateY(90deg) scale(1.05);
+  }
+  100% {
+    transform: translateY(-10px) scale(1.04) rotateY(0deg);
+  }
+}
+@keyframes afvallen {
+  0% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 1;
+    transform: translateX(-6px) rotate(calc((var(--i, 0) - 1.5) * 1.4deg));
+  }
+  100% {
+    opacity: 0.32;
+    transform: translateY(14px) rotate(calc((var(--i, 0) - 1.5) * 3deg)) scale(0.95);
+    filter: grayscale(1);
+  }
+}
+
+/* -- Wie is er binnen: fiches op tafel ----------------------------- */
+.inleverrij {
+  gap: clamp(0.5rem, 1.2vw, 1.4rem);
+}
+.inleverrij .vak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.35em 1.1em 0.35em 0.35em;
+  border-radius: 999px;
+  border: 2px dashed color-mix(in srgb, var(--goud) 45%, transparent);
+  background: rgba(0, 0, 0, 0.22);
+  color: color-mix(in srgb, var(--ivoor) 55%, transparent);
+  font-weight: 700;
+  font-size: calc(var(--fs-lood) * 0.95);
+  letter-spacing: 0.02em;
+}
+.inleverrij .fichetje {
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 50%;
+  font-style: normal;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  color: transparent;
+  border: 2px dashed color-mix(in srgb, var(--goud) 45%, transparent);
+}
+.inleverrij .vak.binnen {
+  border: 2px solid var(--goud);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--ivoor);
+}
+.inleverrij .vak.binnen .fichetje {
+  border: none;
+  color: var(--fiche-inkt);
+  background:
+    radial-gradient(circle, var(--fiche) 0 64%, var(--fiche-rand) 65% 69%, transparent 70%),
+    repeating-conic-gradient(var(--fiche) 0 20deg, var(--fiche-rand) 20deg 40deg);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+  animation: fichevalt 0.5s var(--deal) both;
+}
+@keyframes fichevalt {
+  from {
+    transform: translateY(-60px) rotate(-120deg) scale(1.4);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* -- De telefoon: dezelfde kaarten, groot onder de duim ------------ */
+.kaartknoppen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.kaartknop {
+  --pip: var(--optie-schop);
+  position: relative;
+  min-height: clamp(128px, 24vh, 250px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 3.6rem 0.95rem 0.95rem;
+  border: none;
+  border-radius: 18px;
+  background: var(--optie-vlak);
+  color: var(--optie-inkt);
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: 1.28rem;
+  line-height: 1.08;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 6px 0 rgba(0, 0, 0, 0.22),
+    0 16px 28px -12px rgba(0, 0, 0, 0.55);
+  transition:
+    transform 0.18s var(--zacht),
+    opacity 0.25s var(--zacht),
+    box-shadow 0.25s var(--zacht);
+  -webkit-tap-highlight-color: transparent;
+}
+.kaartknoppen[data-aantal="2"] .kaartknop {
+  min-height: clamp(170px, 34vh, 340px);
+  font-size: 1.6rem;
+}
+.kaartknop[data-suit="♥"] {
+  --pip: var(--kleur-hart);
+}
+.kaartknop[data-suit="♦"] {
+  --pip: var(--kleur-ruit);
+}
+.kaartknop[data-suit="♣"] {
+  --pip: var(--kleur-klaver);
+}
+.kaartknop::before {
+  content: attr(data-suit) / "";
+  position: absolute;
+  right: 0.6rem;
+  top: 0.2rem;
+  font-size: 4.2rem;
+  line-height: 1;
+  color: var(--pip);
+  opacity: 0.14;
+}
+.kaartknop .letter {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 900;
+  font-size: 1.7rem;
+  line-height: 0.9;
+  color: var(--pip);
+}
+.kaartknop .letter i {
+  font-style: normal;
+  font-size: 0.82em;
+}
+.kaartknop .optie {
+  position: relative;
+}
+.kaartknop:active {
+  transform: translateY(3px) scale(0.98);
+}
+/* Gekozen: de kaart komt omhoog, de rest gaat een stap terug. */
+.kaartknop.gekozen {
+  transform: translateY(-6px);
+  box-shadow:
+    0 0 0 4px var(--goud),
+    0 0 0 9px color-mix(in srgb, var(--goud) 30%, transparent),
+    0 22px 34px -12px rgba(0, 0, 0, 0.7);
+}
+.kaartknop.gekozen::after {
+  content: "✓" / "";
+  position: absolute;
+  right: 0.7rem;
+  top: 0.7rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--goud);
+  color: #14110d;
+  font-family: var(--ui);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+.kaartknoppen:has(.gekozen) .kaartknop:not(.gekozen) {
+  opacity: 0.5;
+}
+
+/* Op de telefoon is de vraagkaart kleiner; de hoekwaarden ook. */
+.romp .tafelkaart .vraagtekst[style] {
+  font-weight: 800;
+}
+
+/* ===================================================================
+   DE DECORS
+   Per ronde: variabelen, een achtergrond en decorstukken op `.motief`.
+   Zware decorstukken (gordijnen, rails, lijsten) alleen op de televisie;
+   de telefoon krijgt de achtergrond en de kaarten.
+   =================================================================== */
+
+.motief {
+  opacity: 1;
+  /* Boven het vignet van de tafel, onder alles wat je moet lezen. */
+  z-index: 1;
+}
+/* Op de televisie mag het vlak de breedte van het scherm gebruiken. */
+.televisie .romp {
+  max-width: 1820px;
+}
+.motief::before,
+.motief::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ---- ♠ De kaarttafel ---------------------------------------------- */
+.scherm[data-sfeer="vilt"],
+.scherm:not([data-sfeer]) {
+  --vilt: #0f5a3b;
+  --vilt-licht: #1f7d52;
+  --vilt-diep: #073421;
+  --vilt-hoog: #12603f;
+  --rand: #2a7a55;
+  --goud: #e7c25b;
+  --goud-licht: #ffe8a3;
+  --goud-diep: #a37b1c;
+}
+.scherm[data-sfeer="vilt"] {
+  background:
+    radial-gradient(55% 60% at 50% 32%, rgba(255, 236, 170, 0.24), transparent 70%),
+    radial-gradient(130% 110% at 50% 28%, #1f7d52 0%, #0f5a3b 42%, #073421 85%, #03190f 100%);
+}
+.scherm[data-sfeer="vilt"]::before {
+  opacity: 0.32;
+}
+/* De bedrukking van een echte tafel: twee gouden bogen. */
+.televisie[data-sfeer="vilt"] .motief::before {
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='none'%3E%3Cpath d='M-40 820 Q800 520 1640 820' fill='none' stroke='%23e7c25b' stroke-opacity='.45' stroke-width='3'/%3E%3Cpath d='M-40 860 Q800 560 1640 860' fill='none' stroke='%23e7c25b' stroke-opacity='.25' stroke-width='2'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+/* De houten rand van de tafel. */
+.televisie[data-sfeer="vilt"] .motief::after {
+  left: -12%;
+  right: -12%;
+  height: 170vh;
+  bottom: -165vh;
+  border-radius: 50%;
+  border: 3.6vh solid #3a1d0e;
+  box-shadow:
+    inset 0 0 0 0.6vh #6b3a1c,
+    inset 0 2vh 3vh rgba(0, 0, 0, 0.55),
+    0 -1vh 5vh rgba(0, 0, 0, 0.55);
+}
+
+/* ---- ⚽ Het stadion ----------------------------------------------- */
+.scherm[data-sfeer="gras"] {
+  --vilt: #165c2c;
+  --vilt-licht: #237a3d;
+  --vilt-diep: #0b3a1a;
+  --vilt-hoog: #1a6a33;
+  --rand: #3c8f55;
+  --goud: #d9f45b;
+  --goud-licht: #f3ffbf;
+  --goud-diep: #7b9a1e;
+  --decor-letter: "Anton", Impact, sans-serif;
+  --decor-gewicht: 400;
+  --decor-kast: uppercase;
+  --decor-spatie: 0.01em;
+  --kaart-vlak: #ffffff;
+  --kaart-vlak-diep: #eef3ee;
+  --kaart-inkt: #0d2414;
+  --kaart-zacht: #17803f;
+  --optie-vlak: #ffffff;
+  --fiche: #13803f;
+  --fiche-rand: #ffffff;
+  background:
+    radial-gradient(38% 40% at 6% -4%, rgba(255, 255, 235, 0.5), transparent 70%),
+    radial-gradient(38% 40% at 94% -4%, rgba(255, 255, 235, 0.5), transparent 70%),
+    linear-gradient(180deg, rgba(3, 18, 8, 0.75) 0%, rgba(3, 18, 8, 0.1) 30%, transparent 55%, rgba(3, 18, 8, 0.45) 100%),
+    repeating-linear-gradient(90deg, #22813f 0 8.333%, #1b6f35 8.333% 16.666%);
+}
+/* Krijtlijnen: de middenlijn en de middencirkel. */
+.televisie[data-sfeer="gras"] .motief::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 2px), rgba(255, 255, 255, 0.38) calc(50% - 2px) calc(50% + 2px), transparent calc(50% + 2px)),
+    radial-gradient(circle at 50% 58%, transparent 0 22vh, rgba(255, 255, 255, 0.38) calc(22vh + 1px) calc(22vh + 5px), transparent calc(22vh + 6px));
+}
+/* Het publiek bovenin, in de schaduw van de tribune. */
+.televisie[data-sfeer="gras"] .motief::after {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 14vh;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0 1.5px, transparent 2.5px) 0 0 / 14px 11px;
+  -webkit-mask: linear-gradient(180deg, #000, transparent);
+  mask: linear-gradient(180deg, #000, transparent);
+}
+
+/* ---- 📟 Het scorebord --------------------------------------------- */
+.scherm[data-sfeer="staal"] {
+  --vilt: #0d1628;
+  --vilt-licht: #15233d;
+  --vilt-diep: #070d18;
+  --vilt-hoog: #13203a;
+  --rand: #2a3d63;
+  --goud: #ffb020;
+  --goud-licht: #ffd27a;
+  --goud-diep: #9a6608;
+  --decor-letter: "Archivo", Arial, sans-serif;
+  --decor-gewicht: 900;
+  --decor-kast: uppercase;
+  --decor-spatie: 0.01em;
+  --decor-breedte: 125%;
+  --kaart-vlak: #12203a;
+  --kaart-vlak-diep: #0c1629;
+  --kaart-inkt: #f3f6ff;
+  --kaart-zacht: #ffb020;
+  --kaart-rand: rgba(255, 176, 32, 0.55);
+  --kaart-hoek: #ff6b6b;
+  --kleur-schop: #f3f6ff;
+  --optie-vlak: #16264a;
+  --optie-inkt: #f3f6ff;
+  --optie-schop: #f3f6ff;
+  --kleur-hart: #ff5c6c;
+  --kleur-ruit: #5b9dff;
+  --kleur-klaver: #3ddc84;
+  --fiche: #ffb020;
+  --fiche-rand: #0c1629;
+  --fiche-inkt: #0c1629;
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(70, 130, 255, 0.28), transparent 70%),
+    linear-gradient(rgba(110, 170, 255, 0.07) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, rgba(110, 170, 255, 0.07) 1px, transparent 1px) 0 0 / 64px 64px,
+    #070d18;
+}
+.scherm[data-sfeer="staal"] .rail .ring text {
+  font-family: "DM Mono", monospace;
+}
+/* Lichtkrant boven- en onderaan. */
+.televisie[data-sfeer="staal"] .motief::before,
+.televisie[data-sfeer="staal"] .motief::after {
+  left: 0;
+  right: 0;
+  height: 3.2vh;
+  background: radial-gradient(circle, rgba(255, 176, 32, 0.75) 0 2px, rgba(255, 176, 32, 0.15) 2.5px, transparent 3.5px) 0 50% / 12px 12px;
+  filter: drop-shadow(0 0 6px rgba(255, 176, 32, 0.6));
+}
+.televisie[data-sfeer="staal"] .motief::before {
+  top: 0;
+  opacity: 0.35;
+}
+.televisie[data-sfeer="staal"] .motief::after {
+  bottom: 0.8vh;
+}
+
+/* ---- 🧡 De Oranje-show -------------------------------------------- */
+.scherm[data-sfeer="oranje"] {
+  --vilt: #7a2508;
+  --vilt-licht: #b2400e;
+  --vilt-diep: #3a0f04;
+  --vilt-hoog: #8e2f0a;
+  --rand: #c7581c;
+  --goud: #ffe08a;
+  --goud-licht: #fff3d0;
+  --goud-diep: #b8700b;
+  --ivoor: #fff8ee;
+  --decor-letter: "Anton", Impact, sans-serif;
+  --decor-gewicht: 400;
+  --decor-kast: uppercase;
+  --decor-spatie: 0.01em;
+  --kaart-vlak: #ffffff;
+  --kaart-vlak-diep: #fff3e6;
+  --kaart-inkt: #1d0d03;
+  --kaart-zacht: #e0560f;
+  --optie-vlak: #ffffff;
+  --fiche: #ff7a00;
+  --fiche-rand: #ffffff;
+  background:
+    radial-gradient(70% 55% at 50% 112%, rgba(255, 200, 80, 0.55), transparent 65%),
+    radial-gradient(110% 90% at 50% -10%, #ff8a1f 0%, #e2500f 32%, #6e1f08 75%, #2a0b04 100%);
+}
+/* Lampen van het podium: lichtbundels van bovenaf. */
+.televisie[data-sfeer="oranje"] .motief::before {
+  inset: 0;
+  background: repeating-conic-gradient(from 160deg at 50% -18%, rgba(255, 255, 255, 0.13) 0 4deg, transparent 4deg 13deg);
+  -webkit-mask: linear-gradient(180deg, #000 10%, transparent 85%);
+  mask: linear-gradient(180deg, #000 10%, transparent 85%);
+}
+/* Lampjes langs de vloer. */
+.televisie[data-sfeer="oranje"] .motief::after {
+  left: 0;
+  right: 0;
+  bottom: 1.2vh;
+  height: 2.4vh;
+  background: radial-gradient(circle, #fff6d6 0 0.45vh, rgba(255, 200, 90, 0.55) 0.65vh, transparent 1.1vh) 0 50% / 3.4vh 100% repeat-x;
+}
+
+/* ---- ⚡ De bliksemronde ------------------------------------------- */
+.scherm[data-sfeer="bliksem"] {
+  --vilt: #1d0f3d;
+  --vilt-licht: #2c1760;
+  --vilt-diep: #0d0620;
+  --vilt-hoog: #26134f;
+  --rand: #4a2a8a;
+  --goud: #ffd60a;
+  --goud-licht: #fff3a3;
+  --goud-diep: #a68900;
+  --decor-letter: "Anton", Impact, sans-serif;
+  --decor-gewicht: 400;
+  --decor-kast: uppercase;
+  --decor-spatie: 0.01em;
+  --decor-stijl: italic;
+  --kaart-vlak: #ffd60a;
+  --kaart-vlak-diep: #ffc400;
+  --kaart-inkt: #140a2a;
+  --kaart-zacht: #140a2a;
+  --kaart-hoek: #c4001f;
+  --optie-vlak: #ffffff;
+  --fiche: #140a2a;
+  --fiche-rand: #ffd60a;
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(160, 90, 255, 0.55), transparent 70%),
+    radial-gradient(50% 40% at 50% 115%, rgba(255, 214, 10, 0.3), transparent 70%),
+    linear-gradient(180deg, #2a1258, #12082a 70%, #0a0418);
+}
+.scherm[data-sfeer="bliksem"] .tafelkaart .etiket {
+  opacity: 0.7;
+}
+/* Gevarenstrepen langs de onderrand, en een bliksemschicht. */
+.televisie[data-sfeer="bliksem"] .motief::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.6vh;
+  background: repeating-linear-gradient(-45deg, #ffd60a 0 2.2vh, #140a2a 2.2vh 4.4vh);
+  box-shadow: 0 -1vh 3vh rgba(255, 214, 10, 0.35);
+}
+.televisie[data-sfeer="bliksem"] .motief::before {
+  inset: 0;
+  background: #ffd60a;
+  opacity: 0.16;
+  clip-path: polygon(88% 4%, 74% 46%, 84% 46%, 70% 96%, 96% 36%, 85% 36%, 97% 4%);
+}
+.televisie[data-sfeer="bliksem"] .spanningsrand {
+  box-shadow: inset 0 0 0 0.6vh #ffd60a;
+}
+
+/* ---- 🎬 De bioscoop ----------------------------------------------- */
+.scherm[data-sfeer="bioscoop"] {
+  --vilt: #3a0b11;
+  --vilt-licht: #5a1019;
+  --vilt-diep: #1a0507;
+  --vilt-hoog: #4a0d15;
+  --rand: #7a1c26;
+  --goud: #f6c453;
+  --goud-licht: #ffe3a0;
+  --goud-diep: #9a6c12;
+  --decor-letter: "Limelight", "Fraunces", serif;
+  --decor-gewicht: 400;
+  --decor-kast: none;
+  --decor-spatie: 0.02em;
+  --kaart-vlak: #fbf0d9;
+  --kaart-vlak-diep: #f2e0bb;
+  --kaart-inkt: #2a0a0c;
+  --kaart-zacht: #a3141f;
+  --kaart-hoek: #a3141f;
+  --optie-vlak: #fbf0d9;
+  --fiche: #a3141f;
+  --fiche-rand: #f6d27a;
+  background: radial-gradient(60% 75% at 50% 42%, #4a1218 0%, #1e0608 62%, #0a0203 100%);
+}
+/* Het rode doek, links en rechts opengeschoven. */
+.televisie[data-sfeer="bioscoop"] .motief::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.45), transparent 4%, transparent 96%, rgba(0, 0, 0, 0.45)),
+    repeating-linear-gradient(90deg, #8e0f1c 0 1.1vw, #5c0812 1.1vw 2vw, #b3182c 2vw 2.6vw, #6d0a15 2.6vw 3.6vw);
+  -webkit-mask: linear-gradient(90deg, #000 0 9%, transparent 13% 87%, #000 91%);
+  mask: linear-gradient(90deg, #000 0 9%, transparent 13% 87%, #000 91%);
+}
+/* Lichtkrant met gloeilampjes bovenaan. */
+.televisie[data-sfeer="bioscoop"] .motief::after {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3.4vh;
+  background:
+    radial-gradient(circle, #fffbe8 0 0.55vh, #ffc94d 0.8vh, rgba(255, 180, 60, 0.35) 1.1vh, transparent 1.5vh) 0 50% / 3.4vh 100% repeat-x,
+    linear-gradient(180deg, #2a0906, #140302);
+  box-shadow: 0 0.6vh 2.4vh rgba(255, 190, 80, 0.3);
+}
+/* De vraag is een kaartje voor de film: inkepingen en een perforatie. */
+.scherm[data-sfeer="bioscoop"] .tafelkaart {
+  -webkit-mask:
+    radial-gradient(circle at 0 50%, transparent 0 clamp(10px, 1.4vw, 26px), #000 calc(clamp(10px, 1.4vw, 26px) + 1px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 0 clamp(10px, 1.4vw, 26px), #000 calc(clamp(10px, 1.4vw, 26px) + 1px)) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle at 0 50%, transparent 0 clamp(10px, 1.4vw, 26px), #000 calc(clamp(10px, 1.4vw, 26px) + 1px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 0 clamp(10px, 1.4vw, 26px), #000 calc(clamp(10px, 1.4vw, 26px) + 1px)) right / 51% 100% no-repeat;
+  outline: 2px dashed rgba(163, 20, 31, 0.35);
+  outline-offset: calc(clamp(8px, 0.9vw, 16px) * -1);
+}
+
+/* ---- 🔮 De waarzegger --------------------------------------------- */
+.scherm[data-sfeer="violet"] {
+  --vilt: #24134a;
+  --vilt-licht: #3a1f6e;
+  --vilt-diep: #0f0822;
+  --vilt-hoog: #2c1859;
+  --rand: #4e3290;
+  --goud: #e7c46e;
+  --goud-licht: #fbe6b0;
+  --goud-diep: #8f6f24;
+  --decor-letter: "Cinzel", "Fraunces", serif;
+  --decor-gewicht: 800;
+  --decor-kast: none;
+  --decor-spatie: 0.04em;
+  --kaart-vlak: #24164a;
+  --kaart-vlak-diep: #170d33;
+  --kaart-inkt: #f8edd2;
+  --kaart-zacht: #e7c46e;
+  --kaart-rand: rgba(231, 196, 110, 0.85);
+  --kaart-hoek: #ff8fa0;
+  --kleur-schop: #f8edd2;
+  --optie-vlak: #2a1a56;
+  --optie-inkt: #f8edd2;
+  --optie-schop: #f8edd2;
+  --kleur-hart: #ff7d8e;
+  --kleur-ruit: #8fb4ff;
+  --kleur-klaver: #6fe0a6;
+  --fiche: #6a3fc1;
+  --fiche-rand: #e7c46e;
+  background:
+    radial-gradient(42% 46% at 50% 108%, rgba(200, 140, 255, 0.5), transparent 70%),
+    radial-gradient(1.4px 1.4px at 12% 22%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 31% 12%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 72% 18%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 88% 41%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 8% 64%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 93% 76%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 56% 6%, #fff, transparent),
+    radial-gradient(100% 90% at 50% 18%, #3d2174 0%, #1c0f3a 52%, #0a0517 100%);
+}
+/* Een tarotkaart: dubbele gouden lijst. */
+.scherm[data-sfeer="violet"] .tafelkaart,
+.scherm[data-sfeer="violet"] .keuze,
+.scherm[data-sfeer="violet"] .kaartknop {
+  box-shadow:
+    inset 0 0 0 2px var(--kaart-rand),
+    inset 0 0 0 7px transparent,
+    inset 0 0 0 8px rgba(231, 196, 110, 0.45),
+    0 30px 70px -20px rgba(0, 0, 0, 0.8);
+}
+/* De sterrenkring achter de kaart. */
+.televisie[data-sfeer="violet"] .motief::before {
+  left: 50%;
+  top: 52%;
+  width: 120vh;
+  height: 120vh;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(231, 196, 110, 0.18);
+  box-shadow:
+    inset 0 0 0 5vh transparent,
+    inset 0 0 0 calc(5vh + 1px) rgba(231, 196, 110, 0.12);
+  background: repeating-conic-gradient(rgba(231, 196, 110, 0.1) 0 0.4deg, transparent 0.4deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 44%, #000 45%);
+  mask: radial-gradient(circle, transparent 0 44%, #000 45%);
+  animation: draaien 240s linear infinite;
+}
+@keyframes draaien {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* ---- 🥂 Het oudejaarsgala ----------------------------------------- */
+.scherm[data-sfeer="vuurwerk"] {
+  --vilt: #111b3d;
+  --vilt-licht: #1b2754;
+  --vilt-diep: #070b1a;
+  --vilt-hoog: #152048;
+  --rand: #2e3d72;
+  --goud: #e6c46a;
+  --goud-licht: #fff0bd;
+  --goud-diep: #9a7524;
+  --decor-letter: "Bodoni Moda", "Fraunces", serif;
+  --decor-gewicht: 900;
+  --decor-kast: none;
+  --decor-spatie: -0.01em;
+  --kaart-vlak: #fbf4e2;
+  --kaart-vlak-diep: #efe1bd;
+  --kaart-inkt: #0d1530;
+  --kaart-zacht: #9a7524;
+  --kaart-rand: #d9b45a;
+  --optie-vlak: #fbf4e2;
+  --fiche: #0d1530;
+  --fiche-rand: #e6c46a;
+  --fiche-inkt: #fff0bd;
+  background: radial-gradient(60% 62% at 50% 46%, #1f2d62 0%, #0d1530 48%, #05070f 100%);
+}
+.scherm[data-sfeer="vuurwerk"] .tafelkaart {
+  box-shadow:
+    inset 0 0 0 3px #d9b45a,
+    inset 0 0 0 9px transparent,
+    inset 0 0 0 10px rgba(154, 117, 36, 0.6),
+    0 40px 90px -20px rgba(0, 0, 0, 0.8);
+}
+.scherm[data-sfeer="vuurwerk"] .mega,
+.scherm[data-sfeer="vuurwerk"] .rail .titel h2 {
+  background: linear-gradient(180deg, #fff0bd 0%, #e6c46a 45%, #9a7524 55%, #e6c46a 80%, #fff0bd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Zonnestralen in art deco achter alles. */
+.scherm[data-sfeer="vuurwerk"] .motief {
+  background:
+    radial-gradient(circle at 50% 52%, transparent 0, rgba(5, 7, 15, 0.9) 70%),
+    repeating-conic-gradient(from 0deg at 50% 52%, rgba(230, 196, 106, 0.11) 0 3deg, transparent 3deg 10deg);
+}
+/* De gouden lijst rond het hele scherm. */
+.televisie[data-sfeer="vuurwerk"] .motief::after {
+  inset: 2.4vh;
+  border: 2px solid rgba(230, 196, 106, 0.7);
+  box-shadow:
+    inset 0 0 0 9px transparent,
+    inset 0 0 0 10px rgba(230, 196, 106, 0.4);
+}
+/* Vuurwerk linksboven. */
+.televisie[data-sfeer="vuurwerk"] .motief::before {
+  left: 3vw;
+  top: 12vh;
+  width: 30vh;
+  height: 30vh;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 230, 160, 0.75) 0 1.2deg, transparent 1.2deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 18%, #000 24% 48%, transparent 66%);
+  mask: radial-gradient(circle, transparent 0 18%, #000 24% 48%, transparent 66%);
+  opacity: 0.5;
+  animation: vuurpijl 4.5s var(--zacht) infinite;
+}
+@keyframes vuurpijl {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* ---- 🍰 De bakkerij ----------------------------------------------- */
+.scherm[data-sfeer="suiker"] {
+  --vilt: #6a1840;
+  --vilt-licht: #8c2456;
+  --vilt-diep: #3a0a22;
+  --vilt-hoog: #7a1d4a;
+  --rand: #a33a6c;
+  --goud: #ffc2da;
+  --goud-licht: #ffe4ef;
+  --goud-diep: #b0507a;
+  --decor-letter: "Fraunces", Georgia, serif;
+  --decor-gewicht: 900;
+  --decor-stijl: italic;
+  --decor-spatie: -0.02em;
+  --kaart-vlak: #fff6fa;
+  --kaart-vlak-diep: #ffe6f0;
+  --kaart-inkt: #3a0a22;
+  --kaart-zacht: #d63f78;
+  --kaart-hoek: #d63f78;
+  --optie-vlak: #fff6fa;
+  --fiche: #ff6fa5;
+  --fiche-rand: #ffffff;
+  background:
+    radial-gradient(4px 2px at 10% 20%, #ffd166 99%, transparent),
+    radial-gradient(4px 2px at 80% 12%, #8fe3cf 99%, transparent),
+    radial-gradient(2px 4px at 30% 80%, #ffffff 99%, transparent),
+    radial-gradient(2px 4px at 90% 70%, #ffd166 99%, transparent),
+    radial-gradient(4px 2px at 55% 90%, #a0c4ff 99%, transparent),
+    radial-gradient(2px 4px at 6% 55%, #8fe3cf 99%, transparent),
+    repeating-linear-gradient(45deg, rgba(255, 194, 218, 0.07) 0 26px, transparent 26px 52px),
+    radial-gradient(100% 90% at 50% 10%, #a32a63 0%, #6a1840 50%, #2e0719 100%);
+}
+.scherm[data-sfeer="suiker"] .tafelkaart {
+  font-variation-settings: "SOFT" 100;
+}
+.scherm[data-sfeer="suiker"] .vraagtekst,
+.scherm[data-sfeer="suiker"] .keuze,
+.scherm[data-sfeer="suiker"] .kaartknop,
+.scherm[data-sfeer="suiker"] .mega {
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+}
+/* Slagroomrand onderaan het scherm. */
+.televisie[data-sfeer="suiker"] .motief::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4vh;
+  background: radial-gradient(circle at 50% 0, #fff6fa 0 2vh, transparent 2.1vh) 0 0 / 4vh 4vh repeat-x;
+  transform: rotate(180deg);
+  opacity: 0.9;
+}
+
+/* ---- 🏆 De poule -------------------------------------------------- */
+.scherm[data-sfeer="poule"] {
+  --vilt: #0d3a20;
+  --vilt-licht: #145a31;
+  --vilt-diep: #062012;
+  --vilt-hoog: #0f4527;
+  --rand: #2b6e45;
+  --goud: #f2c94c;
+  --goud-licht: #ffe9a6;
+  --goud-diep: #9a7a12;
+  --decor-letter: "Anton", Impact, sans-serif;
+  --decor-gewicht: 400;
+  --decor-kast: uppercase;
+  --decor-spatie: 0.01em;
+  --kaart-vlak: #fdfcf5;
+  --kaart-vlak-diep: #f1eedc;
+  --kaart-inkt: #0b2a17;
+  --kaart-zacht: #9a7a12;
+  --optie-vlak: #fdfcf5;
+  --fiche: #d4a017;
+  --fiche-rand: #0b2a17;
+  --fiche-inkt: #0b2a17;
+  background:
+    repeating-conic-gradient(from 180deg at 50% -10%, rgba(242, 201, 76, 0.12) 0 3deg, transparent 3deg 12deg),
+    radial-gradient(100% 90% at 50% 0%, #1a6a3a 0%, #0d3a20 50%, #041509 100%);
+}
+/* Een wedformulier: groene kop bovenaan de kaart. */
+.scherm[data-sfeer="poule"] .tafelkaart {
+  border-top: clamp(10px, 1.2vw, 20px) solid #13803f;
+}
+
+/* ---- 🌙 De nacht -------------------------------------------------- */
+.scherm[data-sfeer="nacht"] {
+  --vilt: #111a3a;
+  --vilt-licht: #1b2754;
+  --vilt-diep: #070b1c;
+  --vilt-hoog: #152048;
+  --rand: #2c3a6e;
+  --goud: #c6d4ff;
+  --goud-licht: #eef2ff;
+  --goud-diep: #5a6aa8;
+  --decor-letter: "Fraunces", Georgia, serif;
+  --decor-gewicht: 800;
+  --decor-stijl: italic;
+  --kaart-zacht: #4458a8;
+  --fiche: #2b3f8f;
+  --fiche-rand: #eef2ff;
+  background:
+    radial-gradient(circle at 93% 74%, #fffbe6 0 4.5vh, rgba(255, 250, 220, 0.22) 4.9vh, transparent 22vh),
+    radial-gradient(1.4px 1.4px at 12% 22%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 31% 64%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.6px 1.6px at 54% 18%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 68% 47%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 81% 72%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 22% 84%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.2px 1.2px at 40% 8%, #fff, transparent),
+    radial-gradient(100% 90% at 50% 10%, #1e2b63 0%, #0d1533 55%, #04060f 100%);
+}
+
+/* ===== Het decor wisselt mee met de ronde ========================= */
+.scherm {
+  transition: background 0.8s var(--zacht);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motief::before,
+  .motief::after {
+    animation: none !important;
+  }
+}
