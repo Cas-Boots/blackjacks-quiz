@@ -278,6 +278,21 @@ const OPLOSSERS: Record<string, Oplosser> = {
     };
   },
 
+  /** De nummers twee en drie van onze sporten tegen elkaar (de sportschool is altijd één). */
+  'sport.sportDuel': (a) => {
+    const lijst = [...a.sporten.entries()]
+      .filter(([t]) => !['gym', 'physio', 'other', 'onbekend'].includes(t))
+      .sort((x, y) => y[1] - x[1] || sportNaam(x[0]).localeCompare(sportNaam(y[0])));
+    if (lijst.length < 2) throw new Error('te weinig sporten voor een duel');
+    const [[t1, n1], [t2, n2]] = lijst;
+    const [x, y] = [t1, t2].map((t) => sportNaam(t).toLowerCase()).sort((p, q) => p.localeCompare(q));
+    return {
+      v: `Wat deden we dit jaar vaker: ${x} of ${y}?`,
+      a: n1 === n2 ? `Gelijk — allebei ${keer(n1)}` : `${sportNaam(t1)} — ${n1} tegen ${n2}`,
+      toelichting: 'Na de sportschool, die met afstand bovenaan staat.',
+    };
+  },
+
   /** De sport die we samen het vaakst deden, de sportschool niet meegerekend. */
   'sport.naGym': (a) => {
     const lijst = [...a.sporten.entries()]

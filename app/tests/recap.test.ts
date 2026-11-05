@@ -303,6 +303,9 @@ describe('jaardoelen en sporten na de sportschool', () => {
     const a = analyseer(klein({ goals: [{ id: 1, season_id: 1, person_id: 1, metric_id: 1, target: 50 }] }));
     expect(beantwoord('sport.doelEerst', a)?.v).toBe('Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?');
   });
+  it('zet de nummers twee en drie van onze sporten tegen elkaar', () => {
+    expect(beantwoord('sport.sportDuel', analyse)).toMatchObject({ v: 'Wat deden we dit jaar vaker: hardlopen of padel?', a: 'Hardlopen — 65 tegen 61' });
+  });
   it('laat twee van ons duelleren', () => {
     expect(beantwoord('sport.duel:Liz/Eva', analyse)).toMatchObject({ v: 'Wie sportte dit jaar vaker: Liz of Eva?', a: 'Liz — 91 tegen 84' });
   });
