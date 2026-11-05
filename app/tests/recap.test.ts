@@ -332,6 +332,13 @@ describe('taart: terugblik op 2024', () => {
   it('noemt de taartkoning van 2024, en hoe het nu met hem gaat', () => {
     expect(beantwoord('taart.koning2024', analyse)).toMatchObject({ a: 'Joris — 33 taarten', toelichting: 'En dit jaar? Vijf.' });
   });
+  it('zet het taarttotaal naast dat van 2024', () => {
+    expect(beantwoord('taart.totaalVs2024', analyse)).toMatchObject({
+      v: 'In 2024 aten we samen 80,5 taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.',
+      a: '46 taarten',
+      toelichting: '43 procent minder. Joris at er in 2024 in zijn eentje al 33.',
+    });
+  });
   it('vindt wie er meer taart at dan in 2024', () => {
     expect(beantwoord('taart.meerDan2024', analyse)).toMatchObject({ a: 'Eva en Cas', toelichting: 'Eva van 1 naar 8 en Cas van 19,5 naar 23.' });
   });

@@ -442,6 +442,22 @@ const OPLOSSERS: Record<string, Oplosser> = {
     };
   },
 
+  /** Het taarttotaal van dit jaar, met dat van 2024 als referentie. */
+  'taart.totaalVs2024': (a) => {
+    const getal = (n: number) => String(n).replace('.', ',');
+    const toen = Object.values(TAART_2024).reduce<number>((n, x) => n + (x ?? 0), 0);
+    const nu = a.personen.reduce((n, p) => n + p.taart.totaal, 0);
+    const [koning, zijn] = Object.entries(TAART_2024).sort((x, y) => (y[1] ?? 0) - (x[1] ?? 0))[0];
+    const verschil = Math.round(100 * (1 - nu / toen));
+    return {
+      v: `In 2024 aten we samen ${getal(toen)} taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.`,
+      a: `${nu} taarten`,
+      toelichting: nu < toen
+        ? `${verschil} procent minder. ${koning} at er in 2024 in zijn eentje al ${getal(zijn ?? 0)}.`
+        : `${-verschil} procent meer dan in 2024.`,
+    };
+  },
+
   /** Wie at er dit jaar meer taart dan in 2024. */
   'taart.meerDan2024': (a) => {
     // Wie in 2024 niet meedeed (Bastiaan), telt niet mee.
