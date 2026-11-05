@@ -23,11 +23,11 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 8 rondes, 34 vragen (± 2 uur met praten) | 15 rondes, 112 vragen (ook alle reservevragen) |
+| Blackjacks 2026 — Het Jaaroverzicht | 8 rondes, 33 vragen (± 2 uur met praten) | 15 rondes, 112 vragen (ook alle reservevragen) |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
 De avond is bewust kort gehouden: op oudejaarsavond begint de quiz rond
-half tien en is hij met praten en al rond 23:25 klaar, ruim voor het aftellen.
+half tien en is hij met praten en al rond 23:23 klaar, ruim voor het aftellen.
 Rondes van drie tot vijf vragen, dertig
 seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
 dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
