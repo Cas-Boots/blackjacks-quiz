@@ -54,7 +54,8 @@
   let sfeer = $derived(
     sfeerProef ? sfeerProef
     : staat?.fase === 'jaaroverzicht' ? 'bioscoop'
-      : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
+      : staat?.fase === 'einde' ? 'vuurwerk'
+      : staat && staat.fase !== 'lobby' ? (ronde?.sfeer ?? 'vilt')
         : 'vilt',
   );
 

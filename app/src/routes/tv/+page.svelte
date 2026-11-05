@@ -11,14 +11,14 @@
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
   import Getallenlijn from '$lib/client/Getallenlijn.svelte';
-  import Podium, { WINNAAR_NA_MS } from '$lib/client/Podium.svelte';
+  import Podium from '$lib/client/Podium.svelte';
   import Media from '$lib/client/Media.svelte';
   import Cijfers from '$lib/client/Cijfers.svelte';
   import Pauzescherm from '$lib/client/Pauzescherm.svelte';
   import { DRINGEND_VANAF_MS, nogTekst } from '$lib/shared/nieuwjaar';
   import Jaaroverzicht from '$lib/client/Jaaroverzicht.svelte';
   import Overgang, { type OvergangMoment } from '$lib/client/Overgang.svelte';
-  import { REEKS_VANAF, REEKS_STAP, REEKS_MAX } from '$lib/shared/bonus';
+  import { REEKS_VANAF, REEKS_STAP, REEKS_MAX, DUBBELE_SLOTRONDES } from '$lib/shared/bonus';
   import Portret from '$lib/client/Portret.svelte';
   import Dierenparade, { type Loper } from '$lib/client/Dierenparade.svelte';
   import Plaatmaatje from '$lib/client/Plaatmaatje.svelte';
@@ -65,14 +65,15 @@
      teamkaarten tonen zet iedere naam twee keer op het scherm; dan is een
      rij naamplaten eerlijker én rustiger. */
   let inTeams = $derived((ronde?.teamModus ?? 'individueel') === 'teams');
-  /* Buiten een ronde om — aanmelden en uitslag — staat de tafel in zijn
-     eigen kleuren, zodat begin en eind herkenbaar bij elkaar horen. */
+  /* Buiten een ronde om: het aanmelden aan de kaarttafel, de uitslag op het
+     oudejaarsgala — de avond eindigt tenslotte rond middernacht. */
   /* In de testmodus kun je elk decor op elke dia zetten: /tv?test=vraag-meerkeuze&sfeer=bioscoop. */
   let sfeerProef = $derived(inTest ? page.url.searchParams.get('sfeer') : null);
   let sfeer = $derived(
     sfeerProef ? sfeerProef
     : staat?.fase === 'jaaroverzicht' ? 'bioscoop'
-      : staat && staat.fase !== 'lobby' && staat.fase !== 'einde' ? (ronde?.sfeer ?? 'vilt')
+      : staat?.fase === 'einde' ? 'vuurwerk'
+      : staat && staat.fase !== 'lobby' ? (ronde?.sfeer ?? 'vilt')
         : 'vilt',
   );
 
@@ -281,6 +282,22 @@
   );
 
   let top3 = $derived((staat?.stand ?? []).slice(0, 3));
+  /* ---- De ceremonie bij de uitslag ---------------------------------------
+     Van onderen naar boven: eerst de plekken vanaf vier (de laatste eerst),
+     dan de derde trede, de tweede, en onder tromgeroffel de eerste met een
+     dichte kaart erop die omdraait. Alles in ms vanaf het begin van de dia. */
+  function ceremonie(aantal: number) {
+    const rest = Math.max(0, aantal - 3);
+    const derde = 500 + rest * 650 + 500;
+    const tweede = derde + 1900;
+    const eerste = tweede + 3300;
+    return { rest: (k: number) => 500 + k * 650, derde, tweede, eerste, roffel: eerste - 1700 };
+  }
+  let ceremonieNu = $derived(ceremonie(staat?.stand.length ?? 0));
+  let winnaarNa = $derived(ceremonieNu.eerste);
+  /** De confetti wacht op de winnaar. */
+  let confettiAan = $state(false);
+
   /** Bij een gelijkspel bovenaan winnen ze allebei; dat verdient een eigen zin. */
   let winnaars = $derived((staat?.stand ?? []).filter((r, _, alle) => alle.length && r.punten === alle[0].punten));
   let winZin = $derived(
@@ -361,6 +378,33 @@
     }),
   );
   let standNu = $derived(toonNieuweVolgorde ? (staat?.stand ?? []) : standOud);
+
+  /** Hoeveel plekken iemand deze ronde steeg (positief) of zakte (negatief). */
+  let verschuiving = $derived.by(() => {
+    const oud = new Map(standOud.map((r, i) => [r.spelerId, i]));
+    const nu = new Map((staat?.stand ?? []).map((r, i) => [r.spelerId, i]));
+    const uit: Record<number, number> = {};
+    for (const [id, i] of nu) uit[id] = (oud.get(id) ?? i) - i;
+    return uit;
+  });
+  let leiderPunten = $derived(Math.max(1, staat?.stand[0]?.punten ?? 1));
+
+  const TELWOORD = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien'];
+  /** Eén zin over het gat bovenaan, en wat er nog kan. */
+  let standVerhaal = $derived.by(() => {
+    if (!staat || staat.stand.length < 2) return null;
+    const [a, b] = staat.stand;
+    const fmt = (n: number) => n.toLocaleString('nl-NL');
+    const kop = a.punten === b.punten
+      ? `${a.naam} en ${b.naam} staan gelijk bovenaan.`
+      : `${a.naam} staat ${fmt(a.punten - b.punten)} punten voor op ${b.naam}.`;
+    const over = staat.rondeAantal - staat.rondeIndex - 1;
+    const n = TELWOORD[over] ?? String(over);
+    if (over <= 0) return kop;
+    if (over === 1) return `${kop} Nog één ronde, en die telt dubbel.`;
+    if (over <= DUBBELE_SLOTRONDES) return `${kop} Nog ${n} rondes, en ze tellen allebei dubbel.`;
+    return `${kop} Nog ${n} rondes; de laatste ${TELWOORD[DUBBELE_SLOTRONDES]} tellen dubbel.`;
+  });
 
   /* ---- De show ---------------------------------------------------------
      Een kaart die over het scherm vliegt tussen twee blokken, drie-twee-één
@@ -516,11 +560,21 @@
         setTimeout(() => geluid.roffel(), naOvergang);
         // Even de oude volgorde laten staan, dan laten schuiven.
         setTimeout(() => (toonNieuweVolgorde = true), 900 + naOvergang);
-        // De fanfare pas als de eerste trede van het podium staat.
-        if (st.fase === 'einde') setTimeout(() => geluid.fanfare(), WINNAAR_NA_MS);
+        // De ceremonie: een fiche per plek vanaf onderen, een tik per trede,
+        // de roffel voor de eerste en de fanfare als de kaart omdraait.
+        if (st.fase === 'einde') {
+          const c = ceremonie(st.stand.length);
+          for (let k = 0; k < Math.max(0, st.stand.length - 3); k++) setTimeout(() => geluid.fiche(), c.rest(k));
+          setTimeout(() => geluid.plop(), c.derde);
+          setTimeout(() => geluid.plop(), c.tweede);
+          setTimeout(() => geluid.tromgeroffel(1.6), c.roffel);
+          setTimeout(() => geluid.fanfare(), c.eerste);
+          confettiAan = false;
+          setTimeout(() => (confettiAan = true), c.eerste);
+        }
         // Het maatje van de stijger maakt een rondje; bij de uitslag dat van de winnaar.
         if (st.fase === 'stand' && stijgerId !== null) laatLopen(lopersVan([stijgerId]), 'blij', 2200 + naOvergang);
-        if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', WINNAAR_NA_MS + 900, true);
+        if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', ceremonie(st.stand.length).eerste + 900, true);
       }
       vorigeFase = st.fase;
     }
@@ -710,7 +764,7 @@
     <div class="romp midden" in:fade={{ duration: 260, easing: cubicOut }}>
       <!-- Confetti hangt over het hele scherm en hoort dus buiten het vlak:
            binnen een geschaald vlak zou hij met de dia meekrimpen. -->
-      {#if staat?.fase === 'einde'}
+      {#if staat?.fase === 'einde' && confettiAan}
         <Confetti />
       {/if}
       <!-- Het vlak met de dia zelf. Past hij niet op de televisie, dan gaat
@@ -910,7 +964,7 @@
               {/if}
             </div>
             {#if vraag.opties}
-              <div class="keuzes" data-aantal={vraag.opties.length}>
+              <div class="keuzes klein" data-aantal={vraag.opties.length}>
                 {#each vraag.opties as optie, i}
                   <div
                     class="keuze"
@@ -1046,13 +1100,23 @@
             <p class="etiket" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>{ronde?.naam} zit erop</p>
             <h1 class="groot" in:fly={{ y: 22, duration: 520, delay: 60, easing: cubicOut }}>Tussenstand</h1>
             <hr class="rule" style="animation-delay:.25s" />
+            {#if toonNieuweVolgorde && standVerhaal}
+              <p class="standverhaal" in:fly={{ y: 10, duration: 480, delay: 500, easing: cubicOut }}>{standVerhaal}</p>
+            {/if}
             {#if toonNieuweVolgorde && laatsteId !== null && standNu[standNu.length - 1].punten < standNu[0].punten}
               <p class="kwinkslag" style="animation-delay:1.1s">{staat.stand[staat.stand.length - 1].naam}: {lantaarnZin.charAt(0).toLowerCase() + lantaarnZin.slice(1)}</p>
             {/if}
             <div class="stand">
               {#each standNu as r, i (r.spelerId)}
                 <div class="standrij" class:leider={toonNieuweVolgorde && i === 0} class:laatste={toonNieuweVolgorde && r.spelerId === laatsteId && r.punten < standNu[0].punten} style="--i:{i}" animate:flip={{ duration: 720, easing: cubicOut }}>
-                  <span class="plek">{i + 1}</span>
+                  <span class="plek">
+                    {i + 1}
+                    {#if toonNieuweVolgorde && verschuiving[r.spelerId]}
+                      <span class="verschuiving" class:op={verschuiving[r.spelerId] > 0} class:neer={verschuiving[r.spelerId] < 0}>
+                        {verschuiving[r.spelerId] > 0 ? '▲' : '▼'}{Math.abs(verschuiving[r.spelerId])}
+                      </span>
+                    {/if}
+                  </span>
                   <span class="kroonhouder" class:kroon={toonNieuweVolgorde && i === 0}>
                     <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat="m" goud={toonNieuweVolgorde && i === 0} />
                   </span>
@@ -1067,6 +1131,8 @@
                       <span class="fiche" style="--wacht:{0.2 + i * 0.12}s"><span>+{r.dezeRonde}</span></span>
                     {/if}
                   </span>
+                  <!-- Hoe ver iemand achter de koploper zit, in één oogopslag. -->
+                  <span class="standbalk" aria-hidden="true"><i style="--deel:{Math.max(0.02, r.punten / leiderPunten)}"></i></span>
                 </div>
               {/each}
             </div>
@@ -1074,23 +1140,39 @@
 
           <!-- ══ De uitslag ═════════════════════════════════════════════ -->
         {:else if staat.fase === 'einde'}
-          <div style="display:flex;flex-direction:column;gap:clamp(1rem,2.5vh,2rem);align-items:center;text-align:center">
+          <div class="uitslagdia" style="--roffel:{ceremonieNu.roffel}ms;--eerste:{ceremonieNu.eerste}ms">
             <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
-            <!-- De naam van de winnaar valt pas als de eerste trede staat. -->
-            <h1 class="mega" in:scale={{ start: 0.86, duration: 760, delay: WINNAAR_NA_MS, easing: cubicOut }}>
-              {winZin}
-            </h1>
-            <p class="lood" style="text-align:center" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 500 }}>
+            <!-- Eén plek voor drie zinnen: de uitslag, de roffel, de winnaar. -->
+            <div class="winnaarkop">
+              <p class="mega opbouw" aria-hidden="true">De uitslag</p>
+              <p class="mega opbouw roffelzin" aria-hidden="true">En de winnaar is…</p>
+              <h1 class="mega winnaar">{winZin}</h1>
+            </div>
+            <p class="lood na-winnaar" style="text-align:center">
               Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
               {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
             </p>
 
-            <Podium {top3} vorigePunten={live.vorigePunten} />
+            <Podium {top3} vorigePunten={live.vorigePunten} tijden={[ceremonieNu.eerste, ceremonieNu.tweede, ceremonieNu.derde]} />
+
+            <!-- Vanaf de vierde plek: kaarten op tafel, de laatste wordt het eerst gedeeld. -->
+            {#if staat.stand.length > 3}
+              <div class="restplekken">
+                {#each staat.stand.slice(3) as r, j (r.spelerId)}
+                  <div class="restkaart" style="--wacht:{ceremonieNu.rest(staat.stand.length - 4 - j)}ms">
+                    <span class="restplek">{j + 4}</span>
+                    <Portret naam={r.naam} foto={r.foto} dier={r.dier} />
+                    <span class="restnaam">{r.naam}</span>
+                    <span class="restpunten">{r.punten.toLocaleString('nl-NL')}</span>
+                  </div>
+                {/each}
+              </div>
+            {/if}
 
             {#if staat.prijzen.length || poedel}
               <div class="prijzen">
                 {#if poedel && poedel.punten < staat.stand[0].punten}
-                  <div class="prijs" style="border-style:dashed" in:fly={{ y: 20, duration: 520, delay: WINNAAR_NA_MS + 1200 + staat.prijzen.length * 260, easing: cubicOut }}>
+                  <div class="prijs" style="border-style:dashed;--wacht:{winnaarNa + 1200 + staat.prijzen.length * 260}ms">
                     <span class="prijsicoon" aria-hidden="true">🏮</span>
                     <span class="prijstitel">Poedelprijs</span>
                     <span class="prijsnaam">{poedel.naam}</span>
@@ -1098,7 +1180,7 @@
                   </div>
                 {/if}
                 {#each staat.prijzen as p, i (p.sleutel)}
-                  <div class="prijs" in:fly={{ y: 20, duration: 520, delay: WINNAAR_NA_MS + 1200 + i * 260, easing: cubicOut }}>
+                  <div class="prijs" style="--wacht:{winnaarNa + 1200 + i * 260}ms">
                     <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
                     <span class="prijstitel">{p.titel}</span>
                     {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}
@@ -1108,19 +1190,7 @@
               </div>
             {/if}
 
-            {#if staat.stand.length > 3}
-              <div class="stand" style="max-width:560px;margin-top:1rem">
-                {#each staat.stand.slice(3) as r, i (r.spelerId)}
-                  <div class="standrij" style="--i:{i + 4}">
-                    <span class="plek">{i + 4}</span>
-                    <span></span>
-                    <span class="naam" style="font-size:calc(var(--fs-naam)*.7)">{r.naam}</span>
-                    <span class="standpunten" style="font-size:calc(var(--fs-naam)*.6)">{r.punten}</span>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-            <p class="fijn" in:fade={{ duration: 500, delay: WINNAAR_NA_MS + 2600 }}>
+            <p class="fijn" style="animation:opkomen .5s calc(var(--eerste) + 2600ms) both">
               De hele avond staat op {joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}/uitslag/{staat.spelId}
             </p>
           </div>

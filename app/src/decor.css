@@ -169,7 +169,7 @@
   background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
   color: var(--kaart-inkt);
   border-radius: clamp(14px, 1.6vw, 30px);
-  padding-block: clamp(22px, 3.4vw, 64px);
+  padding-block: clamp(20px, 2.6vw, 50px);
   padding-inline: clamp(46px, 6.2vw, 130px);
   box-shadow:
     0 0 0 1px var(--kaart-rand),
@@ -229,6 +229,10 @@
 .vraagtekst.klein {
   font-size: calc(var(--fs-vraag) * 0.58 * var(--vraagmaat, 1));
 }
+.televisie .tafelkaart .emoji:not(.klein) {
+  font-size: calc(var(--schaal) * clamp(2.4rem, 6vw, 5.6rem));
+  line-height: 1.1;
+}
 .tafelkaart .eenheid {
   color: var(--kaart-inkt);
   opacity: 0.6;
@@ -253,10 +257,45 @@
 .keuzes[data-aantal="4"] {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+/* Vijf of zes namen (de stemvragen): één rij, nooit een losse kaart eronder. */
+.keuzes[data-aantal="5"] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.keuzes[data-aantal="6"] {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.keuzes[data-aantal="5"] .keuze,
+.keuzes[data-aantal="6"] .keuze {
+  font-size: calc(var(--fs-keuze) * 0.85);
+}
+
+/* Bij de onthulling zijn de keuzes een samenvatting: lager, zodat het
+   antwoord en de fiches ruimte houden en de televisie niet hoeft te krimpen. */
+.keuzes.klein .keuze {
+  min-height: clamp(64px, 10vh, 132px);
+  padding-top: clamp(2.2rem, 3.6vw, 4.2rem);
+  padding-bottom: clamp(0.6rem, 1vw, 1.2rem);
+  font-size: calc(var(--fs-keuze) * 0.82);
+}
+.keuzes.klein .keuze .letter {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.08em;
+  font-size: clamp(1.1rem, 1.9vw, 2.3rem);
+}
+.keuzes.klein .keuze::before {
+  font-size: clamp(2.2rem, 4vw, 5rem);
+}
+.onthulling.na-keuzes {
+  padding-block: clamp(14px, 1.8vw, 30px);
+}
+.onthulling.na-keuzes .antwoordtekst {
+  font-size: calc(var(--fs-groot) * 0.85);
+}
 .keuze {
   --pip: var(--optie-schop);
   position: relative;
-  min-height: clamp(96px, 17vh, 220px);
+  min-height: clamp(96px, 15vh, 200px);
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
@@ -1729,4 +1768,293 @@
   --ver: 230px;
   --n: -0.6;
   transform: scale(0.6);
+}
+
+/* ===================================================================
+   DE TUSSENSTAND
+   Wie steeg, wie zakte, en hoe ver iedereen achter de koploper zit.
+   =================================================================== */
+.standrij.leider {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--goud) 24%, transparent), transparent 72%);
+  border-bottom-color: var(--goud-diep);
+}
+.standrij {
+  row-gap: 0.25rem;
+}
+.standrij .plek {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: calc(var(--fs-naam) * 0.6);
+  color: var(--goud);
+  opacity: 0.85;
+}
+.verschuiving {
+  margin-top: 0.2em;
+  font-family: var(--ui);
+  font-size: 0.66em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  animation: verschuiven 0.6s 0.6s var(--deal) both;
+}
+.verschuiving.op {
+  color: #3ddc84;
+}
+.verschuiving.neer {
+  color: #ff7b72;
+}
+@keyframes verschuiven {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.standpunten {
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.standbalk {
+  grid-column: 3 / -1;
+  height: clamp(4px, 0.6vh, 8px);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.standbalk i {
+  display: block;
+  height: 100%;
+  width: calc(var(--deel, 0) * 100%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--goud-diep), var(--goud));
+  transition: width 0.9s 0.3s var(--deal);
+}
+.standrij.leider .standbalk i {
+  background: linear-gradient(90deg, var(--goud), var(--goud-licht));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--goud) 60%, transparent);
+}
+.standverhaal {
+  margin: 0;
+  font-family: var(--vraagletter);
+  font-weight: 700;
+  font-size: var(--fs-lood);
+  color: var(--ivoor);
+}
+
+/* ===================================================================
+   DE UITSLAG: een ceremonie van onderen naar boven
+   =================================================================== */
+.uitslagdia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 1.6vh, 1.4rem);
+  text-align: center;
+}
+/* De uitslag, de roffelzin en de winnaar delen één plek. */
+.winnaarkop {
+  display: grid;
+  place-items: center;
+}
+.winnaarkop > * {
+  grid-area: 1 / 1;
+}
+.opbouw {
+  opacity: 0;
+  color: color-mix(in srgb, var(--ivoor) 70%, transparent);
+  animation: opbouwen var(--roffel) linear both;
+}
+.roffelzin {
+  color: var(--goud);
+  animation: roffelen calc(var(--eerste) - var(--roffel)) var(--roffel) linear both;
+}
+@keyframes opbouwen {
+  0%, 4% { opacity: 0; transform: translateY(12px); }
+  10%, 92% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes roffelen {
+  0% { opacity: 0; transform: scale(0.94); }
+  15% { opacity: 1; }
+  85% { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+
+/* Plek vier en verder: kaarten op tafel, de laatste het eerst. */
+.restplekken {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.2vw, 1.2rem);
+  margin-top: clamp(0.2rem, 0.8vh, 0.8rem);
+}
+.restkaart {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.45em 1.1em 0.45em 0.5em;
+  border-radius: 14px;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  font-size: calc(var(--fs-lood) * 1.05);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 14px 28px -12px rgba(0, 0, 0, 0.6);
+  animation: restdelen 0.5s var(--wacht, 0ms) var(--deal) both;
+}
+.restkaart:nth-child(2n) {
+  rotate: 1.2deg;
+}
+.restkaart:nth-child(2n + 1) {
+  rotate: -1deg;
+}
+@keyframes restdelen {
+  from {
+    opacity: 0;
+    transform: translateY(-70px) rotate(-14deg) scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.restplek {
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: 1.25em;
+  color: var(--kaart-zacht);
+  min-width: 1.2em;
+}
+.restnaam {
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: 1.2em;
+}
+.restpunten {
+  font-family: var(--vraagletter);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  opacity: 0.7;
+}
+
+/* De prijzen op één rij, als kaartjes in het decor. */
+.televisie .prijzen {
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  width: min(100%, 1760px);
+  gap: clamp(0.4rem, 0.8vw, 0.9rem);
+}
+.televisie .prijs {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "icoon"
+    "titel"
+    "naam"
+    "detail";
+  justify-items: center;
+  text-align: center;
+  row-gap: 0.15rem;
+  padding: clamp(0.6rem, 1vw, 1rem) clamp(0.5rem, 0.8vw, 0.9rem);
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 16px 30px -14px rgba(0, 0, 0, 0.6);
+}
+.televisie .prijstitel {
+  white-space: normal;
+  color: var(--kaart-zacht);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.televisie .prijsnaam {
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  color: var(--kaart-inkt);
+}
+.televisie .prijsdetail {
+  color: var(--kaart-inkt);
+  opacity: 0.7;
+  font-size: calc(var(--fs-lood) * 0.72);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opbouw {
+    display: none;
+  }
+}
+
+/* De ceremonie loopt op één klok: --eerste is het moment van de winnaar.
+   Svelte-overgangen met vertraging spelen hier niet (de dia komt in één
+   keer binnen), dus het wachten zit in CSS. */
+.winnaarkop > * {
+  margin: 0;
+}
+.uitslagdia .winnaar {
+  animation: winnaarIn 0.76s var(--eerste) var(--deal) both;
+}
+.uitslagdia .na-winnaar {
+  animation: opkomen 0.5s calc(var(--eerste) + 500ms) both;
+}
+.uitslagdia .prijs {
+  animation: opkomen 0.52s var(--wacht, var(--eerste)) var(--deal) both;
+}
+@keyframes winnaarIn {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.televisie .uitslagdia .podium {
+  --trede-1: clamp(130px, 19vh, 230px);
+}
+.televisie .prijsdetail {
+  -webkit-line-clamp: 2;
+}
+
+/* ===== Het aanmelden: de QR-code is de hartenvrouw ================= */
+.qr-kaart {
+  position: relative;
+  padding-inline: clamp(40px, 3.6vw, 64px);
+  rotate: 2deg;
+  border-radius: clamp(14px, 1.4vw, 24px);
+}
+.qr-kaart::before,
+.qr-kaart::after {
+  content: "Q\A♥" / "";
+  white-space: pre;
+  position: absolute;
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: clamp(1.1rem, 1.9vw, 2.2rem);
+  line-height: 0.95;
+  text-align: center;
+  color: var(--kleur-hart);
+  pointer-events: none;
+}
+.qr-kaart::before {
+  left: clamp(10px, 1vw, 18px);
+  top: clamp(8px, 0.9vw, 16px);
+}
+.qr-kaart::after {
+  right: clamp(10px, 1vw, 18px);
+  bottom: clamp(8px, 0.9vw, 16px);
+  transform: rotate(180deg);
 }

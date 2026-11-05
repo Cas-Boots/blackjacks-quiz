@@ -17,24 +17,42 @@
     top3,
     vorigePunten = {},
     compact = false,
+    tijden = null,
   }: {
     top3: { spelerId: number; naam: string; punten: number; foto: string | null; dier?: string | null }[];
     vorigePunten?: Record<number, number>;
     /** Voor de telefoon: kleiner, zonder tellende cijfers. */
     compact?: boolean;
+    /**
+     * De ceremonie op de televisie: wanneer plek 1, 2 en 3 onthuld worden
+     * (ms). De eerste trede rijst dan al tijdens de tromgeroffel, met een
+     * dichte kaart erop die op het moment zelf omdraait.
+     */
+    tijden?: [number, number, number] | null;
   } = $props();
+  /** Zo lang staat de dichte kaart op de eerste trede voordat hij omdraait. */
+  const ROFFEL = 1700;
 
   /** Tweede, eerste, derde — zoals een echt podium staat. */
   let volgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.length === 2 ? [1, 0] : top3.map((_, i) => i));
   /** De derde trede komt eerst, de eerste als laatste. */
-  const vertraging = [1700, 1000, 300];
+  let vertraging = $derived(tijden ?? [1700, 1000, 300]);
 </script>
 
 <div class="podium" class:compact>
   {#each volgorde as idx (top3[idx].spelerId)}
     {@const r = top3[idx]}
-    <div class="trede" data-plek={idx + 1} style="--vertraging:{compact ? vertraging[idx] / 2 : vertraging[idx]}ms">
-      <div class="staander">
+    {@const geheim = !!tijden && idx === 0}
+    <div
+      class="trede"
+      data-plek={idx + 1}
+      style="--vertraging:{compact ? vertraging[idx] / 2 : vertraging[idx]}ms;--blok:{geheim ? vertraging[idx] - ROFFEL : compact ? vertraging[idx] / 2 : vertraging[idx]}ms"
+    >
+      {#if geheim}
+        <!-- De winnaar ligt nog dicht; de kaart draait om als de roffel stopt. -->
+        <span class="dichtekaart" aria-hidden="true"><span>?</span></span>
+      {/if}
+      <div class="staander" class:geheim>
         <span class="kroonhouder" class:kroon={idx === 0}>
           <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat={compact ? 'm' : 'l'} goud={idx === 0} />
         </span>
@@ -89,6 +107,7 @@
     background: linear-gradient(90deg, transparent, var(--goud), transparent);
   }
   .trede {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -147,7 +166,7 @@
     place-items: center;
     overflow: hidden;
     animation: oprijzen 0.8s var(--deal) both;
-    animation-delay: var(--vertraging);
+    animation-delay: var(--blok, var(--vertraging));
     box-shadow:
       inset 0 6px 0 rgba(255, 255, 255, 0.35),
       inset 0 -10px 24px rgba(0, 0, 0, 0.35),
@@ -193,6 +212,71 @@
     animation: gloedTrede 2.6s ease-in-out infinite;
     animation-delay: calc(var(--vertraging) + 800ms);
   }
+  /* De winnaar onthuld: eerst een dichte kaart, dan draait hij om. */
+  .staander.geheim {
+    animation-delay: var(--vertraging);
+    animation-name: omdraaienWinnaar;
+    animation-duration: 0.7s;
+  }
+  .dichtekaart {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--hoogte) + 0.9rem);
+    width: clamp(84px, 7vw, 140px);
+    aspect-ratio: 5 / 7;
+    margin-left: calc(clamp(84px, 7vw, 140px) / -2);
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
+      var(--fiche, #c62f2a);
+    box-shadow:
+      inset 0 0 0 5px var(--kaart-vlak, #fffdf6),
+      0 18px 30px rgba(0, 0, 0, 0.5);
+    animation:
+      kaartLegt 0.5s calc(var(--vertraging) - 1700ms) var(--deal) both,
+      kaartTrilt 0.18s calc(var(--vertraging) - 900ms) ease-in-out 5,
+      kaartWeg 0.35s var(--vertraging) ease-in forwards;
+  }
+  .dichtekaart span {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(2rem, 3.6vw, 4.4rem);
+    color: var(--kaart-vlak, #fffdf6);
+  }
+  @keyframes kaartLegt {
+    from {
+      opacity: 0;
+      transform: translateY(-60px) rotate(-12deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes kaartTrilt {
+    50% {
+      transform: rotate(3deg) scale(1.04);
+    }
+  }
+  @keyframes kaartWeg {
+    to {
+      opacity: 0;
+      transform: rotateY(90deg) scale(1.1);
+    }
+  }
+  @keyframes omdraaienWinnaar {
+    from {
+      opacity: 0;
+      transform: rotateY(-90deg) scale(1.1);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   @keyframes oprijzen {
     from {
       height: 0;
@@ -204,6 +288,9 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .dichtekaart {
+      display: none;
+    }
     .blok,
     .staander {
       animation-duration: 0.01ms;
