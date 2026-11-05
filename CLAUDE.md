@@ -53,7 +53,21 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
 
 ## Lengte
 
-De avond is bewust kort: dertig seconden per vraag, een minuut in teamrondes.
-Reken per vraag de klok plus ongeveer 45 seconden voor voorlezen en
-onthullen. Wat er bij komt, moet er meestal ergens anders af. Werk de
-aantallen in `README.md` bij als je rondes of vragen toevoegt.
+De klok is kort (dertig seconden per vraag, een minuut in teamrondes), maar de
+tijd gaat zitten in alles eromheen: onthullen, uitleggen, discussiëren. Reken
+daarom met praattijd, niet alleen met de klok:
+
+| Wat | Bovenop de klok |
+|---|---|
+| Snelle nieuwsvraag (waar of niet waar, meerkeuze) | 1 min per vraag |
+| Open nieuwsvraag, schatting, emoji of muziek | 1½ min per vraag |
+| Vraag over onszelf (sport, taart, voorspellingen, stemmen) | 2 min per vraag |
+| Elke ronde (inleiden, teams, tussenstand) | 2 min |
+| Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
+
+Zo kwam de hoofdquiz in november 2026 met 11 rondes en 58 vragen op ± 3 uur
+(2½ uur met een strakke quizmaster), tegen 1½ uur op alleen de klok. De
+rondes over onszelf kosten de meeste tijd, maar maken de quiz uniek: inkorten
+doe je eerst bij de nieuwsvragen. Wat er bij komt, moet er meestal ergens
+anders af. Werk de aantallen in `README.md` bij als je rondes of vragen
+toevoegt.

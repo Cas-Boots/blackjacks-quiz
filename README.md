@@ -23,7 +23,7 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 11 rondes, 58 vragen (± anderhalf uur) | 15 rondes, 81 vragen |
+| Blackjacks 2026 — Het Jaaroverzicht | 11 rondes, 58 vragen (± 2½ à 3 uur met praten) | 15 rondes, 81 vragen |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
 De avond is bewust kort gehouden. Rondes van vier tot acht vragen, dertig
