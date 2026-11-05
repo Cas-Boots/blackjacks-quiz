@@ -53,6 +53,13 @@ export interface Ronde {
   punten: number;
   teamModus: TeamModus;
   aantalTeams?: number;
+  /**
+   * Hoeveel iemand weet van het onderwerp van deze ronde, op naam: 1 is
+   * gewoon, hoger is meer. Wie er niet in staat (ook een gast) telt als 1.
+   * De teams worden zo verdeeld dat ze samen even sterk zijn; uit de
+   * eerlijkste indelingen kiest het toeval, zodat de teams blijven wisselen.
+   */
+  kennis?: Record<string, number>;
   uitleg: string;
   /** Standaard uitgevinkt bij het samenstellen. */
   optioneel?: boolean;

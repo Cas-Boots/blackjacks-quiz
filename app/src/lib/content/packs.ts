@@ -15,6 +15,15 @@ import type { Pakketten } from './types';
 
 const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 300'%3E%3Crect width='480' height='300' fill='rgb(13,30,24)'/%3E%3Ctext x='240' y='128' font-family='Georgia,serif' font-size='110' fill='rgb(201,162,39)' text-anchor='middle'%3E%E2%99%A0%3C/text%3E%3Ctext x='240' y='210' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='rgb(216,210,194)' text-anchor='middle'%3EVoorbeeldafbeelding%3C/text%3E%3Ctext x='240' y='245' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='rgb(138,160,150)' text-anchor='middle'%3EZo verschijnt een beeldvraag op het scherm%3C/text%3E%3C/svg%3E";
 
+/**
+ * Wie hoeveel van het nieuws weet (1 is gewoon, hoger is meer). De teams
+ * in de nieuwsrondes worden zo verdeeld dat ze samen even sterk zijn.
+ * Cas is quizmaster en speelt niet mee.
+ */
+const NIEUWS = { Joris: 4, Rik: 3, Eva: 2, Liz: 1, Bastiaan: 1 };
+/** Hetzelfde voor muziek: Joris en Rik komen zo nooit in hetzelfde team. */
+const MUZIEK = { Joris: 3, Rik: 3 };
+
 export const PAKKETTEN: Pakketten = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
@@ -59,12 +68,13 @@ export const PAKKETTEN: Pakketten = {
         naam: "Vier Kaarten",
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
-          {v:"Welke film won in maart de Oscar voor beste film?",
+          {v:"Welke film won in maart de Oscar voor beste film? Tip: de titel telt vier woorden.",
            opties:["Sinners","One Battle After Another","Hamnet","Marty Supreme"], goed:1,
            toelichting:"Paul Thomas Anderson ging met zes Oscars naar huis; Sinners won er vier."},
           {v:"Tegen welk land ging Oranje eruit op het WK?",
@@ -76,10 +86,10 @@ export const PAKKETTEN: Pakketten = {
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
-          {v:"Wie werd in Italië de succesvolste winterolympiër ooit?",
-           opties:["Johannes Høsflot Klæbo","Marit Bjørgen","Ole Einar Bjørndalen","Sven Kramer"], goed:0,
+          {v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
+           opties:["Johannes Høsflot Klæbo","Sven Kramer","Ireen Wüst","Shaun White"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
-          {v:"Welke negentienjarige voerde lange tijd het Formule 1-kampioenschap aan?",
+          {v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
            opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
            toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
@@ -124,13 +134,18 @@ export const PAKKETTEN: Pakketten = {
           {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
           {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
           {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
-           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."},
+          {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
+           toelichting:"Daarna maart met 60."},
+          {v:"Welke van deze sporten heeft niemand van ons dit jaar gedaan: boulderen, fietsen, hockey of kajakken?", a:"Hockey", live:"sport.nietGedaan",
+           toelichting:"De rest deed wel iemand: boulderen (Rik), fietsen (Cas) en kajakken (Cas)."}
         ]
       },
       {
         naam: "Dichtstbij Wint",
         suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
@@ -161,6 +176,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "2026 in Emoji",
         suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
         vragen: [
           {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
@@ -239,9 +255,35 @@ export const PAKKETTEN: Pakketten = {
         ]
       },
       {
+        naam: "De Hitparade",
+        suit: "♥", thema: "De muziek van 2026", sfeer: "violet",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
+        kennis: MUZIEK,
+        uitleg: "In teams, met Joris en Rik ieder aan een andere kant. Raden, gokken, meezingen: je hoeft geen kenner te zijn.",
+        // Alleen nummers uit 2026. Wat er onder de film van het jaar ligt,
+        // staat in showreel/muziek/LEESMIJ.md.
+        vragen: [
+          {emoji:"🌸 🌊 👸", v:"Met welk nummer van Taylor Swift begon 2026 op nummer 1?", a:"The Fate of Ophelia",
+           toelichting:"Het stond de eerste weken van januari bovenaan in de Top 40."},
+          {v:"Onder januari tot en met april in de openingsfilm klonk de hit die eind januari Taylor Swift van 1 stootte, en daar elf weken bleef. Welke, en van wie?", a:"I Just Might — Bruno Mars",
+           toelichting:"Van 24 januari tot begin april. Wie goed luisterde naar de film, had hem al."},
+          {v:"Shakira en Burna Boy stonden deze zomer maandenlang op 1 met Dai Dai. Welk record pakte Shakira daarmee?", a:"Geen zangeres voerde de Top 40 ooit langer aan",
+           toelichting:"Ook Burna Boy schreef geschiedenis: hij werd de succesvolste Afrikaanse artiest ooit in de Top 40."},
+          {emoji:"💯 😢", v:"Welke Nederlandse hit stootte Dai Dai van de troon?", a:"100 Tranen — Qlas, Antoon en Boef"},
+          {v:"Wiens Spotify Wrapped is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"wrapped-01.png"},
+           toelichting:"Zet een screenshot van iemands top 5 artiesten in app/media, zonder naam erop."},
+          {v:"Een AI-zanger zingt een nieuwsfeit uit 2026. Welk?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"ai-nieuws-01.mp3"},
+           toelichting:"Laat een AI-muziekgenerator een couplet over een nieuwsfeit inzingen, en zet het in app/media."},
+          {v:"Kennersvraag, dubbele punten: welke Roemeense dj maakte in 2026 een hit met Jason Derulo?", a:"DJ Goja, met Mi Chico", punten:4,
+           toelichting:"Het origineel kwam in maart uit; in juni volgde de versie met Derulo en de Braziliaanse zangeres Melody."}
+        ]
+      },
+      {
         naam: "2027",
         suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",

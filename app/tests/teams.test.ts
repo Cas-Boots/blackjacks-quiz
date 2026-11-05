@@ -57,6 +57,42 @@ describe('maakTeams', () => {
   });
 });
 
+describe('kennis', () => {
+  const vijf = [
+    { id: 1, naam: 'Joris' }, { id: 2, naam: 'Rik' }, { id: 3, naam: 'Eva' },
+    { id: 4, naam: 'Liz' }, { id: 5, naam: 'Bastiaan' },
+  ];
+  const sterkte: Record<number, number> = { 1: 4, 2: 3, 3: 2, 4: 1, 5: 1 };
+  const nieuws = ronde({ aantalTeams: 2, kennis: { Joris: 4, rik: 3, Eva: 2, Liz: 1, Bastiaan: 1 } });
+
+  it('maakt de teams even sterk, en laat ze toch wisselen', () => {
+    const indelingen = new Set<string>();
+    for (let k = 0; k < 200; k++) {
+      const teams = maakTeams(nieuws, vijf);
+      const totalen = teams.map((t) => t.leden.reduce((n, id) => n + sterkte[id], 0));
+      expect(Math.abs(totalen[0] - totalen[1])).toBeLessThanOrEqual(1);
+      expect(teams.map((t) => t.leden.length).sort()).toEqual([2, 3]);
+      // Joris en Rik samen is nooit eerlijk.
+      expect(teams.some((t) => t.leden.includes(1) && t.leden.includes(2))).toBe(false);
+      indelingen.add(teams.map((t) => t.leden.slice().sort().join(',')).sort().join(' | '));
+    }
+    expect(indelingen.size).toBeGreaterThan(1);
+  });
+
+  it('houdt twee kenners uit elkaar als alleen zij genoemd zijn', () => {
+    const muziek = ronde({ aantalTeams: 2, kennis: { Joris: 3, Rik: 3 } });
+    for (let k = 0; k < 50; k++) {
+      const teams = maakTeams(muziek, vijf);
+      expect(teams.some((t) => t.leden.includes(1) && t.leden.includes(2))).toBe(false);
+    }
+  });
+
+  it('laat niemand vallen, ook geen gast die niet in de lijst staat', () => {
+    const teams = maakTeams(nieuws, [...vijf, { id: 6, naam: 'Gast' }], vast([0.3, 0.7, 0.1]));
+    expect(teams.flatMap((t) => t.leden).sort()).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+});
+
 describe('verplaats', () => {
   it('schuift een speler naar het volgende team', () => {
     const teams = [
