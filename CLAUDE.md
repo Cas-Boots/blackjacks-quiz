@@ -160,6 +160,51 @@ Blackjacks?*), met de kennisrondes en de voorspellingen ervoor. Kennisrondes
 als slotronde maken het juist minder spannend: daar loopt wie al voorstaat
 verder uit. Let op: meer toeval aan het eind is ook meer loterij.
 
+## Stand van zaken (5 november 2026)
+
+Alle rondes zijn met Cas doorgenomen. De avond, in deze volgorde:
+
+| # | Ronde | Vragen | Vorm |
+|---|---|---|---|
+| 1 | Warmdraaien | 5 | waar of niet waar over het grote nieuws, ieder voor zich |
+| 2 | Hitparade 1: Wat hoor je? | 4 | muziekfragmenten, teams |
+| 3 | Vier Kaarten | 4 | meerkeuze over groot nieuws dat niet in de film staat, teams |
+| 4 | Onze Sportcompetitie | 6 | sport en taart uit resolution-recap, ieder voor zich |
+| 5 | Dichtstbij Wint | 3 | schatten, teams (Joris en Rik samen) |
+| 6 | 2026 in Emoji | 4 | emoji-puzzels over het nieuws, teams |
+| 7 | De Voorspellingen | 4 | de afrekening van januari, ieder voor zich |
+| 8 | Hitparade 2: Wie, wat en wanneer? | 4 | muziekfragmenten, teams |
+
+**34 vragen is het afgesproken aantal.** Bewust uit (`optioneel`), met de
+reden: *Hoger of Lager* (te veel sport naast de sportronde), *Taart & Verre
+Landen* (taart zit in de sport, landen alleen voor de voorspellingen),
+*2027* (de vragen waren niet de moeite waard), *Wie van de Blackjacks?*
+(stemmen werkt slecht met vijf spelers), *De WK-poule*, *Bliksemronde*,
+*Jullie Jaar in Beeld* en *Oktober tot december*. Afgekeurde vragen staan
+als `reserve`; kijk daar eerst voordat je iets nieuws zoekt, maar lees de
+opmerking erbij (sommige zijn bewust afgekeurd, of staan al elders).
+Lokaal nieuws uit Obdam, Heerhugowaard en Alkmaar is uitgezocht: niets sterk
+genoeg.
+
+### Zo werken we samen
+
+- **Cas beslist, vraag voor vraag.** Laat een ronde zien als tabel, met wat
+  je opvalt (te makkelijk, te moeilijk, wie heeft voordeel, past de vorm).
+  Bij nieuwe of vervangen vragen: laat eerst alleen zien wat de spelers zien,
+  zónder antwoorden, zodat Cas kan proberen of ze te raden zijn.
+- **Feiten eerst nazoeken**, met een bron in je antwoord. Kan iets niet
+  (een site buiten het netwerk), zeg dat en gok niet.
+- **Na elke wijziging**, in `app/`: `npm run content:sync`, `npx vitest run`,
+  `npm run check`, `npm run build` en `npx playwright test`. Commit pas als de
+  héle uitvoer van de e2e-proeven geen `failed` of `✘` bevat (niet alleen de
+  laatste regels). Proeven zoeken rondes en vragen op naam of inhoud, nooit
+  op een vaste plek in `packs.ts`.
+- `npm ci` faalt: het lockbestand loopt achter op `package.json`. Gebruik
+  `npm install` en zet `package-lock.json` daarna terug, tenzij het bijwerken
+  ervan de bedoeling is.
+- Commitboodschappen verklappen geen antwoorden van vragen die Cas nog wil
+  proberen.
+
 ## Nog te doen in december
 
 Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
