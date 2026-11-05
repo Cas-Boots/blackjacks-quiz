@@ -14,7 +14,7 @@ import type { Vraag } from '$lib/content/types';
 import type { VoorspellingenUitslag } from '$lib/shared/state';
 import { VOORSPELLING_OPLOSSERS } from './voorspellingen';
 import { POULE_OPLOSSERS, pouleAnalyse } from './poule';
-import { SPORT_2025 } from './vorigjaar';
+import { SPORT_2025, TAART_2024 } from './vorigjaar';
 import {
   type Analyse, type Persoon, datumTekst, maandNaam, opsomming, sportNaam, telwoord, zoekSportTag,
 } from './analyse';
@@ -428,6 +428,55 @@ const OPLOSSERS: Record<string, Oplosser> = {
   },
 
   /* ---- Taart --------------------------------------------------------- */
+
+  /** Terugblik: wie at in 2024, het taartjaar, de meeste taart, en hoeveel is het nu? */
+  'taart.koning2024': (a) => {
+    const [naam, toen] = Object.entries(TAART_2024)
+      .filter((x): x is [string, number] => x[1] !== null)
+      .sort((x, y) => y[1] - x[1])[0];
+    const nu = a.personen.find((p) => p.naam === naam)?.taart.totaal;
+    return {
+      v: 'Wie was in 2024 onze taartkoning?',
+      a: `${naam} — ${String(toen).replace('.', ',')} taarten`,
+      toelichting: nu !== undefined ? `En dit jaar? ${telwoord(nu, true)}.` : undefined,
+    };
+  },
+
+  /** Het taarttotaal van dit jaar, met dat van 2024 als referentie. */
+  'taart.totaalVs2024': (a) => {
+    const getal = (n: number) => String(n).replace('.', ',');
+    const toen = Object.values(TAART_2024).reduce<number>((n, x) => n + (x ?? 0), 0);
+    const nu = a.personen.reduce((n, p) => n + p.taart.totaal, 0);
+    const [koning, zijn] = Object.entries(TAART_2024).sort((x, y) => (y[1] ?? 0) - (x[1] ?? 0))[0];
+    const verschil = Math.round(100 * (1 - nu / toen));
+    return {
+      v: `In 2024 aten we samen ${getal(toen)} taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.`,
+      a: `${nu} taarten`,
+      toelichting: nu < toen
+        ? `${verschil} procent minder. ${koning} at er in 2024 in zijn eentje al ${getal(zijn ?? 0)}.`
+        : `${-verschil} procent meer dan in 2024.`,
+    };
+  },
+
+  /** Wie at er dit jaar meer taart dan in 2024. */
+  'taart.meerDan2024': (a) => {
+    // Wie in 2024 niet meedeed (Bastiaan), telt niet mee.
+    const lijst = a.personen
+      .filter((p) => typeof TAART_2024[p.naam] === 'number')
+      .map((p) => ({ p, toen: TAART_2024[p.naam] as number }))
+      .sort((x, y) => (y.p.taart.totaal - y.toen) - (x.p.taart.totaal - x.toen) || x.p.naam.localeCompare(y.p.naam));
+    const meer = lijst.filter((x) => x.p.taart.totaal > x.toen);
+    const getal = (n: number) => String(n).replace('.', ',');
+    const stand = (x: (typeof lijst)[number]) => `${x.p.naam} van ${getal(x.toen)} naar ${x.p.taart.totaal}`;
+    if (!meer.length) {
+      return { v: 'Wie at er dit jaar méér taart dan in 2024?', a: 'Niemand', toelichting: `${opsomming(lijst.map(stand))}.` };
+    }
+    return {
+      v: 'Wie at er dit jaar méér taart dan in 2024?',
+      a: opsomming(meer.map((x) => x.p.naam)),
+      toelichting: `${opsomming(meer.map(stand))}.`,
+    };
+  },
 
   'taart.totaal': (a) => {
     const totaal = a.personen.reduce((n, p) => n + p.taart.totaal, 0);

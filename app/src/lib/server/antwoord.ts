@@ -165,6 +165,9 @@ export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel
   if (vraag.a && lijktOp(tekst, vraag.a)) {
     return { automatisch: true, goed: true, reden: 'komt overeen' };
   }
+  if (vraag.ookGoed?.some((alt) => lijktOp(tekst, alt))) {
+    return { automatisch: true, goed: true, reden: 'komt overeen met een ander goed antwoord' };
+  }
   return { automatisch: false, goed: false, reden: 'beoordeel zelf' };
 }
 

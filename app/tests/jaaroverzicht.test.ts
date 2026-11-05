@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import snapshot from '../src/lib/content/recap-snapshot.json';
+import snapshot from './fixtures/recap-2026-09-18.json';
 import { analyseer, type RecapExport } from '../src/lib/server/recap/analyse';
 import {
   splits, aantalBalken, eigenMaand, voorDeTrailer, inDeTrailer, maandenInDeFilm, aantalDias, maandenTeVullen,

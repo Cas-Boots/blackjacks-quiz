@@ -69,6 +69,17 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   de release (19 november 2026), waarschijnlijk "hoeveel spelers op de eerste
   dag"; tot dan staat hij als schatvraag in *Dichtstbij Wint* als `teVullen`.
   Haal hem niet weg bij het inkorten.
+- **Taart hoort bij de sport**: dezelfde tellers uit resolution-recap, hetzelfde
+  idee, dus één ronde (*Onze Sportcompetitie*). De taart is dit jaar niet
+  serieus bijgehouden (in 2024 wel): vergelijk dus vooral het totaal met 2024. **De landen zijn alleen
+  bijgehouden voor de voorspellingen**; geen eigen landenvragen. Vorige
+  seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
+  een terugblik daarop valt goed. Ververs de cijfers met
+  `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Open vragen: denk aan hoe ze het intypen.** Stuur het antwoord met de
+  vraag ("In één woord", "Wie werd er opgepakt?"), houd `a` kort, en zet
+  andere goede antwoorden in `ookGoed`: die keurt de app automatisch goed,
+  zonder dat ze op het scherm komen. De rest beoordeelt de quizmaster.
 - **Feiten worden nagezocht**, niet gegokt. Kan iets nog niet (de rest van
   het jaar, eigen foto's), zet er dan `teVullen: true` bij.
 
@@ -87,8 +98,8 @@ daarom met praattijd, niet alleen met de klok:
 | Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
 
 **Het doel: ± 2 uur, en vóór middernacht klaar.** De quiz is op
-oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 9
-rondes en 36 vragen eindigt hij volgens het model hierboven om ± 23:35, ruim
+oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 8
+rondes en 33 vragen eindigt hij volgens het model hierboven om ± 23:25, ruim
 voor het aftellen. `app/tests/keuze.test.ts` rekent dat na en faalt boven de
 125 minuten.
 

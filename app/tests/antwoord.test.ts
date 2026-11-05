@@ -130,3 +130,15 @@ describe('leesGetal', () => {
     expect(leesGetal('geen idee')).toBeNull();
   });
 });
+
+describe('ookGoed', () => {
+  const r = { naam: 'r', suit: '♠', thema: '', type: 'open' as const, tijd: 60, punten: 2, teamModus: 'teams' as const, uitleg: '', vragen: [] };
+  const v = { v: 'Wat legde Nederland stil?', a: 'Sneeuw', ookGoed: ['sneeuwval', 'sneeuwchaos'] };
+  it('keurt een ander goed antwoord automatisch goed', () => {
+    expect(beoordeel(r, v, 'Sneeuwchaos!')).toMatchObject({ automatisch: true, goed: true });
+    expect(beoordeel(r, v, 'sneeuw')).toMatchObject({ automatisch: true, goed: true });
+  });
+  it('laat de rest aan de quizmaster', () => {
+    expect(beoordeel(r, v, 'storm')).toMatchObject({ automatisch: false, goed: false });
+  });
+});

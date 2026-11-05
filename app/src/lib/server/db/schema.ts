@@ -40,6 +40,8 @@ export const spellen = sqliteTable('spellen', {
   pauze: text('pauze'),
   /** Of de klok liep toen de pauze begon; dan loopt hij bij het hervatten weer door. */
   pauzeKlokLiep: integer('pauze_klok_liep', { mode: 'boolean' }).notNull().default(false),
+  /** Bij de uitslag: de quizmaster heeft van het podium doorgeschakeld naar de prijzen. */
+  prijzenInBeeld: integer('prijzen_in_beeld', { mode: 'boolean' }).notNull().default(false),
   /** Loopt op bij elke wijziging. Clients negeren pakketjes met een lagere versie. */
   versie: integer('versie').notNull().default(0),
   isActief: integer('is_actief', { mode: 'boolean' }).notNull().default(true),

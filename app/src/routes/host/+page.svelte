@@ -224,6 +224,8 @@
     if (f === 'vraag') return doe('toon-antwoord');
     if (f === 'antwoord' || f === 'cijfers') return doe('volgende');
     if (f === 'stand') return doe('naar-ronde', { ronde: (staat?.rondeIndex ?? 0) + 1 });
+    // Bij de uitslag: van het podium naar de prijzen. De film start je bewust met de knop.
+    if (f === 'einde' && !staat?.prijzenInBeeld) return doe('toon-prijzen', { aan: true });
   }
 
   /* Sneltoetsen, zoals in de losse quiz: spatie is 'verder', pijl-links is
@@ -241,7 +243,9 @@
         break;
       case 'ArrowLeft':
         e.preventDefault();
-        void doe('vorige');
+        // Staan de prijzen in beeld, dan is 'terug' eerst terug naar het podium.
+        if (staat?.fase === 'einde' && staat.prijzenInBeeld) void doe('toon-prijzen', { aan: false });
+        else void doe('vorige');
         break;
       case 'p':
       case 'P':
@@ -529,9 +533,22 @@
           <button class="knop stil" onclick={() => doe('naar-stand')} disabled={bezig}>Naar de tussenstand</button>
         {/if}
       {:else if staat?.fase === 'einde'}
-        <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig}>
-          🎞 De film: het hele jaar
-        </button>
+        <!-- Eerst het podium; de prijzen komen als de kamer is uitgejuicht. -->
+        {#if !staat.prijzenInBeeld}
+          <button class="knop hoofd" onclick={() => doe('toon-prijzen', { aan: true })} disabled={bezig}>
+            🏆 Toon de prijzen
+          </button>
+          <button class="knop" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig}>
+            🎞 De film: het hele jaar
+          </button>
+        {:else}
+          <button class="knop hoofd" onclick={() => doe('jaaroverzicht', { stap: 0 })} disabled={bezig}>
+            🎞 De film: het hele jaar
+          </button>
+          <button class="knop" onclick={() => doe('toon-prijzen', { aan: false })} disabled={bezig}>
+            ← Terug naar het podium
+          </button>
+        {/if}
       {:else if staat?.fase === 'stand'}
         {#if (staat.rondeIndex ?? 0) + 1 < staat.rondeAantal}
           <button class="knop hoofd" onclick={() => doe('naar-ronde', { ronde: (staat?.rondeIndex ?? 0) + 1 })} disabled={bezig}>Volgende ronde</button>

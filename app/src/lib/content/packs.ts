@@ -55,10 +55,12 @@ export const PAKKETTEN: Pakketten = {
            naOnthulling:{soort:"video", bron:"songfestival-2026-winnaar.mp4", bijschrift:"Dara — Bangaranga"}},
           {v:"Taylor Swift trad op in de rust van de Super Bowl.", goed:false,
            toelichting:"Nee, Bad Bunny, bijna helemaal in het Spaans. Midden in de show trouwde er écht een stel op het podium."},
+          // Staat al in 2026 in Emoji.
           {reserve:true, v:"De maanvlucht van Artemis II duurde langer dan twee weken.", goed:false,
            toelichting:"Tien dagen: van 1 tot 10 april. Ze kwamen wel verder van de aarde dan ooit een mens."},
           {v:"De opvouwbare iPhone kost in Nederland meer dan 2.000 euro.", goed:true,
            toelichting:"Vanaf € 2.339 voor de iPhone Duo: de duurste iPhone ooit."},
+          // Staat al in 2026 in Emoji.
           {reserve:true, v:"De VS namen de president van Venezuela gevangen.", goed:true,
            toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
           {reserve:true, v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
@@ -76,6 +78,7 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"In oktober, bij honderden winkels. Al het verse eten moest weg."},
           {reserve:true, v:"Realityster Spencer Pratt werd burgemeester van Los Angeles.", goed:false,
            toelichting:"Hij deed echt mee en lag even voor, maar werd derde."},
+          // Staat al in 2026 in Emoji.
           {reserve:true, v:"Voor het eerst sinds 1972 vlogen er mensen om de maan.", goed:true,
            toelichting:"Artemis II, met vier astronauten aan boord."},
           {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
@@ -159,24 +162,32 @@ export const PAKKETTEN: Pakketten = {
       },
       {
         naam: "Onze Sportcompetitie",
-        suit: "♠", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
+        suit: "♠", thema: "Resolution Recap — sport en taart", sfeer: "gras",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "sport",
-        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
+        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig: het sporten en de taart. Nu gaat het over jullie.",
         // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
         // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
-        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
+        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 4 november).
         vragen: [
-          {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 140 procent", live:"sport.doelProcent",
-           toelichting:"84 keer sporten op een doel van 60. Daarna Liz met 114 procent."},
-          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 91 tegen 84", live:"sport.duel:Liz/Eva"},
-          {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
-           toelichting:"Daarna maart met 60."},
-          {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Hardlopen — 65 tegen 61", live:"sport.sportDuel",
+          {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 163 procent", live:"sport.doelProcent",
+           toelichting:"98 keer sporten op een doel van 60. Daarna Liz met 136 procent."},
+          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 109 tegen 98", live:"sport.duel:Liz/Eva"},
+          {v:"In welke maand sportten we met z’n allen het meest?", a:"oktober — 75 keer", live:"sport.drukkeMaand",
+           toelichting:"Daarna april met 68."},
+          {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Padel — 90 tegen 80", live:"sport.sportDuel",
            toelichting:"Na de sportschool, die met afstand bovenaan staat."},
           // Terugblik: 2025 was ons eerste sportjaar (cijfers in recap/vorigjaar.ts).
-          {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 45 keer", live:"sport.vooruit",
-           toelichting:"Dat is 125 procent meer. Daarna Eva: van 44 naar 84."},
+          {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 59 keer", live:"sport.vooruit",
+           toelichting:"Dat is 195 procent meer. Daarna Eva: van 44 naar 98."},
+          // De taartteller: zelfde idee als het sporten. Dit jaar is hij niet
+          // serieus bijgehouden, in 2024 wel: daarom alleen de vergelijking
+          // van het totaal (cijfers in recap/vorigjaar.ts).
+          {reserve:true, v:"Wie was in 2024 onze taartkoning?", a:"Joris — 33 taarten", live:"taart.koning2024",
+           toelichting:"En dit jaar? Vijf."},
+          // Een getal in een open ronde: de quizmaster vinkt wie het dichtst zit goed.
+          {v:"In 2024 aten we samen 80,5 taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.", a:"49 taarten", live:"taart.totaalVs2024",
+           toelichting:"39 procent minder. Joris at er in 2024 in zijn eentje al 33."},
           // Reserve: niet sterk genoeg, of zonder referentie om te raden.
           {reserve:true, v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst:anders",
            toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
@@ -234,13 +245,18 @@ export const PAKKETTEN: Pakketten = {
         suit: "♣", thema: "Resolution Recap — de rest", sfeer: "suiker",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "taart",
+        // Uit: de taartvragen staan nu in Onze Sportcompetitie (zelfde tellers,
+        // zelfde idee), en de landen zijn alleen bijgehouden voor de voorspellingen.
+        optioneel: true,
         uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
         vragen: [
-          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
-          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
-          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
+          {reserve:true, v:"Wie at er dit jaar méér taart dan in 2024?", a:"Eva en Cas", live:"taart.meerDan2024", tijd:60,
+           toelichting:"Eva van 1 naar 9 en Cas van 19,5 naar 24."},
+          {reserve:true, v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
+          {reserve:true, v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
+          {reserve:true, v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
           {reserve:true, v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
-          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
+          {reserve:true, v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
         ]
       },
       {
@@ -248,17 +264,25 @@ export const PAKKETTEN: Pakketten = {
         suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
-        uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
+        uitleg: "In teams. Welk nieuws uit 2026 staat hier? Een kort antwoord is genoeg: één woord of een naam.",
         vragen: [
-          {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
+          {emoji:"🚆 🚫 ✈️ 🚫 🛷", v:"In één woord: wat legde in januari half Nederland stil?", a:"Sneeuw",
+           ookGoed:["sneeuwval", "sneeuwchaos", "sneeuwstorm", "winterweer", "gladheid"],
            toelichting:"Het openbaar vervoer en het vliegverkeer lagen grotendeels stil."},
-          {emoji:"🏜️ 🚙 🇶🇦 6️⃣", v:"Welke race, en wie won hem voor de zesde keer?", a:"De Dakar Rally — Nasser Al-Attiyah",
+          {emoji:"🇺🇸 🚁 🇻🇪 👨‍💼 ⛓️", v:"Wie werd er in januari door de Amerikanen opgepakt?", a:"Nicolás Maduro",
+           ookGoed:["de president van Venezuela", "president Venezuela", "Venezuela"],
+           toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
+          {reserve:true, emoji:"🏜️ 🚙 🇶🇦 6️⃣", v:"Welke race, en wie won hem voor de zesde keer?", a:"De Dakar Rally — Nasser Al-Attiyah",
            toelichting:"In januari, en voor het eerst in een Dacia."},
           {emoji:"🕷️ 🧑 🆕 🌅", v:"Welke film?", a:"Spider-Man: Brand New Day",
+           ookGoed:["Spider-Man", "Spiderman", "Spider Man"],
            toelichting:"De grootste kaskraker van het jaar in de Amerikaanse bioscopen."},
           {reserve:true, emoji:"📚 🎁 🛵 👴", v:"Welk boek kreeg je in maart cadeau bij de boekwinkel?", a:"Piaggio van Hendrik Groen",
            toelichting:"Het Boekenweekgeschenk. Achter Hendrik Groen bleek Peter de Smet te zitten."},
-          {emoji:"🎾 🍓 🇨🇿 🆚 🇨🇿", v:"Welke finale, in juli?", a:"De vrouwenfinale van Wimbledon",
+          {emoji:"🚀 🌕 🔄 👩‍🚀 👨‍🚀 🌊", v:"Welke ruimtereis, in april?", a:"Artemis II",
+           ookGoed:["Artemis", "Artemis 2", "maanmissie", "maanreis", "maanvlucht", "mensen om de maan", "rondje om de maan"],
+           toelichting:"Vier astronauten, tien dagen, voor het eerst sinds 1972 weer bij de maan. Ze kwamen verder van de aarde dan ooit een mens."},
+          {reserve:true, emoji:"🎾 🍓 🇨🇿 🆚 🇨🇿", v:"Welke finale, in juli?", a:"De vrouwenfinale van Wimbledon",
            toelichting:"Linda Nosková versloeg landgenote Karolína Muchová. Bij de mannen prolongeerde Jannik Sinner."}
         ]
       },

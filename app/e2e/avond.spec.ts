@@ -313,9 +313,19 @@ test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ b
   // Opnieuw onthullen, naar de uitslag: podium, prijzen, uitslagpagina.
   await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
   await expect(qm.pagina.locator('.standpunten').first()).toHaveText('1500', { timeout: 15_000 });
+  // De prijzen horen bij de uitslag; daarvoor weigert de server de knop.
+  const teVroeg = await qm.pagina.request.post('/api/host', { data: { opdracht: 'toon-prijzen', aan: true } });
+  expect(teVroeg.status()).toBe(409);
   await qm.doe('naar-einde');
   await expect(tv.pagina.locator('.podium .trede')).toHaveCount(3, { timeout: 15_000 });
+  // Eerst het podium; de quizmaster schakelt zelf door naar de prijzen, en weer terug.
+  await expect(tv.pagina.locator('.uitslagdia.prijzen')).toHaveCount(0);
+  await qm.pagina.getByRole('button', { name: /Toon de prijzen/ }).click();
+  await expect(tv.pagina.locator('.uitslagdia.prijzen')).toHaveCount(1, { timeout: 15_000 });
   await expect(tv.pagina.locator('.prijs').first()).toBeVisible({ timeout: 15_000 });
+  await qm.pagina.getByRole('button', { name: /Terug naar het podium/ }).click();
+  await expect(tv.pagina.locator('.uitslagdia.prijzen')).toHaveCount(0, { timeout: 15_000 });
+  await expect(qm.pagina.getByRole('button', { name: /Toon de prijzen/ })).toBeVisible();
   await expect(tv.pagina.getByText(/\/uitslag\/\d+/)).toBeVisible({ timeout: 15_000 });
 
   const link = liz.pagina.getByRole('link', { name: 'Bekijk en deel de uitslag' });

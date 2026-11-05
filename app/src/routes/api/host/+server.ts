@@ -212,6 +212,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       log = { omschrijving: `Antwoord getoond bij vraag ${spel.vraagIndex + 1}`, terug: true };
       break;
     }
+    case 'toon-prijzen': {
+      // Van het podium naar de prijzen en terug. Geen stap voor 'ongedaan':
+      // het verandert niets aan de stand, alleen aan wat de televisie laat zien.
+      if (spel.fase !== 'einde') error(409, 'de prijzen horen bij de uitslag');
+      zet({ prijzenInBeeld: typeof body.aan === 'boolean' ? body.aan : !spel.prijzenInBeeld });
+      break;
+    }
     case 'media-wissel': {
       if (!vraag?.media) error(409, 'deze vraag heeft geen fragment');
       zet({ mediaSpeelt: !spel.mediaSpeelt });
@@ -308,7 +315,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
     case 'naar-einde': {
       stopKlok();
-      zet({ fase: 'einde', geeindigdOp: new Date().toISOString() });
+      // De uitslag begint altijd bij het podium; de prijzen komen op het teken van de quizmaster.
+      zet({ fase: 'einde', geeindigdOp: new Date().toISOString(), prijzenInBeeld: false });
       log = { omschrijving: 'Naar de uitslag', terug: true };
       break;
     }

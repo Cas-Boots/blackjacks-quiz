@@ -332,9 +332,13 @@ De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
 manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.
 
 Na elke ronde de tussenstand, met op je telefoon je eigen regel gemarkeerd en
-"Je staat 2e van 5." Aan het eind een echt podium: drie treden in goud,
-zilver en brons die één voor één uit de vloer rijzen, van drie naar één, met
-de fanfare als de winnaar bovenaan staat. Daaronder de prijzen:
+"Je staat 2e van 5." Aan het eind een ceremonie op het oudejaarsgala: eerst
+worden de plekken vanaf vier als kaarten gedeeld, dan rijzen de treden, van
+drie naar één. De top drie staat er als speelkaart op (de winnaar is de
+schoppenaas, dan de hartenheer en de ruitenvrouw); de aas ligt tijdens de
+tromgeroffel dicht en draait om met de fanfare. De prijzen komen daarna op een
+eigen scherm, als de quizmaster op *Toon de prijzen* drukt (of op de spatie);
+met *Terug naar het podium* (of `←`) staat het podium er weer. De prijzen:
 **scherpschutter** (meeste vragen goed), **snelste vinger** (het snelste goede
 antwoord), **beste ronde**, **langste reeks** (drie of meer op rij goed),
 **comeback van de avond** (wie na een ronde het diepst stond en het meest is
@@ -342,7 +346,7 @@ geklommen) en de **moeilijkste vraag** (de vraag die de minste mensen goed
 hadden). Een prijs die meer dan twee mensen zouden delen valt weg. Bij een
 gelijkspel bovenaan winnen ze allebei.
 
-Onder het podium staat het adres van de uitslagpagina, en op elke telefoon een
+Onder de prijzen staat het adres van de uitslagpagina, en op elke telefoon een
 knop *Bekijk en deel de uitslag*. Die pagina blijft bestaan: `/uitslag` toont
 alle avonden, `/uitslag/7` één avond met de eindstand, de prijzen, de punten
 per ronde en per vraag wie het goed had. *Deel de uitslag* zet een samenvatting
