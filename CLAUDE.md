@@ -71,6 +71,11 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   niet waar allebei logisch. Houd wel ruimte tussen drempel en antwoord.
   Een filmpje dat het antwoord verklapt (de Songfestivalwinnaar) hoort in
   `naOnthulling`: dat verschijnt pas bij de onthulling.
+- **Vier Kaarten is de kennisronde met het grote nieuws dat níet in de
+  openingsfilm staat** (Maduro, de Amerikaanse verkiezingen, Artemis II, de
+  laatste Formule 1 op Zandvoort), in meerkeuze met opties waarop je kunt
+  redeneren. Wat de film al laat zien (Groenland, Iran, Orbán, de hitte, de
+  ov-staking …) blijft eruit.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026), waarschijnlijk "hoeveel spelers op de eerste
   dag"; tot dan staat hij als schatvraag in *Dichtstbij Wint* als `teVullen`.
@@ -109,8 +114,8 @@ daarom met praattijd, niet alleen met de klok:
 | Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
 
 **Het doel: ± 2 uur, en vóór middernacht klaar.** De quiz is op
-oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 7
-rondes en 30 vragen eindigt hij volgens het model hierboven om ± 23:15, ruim
+oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 8
+rondes en 34 vragen eindigt hij volgens het model hierboven om ± 23:25, ruim
 voor het aftellen. `app/tests/keuze.test.ts` rekent dat na en faalt boven de
 125 minuten.
 
@@ -172,5 +177,7 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   tekst voor het AI-lied, staat in `app/media/README.md`.
 - **Warmdraaien**: een fragment van de Songfestivalwinnaar
   (`songfestival-2026-winnaar.mp4`) in `app/media/`.
+- **Vier Kaarten**: de uitslag van de Amerikaanse verkiezingen van 3 november
+  was bij het schrijven nog voorlopig; controleer hem.
 - **De cijfers verversen** met de laatste back-up van resolution-recap
   (`npm run recap:snapshot`), en de achtervangteksten nalopen.

@@ -62,6 +62,7 @@ export const PAKKETTEN: Pakketten = {
           {v:"De opvouwbare iPhone kost in Nederland meer dan 2.000 euro.", goed:true,
            toelichting:"Vanaf € 2.339 voor de iPhone Duo: de duurste iPhone ooit."},
           // Staat al in 2026 in Emoji.
+          // Staat al in Vier Kaarten.
           {reserve:true, v:"De VS namen de president van Venezuela gevangen.", goed:true,
            toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
           {reserve:true, v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
@@ -144,9 +145,21 @@ export const PAKKETTEN: Pakketten = {
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
-        optioneel: true,
-        uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
+        uitleg: "Het grote nieuws van 2026, in teams. Steeds één antwoord goed: overleg snel.",
         vragen: [
+          // Het grote nieuws dat niet in de openingsfilm staat (zie CLAUDE.md).
+          {v:"Welk land vielen de Verenigde Staten in januari binnen, om de president op te pakken?",
+           opties:["Cuba", "Venezuela", "Mexico", "Colombia"], goed:1,
+           toelichting:"Nicolás Maduro werd op 3 januari gevangengenomen en naar New York gevlogen, waar hij terechtstaat."},
+          {v:"Op 3 november waren de Amerikaanse tussentijdse verkiezingen. Hoe liep het af?",
+           opties:["Trumps Republikeinen hielden beide Kamers", "De Democraten wonnen het Huis én de Senaat", "De Democraten wonnen alleen het Huis", "Het werd een gelijkspel in de Senaat"], goed:1,
+           toelichting:"Een grote overwinning voor de Democraten, met Trump op 38 procent goedkeuring. Zelfs Susan Collins verloor haar zetel in Maine."},
+          {v:"Voor het eerst sinds 1972 vlogen er weer mensen om de maan. Drie waren Amerikaans; de vierde kwam uit…",
+           opties:["Japan", "Canada", "Duitsland", "India"], goed:1,
+           toelichting:"Jeremy Hansen, de eerste Canadees bij de maan. Artemis II was in april tien dagen onderweg."},
+          {v:"In augustus reed de Formule 1 voor het laatst op Zandvoort. Wie sloot het weekend af met een groot optreden?",
+           opties:["Tiësto", "Armin van Buuren", "Martin Garrix", "Hardwell"], goed:2,
+           toelichting:"Daarmee kwam er na zes jaar een einde aan de Dutch Grand Prix."},
           // De premier, Oranje, het Songfestival en de Winterspelen staan al elders: hier reserve.
           {reserve:true, v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
@@ -159,7 +172,7 @@ export const PAKKETTEN: Pakketten = {
           {reserve:true, v:"Tegen welk land ging Oranje eruit op het WK?",
            opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
            toelichting:"Na strafschoppen, bij 1-1."},
-          {v:"Op 12 augustus werd het even nacht. Waar was de zonsverduistering totaal?",
+          {reserve:true, v:"Op 12 augustus werd het even nacht. Waar was de zonsverduistering totaal?",
            opties:["Lyon","Bilbao","Belfast"], goed:1,
            toelichting:"Een halve minuut maar: Bilbao lag vlak bij de rand van de schaduw. In Lyon en Belfast bleef het bij zo'n 93 procent van de zon."},
           {reserve:true, v:"Met welk nummer won Bulgarije het Songfestival?",
@@ -168,7 +181,7 @@ export const PAKKETTEN: Pakketten = {
           {reserve:true, v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
            opties:["Johannes Høsflot Klæbo","Sven Kramer","Ireen Wüst","Shaun White"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
-          {v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
+          {reserve:true, v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
            opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
            toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
@@ -325,6 +338,7 @@ export const PAKKETTEN: Pakketten = {
           {reserve:true, emoji:"🚆 🚫 ✈️ 🚫 🧤 🥶", v:"Welk nieuws, uit januari?", a:"Sneeuw",
            ookGoed:["sneeuwval", "sneeuwchaos", "sneeuwstorm", "winterweer", "gladheid", "het sneeuwde", "veel sneeuw"],
            toelichting:"Het openbaar vervoer en het vliegverkeer lagen grotendeels stil."},
+          // Staat al in Vier Kaarten.
           {reserve:true, emoji:"🇺🇸 🚁 🇻🇪 👨‍💼 ⛓️", v:"Welk nieuws, uit januari?", a:"De VS namen Maduro gevangen",
            ookGoed:["Nicolás Maduro", "Maduro opgepakt", "Maduro gearresteerd", "Maduro ontvoerd", "president van Venezuela opgepakt", "president van Venezuela gevangen", "Venezuela"],
            toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
@@ -332,6 +346,7 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"In januari, en voor het eerst in een Dacia."},
                     {reserve:true, emoji:"📚 🎁 🛵 👴", v:"Welk boek kreeg je in maart cadeau bij de boekwinkel?", a:"Piaggio van Hendrik Groen",
            toelichting:"Het Boekenweekgeschenk. Achter Hendrik Groen bleek Peter de Smet te zitten."},
+          // Staat al in Vier Kaarten.
           {reserve:true, emoji:"🚀 🌕 🔄 👩‍🚀 👨‍🚀 🌊", v:"Welk nieuws, uit april?", a:"Artemis II",
            ookGoed:["Artemis", "Artemis 2", "maanmissie", "maanreis", "maanvlucht", "mensen om de maan", "rondje om de maan"],
            toelichting:"Vier astronauten, tien dagen, voor het eerst sinds 1972 weer bij de maan. Ze kwamen verder van de aarde dan ooit een mens."},
