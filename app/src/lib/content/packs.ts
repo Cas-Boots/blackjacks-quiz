@@ -204,7 +204,9 @@ export const PAKKETTEN: Pakketten = {
         samen: ["Joris", "Rik"],
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
-          {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
+          {v:"Het verstoten aapje Punch sjouwde overal een IKEA-knuffel mee. Hoeveel euro kost die knuffel?", getal:14.99, eenheid:"euro",
+           toelichting:"€ 14,99 voor DJUNGELSKOG, de orang-oetan. Het filmpje ging de hele wereld over, en IKEA Japan stuurde de dierentuin een doos reserveknuffels."},
+          {reserve:true, v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
            toelichting:"€1,40. En sinds juli komt je brief standaard binnen twee dagen, niet meer de volgende dag."},
           {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
            toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
