@@ -49,10 +49,14 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
 - **Muziek is er voor iedereen**: emoji's, meezingen, vragen over onszelf
   (Spotify Wrapped). Niet alleen herkennen voor kenners.
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
-  meegekregen, ook wie het nieuws nauwelijks volgt (de premier, het WK, Maduro,
-  het minimumloon). Geen obscure weetjes of een losse grabbelton
+  meegekregen, ook wie het nieuws nauwelijks volgt (de premier, de Winterspelen,
+  het Songfestival, de maan, de opvouwbare iPhone). Geen obscure weetjes of een losse grabbelton
   van rariteiten. Formuleer kort en ondubbelzinnig, rond de tien woorden; het
   verhaal eromheen gaat in een korte toelichting.
+  Elke stelling moet aan beide kanten geloofwaardig zijn: niet zo gesteld
+  dat de formulering het antwoord verraadt (een bizarre, specifieke claim
+  is meestal waar). Geen instinkers op een detail (€ 14,99 tegen 15 euro),
+  en geen onderwerp dat elders in de quiz al staat.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026), waarschijnlijk "hoeveel spelers op de eerste
   dag"; tot dan staat hij als schatvraag in *Dichtstbij Wint* als `teVullen`.

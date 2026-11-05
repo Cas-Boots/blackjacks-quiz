@@ -721,13 +721,21 @@ const PAKKETTEN = {
           // gezegd. Zie CLAUDE.md.
           {v:"Rob Jetten werd de jongste premier ooit.", goed:true,
            toelichting:"38 jaar, beëdigd op 23 februari. Het record was van Ruud Lubbers: 43, in 1982."},
-          {v:"De VS namen de president van Venezuela gevangen.", goed:true,
+          {v:"De Winterspelen werden dit jaar in Zwitserland gehouden.", goed:false,
+           toelichting:"Nee, in Italië: in Milaan en Cortina d’Ampezzo."},
+          {v:"Bulgarije won voor het eerst het Songfestival.", goed:true,
+           toelichting:"Met Bangaranga van Dara. Het Songfestival van 2027 is dus in Bulgarije."},
+          {v:"Dit jaar landden er weer mensen op de maan.", goed:false,
+           toelichting:"Bijna: Artemis II vloog er in april met vier astronauten omheen, maar landde niet."},
+          {v:"Apple bracht dit jaar een opvouwbare iPhone uit.", goed:true,
+           toelichting:"De iPhone Duo, sinds oktober in de winkel, vanaf 1.999 dollar."},
+          {reserve:true, v:"De VS namen de president van Venezuela gevangen.", goed:true,
            toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
           {reserve:true, v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
            toelichting:"AVROTROS bleef weg uit Wenen omdat Israël mocht meedoen. De NPO zond het wel uit."},
-          {v:"Oranje haalde op het WK de halve finale.", goed:false,
+          {reserve:true, v:"Oranje haalde op het WK de halve finale.", goed:false,
            toelichting:"Oranje ging eruit tegen Marokko, na strafschoppen."},
-          {v:"Het minimumloon ging dit jaar boven de 15 euro per uur.", goed:false,
+          {reserve:true, v:"Het minimumloon ging dit jaar boven de 15 euro per uur.", goed:false,
            toelichting:"Net niet: sinds 1 juli is het € 14,99 bruto per uur."},
           {reserve:true, v:"Door een storing bleven in oktober schappen bij Albert Heijn leeg.", goed:true,
            toelichting:"Een IT-incident bij Ahold Delhaize. Ook Etos en Gall & Gall lagen eruit."},
@@ -770,7 +778,7 @@ const PAKKETTEN = {
         optioneel: true,
         uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
         vragen: [
-          // De premier, Oranje en het Songfestival staan al in Warmdraaien: hier reserve.
+          // De premier, Oranje, het Songfestival en de Winterspelen staan al elders: hier reserve.
           {reserve:true, v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
@@ -786,7 +794,7 @@ const PAKKETTEN = {
           {reserve:true, v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
-          {v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
+          {reserve:true, v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
            opties:["Johannes Høsflot Klæbo","Sven Kramer","Ireen Wüst","Shaun White"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
           {v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
@@ -857,7 +865,7 @@ const PAKKETTEN = {
            toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
           {reserve:true, v:"Hoeveel punten scoorde Seattle in de Super Bowl?", getal:29, eenheid:"punten",
            toelichting:"29-13 tegen New England. Kicker Jason Myers schoot een record van vijf velddoelpunten."},
-          {v:"Hoeveel wandelaars haalden in juli de finish van de Vierdaagse in Nijmegen?", getal:42137, eenheid:"wandelaars",
+          {reserve:true, v:"Hoeveel wandelaars haalden in juli de finish van de Vierdaagse in Nijmegen?", getal:42137, eenheid:"wandelaars",
            toelichting:"Er gingen er 45.761 van start. Het record, 42.777, is van een jaar eerder."},
           // GTA VI hoort er hoe dan ook in (CLAUDE.md). Het getal volgt na de
           // release op 19 november; tot dan herinnert de controle vooraf eraan.
