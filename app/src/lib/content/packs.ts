@@ -121,7 +121,11 @@ export const PAKKETTEN: Pakketten = {
           {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
           {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
           {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
-           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."}
+           toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."},
+          {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
+           toelichting:"Daarna maart met 60."},
+          {v:"Welke van deze sporten heeft niemand van ons dit jaar gedaan: boulderen, fietsen, hockey of kajakken?", a:"Hockey", live:"sport.nietGedaan",
+           toelichting:"De rest deed wel iemand: boulderen (Rik), fietsen (Cas) en kajakken (Cas)."}
         ]
       },
       {
@@ -233,6 +237,31 @@ export const PAKKETTEN: Pakketten = {
           {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
           {v:"Wat stond er dit jaar op nummer één in de Top 2000?", a:"— nog invullen —", teVullen:true},
           {v:"Welk woord werd gekozen tot woord van het jaar?", a:"— nog invullen —", teVullen:true}
+        ]
+      },
+      {
+        naam: "De Hitparade",
+        suit: "♥", thema: "De muziek van 2026", sfeer: "violet",
+        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
+        uitElkaar: ["Joris", "Rik"],
+        uitleg: "In teams, met Joris en Rik ieder aan een andere kant. Raden, gokken, meezingen: je hoeft geen kenner te zijn.",
+        // Alleen nummers uit 2026. Wat er onder de film van het jaar ligt,
+        // staat in showreel/muziek/LEESMIJ.md.
+        vragen: [
+          {emoji:"🌸 🌊 👸", v:"Met welk nummer van Taylor Swift begon 2026 op nummer 1?", a:"The Fate of Ophelia",
+           toelichting:"Het stond de eerste weken van januari bovenaan in de Top 40."},
+          {v:"Onder januari tot en met april in de openingsfilm klonk de hit die eind januari Taylor Swift van 1 stootte, en daar elf weken bleef. Welke, en van wie?", a:"I Just Might — Bruno Mars",
+           toelichting:"Van 24 januari tot begin april. Wie goed luisterde naar de film, had hem al."},
+          {v:"Shakira en Burna Boy stonden deze zomer maandenlang op 1 met Dai Dai. Welk record pakte Shakira daarmee?", a:"Geen zangeres voerde de Top 40 ooit langer aan",
+           toelichting:"Ook Burna Boy schreef geschiedenis: hij werd de succesvolste Afrikaanse artiest ooit in de Top 40."},
+          {emoji:"💯 😢", v:"Welke Nederlandse hit stootte Dai Dai van de troon?", a:"100 Tranen — Qlas, Antoon en Boef"},
+          {v:"Wiens Spotify Wrapped is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"wrapped-01.png"},
+           toelichting:"Zet een screenshot van iemands top 5 artiesten in app/media, zonder naam erop."},
+          {v:"Een AI-zanger zingt een nieuwsfeit uit 2026. Welk?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"ai-nieuws-01.mp3"},
+           toelichting:"Laat een AI-muziekgenerator een couplet over een nieuwsfeit inzingen, en zet het in app/media."},
+          {v:"Kennersvraag, dubbele punten: welke Roemeense dj maakte in 2026 een hit met Jason Derulo?", a:"DJ Goja, met Mi Chico", punten:4,
+           toelichting:"Het origineel kwam in maart uit; in juni volgde de versie met Derulo en de Braziliaanse zangeres Melody."}
         ]
       },
       {

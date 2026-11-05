@@ -265,6 +265,30 @@ describe('cijfers voor de televisie', () => {
   });
 });
 
+describe('sportmaanden en sporten die niemand deed', () => {
+  it('vindt de drukste sportmaand, samen en per persoon', () => {
+    const samen = beantwoord('sport.drukkeMaand', analyse);
+    expect(samen?.a).toBe('april — 68 keer');
+    expect(samen?.toelichting).toBe('Daarna maart met 60.');
+    const eva = beantwoord('sport.drukkeMaand:Eva', analyse);
+    expect(eva?.v).toBe('In welke maand sportte Eva dit jaar het meest?');
+    expect(eva?.a).toBe('augustus — 14 keer');
+  });
+  it('noemt een gedeelde eerste plek', () => {
+    const a = analyseer(klein());
+    // An sportte drie keer in januari, Bo twee keer in februari.
+    expect(beantwoord('sport.drukkeMaand:Bo', a)?.a).toBe('februari — 2 keer');
+  });
+  it('zet drie sporten die we deden naast één die niemand deed', () => {
+    const uit = beantwoord('sport.nietGedaan', analyse);
+    expect(uit?.a).toBe('Hockey');
+    expect(uit?.v).toBe('Welke van deze sporten heeft niemand van ons dit jaar gedaan: boulderen, fietsen, hockey of kajakken?');
+    expect(uit?.toelichting).toContain('boulderen (Rik)');
+    // Geen sport die bij iedereen staat, en geen pilates: die zijn al een vraag.
+    expect(uit?.v).not.toMatch(/klimmen|pilates|sportschool/);
+  });
+});
+
 describe('getallen over onszelf', () => {
   it('geeft een dichtstbij-vraag een getal uit de cijfers', () => {
     expect(beantwoord('getal.sportSamen', analyse)?.getal).toBe(analyse.personen.reduce((n, p) => n + p.sport.totaal, 0));

@@ -196,6 +196,52 @@ const OPLOSSERS: Record<string, Oplosser> = {
     };
   },
 
+  /** De drukste sportmaand, van ons samen of (met een naam erachter) van één persoon. */
+  'sport.drukkeMaand': (a, arg) => {
+    const p = arg ? a.personen.find((x) => x.naam.toLowerCase() === arg.trim().toLowerCase()) : undefined;
+    if (arg && !p) throw new Error(`onbekende persoon: ${arg}`);
+    const perMaand = new Map<string, number>();
+    for (const x of p ? [p] : a.personen) {
+      for (const [dag, n] of Object.entries(x.sport.dagen)) {
+        const maand = dag.slice(0, 7);
+        perMaand.set(maand, (perMaand.get(maand) ?? 0) + n);
+      }
+    }
+    const lijst = [...perMaand.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]));
+    const v = p ? `In welke maand sportte ${p.naam} dit jaar het meest?` : 'In welke maand sportten we met z’n allen het meest?';
+    if (!lijst.length) return { v, a: 'Niets bijgehouden' };
+    const [[maand, n], tweede] = lijst;
+    const gedeeld = lijst.filter(([, m]) => m === n).map(([d]) => maandNaam(`${d}-01`));
+    return {
+      v,
+      a: gedeeld.length > 1 ? `${opsomming(gedeeld)} — ${keer(n)} per maand` : `${maandNaam(`${maand}-01`)} — ${keer(n)}`,
+      toelichting: tweede && gedeeld.length === 1 ? `Daarna ${maandNaam(`${tweede[0]}-01`)} met ${tweede[1]}.` : undefined,
+    };
+  },
+
+  /** Drie sporten die iemand wel deed en één die niemand deed: welke hoort er niet bij? */
+  'sport.nietGedaan': (a) => {
+    // Zo vaak gedaan dat het geen kunst is, of al een vraag in de sportronde.
+    const bijIedereen = [...a.sporten.keys()].filter((t) => a.personen.every((p) => (p.perSport.get(t) ?? 0) > 0));
+    const overslaan = new Set(['gym', 'physio', 'other', 'onbekend', 'pilates', ...bijIedereen]);
+    const wel = [...a.sporten.entries()]
+      .filter(([t, n]) => n > 0 && !overslaan.has(t))
+      .sort((x, y) => x[1] - y[1] || sportNaam(x[0]).localeCompare(sportNaam(y[0])))
+      .slice(0, 3)
+      .map(([t]) => t);
+    // Sporten die je bij een groep als de onze zou verwachten.
+    const niet = ['hockey', 'yoga', 'boxing', 'badminton', 'basketball', 'squash', 'table-tennis', 'dance', 'rowing', 'hiking']
+      .find((t) => !(a.sporten.get(t) ?? 0));
+    if (wel.length < 3 || !niet) throw new Error('te weinig sporten voor de vraag');
+    const opties = [...wel, niet].map(sportNaam).sort((x, y) => x.localeCompare(y));
+    const wie = (t: string) => opsomming(a.personen.filter((p) => (p.perSport.get(t) ?? 0) > 0).map((p) => p.naam));
+    return {
+      v: `Welke van deze sporten heeft niemand van ons dit jaar gedaan: ${opsomming(opties.map((n) => n.toLowerCase())).replace(/ en ([^ ]+)$/, ' of $1')}?`,
+      a: sportNaam(niet),
+      toelichting: `De rest deed wel iemand: ${opsomming(wel.map((t) => `${sportNaam(t).toLowerCase()} (${wie(t)})`))}.`,
+    };
+  },
+
   /* ---- Getallen, voor een dichtstbij-ronde over onszelf --------------- */
 
   'getal.sportSamen': (a, arg) => {

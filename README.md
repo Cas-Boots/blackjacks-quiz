@@ -23,7 +23,7 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 10 rondes, 49 vragen (± een uur en een kwartier) | 14 rondes, 72 vragen |
+| Blackjacks 2026 — Het Jaaroverzicht | 11 rondes, 58 vragen (± anderhalf uur) | 15 rondes, 81 vragen |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
 De avond is bewust kort gehouden. Rondes van vier tot acht vragen, dertig
@@ -44,6 +44,13 @@ ronde 1; voeg je een vraag toe, kijk dan ook in `showreel/reel-data.js`.
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
+
+### De kenners uit elkaar
+
+Joris en Rik weten veel van muziek. In de muziekronde *De Hitparade* komen ze
+daarom altijd in een ander team (`uitElkaar` in de ronde); zet het bij elke
+andere teamronde erbij als je wilt. Wie er niet is, wordt overgeslagen; met de
+hand verplaatsen kan nog steeds.
 
 ### Rondes over de groep zelf
 

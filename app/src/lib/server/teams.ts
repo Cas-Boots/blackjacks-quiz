@@ -57,7 +57,13 @@ export function maakTeams(
     suit: TEAMNAMEN[i % TEAMNAMEN.length].suit,
     leden: [],
   }));
-  husselen(spelers, toeval).forEach((s, i) => teams[i % aantal].leden.push(s.id));
+  // Eerst husselen, dan wie uit elkaar moet vooraan: het rondje langs de
+  // teams zet die dan ieder in een ander team, en de rest vult gelijk aan.
+  const uitElkaar = new Set((ronde.uitElkaar ?? []).map((n) => n.trim().toLowerCase()));
+  const gehusseld = husselen(spelers, toeval);
+  const apart = (s: Speler) => uitElkaar.has(s.naam.trim().toLowerCase());
+  [...gehusseld.filter(apart), ...gehusseld.filter((s) => !apart(s))]
+    .forEach((s, i) => teams[i % aantal].leden.push(s.id));
   return teams;
 }
 

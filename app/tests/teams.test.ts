@@ -57,6 +57,22 @@ describe('maakTeams', () => {
   });
 });
 
+describe('uitElkaar', () => {
+  const zes = [...spelers, { id: 6, naam: 'Cas' }];
+  it('zet de kenners nooit samen in een team, hoe er ook gehusseld wordt', () => {
+    for (let k = 0; k < 50; k++) {
+      const teams = maakTeams(ronde({ aantalTeams: 2, uitElkaar: ['Joris', 'rik'] }), zes);
+      const team = (id: number) => teams.findIndex((t) => t.leden.includes(id));
+      expect(team(3)).not.toBe(team(4));
+      expect(teams.map((t) => t.leden.length)).toEqual([3, 3]);
+    }
+  });
+  it('slaat een kenner over die er niet is', () => {
+    const teams = maakTeams(ronde({ aantalTeams: 2, uitElkaar: ['Joris', 'Niemand'] }), zes, vast([0.3]));
+    expect(teams.flatMap((t) => t.leden).sort()).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+});
+
 describe('verplaats', () => {
   it('schuift een speler naar het volgende team', () => {
     const teams = [
