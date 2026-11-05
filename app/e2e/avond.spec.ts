@@ -196,7 +196,8 @@ test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij 
 
 test('teamronde: één telefoon levert in voor het hele team', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '2027': [0] }); // 2027, in teams
+  // Een open teamvraag met Brazilië als antwoord, op inhoud gezocht (mag een reservevraag zijn).
+  await nieuwSpel(qm, { '2027': [vraag('2027', (v) => v.a === 'Brazilië').index] });
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
   const team = st.teams.find((t: { leden: number[] }) => t.leden.length >= 2);
@@ -225,7 +226,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
 
 test('teamronde: iedereen binnen kort de klok in, en overleggen kost geen punten', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '2027': [0] }); // 2027, twee teams
+  await nieuwSpel(qm, { '2027': [vraag('2027', (v) => v.a === 'Brazilië').index] }); // twee teams, open vraag
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
