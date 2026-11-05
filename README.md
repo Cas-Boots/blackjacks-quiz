@@ -51,7 +51,9 @@ Niet iedereen volgt het nieuws even goed. Daarom heeft elke nieuwsronde in
 teams een lijstje `kennis` (bovenaan `packs.ts`: Joris 4, Rik 3, Eva 2, Liz en
 Bastiaan 1). De app verdeelt de teams zo dat ze samen even sterk zijn, en
 kiest uit de eerlijke indelingen er elke ronde een andere. Joris en Rik komen
-zo nooit samen in een team. Voor de muziekronde geldt hetzelfde, met alleen
+daar zo nooit samen in een team. Alleen in *Dichtstbij Wint*, waar iedereen
+gokt en kennis weinig uitmaakt, zijn de teams gewoon willekeurig en kunnen ze
+wel samen. Voor de muziekronde geldt hetzelfde, met alleen
 Joris en Rik als kenners. Wie niet in het lijstje staat, ook een gast, telt als
 1. Met de hand verplaatsen kan nog steeds. Cas is quizmaster en speelt niet mee.
 
