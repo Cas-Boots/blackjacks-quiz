@@ -697,6 +697,22 @@ export const DIAS: Dia[] = [
     ),
   },
   {
+    id: 'antwoord-geheim', hoofdstuk: 'Onthulling', titel: 'In het geheime laatste stuk',
+    let: 'Dezelfde onthulling, maar in het laatste stuk van de avond: op de televisie alleen goed of fout, zonder punten. Op de telefoon zie je wel je eigen winst.',
+    vorigePunten: START,
+    maak: () => antwoord(
+      R.waar, V.waar,
+      { antwoord: 'Niet waar', toelichting: 'Kwartfinale, strafschoppen. Het is een traditie.', goedeOptie: 1 },
+      [inz('s_1', 'Niet waar', true, 3100), inz('s_2', 'Waar', false, 5400), inz('s_3', 'Niet waar', true, 6800), inz('s_4', 'Waar', false, 9900), inz('s_5', 'Niet waar', true, 12000)],
+      {
+        stand: stand(erbij({ 1: 474, 3: 743, 5: 400 })),
+        uitdeling: { 1: 474, 3: 743, 5: 400 },
+        reeksen: { 1: 1, 3: 4, 5: 1 },
+        standGeheim: true,
+      },
+    ),
+  },
+  {
     id: 'antwoord-beoordelen', hoofdstuk: 'Onthulling', titel: 'Nog te beoordelen',
     let: 'Een open vraag: de kaartjes staan er zonder oordeel. Beoordeel ze één voor één, zoals de quizmaster op het hostscherm doet; bij een goed antwoord komen de punten binnen.',
     vorigePunten: START,

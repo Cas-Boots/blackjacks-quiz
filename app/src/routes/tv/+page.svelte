@@ -396,9 +396,11 @@
   let geheimZin = $derived.by(() => {
     if (!staat) return '';
     const over = staat.rondeAantal - staat.rondeIndex - 1;
+    const n = TELWOORD[over] ?? String(over);
     if (over <= 0) return 'Wie er wint, hoor je zo bij de uitslag.';
     if (over === 1) return 'Pas bij de uitslag zie je wie er wint. Nog één ronde, en die telt dubbel: alles kan nog.';
-    return `Pas bij de uitslag zie je wie er wint. Nog ${TELWOORD[over] ?? over} rondes, en ze tellen dubbel: alles kan nog.`;
+    if (over <= DUBBELE_SLOTRONDES) return `Pas bij de uitslag zie je wie er wint. Nog ${n} rondes, en ze tellen allebei dubbel: alles kan nog.`;
+    return `Pas bij de uitslag zie je wie er wint. Nog ${n} rondes, de laatste ${TELWOORD[DUBBELE_SLOTRONDES]} tellen dubbel: alles kan nog.`;
   });
   let leiderPunten = $derived(Math.max(1, staat?.stand[0]?.punten ?? 1));
 
@@ -1100,7 +1102,8 @@
                       <span class="wie">{naamVan(i.inzender)}</span>
                       <span class="wat">{i.tekst || '—'}</span>
                       <span class="oordeel" aria-hidden="true">{i.isGoed === true ? '✓' : i.isGoed === false ? '✗' : ''}</span>
-                      {#if i.isGoed === true && puntenVoor(i.inzender) > 0}
+                      <!-- In het geheime laatste stuk alleen goed of fout: de punten verraden de stand. -->
+                      {#if i.isGoed === true && puntenVoor(i.inzender) > 0 && !staat.standGeheim}
                         <span class="fiche" style="--wacht:{0.7 + n * 0.09}s"><span>+{puntenVoor(i.inzender)}</span></span>
                       {/if}
                     </div>
@@ -1145,7 +1148,7 @@
             {/if}
             {#if staat.laatsteOpenStand}
               <p class="laatstekeer" in:scale={{ start: 0.8, duration: 560, delay: 1400, easing: cubicOut }}>
-                👀 Kijk goed: dit is de laatste keer dat jullie de stand zien. De slotrondes blijft hij geheim.
+                👀 Kijk goed: dit is de laatste keer dat jullie de stand zien. De rest van de avond blijft hij geheim.
               </p>
             {/if}
             {#if toonNieuweVolgorde && laatsteId !== null && standNu[standNu.length - 1].punten < standNu[0].punten}

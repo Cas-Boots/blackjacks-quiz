@@ -317,11 +317,15 @@ De bedoeling: het blijft tot de laatste vraag spannend wie er wint.
 - **Dubbele slotrondes.** De laatste twee rondes tellen dubbel (de afrekening
   van de voorspellingen niet meegerekend). Een gouden kaart in een slotronde
   telt vier keer.
-- **De stand blijft geheim in de slotrondes.** De tussenstand vlak daarvoor is
-  de laatste die de kamer te zien krijgt, met een knipoog dat het daarna
-  geheim wordt. Daarna toont de televisie alleen de namen op alfabet met een
-  dichte fiche, en de telefoons zeggen dat je plek geheim blijft. Pas bij de
-  uitslag weet iedereen wie er wint. Het hostscherm toont de echte stand.
+- **De stand blijft geheim in het laatste stuk.** Ongeveer het laatste derde
+  van de avond (30 procent van de rondes, afgerond, en in elk geval de
+  slotrondes: bij 8 rondes de laatste 2, bij 9 of 10 de laatste 3). De
+  tussenstand vlak daarvoor is de laatste die de kamer te zien krijgt, met een
+  knipoog dat het daarna geheim wordt. Daarna toont de televisie bij de
+  onthulling alleen goed of fout, zonder punten, en bij de tussenstand alleen
+  de namen op alfabet met een dichte fiche. Op je telefoon zie je wel wat je
+  zelf per vraag verdient, maar geen totaal en geen plek. Pas bij de uitslag
+  weet iedereen wie er wint. Het hostscherm toont de echte stand.
 - **Je plek na elke vraag.** Zoals bij Kahoot ziet elke telefoon na de
   onthulling je plek, met een pijltje als je steeg of zakte, en hoeveel je
   achter de volgende staat.

@@ -733,7 +733,7 @@
       {#if staat.standGeheim}
         <div class="paneel" style="text-align:center">
           <p class="etiket">Tussenstand</p>
-          <p class="lood" style="font-size:1.05rem;margin-top:.4rem">🤫 De stand is geheim tot de uitslag. De slotrondes tellen dubbel: alles kan nog.</p>
+          <p class="lood" style="font-size:1.05rem;margin-top:.4rem">🤫 De stand is geheim tot de uitslag. Je ziet wel wat je zelf per vraag verdient: alles kan nog.</p>
         </div>
       {:else}
       <div class="paneel">

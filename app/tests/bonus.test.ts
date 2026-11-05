@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { berekenBonussen, opScorebord, PUNT_WAARDE, telSnelheid, type BonusVraag } from '../src/lib/server/bonus';
 import { vermenigvuldigers, vermenigvuldigerVan } from '../src/lib/server/vermenigvuldiger';
+import { eersteGeheimeRonde } from '../src/lib/shared/bonus';
 import { ingekort, LAATSTE_MS } from '../src/lib/server/klok';
 import type { Ronde } from '../src/lib/content/types';
 
@@ -180,5 +181,25 @@ describe('de klok bij een volle tafel', () => {
 
   it('verlengt nooit', () => {
     expect(ingekort(12_000, 10_000, teams, new Set(['a', 'b']))).toBe(12_000);
+  });
+});
+
+describe('de geheime stand aan het eind', () => {
+  it('houdt het laatste kwart tot derde van de avond geheim', () => {
+    // 8 rondes: de laatste 2 (25%); 9 of 10 rondes: de laatste 3 (33% en 30%).
+    expect(eersteGeheimeRonde(8, -1)).toBe(6);
+    expect(eersteGeheimeRonde(9, -1)).toBe(6);
+    expect(eersteGeheimeRonde(10, -1)).toBe(7);
+  });
+
+  it('houdt in elk geval de dubbele slotrondes geheim', () => {
+    // De afrekening als laatste ronde: de slotrondes staan daarvoor.
+    expect(eersteGeheimeRonde(8, 5)).toBe(5);
+    expect(eersteGeheimeRonde(10, 8)).toBe(7);
+  });
+
+  it('houdt niets geheim bij een heel korte avond', () => {
+    expect(eersteGeheimeRonde(2, -1)).toBe(-1);
+    expect(eersteGeheimeRonde(1, 0)).toBe(-1);
   });
 });

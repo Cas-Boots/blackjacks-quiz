@@ -6,6 +6,7 @@
  * seconden er nog op de klok staan, en dat doen ze op basis van de servertijd
  * die in elke momentopname meekomt.
  */
+import { eersteGeheimeRonde } from '$lib/shared/bonus';
 import { eq, and, desc } from 'drizzle-orm';
 import { standaardVragen } from '$lib/content/keuze';
 import { db, huidigeProef } from './db/index';
@@ -428,8 +429,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const teamLijst = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst) : [];
   const cor = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
   const bonussen = bonussenVan(spel);
-  /** De eerste dubbele slotronde: vanaf daar blijft de stand geheim tot de uitslag. */
-  const eersteSlot = bonussen.dubbel.findIndex((d) => d?.dubbel);
+  /** Vanaf deze ronde blijft de stand geheim tot de uitslag: het laatste stuk van de avond. */
+  const eersteSlot = eersteGeheimeRonde(rondes.length, bonussen.dubbel.findIndex((d) => d?.dubbel));
   const stand = telStand(
     [...bonussen.verdelingen.values()],
     cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),

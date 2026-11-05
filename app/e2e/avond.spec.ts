@@ -363,15 +363,20 @@ test('zonder live stroom valt een telefoon terug op navragen en blijft meedoen',
   for (const x of [t, qm]) await x.ctx.close();
 });
 
-test('de slotrondes: de stand blijft geheim op de televisie, de quizmaster ziet hem wel', async ({ browser }) => {
+test('het laatste stuk: de stand blijft geheim op de televisie, de quizmaster ziet hem wel', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await qm.doe('nieuw-spel', { pakket: 'jaar2026' });
   const tv = await nieuwApparaat(browser, '/tv');
   const aantal = (await qm.staat()).rondeAantal as number;
 
-  // Een gewone ronde: de stand is open.
+  // Een gewone ronde: de stand is open. Het laatste kwart tot derde van de avond niet.
   await qm.doe('naar-ronde', { ronde: 0 });
   expect((await qm.staat()).standGeheim).toBe(false);
+  const geheimVanaf = aantal - Math.max(1, Math.round(aantal * 0.3));
+  await qm.doe('naar-ronde', { ronde: geheimVanaf - 1 });
+  expect((await qm.staat()).standGeheim).toBe(false);
+  await qm.doe('naar-ronde', { ronde: geheimVanaf });
+  expect((await qm.staat()).standGeheim).toBe(true);
 
   // De laatste ronde is een slotronde: na afloop is de stand geheim.
   await qm.doe('naar-ronde', { ronde: aantal - 1 });
