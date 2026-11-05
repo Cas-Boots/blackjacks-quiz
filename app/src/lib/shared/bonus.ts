@@ -27,11 +27,14 @@ export const DUBBELE_SLOTRONDES = 2;
 /** De gouden kaart: per ronde één willekeurige vraag die dubbel telt. */
 export const GOUDEN_KAART = 2;
 
-/** Het deel van de punten dat je overhoudt na zoveel milliseconden. */
-export function snelheidsDeel(naMs: number | null, duurMs: number): number {
-  if (naMs === null || !(duurMs > 0)) return MINIMUM_DEEL;
+/**
+ * Het deel van de punten dat je overhoudt na zoveel milliseconden. `minimum`
+ * is er voor de simulatie (scripts/spanning.ts); de app gebruikt MINIMUM_DEEL.
+ */
+export function snelheidsDeel(naMs: number | null, duurMs: number, minimum = MINIMUM_DEEL): number {
+  if (naMs === null || !(duurMs > 0)) return minimum;
   const verstreken = Math.min(1, Math.max(0, naMs / duurMs));
-  return 1 - (1 - MINIMUM_DEEL) * verstreken;
+  return 1 - (1 - minimum) * verstreken;
 }
 
 /**

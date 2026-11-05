@@ -76,7 +76,7 @@ export function opScorebord(verdeling: Verdeling): Verdeling {
  * een vraag waar iedereen fout zat breekt dus elke reeks, ook als de
  * quizmaster niets heeft aangeklikt.
  */
-export function berekenBonussen(vragen: BonusVraag[]): BonusUitslag {
+export function berekenBonussen(vragen: BonusVraag[], opties: { minimumDeel?: number } = {}): BonusUitslag {
   const perVraag = new Map<string, VraagBonus>();
   const lopend: Record<number, number> = {};
 
@@ -103,7 +103,7 @@ export function berekenBonussen(vragen: BonusVraag[]): BonusUitslag {
       // Zonder antwoord van de telefoon (de quizmaster kende het met de
       // hand toe) is er geen tijd: dan telt het als op de valreep.
       const antwoord = v.antwoorden.find((a) => a.leden.includes(id));
-      const deel = telSnelheid(v) ? snelheidsDeel(antwoord?.naMs ?? null, v.duurMs) : 1;
+      const deel = telSnelheid(v) ? snelheidsDeel(antwoord?.naMs ?? null, v.duurMs, opties.minimumDeel) : 1;
       bonus.punten[id] = Math.round(basis * PUNT_WAARDE * deel) * v.vermenigvuldiger;
     }
 
