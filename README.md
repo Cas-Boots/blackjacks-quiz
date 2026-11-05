@@ -23,7 +23,7 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 10 rondes, 50 vragen (± een uur en een kwartier) | 15 rondes, 77 vragen |
+| Blackjacks 2026 — Het Jaaroverzicht | 10 rondes, 49 vragen (± een uur en een kwartier) | 14 rondes, 72 vragen |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
 De avond is bewust kort gehouden. Rondes van vier tot acht vragen, dertig
@@ -31,10 +31,16 @@ seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
 dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
 naar de laatste vijf seconden), en het ritme wisselt steeds: een ronde over
 het jaar, dan een over onszelf, en om en om ieder voor zich en in teams. Rondes
-die nog leeg zijn, alleen voor kenners of extra (*Sport: de Marges*, *De WK-poule*,
+die nog leeg zijn of extra (*De WK-poule*,
 *Jullie Jaar in Beeld*, *Bliksemronde*, *Oktober tot december*) staan
 uitgevinkt. Vink ze aan in de
 vragenkiezer als je ze wilt spelen.
+
+Elk onderwerp uit het nieuws komt in de hele quiz precies één keer voor: één
+vraag over het WK, één over de Winterspelen, één over het Songfestival. Alleen
+de rondes over onszelf mogen vaker op hetzelfde terugkomen. En niets wat de
+quiz vraagt staat in de openingsfilm (`showreel/`), want die draait vóór
+ronde 1; voeg je een vraag toe, kijk dan ook in `showreel/reel-data.js`.
 
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.

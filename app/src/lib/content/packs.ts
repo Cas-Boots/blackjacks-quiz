@@ -18,7 +18,7 @@ const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 export const PAKKETTEN: Pakketten = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
-    beschrijving: "De hoofdquiz, strak in een uur: negen korte rondes die om en om wisselen tussen het jaar en onszelf, tussen ieder voor zich en in teams. Elk feit komt precies één keer voor. De uitgevinkte rondes zijn extra's.",
+    beschrijving: "De hoofdquiz, in vijf kwartier: tien korte rondes die om en om wisselen tussen het jaar en onszelf, tussen ieder voor zich en in teams. Elk onderwerp uit het nieuws komt precies één keer voor; alleen over onszelf mag het vaker. De uitgevinkte rondes zijn extra's.",
     rondes: [
       {
         naam: "Warmdraaien",
@@ -26,18 +26,18 @@ export const PAKKETTEN: Pakketten = {
         type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
         uitleg: "Zes stellingen om in te komen. Iedereen voor zich.",
         vragen: [
-          {v:"De WK-finale werd pas in de verlenging beslist.", goed:true,
-           toelichting:"Na negentig minuten stond het nog 0-0."},
+          {v:"Arsenal won in 2026 eindelijk zijn eerste Champions League.", goed:false,
+           toelichting:"Paris Saint-Germain won de finale in Boedapest na 1-1 en strafschoppen, en prolongeerde zo zijn titel."},
           {v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
            toelichting:"Hij evenaarde het. Met zijn vijfde zege staat hij naast Merckx, Hinault, Anquetil en Indurain."},
-          {v:"Het kabinet-Jetten heeft een meerderheid in de Tweede Kamer.", goed:false,
-           toelichting:"Een minderheidskabinet — samen 66 van de 150 zetels."},
+          {v:"Voor het eerst won een Spaanstalig album de Grammy voor album van het jaar.", goed:true,
+           toelichting:"DeBÍ TiRAR MáS FOToS van Bad Bunny, op 1 februari in Los Angeles."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
           {v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
            toelichting:"Omhoog, zoals elk half jaar."},
-          {v:"Nederland won op de Winterspelen van 2026 meer dan tien keer goud.", goed:false,
-           toelichting:"Precies tien keer. Wie ‘waar’ zei: net niet."}
+          {v:"GTA VI kwam in mei 2026 uit, zoals beloofd.", goed:false,
+           toelichting:"Rockstar stelde de game nog een keer uit, naar 19 november."}
         ]
       },
       {
@@ -64,8 +64,9 @@ export const PAKKETTEN: Pakketten = {
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
-          {v:"Wie kwam er als invaller in en besliste de WK-finale?",
-           opties:["Lamine Yamal","Ferran Torres","Álvaro Morata","Dani Olmo"], goed:1},
+          {v:"Welke film won in maart de Oscar voor beste film?",
+           opties:["Sinners","One Battle After Another","Hamnet","Marty Supreme"], goed:1,
+           toelichting:"Paul Thomas Anderson ging met zes Oscars naar huis; Sinners won er vier."},
           {v:"Tegen welk land ging Oranje eruit op het WK?",
            opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
            toelichting:"Na strafschoppen, bij 1-1."},
@@ -129,27 +130,14 @@ export const PAKKETTEN: Pakketten = {
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
-          {v:"Hoeveel landen deden er mee aan het WK voetbal van 2026?", getal:48, eenheid:"landen",
-           toelichting:"Voor het eerst 48 in plaats van 32."},
+          {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
+           toelichting:"€1,40. En sinds juli komt je brief standaard binnen twee dagen, niet meer de volgende dag."},
           {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
            toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
-          {v:"Hoeveel punten haalde de winnaar van het Songfestival in totaal?", getal:516, eenheid:"punten"},
-          {v:"Hoeveel medailles won Noorwegen in totaal op de Winterspelen?", getal:41, eenheid:"medailles"},
-          {v:"Hoeveel dagen was de bemanning van Artemis II onderweg?", getal:10, eenheid:"dagen"}
-        ]
-      },
-      {
-        naam: "Sport: de Marges",
-        suit: "♦", thema: "Voor de echte kenners", sfeer: "gras",
-        type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
-        optioneel: true,
-        uitleg: "In teams. Wie er wonnen weten jullie wel. Dit gaat over de details eromheen.",
-        vragen: [
-          {v:"In welk stadion werd de WK-finale gespeeld?", a:"MetLife Stadium, in New Jersey"},
-          {v:"Hoeveel stond Evenepoel in Parijs achter op Pogačar?", a:"6 minuten en 26 seconden"},
-          {v:"Welke debutant werd derde in de Tour én won de witte trui?", a:"Isaac del Toro"},
-          {v:"Wie reed de groene trui naar Parijs?", a:"Mads Pedersen"},
-          {v:"Op welke klim greep Carapaz in etappe 20 de bolletjestrui?", a:"Alpe d’Huez"}
+          {v:"Hoeveel punten scoorde Seattle in de Super Bowl?", getal:29, eenheid:"punten",
+           toelichting:"29-13 tegen New England. Kicker Jason Myers schoot een record van vijf velddoelpunten."},
+          {v:"Hoeveel wandelaars haalden in juli de finish van de Vierdaagse in Nijmegen?", getal:42137, eenheid:"wandelaars",
+           toelichting:"Er gingen er 45.761 van start. Het record, 42.777, is van een jaar eerder."}
         ]
       },
       {
@@ -174,12 +162,14 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
            toelichting:"Het openbaar vervoer en het vliegverkeer lagen grotendeels stil."},
-          {emoji:"🇮🇹 ⛷️ 🏔️ 🥇", v:"Welk sportfeest?", a:"De Olympische Winterspelen in Milaan en Cortina"},
+          {emoji:"🏜️ 🚙 🇶🇦 6️⃣", v:"Welke race, en wie won hem voor de zesde keer?", a:"De Dakar Rally — Nasser Al-Attiyah",
+           toelichting:"In januari, en voor het eerst in een Dacia."},
           {emoji:"🕷️ 🧑 🆕 🌅", v:"Welke film?", a:"Spider-Man: Brand New Day",
            toelichting:"De grootste kaskraker van het jaar in de Amerikaanse bioscopen."},
-          {emoji:"⛵ 🌊 👁️ 🏛️", v:"Welke film?", a:"The Odyssey",
-           toelichting:"De verfilming van het Griekse epos was een van de grootste kaskrakers van 2026."},
-          {emoji:"🤠 🧑‍🚀 🧸 5️⃣", v:"Welke film?", a:"Toy Story 5"}
+          {emoji:"📚 🎁 🛵 👴", v:"Welk boek kreeg je in maart cadeau bij de boekwinkel?", a:"Piaggio van Hendrik Groen",
+           toelichting:"Het Boekenweekgeschenk. Achter Hendrik Groen bleek Peter de Smet te zitten."},
+          {emoji:"🎾 🍓 🇨🇿 🆚 🇨🇿", v:"Welke finale, in juli?", a:"De vrouwenfinale van Wimbledon",
+           toelichting:"Linda Nosková versloeg landgenote Karolína Muchová. Bij de mannen prolongeerde Jannik Sinner."}
         ]
       },
       {
@@ -205,16 +195,15 @@ export const PAKKETTEN: Pakketten = {
         suit: "♦", thema: "Korte vragen, snel punten", sfeer: "bliksem",
         type: "open", tijd: 30, punten: 1, teamModus: "individueel",
         optioneel: true,
-        uitleg: "Zes korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
+        uitleg: "Vier korte vragen, één punt per stuk. Eerste ingeving, meteen intikken. Tempo!",
         vragen: [
-          {v:"Hoeveel wereldtitels heeft Spanje nu?", a:"Twee — 2010 en 2026"},
-          {v:"Wat was de uitslag van de WK-finale?", a:"1-0"},
-          {v:"Hoeveel landen organiseerden samen het WK?", a:"Drie",
-           toelichting:"De Verenigde Staten, Canada en Mexico."},
-          {v:"Tegen wie speelde Oranje de openingswedstrijd?", a:"Japan"},
-          {v:"Tegen welk Afrikaans land won Oranje in de groepsfase?", a:"Tunesië"},
-          {v:"In welke maand waren de Winterspelen?", a:"Februari",
-           toelichting:"In Milaan en Cortina d’Ampezzo."}
+          {v:"Uit welk land kwam de winnaar van de marathon van Rotterdam?", a:"Ethiopië",
+           toelichting:"Guye Adola, in 2:03:54."},
+          {v:"Uit welk land kwam de winnaar van de TT van Assen?", a:"Japan",
+           toelichting:"Ai Ogura: de eerste Japanse winnaar sinds Makoto Tamada in 2004."},
+          {v:"In welke stad waren deze zomer de Commonwealth Games?", a:"Glasgow"},
+          {v:"In welke stad kwam Sinterklaas dit jaar aan?", a:"Grave",
+           toelichting:"Op 14 november, aan de Maas."}
         ]
       },
       {
@@ -240,7 +229,7 @@ export const PAKKETTEN: Pakketten = {
         optioneel: true, teVullen: true,
         uitleg: "Deze maanden waren er nog niet toen de quiz werd gemaakt. Vul ze in december aan.",
         vragen: [
-          {v:"Wie werd wereldkampioen Formule 1 in 2026?", a:"— nog invullen —", teVullen:true},
+          {v:"Wie kreeg in oktober de Nobelprijs voor de Vrede?", a:"— nog invullen —", teVullen:true},
           {v:"Wat was het grootste nieuws van het najaar?", a:"— nog invullen —", teVullen:true},
           {v:"Wat stond er dit jaar op nummer één in de Top 2000?", a:"— nog invullen —", teVullen:true},
           {v:"Welk woord werd gekozen tot woord van het jaar?", a:"— nog invullen —", teVullen:true}
@@ -254,8 +243,8 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
            toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
-          {v:"Wat is er op 2 augustus 2027 aan de hemel te zien?", a:"Een totale zonsverduistering",
-           toelichting:"Ruim zes minuten totaliteit, onder meer boven Noord-Afrika en Egypte — een van de langste van deze eeuw."},
+          {v:"In welk land wordt in september 2027 de Ryder Cup gespeeld?", a:"Ierland",
+           toelichting:"Op Adare Manor, bij Limerick. Het toernooi bestaat dan honderd jaar."},
           {v:"Welk land organiseert het WK rugby?", a:"Australië"},
           {v:"In welke maand kiest Frankrijk een nieuwe president?", a:"April"}
         ]
@@ -321,12 +310,12 @@ export const PAKKETTEN: Pakketten = {
            opties:["Noorwegen","Italië","Frankrijk","Zwitserland"], goed:1},
           {v:"Wie won in 2026 de Tour de France?",
            opties:["Remco Evenepoel","Mathieu van der Poel","Tadej Pogačar","Jonas Vingegaard"], goed:2},
-          {v:"Hoeveel landen organiseerden samen het WK voetbal?",
-           opties:["Eén","Twee","Drie","Vier"], goed:2},
-          {v:"In welke sport haalt Nederland op de Winterspelen zijn medailles vooral?",
-           opties:["Schaatsen","Skiën","Bobsleeën","Curling"], goed:0},
-          {v:"Tegen welk land werd Oranje op het WK uitgeschakeld?",
-           opties:["Japan","Marokko","Spanje","Argentinië"], goed:1}
+          {v:"Bij welke sport sla je met een racket tegen een shuttle?",
+           opties:["Tennis","Badminton","Squash","Padel"], goed:1},
+          {v:"Hoeveel spelers staan er bij volleybal per team in het veld?",
+           opties:["Vijf","Zes","Zeven","Elf"], goed:1},
+          {v:"Bij welke sport kun je een hole-in-one slaan?",
+           opties:["Golf","Honkbal","Hockey","Biljart"], goed:0}
         ]
       },
       {
@@ -335,7 +324,7 @@ export const PAKKETTEN: Pakketten = {
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
         uitleg: "Eén getal per team. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
-          {v:"Hoeveel gouden medailles won Nederland op de Winterspelen van 2026?", getal:10, eenheid:"keer goud"},
+          {v:"Hoeveel toetsen heeft een piano?", getal:88, eenheid:"toetsen"},
           {v:"Hoeveel treden telt de Domtoren in Utrecht?", getal:465, eenheid:"treden"},
           {v:"Hoeveel botten heeft een volwassen mens?", getal:206, eenheid:"botten"},
           {v:"Hoeveel provincies heeft Nederland?", getal:12, eenheid:"provincies"}
@@ -355,8 +344,8 @@ export const PAKKETTEN: Pakketten = {
            opties:["De olifant","De blauwe vinvis","De giraf","De witte haai"], goed:1},
           {v:"Welke planeet staat het dichtst bij de zon?",
            opties:["Venus","Mars","Aarde","Mercurius"], goed:3},
-          {v:"Wie schilderde De Nachtwacht?",
-           opties:["Vincent van Gogh","Rembrandt van Rijn","Johannes Vermeer","Piet Mondriaan"], goed:1},
+          {v:"Wie schilderde De Sterrennacht?",
+           opties:["Vincent van Gogh","Rembrandt van Rijn","Johannes Vermeer","Piet Mondriaan"], goed:0},
           {v:"Wat eet een reuzenpanda vooral?",
            opties:["Bamboe","Vis","Insecten","Vlees"], goed:0}
         ]
@@ -381,8 +370,9 @@ export const PAKKETTEN: Pakketten = {
         type: "open", tijd: 30, punten: 1, teamModus: "individueel",
         uitleg: "Korte vragen. Ieder voor zich, één punt per stuk. Tempo!",
         vragen: [
-          {v:"Welk land verloor de WK-finale?", a:"Argentinië"},
-          {v:"Hoeveel poten heeft een spin?", a:"Acht"},
+          {v:"Welke kleur krijg je als je blauw en geel mengt?", a:"Groen"},
+          {v:"Wie woont er in paleis Huis ten Bosch?", a:"Koning Willem-Alexander",
+           toelichting:"Met koningin Máxima. Het paleis staat in Den Haag."},
           {v:"Wat is de hoofdstad van België?", a:"Brussel"},
           {v:"Hoeveel is 7 × 8?", a:"56"},
           {v:"Wat is het grootste meer van Nederland?", a:"Het IJsselmeer"},
