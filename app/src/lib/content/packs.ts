@@ -67,11 +67,11 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Oranje ging eruit tegen Marokko, na strafschoppen."},
           {reserve:true, v:"Het minimumloon ging dit jaar boven de 15 euro per uur.", goed:false,
            toelichting:"Net niet: sinds 1 juli is het € 14,99 bruto per uur."},
+          // Albert Heijn staat al als schatvraag in Dichtstbij Wint.
           {reserve:true, v:"Door een storing bleven in oktober schappen bij Albert Heijn leeg.", goed:true,
            toelichting:"Een IT-incident bij Ahold Delhaize. Ook Etos en Gall & Gall lagen eruit."},
           {reserve:true, v:"Bij haar arrestatie bood Britney Spears de agenten lasagne aan.", goed:true,
            toelichting:"Op 4 maart, voor rijden onder invloed. Een duik in haar zwembad mocht ook."},
-          // Staat al als schatvraag in Dichtstbij Wint.
           {reserve:true, v:"Hackers stookten Franse supermarktkoelingen op tot 50 graden.", goed:true,
            toelichting:"In oktober, bij honderden winkels. Al het verse eten moest weg."},
           {reserve:true, v:"Realityster Spencer Pratt werd burgemeester van Los Angeles.", goed:false,
@@ -205,7 +205,10 @@ export const PAKKETTEN: Pakketten = {
         samen: ["Joris", "Rik"],
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
-          {v:"Een supermarktkoeling staat op zo'n 4 graden. Hackers zetten die van honderden Franse supermarkten in oktober hoger. Tot hoeveel graden?", getal:50, eenheid:"graden",
+          // Een schatting van experts, geen cijfer van Albert Heijn zelf: zo staat het er ook.
+          {v:"Door de hack in oktober liep Albert Heijn een week lang omzet mis. Hoeveel miljoen euro, volgens experts?", getal:150, eenheid:"miljoen euro",
+           toelichting:"Tot 150 miljoen, rekende retailexpert Laurens Sloot uit voor RTL Z. Een gewone week is goed voor zo'n 360 miljoen."},
+          {reserve:true, v:"Een supermarktkoeling staat op zo'n 4 graden. Hackers zetten die van honderden Franse supermarkten in oktober hoger. Tot hoeveel graden?", getal:50, eenheid:"graden",
            toelichting:"Vijftig graden: van koelvak naar sauna. Al het verse eten moest weg, en hier en daar ontstond brand."},
           {reserve:true, v:"Wat kostte een gemiddeld koophuis in Nederland in september 2026?", getal:504658, eenheid:"euro",
            toelichting:"€ 504.658, volgens CBS en Kadaster: 2,9 procent meer dan een jaar eerder."},
