@@ -207,7 +207,7 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           // Een schatting van experts, geen cijfer van Albert Heijn zelf: zo staat het er ook.
           {v:"Door de hack in oktober liep Albert Heijn een week lang omzet mis. Hoeveel miljoen euro, volgens experts?", getal:150, eenheid:"miljoen euro",
-           toelichting:"Tot 150 miljoen, rekende retailexpert Laurens Sloot uit voor RTL Z. Een gewone week is goed voor zo'n 360 miljoen."},
+           toelichting:"Tot 150 miljoen, rekende retailexpert Laurens Sloot uit. Een gewone week is goed voor zo'n 360 miljoen. Bron: RTL Z, 20 oktober 2026."},
           {reserve:true, v:"Een supermarktkoeling staat op zo'n 4 graden. Hackers zetten die van honderden Franse supermarkten in oktober hoger. Tot hoeveel graden?", getal:50, eenheid:"graden",
            toelichting:"Vijftig graden: van koelvak naar sauna. Al het verse eten moest weg, en hier en daar ontstond brand."},
           {reserve:true, v:"Wat kostte een gemiddeld koophuis in Nederland in september 2026?", getal:504658, eenheid:"euro",
