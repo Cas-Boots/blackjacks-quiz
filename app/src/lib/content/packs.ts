@@ -479,6 +479,9 @@ export const PAKKETTEN: Pakketten = {
         naam: "Wie van de Blackjacks?",
         suit: "♦", thema: "Slotronde", sfeer: "vilt",
         type: "stem", tijd: 30, punten: 3, teamModus: "individueel",
+        // Uit: stemmen werkt slecht met vijf spelers (november 2026). De tijd
+        // gaat naar de andere rondes.
+        optioneel: true,
         uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},

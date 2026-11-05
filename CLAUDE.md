@@ -109,8 +109,8 @@ daarom met praattijd, niet alleen met de klok:
 | Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
 
 **Het doel: ± 2 uur, en vóór middernacht klaar.** De quiz is op
-oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 8
-rondes en 33 vragen eindigt hij volgens het model hierboven om ± 23:25, ruim
+oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 7
+rondes en 30 vragen eindigt hij volgens het model hierboven om ± 23:15, ruim
 voor het aftellen. `app/tests/keuze.test.ts` rekent dat na en faalt boven de
 125 minuten.
 

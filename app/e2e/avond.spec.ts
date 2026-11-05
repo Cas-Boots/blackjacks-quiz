@@ -401,7 +401,14 @@ test('het laatste stuk: de stand blijft geheim op de televisie, de quizmaster zi
   // Een gewone ronde: de stand is open. Het laatste kwart tot derde van de avond niet.
   await qm.doe('naar-ronde', { ronde: 0 });
   expect((await qm.staat()).standGeheim).toBe(false);
-  const geheimVanaf = aantal - Math.max(1, Math.round(aantal * 0.3));
+  // Geheim vanaf het laatste kwart tot derde, of eerder als de eerste dubbele
+  // slotronde eerder valt: dezelfde regel als eersteGeheimeRonde in bonus.ts.
+  let eersteDubbel = -1;
+  for (let ri = 0; ri < aantal && eersteDubbel < 0; ri++) {
+    await qm.doe('naar-ronde', { ronde: ri });
+    if ((await qm.staat()).ronde.dubbel) eersteDubbel = ri;
+  }
+  const geheimVanaf = Math.min(aantal - Math.max(1, Math.round(aantal * 0.3)), eersteDubbel >= 0 ? eersteDubbel : aantal);
   await qm.doe('naar-ronde', { ronde: geheimVanaf - 1 });
   expect((await qm.staat()).standGeheim).toBe(false);
   await qm.doe('naar-ronde', { ronde: geheimVanaf });
