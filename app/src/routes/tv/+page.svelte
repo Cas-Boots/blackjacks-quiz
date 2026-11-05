@@ -684,6 +684,18 @@
   <Overgang moment={overgang} />
   <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
   <div class="motief" aria-hidden="true"></div>
+  <!-- De uitslag: schijnwerpers zoeken de winnaar, daarna blijft het vuurwerk gaan. -->
+  {#if staat?.fase === 'einde'}
+    <div class="galashow" aria-hidden="true" style="--eerste:{ceremonieNu.eerste}ms">
+      <i class="schijnwerper links"></i><i class="schijnwerper rechts"></i>
+      <i class="pijl" style="--x:14%;--y:22%;--w:0s"></i>
+      <i class="pijl" style="--x:84%;--y:16%;--w:.9s"></i>
+      <i class="pijl" style="--x:30%;--y:9%;--w:1.7s"></i>
+      <i class="pijl" style="--x:70%;--y:30%;--w:2.4s"></i>
+      <i class="pijl" style="--x:8%;--y:55%;--w:3.1s"></i>
+      <i class="pijl" style="--x:92%;--y:50%;--w:3.8s"></i>
+    </div>
+  {/if}
   <!-- Het onthulmoment van het decor: de lamp, de schijnwerpers, de bliksem… -->
   {#if viering}
     {#key vraagSleutelNu}
@@ -765,7 +777,8 @@
       <!-- Confetti hangt over het hele scherm en hoort dus buiten het vlak:
            binnen een geschaald vlak zou hij met de dia meekrimpen. -->
       {#if staat?.fase === 'einde' && confettiAan}
-        <Confetti />
+        <!-- Op het gala: goud, champagne en een vleug roze. -->
+        <Confetti kleuren={['#e6c46a', '#fff0bd', '#f6ecd2', '#d9b45a', '#ffd1dc', '#ffffff']} />
       {/if}
       <!-- Het vlak met de dia zelf. Past hij niet op de televisie, dan gaat
            alles een maat kleiner in plaats van dat de onderkant wegvalt. -->
@@ -1172,7 +1185,7 @@
             {#if staat.prijzen.length || poedel}
               <div class="prijzen">
                 {#if poedel && poedel.punten < staat.stand[0].punten}
-                  <div class="prijs" style="border-style:dashed;--wacht:{winnaarNa + 1200 + staat.prijzen.length * 260}ms">
+                  <div class="prijs" style="border-style:dashed;--wacht:{winnaarNa + 2000 + staat.prijzen.length * 380}ms">
                     <span class="prijsicoon" aria-hidden="true">🏮</span>
                     <span class="prijstitel">Poedelprijs</span>
                     <span class="prijsnaam">{poedel.naam}</span>
@@ -1180,7 +1193,7 @@
                   </div>
                 {/if}
                 {#each staat.prijzen as p, i (p.sleutel)}
-                  <div class="prijs" style="--wacht:{winnaarNa + 1200 + i * 260}ms">
+                  <div class="prijs" style="--wacht:{winnaarNa + 2000 + i * 380}ms">
                     <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
                     <span class="prijstitel">{p.titel}</span>
                     {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}

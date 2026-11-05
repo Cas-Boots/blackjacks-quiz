@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  /** Snippers in de kleuren van de tafel. Speelt één keer en dooft uit. */
+  /** Snippers in de kleuren van de tafel (of van het decor). Speelt één keer en dooft uit. */
+  let { kleuren: eigen = null }: { kleuren?: string[] | null } = $props();
   let doek: HTMLCanvasElement;
 
   onMount(() => {
@@ -18,7 +19,7 @@
     pasAan();
     window.addEventListener('resize', pasAan);
 
-    const kleuren = ['#c9a227', '#f0d98c', '#f7f3e8', '#c0452f', '#4e9a6b'];
+    const kleuren = eigen ?? ['#c9a227', '#f0d98c', '#f7f3e8', '#c0452f', '#4e9a6b'];
     const snippers = Array.from({ length: 190 }, () => ({
       x: Math.random() * doek.clientWidth,
       y: -30 - Math.random() * doek.clientHeight * 0.8,

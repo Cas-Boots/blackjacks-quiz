@@ -35,6 +35,9 @@
 
   /** Tweede, eerste, derde — zoals een echt podium staat. */
   let volgorde = $derived(top3.length === 3 ? [1, 0, 2] : top3.length === 2 ? [1, 0] : top3.map((_, i) => i));
+  /** De top drie als hoge kaarten: aas, heer, vrouw. */
+  const RANG = ['A', 'K', 'Q'];
+  const KLEUR = ['♠', '♥', '♦'];
   /** De derde trede komt eerst, de eerste als laatste. */
   let vertraging = $derived(tijden ?? [1700, 1000, 300]);
 </script>
@@ -48,24 +51,37 @@
       data-plek={idx + 1}
       style="--vertraging:{compact ? vertraging[idx] / 2 : vertraging[idx]}ms;--blok:{geheim ? vertraging[idx] - ROFFEL : compact ? vertraging[idx] / 2 : vertraging[idx]}ms"
     >
-      {#if geheim}
-        <!-- De winnaar ligt nog dicht; de kaart draait om als de roffel stopt. -->
-        <span class="dichtekaart" aria-hidden="true"><span>?</span></span>
-      {/if}
-      <div class="staander" class:geheim>
-        <span class="kroonhouder" class:kroon={idx === 0}>
-          <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat={compact ? 'm' : 'l'} goud={idx === 0} />
-        </span>
-        <span class="naam">{r.naam}</span>
-        <span class="punten">
-          {#if compact}
-            {r.punten}
-          {:else}
-            <Teller naar={r.punten} van={vorigePunten[r.spelerId] ?? r.punten} vertraging={vertraging[idx] + 500} />
+      {#if compact}
+        <div class="staander">
+          <span class="kroonhouder" class:kroon={idx === 0}>
+            <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat="m" goud={idx === 0} />
+          </span>
+          <span class="naam">{r.naam}</span>
+          <span class="punten">{r.punten} {r.punten === 1 ? 'punt' : 'punten'}</span>
+        </div>
+      {:else}
+        <!-- Op de televisie staat de top drie als speelkaart op zijn trede:
+             de winnaar is de schoppenaas, dan de hartenheer en de ruitenvrouw.
+             De aas ligt eerst dicht en draait om als de roffel stopt. -->
+        <div class="speelkaart" class:geheim class:winnaar={idx === 0} data-rood={idx > 0}>
+          <div class="voorkant">
+            <span class="hoek boven" aria-hidden="true">{RANG[idx]}<i>{KLEUR[idx]}</i></span>
+            <span class="hoek onder" aria-hidden="true">{RANG[idx]}<i>{KLEUR[idx]}</i></span>
+            <span class="watermerk" aria-hidden="true">{KLEUR[idx]}</span>
+            <span class="kroonhouder" class:kroon={idx === 0}>
+              <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat="l" goud={idx === 0} />
+            </span>
+            <span class="naam">{r.naam}</span>
+            <span class="punten">
+              <Teller naar={r.punten} van={vorigePunten[r.spelerId] ?? r.punten} vertraging={vertraging[idx] + 500} />
+              {r.punten === 1 ? 'punt' : 'punten'}
+            </span>
+          </div>
+          {#if geheim}
+            <div class="achterkant" aria-hidden="true"><span>?</span></div>
           {/if}
-          {r.punten === 1 ? 'punt' : 'punten'}
-        </span>
-      </div>
+        </div>
+      {/if}
       <!-- De vloer houdt de hoogte van de trede al bezet voordat de trede
            er is: zo staat de opmaak van de dia meteen vast en hoeft het
            scherm niet mee te schuiven terwijl het podium opkomt. -->
@@ -212,71 +228,6 @@
     animation: gloedTrede 2.6s ease-in-out infinite;
     animation-delay: calc(var(--vertraging) + 800ms);
   }
-  /* De winnaar onthuld: eerst een dichte kaart, dan draait hij om. */
-  .staander.geheim {
-    animation-delay: var(--vertraging);
-    animation-name: omdraaienWinnaar;
-    animation-duration: 0.7s;
-  }
-  .dichtekaart {
-    position: absolute;
-    left: 50%;
-    bottom: calc(var(--hoogte) + 0.9rem);
-    width: clamp(84px, 7vw, 140px);
-    aspect-ratio: 5 / 7;
-    margin-left: calc(clamp(84px, 7vw, 140px) / -2);
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background:
-      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
-      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
-      var(--fiche, #c62f2a);
-    box-shadow:
-      inset 0 0 0 5px var(--kaart-vlak, #fffdf6),
-      0 18px 30px rgba(0, 0, 0, 0.5);
-    animation:
-      kaartLegt 0.5s calc(var(--vertraging) - 1700ms) var(--deal) both,
-      kaartTrilt 0.18s calc(var(--vertraging) - 900ms) ease-in-out 5,
-      kaartWeg 0.35s var(--vertraging) ease-in forwards;
-  }
-  .dichtekaart span {
-    font-family: var(--display);
-    font-weight: 900;
-    font-size: clamp(2rem, 3.6vw, 4.4rem);
-    color: var(--kaart-vlak, #fffdf6);
-  }
-  @keyframes kaartLegt {
-    from {
-      opacity: 0;
-      transform: translateY(-60px) rotate(-12deg);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes kaartTrilt {
-    50% {
-      transform: rotate(3deg) scale(1.04);
-    }
-  }
-  @keyframes kaartWeg {
-    to {
-      opacity: 0;
-      transform: rotateY(90deg) scale(1.1);
-    }
-  }
-  @keyframes omdraaienWinnaar {
-    from {
-      opacity: 0;
-      transform: rotateY(-90deg) scale(1.1);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
   @keyframes oprijzen {
     from {
       height: 0;
@@ -287,9 +238,262 @@
       box-shadow: inset 0 0 60px rgba(255, 240, 180, 0.45);
     }
   }
+
+  /* ===== Op de televisie: speelkaarten op art-decotreden ============ */
+  .podium:not(.compact) {
+    --trede-1: clamp(96px, 12.5vh, 160px);
+    --kaart-b: clamp(124px, 10.4vw, 200px);
+    width: min(100%, 1100px);
+    gap: clamp(0.6rem, 1.6vw, 1.8rem);
+    border-bottom: none;
+  }
+  .podium:not(.compact)::after {
+    left: 0;
+    right: 0;
+    height: 4px;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, var(--goud-licht), var(--goud), var(--goud-licht), transparent);
+    box-shadow: 0 0 24px var(--goud);
+  }
+  .speelkaart {
+    position: relative;
+    width: calc(var(--kaart-b) * 0.82);
+    aspect-ratio: 5 / 7;
+    margin-bottom: 0.9rem;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    animation: kaartDelen 0.6s calc(var(--vertraging) + 350ms) var(--deal) both;
+  }
+  .speelkaart.winnaar {
+    width: var(--kaart-b);
+  }
+  .voorkant,
+  .achterkant {
+    position: absolute;
+    inset: 0;
+    border-radius: clamp(10px, 1vw, 18px);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .voorkant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 12% 10%;
+    background: linear-gradient(170deg, #fffdf6, #efe4c8);
+    color: #14110d;
+    box-shadow:
+      inset 0 0 0 2px #d9b45a,
+      inset 0 0 0 7px transparent,
+      inset 0 0 0 8px rgba(154, 117, 36, 0.5),
+      0 24px 50px -12px rgba(0, 0, 0, 0.75);
+  }
+  .winnaar .voorkant {
+    box-shadow:
+      inset 0 0 0 3px #e6c46a,
+      inset 0 0 0 8px transparent,
+      inset 0 0 0 9px rgba(154, 117, 36, 0.6),
+      0 0 0 3px rgba(255, 240, 189, 0.5),
+      0 0 60px rgba(230, 196, 106, 0.55),
+      0 30px 60px -12px rgba(0, 0, 0, 0.8);
+  }
+  .hoek {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: calc(var(--kaart-b) * 0.14);
+    line-height: 0.9;
+    color: #17171c;
+  }
+  .hoek i {
+    font-style: normal;
+    font-size: 0.85em;
+  }
+  [data-rood="true"] .hoek,
+  [data-rood="true"] .watermerk {
+    color: #d42a3a;
+  }
+  .hoek.boven {
+    left: 7%;
+    top: 5%;
+  }
+  .hoek.onder {
+    right: 7%;
+    bottom: 5%;
+    transform: rotate(180deg);
+  }
+  .watermerk {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--kaart-b) * 0.9);
+    line-height: 1;
+    color: #17171c;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .voorkant .naam {
+    position: relative;
+    font-family: var(--display);
+    font-weight: 900;
+    /* Op de kleinere kaarten past ook "Bastiaan" nog op één regel. */
+    font-size: calc(var(--kaart-b) * 0.125);
+    line-height: 1;
+    max-width: 100%;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .winnaar .voorkant .naam {
+    font-size: calc(var(--kaart-b) * 0.16);
+  }
+  /* Na het omdraaien blijft de aas zacht nagloeien. */
+  .speelkaart.winnaar::before {
+    content: "";
+    position: absolute;
+    inset: -18%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 230, 160, 0.45), transparent 65%);
+    opacity: 0;
+    animation: nagloeien 2.8s calc(var(--vertraging) + 700ms) ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes nagloeien {
+    0%, 100% { opacity: 0.35; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+  .voorkant .punten {
+    position: relative;
+    font-family: var(--display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-size: calc(var(--kaart-b) * 0.075);
+    color: #7d6312;
+    white-space: nowrap;
+  }
+  .achterkant {
+    display: grid;
+    place-items: center;
+    background:
+      repeating-linear-gradient(45deg, rgba(230, 196, 106, 0.35) 0 4px, transparent 4px 12px),
+      repeating-linear-gradient(-45deg, rgba(230, 196, 106, 0.35) 0 4px, transparent 4px 12px),
+      #0d1530;
+    box-shadow:
+      inset 0 0 0 6px #fbf4e2,
+      inset 0 0 0 8px #d9b45a,
+      0 24px 50px -12px rgba(0, 0, 0, 0.75);
+    transform: rotateY(180deg);
+  }
+  .achterkant span {
+    display: grid;
+    place-items: center;
+    width: 46%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #fbf4e2;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: calc(var(--kaart-b) * 0.26);
+    color: #0d1530;
+  }
+
+  /* De aas: dicht neergelegd tijdens de roffel, dan omgedraaid. */
+  .speelkaart.geheim {
+    animation:
+      kaartDelen 0.6s calc(var(--vertraging) - 1700ms) var(--deal) both,
+      kaartTrilt 0.16s calc(var(--vertraging) - 800ms) ease-in-out 5;
+  }
+  .geheim .voorkant {
+    animation: voorOm 0.8s var(--vertraging) var(--deal) both;
+  }
+  .geheim .achterkant {
+    animation: achterOm 0.8s var(--vertraging) var(--deal) both;
+  }
+  @keyframes kaartDelen {
+    from {
+      opacity: 0;
+      transform: translateY(-140px) rotate(-16deg) scale(1.15);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes kaartTrilt {
+    50% {
+      transform: rotate(2.5deg) scale(1.03);
+    }
+  }
+  @keyframes voorOm {
+    from {
+      transform: rotateY(-180deg) scale(1.15);
+    }
+    60% {
+      transform: rotateY(10deg) scale(1.18);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes achterOm {
+    from {
+      transform: rotateY(0deg) scale(1.15);
+    }
+    to {
+      transform: rotateY(180deg);
+    }
+  }
+
+  /* De treden: zwart gelakt met een rand in goud, zilver of brons. */
+  .podium:not(.compact) .trede[data-plek="1"] {
+    --rand-kleur: #f3d77e;
+  }
+  .podium:not(.compact) .trede[data-plek="2"] {
+    --rand-kleur: #dfe3ea;
+  }
+  .podium:not(.compact) .trede[data-plek="3"] {
+    --rand-kleur: #dd9a5e;
+  }
+  .podium:not(.compact) .blok {
+    border-radius: 6px 6px 0 0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 18%, rgba(230, 196, 106, 0.12) 18% calc(18% + 1px)),
+      linear-gradient(180deg, #1c2650 0%, #0b1129 55%, #04060e 100%);
+    border-top: 5px solid var(--rand-kleur);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 3px 0 0 color-mix(in srgb, var(--rand-kleur) 45%, transparent),
+      inset -3px 0 0 color-mix(in srgb, var(--rand-kleur) 45%, transparent),
+      0 -6px 30px -6px color-mix(in srgb, var(--rand-kleur) 55%, transparent),
+      0 30px 50px -30px rgba(0, 0, 0, 0.9);
+  }
+  .podium:not(.compact) .cijfer {
+    font-family: "Bodoni Moda", var(--display);
+    font-weight: 900;
+    font-size: calc(var(--hoogte) * 0.7);
+    color: transparent;
+    background: linear-gradient(180deg, #fffbe8 0%, var(--rand-kleur) 45%, color-mix(in srgb, var(--rand-kleur) 55%, #000) 60%, var(--rand-kleur) 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    mix-blend-mode: normal;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  .podium:not(.compact) .trede[data-plek="1"] .blok::after {
+    animation: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .dichtekaart {
-      display: none;
+    .speelkaart,
+    .voorkant,
+    .achterkant {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
     }
     .blok,
     .staander {

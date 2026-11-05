@@ -2058,3 +2058,113 @@
   bottom: clamp(8px, 0.9vw, 16px);
   transform: rotate(180deg);
 }
+
+/* ===================================================================
+   DE GALASHOW BIJ DE UITSLAG
+   Twee schijnwerpers zoeken over het podium en vinden de winnaar op het
+   moment dat de aas omdraait; daarna gaat er steeds ergens vuurwerk af.
+   =================================================================== */
+.scherm > .galashow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  overflow: hidden;
+}
+.schijnwerper {
+  position: absolute;
+  top: -10vh;
+  width: 34vw;
+  height: 120vh;
+  background: linear-gradient(180deg, rgba(255, 244, 210, 0.42), rgba(255, 244, 210, 0.12) 70%, transparent);
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+  filter: blur(10px);
+  transform-origin: 50% 0;
+  opacity: 0;
+}
+.schijnwerper.links {
+  left: 2vw;
+  animation:
+    zoekLinks 2.4s calc(var(--eerste) - 2400ms) ease-in-out both,
+    vindLinks 0.6s var(--eerste) var(--deal) forwards,
+    flakker 3s calc(var(--eerste) + 600ms) ease-in-out infinite;
+}
+.schijnwerper.rechts {
+  right: 2vw;
+  animation:
+    zoekRechts 2.4s calc(var(--eerste) - 2400ms) ease-in-out both,
+    vindRechts 0.6s var(--eerste) var(--deal) forwards,
+    flakker 3s calc(var(--eerste) + 900ms) ease-in-out infinite;
+}
+@keyframes zoekLinks {
+  0% { opacity: 0; transform: rotate(-30deg); }
+  20% { opacity: 1; }
+  50% { transform: rotate(10deg); }
+  100% { opacity: 1; transform: rotate(-22deg); }
+}
+@keyframes zoekRechts {
+  0% { opacity: 0; transform: rotate(30deg); }
+  20% { opacity: 1; }
+  50% { transform: rotate(-12deg); }
+  100% { opacity: 1; transform: rotate(24deg); }
+}
+/* Beide bundels komen samen op de winnaar, in het midden. */
+@keyframes vindLinks {
+  from { opacity: 1; transform: rotate(-22deg); }
+  to { opacity: 1; transform: rotate(-27deg); }
+}
+@keyframes vindRechts {
+  from { opacity: 1; transform: rotate(24deg); }
+  to { opacity: 1; transform: rotate(27deg); }
+}
+@keyframes flakker {
+  50% { filter: blur(14px) brightness(1.25); }
+}
+/* Vuurpijlen: elk op een eigen plek, steeds opnieuw, pas na de winnaar. */
+.galashow .pijl {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 30vh;
+  height: 30vh;
+  margin: -15vh 0 0 -15vh;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 230, 160, 0.95) 0 1.3deg, transparent 1.3deg 9deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 14%, #000 20% 44%, transparent 62%);
+  mask: radial-gradient(circle, transparent 0 14%, #000 20% 44%, transparent 62%);
+  opacity: 0;
+  animation: pijlKnal 4.6s calc(var(--eerste) + var(--w)) ease-out infinite;
+}
+.galashow .pijl:nth-child(2n) {
+  background: repeating-conic-gradient(rgba(255, 190, 210, 0.95) 0 1.3deg, transparent 1.3deg 9deg);
+}
+.galashow .pijl:nth-child(3n) {
+  background: repeating-conic-gradient(rgba(200, 220, 255, 0.95) 0 1.3deg, transparent 1.3deg 9deg);
+}
+@keyframes pijlKnal {
+  0% { opacity: 0; transform: scale(0.15); }
+  6% { opacity: 1; }
+  30% { opacity: 0.55; transform: scale(1.1); }
+  42%, 100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* De prijzen worden gedeeld en draaien één voor één om. */
+.uitslagdia .prijzen {
+  perspective: 1400px;
+}
+.uitslagdia .prijs {
+  animation: prijsOm 0.7s var(--wacht, var(--eerste)) var(--deal) both;
+  backface-visibility: hidden;
+}
+@keyframes prijsOm {
+  0% { opacity: 0; transform: translateY(-40px) rotateY(-100deg); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scherm > .galashow {
+    display: none;
+  }
+}
