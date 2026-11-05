@@ -2168,3 +2168,130 @@
     display: none;
   }
 }
+
+/* ===================================================================
+   DE UITSLAG IN TWEE BEDRIJVEN
+   Eerst het podium met het hele scherm voor zich; na het juichen schuift
+   het beeld door naar de prijzen, die elk een eigen moment krijgen.
+   =================================================================== */
+.uitslagdia {
+  display: grid;
+}
+.uitslagdia > .akte {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 1.8vh, 1.6rem);
+  text-align: center;
+}
+.podiumakte {
+  animation: akteWeg 0.9s var(--prijzen) var(--zacht) forwards;
+}
+.prijzenakte {
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  animation: akteKomt 0.9s calc(var(--prijzen) + 250ms) var(--deal) forwards;
+}
+@keyframes akteWeg {
+  to {
+    opacity: 0;
+    transform: translateY(-6vh) scale(0.94);
+    visibility: hidden;
+  }
+}
+@keyframes akteKomt {
+  from {
+    opacity: 0;
+    transform: translateY(6vh);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+/* De top drie blijft klein bovenaan staan. */
+.toptrio {
+  display: flex;
+  gap: clamp(0.6rem, 1.5vw, 1.6rem);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.trio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.35em 1.1em 0.35em 0.4em;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid color-mix(in srgb, var(--goud) 55%, transparent);
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: calc(var(--fs-lood) * 1.15);
+  color: var(--ivoor);
+}
+.trio b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.05em;
+  padding: 0.15em 0.45em;
+  border-radius: 8px;
+  background: #fbf4e2;
+  color: #17171c;
+  font-weight: 900;
+}
+.trio b i {
+  font-style: normal;
+}
+.trio[data-plek="2"] b,
+.trio[data-plek="3"] b {
+  color: #d42a3a;
+}
+.trio[data-plek="1"] {
+  border-color: var(--goud);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--goud) 40%, transparent);
+}
+/* Op het eigen scherm zijn de prijzen groot: vier per rij. */
+.prijzenakte .prijzen {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 1600px);
+  gap: clamp(0.8rem, 1.4vw, 1.6rem);
+}
+.prijzenakte .prijs {
+  padding: clamp(1rem, 1.8vw, 2rem) clamp(0.8rem, 1.2vw, 1.4rem);
+  row-gap: 0.4rem;
+}
+.prijzenakte .prijsicoon {
+  font-size: clamp(2.2rem, 3.6vw, 4rem);
+}
+.prijzenakte .prijstitel {
+  font-size: var(--fs-etiket);
+}
+.prijzenakte .prijsnaam {
+  font-size: calc(var(--fs-naam) * 1.05);
+}
+.prijzenakte .prijsdetail {
+  font-size: calc(var(--fs-lood) * 0.85);
+  -webkit-line-clamp: 3;
+}
+/* Elke prijs komt groot binnen en zakt dan op zijn plek. */
+.prijzenakte .prijs {
+  animation: prijsMoment 1.1s var(--wacht) var(--deal) both;
+}
+@keyframes prijsMoment {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px) rotateY(-110deg) scale(1.25);
+  }
+  45% {
+    opacity: 1;
+    transform: rotateY(8deg) scale(1.18);
+    box-shadow: 0 0 0 4px var(--goud), 0 0 50px color-mix(in srgb, var(--goud) 60%, transparent);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}

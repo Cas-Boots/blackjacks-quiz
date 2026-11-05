@@ -291,7 +291,12 @@
     const derde = 500 + rest * 650 + 500;
     const tweede = derde + 1900;
     const eerste = tweede + 3300;
-    return { rest: (k: number) => 500 + k * 650, derde, tweede, eerste, roffel: eerste - 1700 };
+    // Het tweede bedrijf: na een paar seconden juichen schuift het beeld naar de prijzen.
+    const prijzen = eerste + 7000;
+    return {
+      rest: (k: number) => 500 + k * 650, derde, tweede, eerste, roffel: eerste - 1700,
+      prijzen, prijs: (i: number) => prijzen + 900 + i * 1300,
+    };
   }
   let ceremonieNu = $derived(ceremonie(staat?.stand.length ?? 0));
   let winnaarNa = $derived(ceremonieNu.eerste);
@@ -569,6 +574,9 @@
           setTimeout(() => geluid.plop(), c.tweede);
           setTimeout(() => geluid.tromgeroffel(1.6), c.roffel);
           setTimeout(() => geluid.fanfare(), c.eerste);
+          setTimeout(() => geluid.zwiep(), c.prijzen);
+          const aantalPrijzen = st.prijzen.length + (st.stand.length >= 3 && st.stand[st.stand.length - 1].punten < st.stand[0].punten ? 1 : 0);
+          for (let i = 0; i < aantalPrijzen; i++) setTimeout(() => geluid.stempel(), c.prijs(i) + 350);
           confettiAan = false;
           setTimeout(() => (confettiAan = true), c.eerste);
         }
@@ -1153,59 +1161,71 @@
 
           <!-- ══ De uitslag ═════════════════════════════════════════════ -->
         {:else if staat.fase === 'einde'}
-          <div class="uitslagdia" style="--roffel:{ceremonieNu.roffel}ms;--eerste:{ceremonieNu.eerste}ms">
-            <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
-            <!-- Eén plek voor drie zinnen: de uitslag, de roffel, de winnaar. -->
-            <div class="winnaarkop">
-              <p class="mega opbouw" aria-hidden="true">De uitslag</p>
-              <p class="mega opbouw roffelzin" aria-hidden="true">En de winnaar is…</p>
-              <h1 class="mega winnaar">{winZin}</h1>
+          <div class="uitslagdia" style="--roffel:{ceremonieNu.roffel}ms;--eerste:{ceremonieNu.eerste}ms;--prijzen:{ceremonieNu.prijzen}ms">
+            <!-- Eerste bedrijf: het podium, met het hele scherm voor zich. -->
+            <div class="akte podiumakte">
+              <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
+              <!-- Eén plek voor drie zinnen: de uitslag, de roffel, de winnaar. -->
+              <div class="winnaarkop">
+                <p class="mega opbouw" aria-hidden="true">De uitslag</p>
+                <p class="mega opbouw roffelzin" aria-hidden="true">En de winnaar is…</p>
+                <h1 class="mega winnaar">{winZin}</h1>
+              </div>
+              <p class="lood na-winnaar" style="text-align:center">
+                Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
+                {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
+              </p>
+
+              <Podium {top3} vorigePunten={live.vorigePunten} tijden={[ceremonieNu.eerste, ceremonieNu.tweede, ceremonieNu.derde]} />
+
+              <!-- Vanaf de vierde plek: kaarten op tafel, de laatste wordt het eerst gedeeld. -->
+              {#if staat.stand.length > 3}
+                <div class="restplekken">
+                  {#each staat.stand.slice(3) as r, j (r.spelerId)}
+                    <div class="restkaart" style="--wacht:{ceremonieNu.rest(staat.stand.length - 4 - j)}ms">
+                      <span class="restplek">{j + 4}</span>
+                      <Portret naam={r.naam} foto={r.foto} dier={r.dier} />
+                      <span class="restnaam">{r.naam}</span>
+                      <span class="restpunten">{r.punten.toLocaleString('nl-NL')}</span>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
             </div>
-            <p class="lood na-winnaar" style="text-align:center">
-              Met {staat.stand[0]?.punten ?? 0} {staat.stand[0]?.punten === 1 ? 'punt' : 'punten'}.
-              {#if winDier}<br /><span class="dierenroep"><Pixeldier sleutel={winDier.sleutel} pose="blij" /> Hulde aan {winDier.voluit}!</span>{/if}
-            </p>
 
-            <Podium {top3} vorigePunten={live.vorigePunten} tijden={[ceremonieNu.eerste, ceremonieNu.tweede, ceremonieNu.derde]} />
-
-            <!-- Vanaf de vierde plek: kaarten op tafel, de laatste wordt het eerst gedeeld. -->
-            {#if staat.stand.length > 3}
-              <div class="restplekken">
-                {#each staat.stand.slice(3) as r, j (r.spelerId)}
-                  <div class="restkaart" style="--wacht:{ceremonieNu.rest(staat.stand.length - 4 - j)}ms">
-                    <span class="restplek">{j + 4}</span>
-                    <Portret naam={r.naam} foto={r.foto} dier={r.dier} />
-                    <span class="restnaam">{r.naam}</span>
-                    <span class="restpunten">{r.punten.toLocaleString('nl-NL')}</span>
-                  </div>
+            <!-- Tweede bedrijf: de prijzen, elk met een eigen moment. -->
+            <div class="akte prijzenakte">
+              <p class="etiket">De prijzen van de avond</p>
+              <div class="toptrio" aria-label="De top drie">
+                {#each top3 as r, i (r.spelerId)}
+                  <span class="trio" data-plek={i + 1}><b>{['A', 'K', 'Q'][i]}<i>{['♠', '♥', '♦'][i]}</i></b>{r.naam}</span>
                 {/each}
               </div>
-            {/if}
+              {#if staat.prijzen.length || poedel}
+                <div class="prijzen">
+                  {#if poedel && poedel.punten < staat.stand[0].punten}
+                    <div class="prijs" style="border-style:dashed;--wacht:{ceremonieNu.prijs(0)}ms">
+                      <span class="prijsicoon" aria-hidden="true">🏮</span>
+                      <span class="prijstitel">Poedelprijs</span>
+                      <span class="prijsnaam">{poedel.naam}</span>
+                      <span class="prijsdetail">{kies(POEDEL, `poedel:${poedel.spelerId}`)}</span>
+                    </div>
+                  {/if}
+                  {#each staat.prijzen as p, i (p.sleutel)}
+                    <div class="prijs" style="--wacht:{ceremonieNu.prijs(i + (poedel && poedel.punten < staat.stand[0].punten ? 1 : 0))}ms">
+                      <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
+                      <span class="prijstitel">{p.titel}</span>
+                      {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}
+                      <span class="prijsdetail" class:lang={!p.namen.length}>{p.detail}</span>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
 
-            {#if staat.prijzen.length || poedel}
-              <div class="prijzen">
-                {#if poedel && poedel.punten < staat.stand[0].punten}
-                  <div class="prijs" style="border-style:dashed;--wacht:{winnaarNa + 2000 + staat.prijzen.length * 380}ms">
-                    <span class="prijsicoon" aria-hidden="true">🏮</span>
-                    <span class="prijstitel">Poedelprijs</span>
-                    <span class="prijsnaam">{poedel.naam}</span>
-                    <span class="prijsdetail">{kies(POEDEL, `poedel:${poedel.spelerId}`)}</span>
-                  </div>
-                {/if}
-                {#each staat.prijzen as p, i (p.sleutel)}
-                  <div class="prijs" style="--wacht:{winnaarNa + 2000 + i * 380}ms">
-                    <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
-                    <span class="prijstitel">{p.titel}</span>
-                    {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}
-                    <span class="prijsdetail" class:lang={!p.namen.length}>{p.detail}</span>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-
-            <p class="fijn" style="animation:opkomen .5s calc(var(--eerste) + 2600ms) both">
-              De hele avond staat op {joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}/uitslag/{staat.spelId}
-            </p>
+              <p class="fijn">
+                De hele avond staat op {joinAdres.replace(/^https?:\/\//, '').replace(/\/$/, '')}/uitslag/{staat.spelId}
+              </p>
+            </div>
           </div>
         {/if}
       </div>

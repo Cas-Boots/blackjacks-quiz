@@ -241,9 +241,9 @@
 
   /* ===== Op de televisie: speelkaarten op art-decotreden ============ */
   .podium:not(.compact) {
-    --trede-1: clamp(96px, 12.5vh, 160px);
-    --kaart-b: clamp(124px, 10.4vw, 200px);
-    width: min(100%, 1100px);
+    --trede-1: clamp(120px, 19vh, 240px);
+    --kaart-b: clamp(160px, 15vw, 290px);
+    width: min(100%, 1320px);
     gap: clamp(0.6rem, 1.6vw, 1.8rem);
     border-bottom: none;
   }
@@ -488,7 +488,96 @@
     animation: none;
   }
 
+
+  /* ---- Mooier: een galavloer, een stralenkrans en lichtplassen ---- */
+  /* De vloer spiegelt: kaarten en treden staan op zwart glas. */
+  .podium:not(.compact) {
+    -webkit-box-reflect: below 2px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.14));
+  }
+  /* Achter de aas draait een gouden stralenkrans, zodra hij is omgedraaid. */
+  .podium:not(.compact) .trede[data-plek="1"]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--hoogte) + var(--kaart-b) * 0.7);
+    width: calc(var(--kaart-b) * 3.2);
+    aspect-ratio: 1;
+    margin: 0 0 calc(var(--kaart-b) * -1.6) calc(var(--kaart-b) * -1.6);
+    border-radius: 50%;
+    background: repeating-conic-gradient(rgba(255, 226, 150, 0.32) 0 4deg, transparent 4deg 12deg);
+    -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%);
+    mask: radial-gradient(circle, #000 18%, transparent 68%);
+    opacity: 0;
+    animation:
+      kransAan 1s var(--vertraging) var(--deal) forwards,
+      kransDraait 40s var(--vertraging) linear infinite;
+    pointer-events: none;
+  }
+  @keyframes kransAan {
+    from { opacity: 0; scale: 0.4; }
+    to { opacity: 1; scale: 1; }
+  }
+  @keyframes kransDraait {
+    to { rotate: 360deg; }
+  }
+  /* Op elke trede valt een plas licht, alsof er een spot op staat. */
+  .podium:not(.compact) .vloer {
+    position: relative;
+  }
+  .podium:not(.compact) .vloer::before {
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: -14px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--rand-kleur) 70%, white) 0%, transparent 70%);
+    opacity: 0;
+    filter: blur(2px);
+    animation: plasAan 0.8s calc(var(--vertraging) + 400ms) ease-out forwards;
+    z-index: 1;
+    pointer-events: none;
+  }
+  @keyframes plasAan {
+    to { opacity: 0.85; }
+  }
+  /* Het portret in een gouden ovale lijst. */
+  .voorkant .kroonhouder {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 58%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 5%;
+    background:
+      radial-gradient(circle, transparent 0 60%, #fbf4e2 61%),
+      conic-gradient(from 200deg, #9a7524, #fff0bd, #d9b45a, #9a7524, #fff0bd, #9a7524);
+    box-shadow:
+      0 0 0 2px #d9b45a,
+      0 6px 14px rgba(0, 0, 0, 0.3);
+  }
+  .voorkant .kroonhouder :global(.portret),
+  .voorkant .kroonhouder :global(.avatar) {
+    width: 100%;
+    height: 100%;
+  }
+  .voorkant .kroonhouder :global(.avatar) {
+    font-size: calc(var(--kaart-b) * 0.15);
+    box-shadow: inset 0 0 0 3px #fbf4e2;
+  }
+  .voorkant .kroonhouder :global(.dierbadge) {
+    font-size: calc(var(--kaart-b) * 0.09);
+    right: -4%;
+    bottom: -4%;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .podium:not(.compact) .trede[data-plek="1"]::before {
+      animation: none;
+      opacity: 1;
+    }
     .speelkaart,
     .voorkant,
     .achterkant {
