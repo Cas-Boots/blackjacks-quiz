@@ -35,6 +35,9 @@ export function husselen<T>(lijst: T[], toeval: () => number = Math.random): T[]
   return uit;
 }
 
+/** Hoe vaak er gehusseld wordt om eerlijke teams te vinden. */
+const POGINGEN = 200;
+
 export function maakTeams(
   ronde: Ronde,
   spelers: Speler[],
@@ -51,20 +54,32 @@ export function maakTeams(
 
   const gewenst = ronde.aantalTeams ?? 2;
   const aantal = Math.max(2, Math.min(gewenst, Math.max(2, spelers.length)));
-  const teams: Team[] = Array.from({ length: aantal }, (_, i) => ({
+  const leeg = (): Team[] => Array.from({ length: aantal }, (_, i) => ({
     id: `t${i}`,
     naam: TEAMNAMEN[i % TEAMNAMEN.length].naam,
     suit: TEAMNAMEN[i % TEAMNAMEN.length].suit,
     leden: [],
   }));
-  // Eerst husselen, dan wie uit elkaar moet vooraan: het rondje langs de
-  // teams zet die dan ieder in een ander team, en de rest vult gelijk aan.
-  const uitElkaar = new Set((ronde.uitElkaar ?? []).map((n) => n.trim().toLowerCase()));
-  const gehusseld = husselen(spelers, toeval);
-  const apart = (s: Speler) => uitElkaar.has(s.naam.trim().toLowerCase());
-  [...gehusseld.filter(apart), ...gehusseld.filter((s) => !apart(s))]
-    .forEach((s, i) => teams[i % aantal].leden.push(s.id));
-  return teams;
+  const deel = (volgorde: Speler[]) => {
+    const teams = leeg();
+    volgorde.forEach((s, i) => teams[i % aantal].leden.push(s.id));
+    return teams;
+  };
+  if (!ronde.kennis) return deel(husselen(spelers, toeval));
+
+  // Husselen tot de teams even sterk zijn. De eerste eerlijkste indeling
+  // wint; omdat er gehusseld wordt, is dat elke ronde een andere.
+  const kennis = new Map(Object.entries(ronde.kennis).map(([n, k]) => [n.trim().toLowerCase(), k]));
+  const sterkte = new Map(spelers.map((s) => [s.id, kennis.get(s.naam.trim().toLowerCase()) ?? 1]));
+  let beste: Team[] = [];
+  let besteVerschil = Infinity;
+  for (let poging = 0; poging < POGINGEN && besteVerschil > 0; poging++) {
+    const teams = deel(husselen(spelers, toeval));
+    const totalen = teams.map((t) => t.leden.reduce((n, id) => n + (sterkte.get(id) ?? 1), 0));
+    const verschil = Math.max(...totalen) - Math.min(...totalen);
+    if (verschil < besteVerschil) [beste, besteVerschil] = [teams, verschil];
+  }
+  return beste;
 }
 
 /** Schuift één speler naar het volgende team. Voor handmatig bijsturen. */

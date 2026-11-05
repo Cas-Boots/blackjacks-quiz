@@ -15,6 +15,15 @@ import type { Pakketten } from './types';
 
 const DEMO_BEELD = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 300'%3E%3Crect width='480' height='300' fill='rgb(13,30,24)'/%3E%3Ctext x='240' y='128' font-family='Georgia,serif' font-size='110' fill='rgb(201,162,39)' text-anchor='middle'%3E%E2%99%A0%3C/text%3E%3Ctext x='240' y='210' font-family='Helvetica,Arial,sans-serif' font-size='24' fill='rgb(216,210,194)' text-anchor='middle'%3EVoorbeeldafbeelding%3C/text%3E%3Ctext x='240' y='245' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='rgb(138,160,150)' text-anchor='middle'%3EZo verschijnt een beeldvraag op het scherm%3C/text%3E%3C/svg%3E";
 
+/**
+ * Wie hoeveel van het nieuws weet (1 is gewoon, hoger is meer). De teams
+ * in de nieuwsrondes worden zo verdeeld dat ze samen even sterk zijn.
+ * Cas is quizmaster en speelt niet mee.
+ */
+const NIEUWS = { Joris: 4, Rik: 3, Eva: 2, Liz: 1, Bastiaan: 1 };
+/** Hetzelfde voor muziek: Joris en Rik komen zo nooit in hetzelfde team. */
+const MUZIEK = { Joris: 3, Rik: 3 };
+
 export const PAKKETTEN: Pakketten = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
@@ -59,12 +68,13 @@ export const PAKKETTEN: Pakketten = {
         naam: "Vier Kaarten",
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
-          {v:"Welke film won in maart de Oscar voor beste film?",
+          {v:"Welke film won in maart de Oscar voor beste film? Tip: de titel telt vier woorden.",
            opties:["Sinners","One Battle After Another","Hamnet","Marty Supreme"], goed:1,
            toelichting:"Paul Thomas Anderson ging met zes Oscars naar huis; Sinners won er vier."},
           {v:"Tegen welk land ging Oranje eruit op het WK?",
@@ -73,10 +83,10 @@ export const PAKKETTEN: Pakketten = {
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
-          {v:"Wie werd in Italië de succesvolste winterolympiër ooit?",
-           opties:["Johannes Høsflot Klæbo","Marit Bjørgen","Ole Einar Bjørndalen","Sven Kramer"], goed:0,
+          {v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
+           opties:["Johannes Høsflot Klæbo","Sven Kramer","Ireen Wüst","Shaun White"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
-          {v:"Welke negentienjarige voerde lange tijd het Formule 1-kampioenschap aan?",
+          {v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
            opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
            toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
@@ -132,6 +142,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "Dichtstbij Wint",
         suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
@@ -162,6 +173,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "2026 in Emoji",
         suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
         vragen: [
           {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
@@ -244,7 +256,7 @@ export const PAKKETTEN: Pakketten = {
         suit: "♥", thema: "De muziek van 2026", sfeer: "violet",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
-        uitElkaar: ["Joris", "Rik"],
+        kennis: MUZIEK,
         uitleg: "In teams, met Joris en Rik ieder aan een andere kant. Raden, gokken, meezingen: je hoeft geen kenner te zijn.",
         // Alleen nummers uit 2026. Wat er onder de film van het jaar ligt,
         // staat in showreel/muziek/LEESMIJ.md.
@@ -268,6 +280,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "2027",
         suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",

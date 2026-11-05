@@ -742,12 +742,13 @@ const PAKKETTEN = {
         naam: "Vier Kaarten",
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
            toelichting:"Met D66, VVD en CDA, beëdigd op 23 februari."},
-          {v:"Welke film won in maart de Oscar voor beste film?",
+          {v:"Welke film won in maart de Oscar voor beste film? Tip: de titel telt vier woorden.",
            opties:["Sinners","One Battle After Another","Hamnet","Marty Supreme"], goed:1,
            toelichting:"Paul Thomas Anderson ging met zes Oscars naar huis; Sinners won er vier."},
           {v:"Tegen welk land ging Oranje eruit op het WK?",
@@ -756,10 +757,10 @@ const PAKKETTEN = {
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
-          {v:"Wie werd in Italië de succesvolste winterolympiër ooit?",
-           opties:["Johannes Høsflot Klæbo","Marit Bjørgen","Ole Einar Bjørndalen","Sven Kramer"], goed:0,
+          {v:"Welke Noorse langlaufer werd in Italië de succesvolste winterolympiër ooit?",
+           opties:["Johannes Høsflot Klæbo","Sven Kramer","Ireen Wüst","Shaun White"], goed:0,
            toelichting:"De Noorse langlaufer brak het record voor de meeste olympische gouden medailles."},
-          {v:"Welke negentienjarige voerde lange tijd het Formule 1-kampioenschap aan?",
+          {v:"Welke negentienjarige Italiaan voerde lange tijd het Formule 1-kampioenschap aan?",
            opties:["Oliver Bearman","Isack Hadjar","Kimi Antonelli","Gabriel Bortoleto"], goed:2,
            toelichting:"Na de Grand Prix van Spanje had hij 292 punten. Verstappen stond zesde: Red Bull kreeg de compleet nieuwe regels niet aan de praat."}
         ]
@@ -815,6 +816,7 @@ const PAKKETTEN = {
         naam: "Dichtstbij Wint",
         suit: "♥", thema: "2026 in cijfers", sfeer: "staal",
         type: "dichtstbij", tijd: 60, punten: 3, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Eén getal per team: het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         vragen: [
           {v:"Hoeveel cent kost sinds 1 januari 2026 een gewone postzegel?", getal:140, eenheid:"cent",
@@ -845,6 +847,7 @@ const PAKKETTEN = {
         naam: "2026 in Emoji",
         suit: "♠", thema: "Het nieuws in plaatjes", sfeer: "bioscoop",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Welk nieuws, welke film of welk evenement uit 2026 staat hier?",
         vragen: [
           {emoji:"❄️ 🚆 🚫 ✈️", v:"Wat legde begin 2026 half Nederland stil?", a:"Overvloedige sneeuwval",
@@ -927,7 +930,7 @@ const PAKKETTEN = {
         suit: "♥", thema: "De muziek van 2026", sfeer: "violet",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         // De kenners in een ander team, zodat het voor iedereen een muziekronde is.
-        uitElkaar: ["Joris", "Rik"],
+        kennis: MUZIEK,
         uitleg: "In teams, met Joris en Rik ieder aan een andere kant. Raden, gokken, meezingen: je hoeft geen kenner te zijn.",
         // Alleen nummers uit 2026. Wat er onder de film van het jaar ligt,
         // staat in showreel/muziek/LEESMIJ.md.
@@ -951,6 +954,7 @@ const PAKKETTEN = {
         naam: "2027",
         suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
+        kennis: NIEUWS,
         uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
@@ -1776,21 +1780,35 @@ function maakTeams(rondeIndex){
     return [{id:"allen", naam:"Iedereen", suit:r.suit, leden:S.spelers.map(p=>p.id)}];
   }
   const aantal = Math.max(2, Math.min(r.aantalTeams || 2, Math.max(2, S.spelers.length)));
-  const gehusseld = S.spelers.map(p => p.id);
-  for(let i = gehusseld.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [gehusseld[i], gehusseld[j]] = [gehusseld[j], gehusseld[i]];
+  const husselen = () => {
+    const lijst = S.spelers.map(p => p.id);
+    for(let i = lijst.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [lijst[i], lijst[j]] = [lijst[j], lijst[i]];
+    }
+    return lijst;
+  };
+  const deel = volgorde => {
+    const teams = Array.from({length: aantal}, (_,i) => ({
+      id:"t"+i, naam:TEAMNAMEN[i % TEAMNAMEN.length].naam,
+      suit:TEAMNAMEN[i % TEAMNAMEN.length].suit, leden:[]
+    }));
+    volgorde.forEach((pid, i) => teams[i % aantal].leden.push(pid));
+    return teams;
+  };
+  if(!r.kennis) return deel(husselen());
+  // Husselen tot de teams even sterk zijn; wie niet in de lijst staat telt als 1.
+  const kennis = {};
+  Object.entries(r.kennis).forEach(([n, k]) => kennis[n.trim().toLowerCase()] = k);
+  const sterkte = pid => kennis[(speler(pid)?.naam || "").trim().toLowerCase()] ?? 1;
+  let beste = null, besteVerschil = Infinity;
+  for(let poging = 0; poging < 200 && besteVerschil > 0; poging++){
+    const teams = deel(husselen());
+    const totalen = teams.map(t => t.leden.reduce((n, pid) => n + sterkte(pid), 0));
+    const verschil = Math.max(...totalen) - Math.min(...totalen);
+    if(verschil < besteVerschil){ beste = teams; besteVerschil = verschil; }
   }
-  const teams = Array.from({length: aantal}, (_,i) => ({
-    id:"t"+i, naam:TEAMNAMEN[i % TEAMNAMEN.length].naam,
-    suit:TEAMNAMEN[i % TEAMNAMEN.length].suit, leden:[]
-  }));
-  // Wie uit elkaar moet (de kenners) eerst: ieder komt zo in een ander team.
-  const uitElkaar = (r.uitElkaar || []).map(n => n.trim().toLowerCase());
-  const apart = pid => uitElkaar.includes((speler(pid)?.naam || "").trim().toLowerCase());
-  [...gehusseld.filter(apart), ...gehusseld.filter(pid => !apart(pid))]
-    .forEach((pid, i) => teams[i % aantal].leden.push(pid));
-  return teams;
+  return beste;
 }
 function teamsVanRonde(rondeIndex){
   if(!S.teams[rondeIndex]) S.teams[rondeIndex] = maakTeams(rondeIndex);

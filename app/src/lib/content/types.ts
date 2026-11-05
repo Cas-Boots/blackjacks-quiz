@@ -54,11 +54,12 @@ export interface Ronde {
   teamModus: TeamModus;
   aantalTeams?: number;
   /**
-   * Spelers die in deze ronde niet bij elkaar in een team mogen, op naam.
-   * Voor de kenners: met Joris en Rik samen is een muziekronde gespeeld.
-   * Wie er vanavond niet is, wordt overgeslagen.
+   * Hoeveel iemand weet van het onderwerp van deze ronde, op naam: 1 is
+   * gewoon, hoger is meer. Wie er niet in staat (ook een gast) telt als 1.
+   * De teams worden zo verdeeld dat ze samen even sterk zijn; uit de
+   * eerlijkste indelingen kiest het toeval, zodat de teams blijven wisselen.
    */
-  uitElkaar?: string[];
+  kennis?: Record<string, number>;
   uitleg: string;
   /** Standaard uitgevinkt bij het samenstellen. */
   optioneel?: boolean;

@@ -45,12 +45,15 @@ ronde 1; voeg je een vraag toe, kijk dan ook in `showreel/reel-data.js`.
 De familieversie is de generale repetitie: hetzelfde jaar, makkelijkere vragen.
 Met de vragenkiezer stel je hem anders samen dan de avond met de Blackjacks.
 
-### De kenners uit elkaar
+### Eerlijke teams
 
-Joris en Rik weten veel van muziek. In de muziekronde *De Hitparade* komen ze
-daarom altijd in een ander team (`uitElkaar` in de ronde); zet het bij elke
-andere teamronde erbij als je wilt. Wie er niet is, wordt overgeslagen; met de
-hand verplaatsen kan nog steeds.
+Niet iedereen volgt het nieuws even goed. Daarom heeft elke nieuwsronde in
+teams een lijstje `kennis` (bovenaan `packs.ts`: Joris 4, Rik 3, Eva 2, Liz en
+Bastiaan 1). De app verdeelt de teams zo dat ze samen even sterk zijn, en
+kiest uit de eerlijke indelingen er elke ronde een andere. Joris en Rik komen
+zo nooit samen in een team. Voor de muziekronde geldt hetzelfde, met alleen
+Joris en Rik als kenners. Wie niet in het lijstje staat, ook een gast, telt als
+1. Met de hand verplaatsen kan nog steeds. Cas is quizmaster en speelt niet mee.
 
 ### Rondes over de groep zelf
 
