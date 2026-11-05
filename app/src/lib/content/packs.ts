@@ -173,11 +173,12 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Daarna maart met 60."},
           {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Hardlopen — 65 tegen 61", live:"sport.sportDuel",
            toelichting:"Na de sportschool, die met afstand bovenaan staat."},
-          // Is het antwoord dezelfde als bij de eerste vraag, dan vraagt de app
-          // vanzelf wie er het verst van zijn doel af zat ('anders').
-          {v:"Wie zat er dit jaar, gemeten aan zijn eigen jaardoel, het verst vanaf?", a:"Rik — 43 procent", live:"sport.doelEerst:anders",
-           toelichting:"45 keer sporten op een doel van 104. Daarna Joris met 56 procent."},
+          // Terugblik: 2025 was ons eerste sportjaar (cijfers in recap/vorigjaar.ts).
+          {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 45 keer", live:"sport.vooruit",
+           toelichting:"Dat is 125 procent meer. Daarna Eva: van 44 naar 84."},
           // Reserve: niet sterk genoeg, of zonder referentie om te raden.
+          {reserve:true, v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst:anders",
+           toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
           {reserve:true, v:"Welke van deze sporten staat níet in onze top vier: hardlopen, klimmen, padel, skiën of sportschool?", a:"Klimmen — 6 keer", live:"sport.nietInTop",
            toelichting:"De top vier: sportschool (269), hardlopen (65), padel (61) en skiën (17)."},
           {reserve:true, v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},

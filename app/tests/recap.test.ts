@@ -306,6 +306,11 @@ describe('jaardoelen en sporten na de sportschool', () => {
   it('zet de nummers twee en drie van onze sporten tegen elkaar', () => {
     expect(beantwoord('sport.sportDuel', analyse)).toMatchObject({ v: 'Wat deden we dit jaar vaker: hardlopen of padel?', a: 'Hardlopen — 65 tegen 61' });
   });
+  it('vergelijkt met vorig jaar, het eerste sportjaar', () => {
+    const uit = beantwoord('sport.vooruit', analyse);
+    expect(uit?.a).toBe('Rik — van 20 naar 45 keer');
+    expect(uit?.toelichting).toBe('Dat is 125 procent meer. Daarna Eva: van 44 naar 84.');
+  });
   it('laat twee van ons duelleren', () => {
     expect(beantwoord('sport.duel:Liz/Eva', analyse)).toMatchObject({ v: 'Wie sportte dit jaar vaker: Liz of Eva?', a: 'Liz — 91 tegen 84' });
   });

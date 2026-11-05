@@ -14,6 +14,7 @@ import type { Vraag } from '$lib/content/types';
 import type { VoorspellingenUitslag } from '$lib/shared/state';
 import { VOORSPELLING_OPLOSSERS } from './voorspellingen';
 import { POULE_OPLOSSERS, pouleAnalyse } from './poule';
+import { SPORT_2025 } from './vorigjaar';
 import {
   type Analyse, type Persoon, datumTekst, maandNaam, opsomming, sportNaam, telwoord, zoekSportTag,
 } from './analyse';
@@ -275,6 +276,22 @@ const OPLOSSERS: Record<string, Oplosser> = {
       v: `Welke van deze sporten staat níet in onze top ${telwoord(k)}: ${opsomming(opties.map((o) => o.toLowerCase())).replace(/ en ([^ ]+)$/, ' of $1')}?`,
       a: `${sportNaam(buiten)} — ${keer(n)}`,
       toelichting: `De top ${telwoord(k)}: ${opsomming(top.map(([t, m]) => `${sportNaam(t).toLowerCase()} (${m})`))}.`,
+    };
+  },
+
+  /** Wie er ten opzichte van 2025 in verhouding het meest op vooruitging. */
+  'sport.vooruit': (a) => {
+    const met = a.personen
+      .filter((p) => SPORT_2025[p.naam])
+      .map((p) => ({ p, toen: SPORT_2025[p.naam], groei: p.sport.totaal / SPORT_2025[p.naam] - 1 }))
+      .sort((x, y) => y.groei - x.groei || x.p.naam.localeCompare(y.p.naam));
+    if (!met.length) throw new Error('geen cijfers van vorig jaar');
+    const [eerste, tweede] = met;
+    const pct = (g: number) => `${Math.round(100 * g)} procent`;
+    return {
+      v: 'Wie ging er vergeleken met vorig jaar het meest op vooruit?',
+      a: `${eerste.p.naam} — van ${eerste.toen} naar ${eerste.p.sport.totaal} keer`,
+      toelichting: `Dat is ${pct(eerste.groei)} meer.${tweede ? ` Daarna ${tweede.p.naam}: van ${tweede.toen} naar ${tweede.p.sport.totaal}.` : ''}`,
     };
   },
 
