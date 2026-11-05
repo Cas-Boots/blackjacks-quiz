@@ -25,3 +25,42 @@ neerzetten, zet dan `MEDIA_DIR`.
 
 Ontbreekt een bestand, dan toont de televisie een nette melding en loopt de
 quiz gewoon door.
+
+## Draaiboek De Hitparade
+
+Vijf fragmenten, allemaal mp3. Knippen kan met elke audio-app, of met
+`ffmpeg` (voorbeelden hieronder: pas de begintijd `-ss` en de lengte `-t`
+aan). Het bronbestand van het nummer heb je zelf; de quiz levert alleen de
+vraag.
+
+| Bestand | Wat | Hoe lang |
+|---|---|---|
+| `hitparade-intro.mp3` | *Pijnstiller* — Suzan & Freek, vanaf de allereerste seconde | 3 s |
+| `hitparade-artiest.mp3` | *Carla's Song* — Harry Styles (slotnummer van zijn album uit maart). Kies een stuk zónder de titel in de tekst | ± 20 s |
+| `hitparade-origineel.mp3` | *Billie Jean* — Michael Jackson, de bekende baslijn aan het begin | ± 12 s |
+| `hitparade-mashup.mp3` | *The Fate of Ophelia* (Taylor Swift) en *Mi Chico* (DJ Goja, Jason Derulo) tegelijk, elk vanaf het refrein | ± 20 s |
+| `hitparade-ai.mp3` | Het AI-lied hieronder | ± 30 s |
+
+```bash
+ffmpeg -ss 0 -t 3 -i pijnstiller.mp3 hitparade-intro.mp3
+ffmpeg -ss 60 -t 20 -i carlas-song.mp3 hitparade-artiest.mp3
+ffmpeg -ss 0 -t 12 -i billie-jean.mp3 hitparade-origineel.mp3
+ffmpeg -ss 50 -t 20 -i fate-of-ophelia.mp3 -ss 45 -t 20 -i mi-chico.mp3 \
+  -filter_complex "amix=inputs=2:duration=shortest" hitparade-mashup.mp3
+```
+
+### Het AI-lied
+
+Laat een AI-muziekgenerator dit inzingen, bijvoorbeeld met de stijl
+*vrolijke Nederlandstalige pop, mannenstem, 30 seconden*. Het woord
+"sneeuw" staat er bewust niet in: dat is het antwoord.
+
+> Het bord op het perron zei: vervallen,
+> op Schiphol bleef elk vliegtuig aan de grond.
+> Ik keek naar buiten, alles werd wit,
+> en heel Nederland viel stil in het rond.
+>
+> Geen trein, geen vlucht, geen bus die nog rijdt,
+> heel Nederland binnen, de agenda kwijt.
+> Januari kleurde ons land helemaal wit,
+> en ik bleef lekker liggen, daar waar ik zit.

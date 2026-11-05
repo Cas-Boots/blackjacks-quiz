@@ -46,8 +46,10 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   je zonder het nieuws te volgen op kunt redeneren (meerkeuze met
   onmogelijke opties, "de titel telt vier woorden", "een Italiaan").
   Echte kennersvragen zijn uitzondering, en dan met extra punten.
-- **Muziek is er voor iedereen**: emoji's, meezingen, vragen over onszelf
-  (Spotify Wrapped). Niet alleen herkennen voor kenners.
+- **De Hitparade draait om muziek die je hoort**: elke vraag heeft een
+  fragment (intro, onbekend nummer van een wereldster, een oud nummer dat
+  terugkwam, een mash-up, een AI-lied). Geen meezingen (past niet bij de
+  telefoons) en geen "wiens Wrapped" (de eigenaar weet het meteen).
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
   meegekregen, ook wie het nieuws nauwelijks volgt (de premier, de Winterspelen,
   het Songfestival, de Super Bowl, de opvouwbare iPhone). Geen obscure weetjes of een losse grabbelton
@@ -146,8 +148,9 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   gebeurtenis; een paar zijn al uitgekomen). Daarna samen kijken hoe we
   de ronde het leukst maken. 2 en 3 zijn ingevuld; 7, 9, 10 en 14 rekent
   de app zelf uit.
-- **De Hitparade**: een Spotify Wrapped-screenshot (`wrapped-01.png`) en
-  het AI-lied (`ai-nieuws-01.mp3`) in `app/media/`.
+- **De Hitparade**: vijf muziekfragmenten in `app/media/` (intro, artiest,
+  origineel, mash-up en het AI-lied). Wat er in elk fragment moet, en de
+  tekst voor het AI-lied, staat in `app/media/README.md`.
 - **Warmdraaien**: een fragment van de Songfestivalwinnaar
   (`songfestival-2026-winnaar.mp4`) in `app/media/`.
 - **De cijfers verversen** met de laatste back-up van resolution-recap
