@@ -742,7 +742,7 @@ const PAKKETTEN = {
         naam: "Vier Kaarten",
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
-        uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
+        uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
@@ -753,6 +753,9 @@ const PAKKETTEN = {
           {v:"Tegen welk land ging Oranje eruit op het WK?",
            opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
            toelichting:"Na strafschoppen, bij 1-1."},
+          {v:"Op 12 augustus werd het even nacht. Waar was de zonsverduistering totaal?",
+           opties:["Madrid","Barcelona","Palma de Mallorca"], goed:2,
+           toelichting:"Ruim anderhalve minuut, met de zon vlak boven de horizon. Madrid en Barcelona vielen er net buiten."},
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
@@ -1166,6 +1169,8 @@ const JAAROVERZICHT = {
       nr: 8,
       kop: "Zomer, en de zalen zitten vol",
       momenten: [
+        {emoji:"🌑", tekst:"Op 12 augustus wordt het even nacht: boven [[Palma de Mallorca]] is de zon helemaal weg.",
+         bij:"Madrid en Barcelona vallen er net buiten."},
         {emoji:"🎬", tekst:"[[Spider-Man: Brand New Day]] wordt de grootste kaskraker in de Amerikaanse bioscopen."},
         {emoji:"🍿", tekst:"Ook vol: de verfilming van The Odyssey, en een nieuw deel van Toy Story.", pasNaAfloop:true}
       ]
