@@ -23,17 +23,17 @@ tekst vanaf de bank te klein, zet de tekstgrootte dan hoger in het menu.
 
 | Pakket | Standaard aangevinkt | Met alle extra's |
 |---|---|---|
-| Blackjacks 2026 — Het Jaaroverzicht | 9 rondes, 36 vragen (± 2 uur met praten) | 16 rondes, 128 vragen (ook alle reservevragen) |
+| Blackjacks 2026 — Het Jaaroverzicht | 8 rondes, 33 vragen (± 2 uur met praten) | 16 rondes, 128 vragen (ook alle reservevragen) |
 | Familie Proefronde 2026 | 6 rondes, 35 vragen (± drie kwartier) | 7 rondes, 40 vragen |
 
 De avond is bewust kort gehouden: op oudejaarsavond begint de quiz rond
-half tien en is hij met praten en al rond 23:33 klaar, ruim voor het aftellen.
+half tien en is hij met praten en al rond 23:25 klaar, ruim voor het aftellen.
 Rondes van drie tot vijf vragen, dertig
 seconden per vraag, en een volle minuut in teamrondes en bij vragen met meer
 dan één naam in het antwoord (heeft iedereen al ingeleverd, dan springt de klok
 naar de laatste vijf seconden), en het ritme wisselt steeds: een ronde over
 het jaar, dan een over onszelf, en om en om ieder voor zich en in teams. Rondes
-die nog leeg zijn of extra (*Hoger of Lager*, *Vier Kaarten*, *De WK-poule*, *Taart & Verre Landen*,
+die nog leeg zijn of extra (*Hoger of Lager*, *Vier Kaarten*, *De WK-poule*, *Taart & Verre Landen*, *2027*,
 *Jullie Jaar in Beeld*, *Bliksemronde*, *Oktober tot december*) staan
 uitgevinkt, net als de reservevragen (`reserve: true`) binnen de rondes die
 wel meedoen. Vink ze aan in de vragenkiezer als je ze wilt spelen; reken dan

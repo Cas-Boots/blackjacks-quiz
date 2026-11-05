@@ -453,6 +453,8 @@ export const PAKKETTEN: Pakketten = {
         suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
+        // Uit: de vragen bleken niet de moeite waard (november 2026).
+        optioneel: true,
         uitleg: "In teams. Genoeg teruggekeken: wat brengt 2027?",
         vragen: [
           // Kort, en alleen wat jullie zelf raakt. Wat in 2027 nog moet gebeuren,
