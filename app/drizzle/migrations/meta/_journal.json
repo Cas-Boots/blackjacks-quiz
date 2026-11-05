@@ -57,6 +57,13 @@
       "when": 1790670000000,
       "tag": "0007_zelf_kiezen",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793890697790,
+      "tag": "0008_prijzen_in_beeld",
+      "breakpoints": true
     }
   ]
 }

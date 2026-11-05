@@ -1,0 +1,1 @@
+ALTER TABLE `spellen` ADD `prijzen_in_beeld` integer DEFAULT false NOT NULL;

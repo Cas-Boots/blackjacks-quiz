@@ -210,6 +210,7 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     serverTijd: Date.now(),
     klok: null,
     mediaSpeelt: false,
+    prijzenInBeeld: false,
     pauze: null,
     // Ver weg, zodat gewone dia's niets van middernacht merken.
     nieuwjaar: { op: Date.now() + 30 * 24 * 3_600_000, jaar: 2027 },
@@ -823,6 +824,12 @@ export const DIAS: Dia[] = [
     let: 'Confetti, drie treden die uit de vloer rijzen, de fanfare als de winnaar bovenaan staat, dan de prijzen, de poedelprijs en de rest van de stand.',
     vorigePunten: NA_STAND,
     maak: () => basis({ fase: 'einde', rondeIndex: RONDE_AANTAL - 1, stand: stand(EIND), prijzen: PRIJZEN }),
+  },
+  {
+    id: 'einde-prijzen', hoofdstuk: 'Uitslag', titel: 'De prijzen',
+    let: 'Het tweede bedrijf, op de knop van de quizmaster: het podium schuift weg, de top drie staat klein bovenaan en de prijzen komen een voor een binnen, elk met een stempel.',
+    vorigePunten: EIND,
+    maak: () => basis({ fase: 'einde', rondeIndex: RONDE_AANTAL - 1, stand: stand(EIND), prijzen: PRIJZEN, prijzenInBeeld: true }),
   },
   {
     id: 'einde-gelijk', hoofdstuk: 'Uitslag', titel: 'Gelijkspel bovenaan',

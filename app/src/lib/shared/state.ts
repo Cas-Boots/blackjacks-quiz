@@ -131,6 +131,8 @@ export interface PubliekeStaat {
   klok: { eindigtOp: number | null; duurMs: number; loopt: boolean } | null;
   /** Of het fragment (video of muziek) bij deze vraag hoort te spelen. */
   mediaSpeelt: boolean;
+  /** Bij de uitslag: staan de prijzen in beeld in plaats van het podium? De quizmaster schakelt. */
+  prijzenInBeeld: boolean;
   /** De quiz staat even stil. 'nieuwjaar': de televisie telt af naar middernacht. */
   pauze: Pauze | null;
   /** Middernacht waar het vanavond om draait, Nederlandse tijd. Zie nieuwjaar.ts. */

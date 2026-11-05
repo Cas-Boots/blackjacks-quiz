@@ -566,6 +566,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       loopt: spel.klokLoopt,
     },
     mediaSpeelt: spel.mediaSpeelt,
+    prijzenInBeeld: spel.fase === 'einde' && spel.prijzenInBeeld,
     pauze: spel.pauze === 'pauze' || spel.pauze === 'nieuwjaar' ? spel.pauze : null,
     nieuwjaar: nieuwjaarVoor(nu),
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],

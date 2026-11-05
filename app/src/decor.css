@@ -2009,9 +2009,6 @@
 .uitslagdia .na-winnaar {
   animation: opkomen 0.5s calc(var(--eerste) + 500ms) both;
 }
-.uitslagdia .prijs {
-  animation: opkomen 0.52s var(--wacht, var(--eerste)) var(--deal) both;
-}
 @keyframes winnaarIn {
   from {
     opacity: 0;
@@ -2149,19 +2146,6 @@
   42%, 100% { opacity: 0; transform: scale(1.2); }
 }
 
-/* De prijzen worden gedeeld en draaien één voor één om. */
-.uitslagdia .prijzen {
-  perspective: 1400px;
-}
-.uitslagdia .prijs {
-  animation: prijsOm 0.7s var(--wacht, var(--eerste)) var(--deal) both;
-  backface-visibility: hidden;
-}
-@keyframes prijsOm {
-  0% { opacity: 0; transform: translateY(-40px) rotateY(-100deg); }
-  40% { opacity: 1; }
-  100% { opacity: 1; transform: none; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .scherm > .galashow {
@@ -2185,14 +2169,17 @@
   gap: clamp(0.6rem, 1.8vh, 1.6rem);
   text-align: center;
 }
-.podiumakte {
-  animation: akteWeg 0.9s var(--prijzen) var(--zacht) forwards;
-}
 .prijzenakte {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  animation: akteKomt 0.9s calc(var(--prijzen) + 250ms) var(--deal) forwards;
+}
+/* De quizmaster schakelt door: het podium schuift weg, de prijzen komen. */
+.uitslagdia.prijzen .podiumakte {
+  animation: akteWeg 0.9s var(--zacht) forwards;
+}
+.uitslagdia.prijzen .prijzenakte {
+  animation: akteKomt 0.9s 0.25s var(--deal) forwards;
 }
 @keyframes akteWeg {
   to {
@@ -2254,10 +2241,18 @@
   box-shadow: 0 0 24px color-mix(in srgb, var(--goud) 40%, transparent);
 }
 /* Op het eigen scherm zijn de prijzen groot: vier per rij. */
+/* Vier per rij, en een halve rij (of maar twee prijzen) netjes in het midden. */
 .prijzenakte .prijzen {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  --prijs-gat: clamp(0.8rem, 1.4vw, 1.6rem);
+  perspective: 1400px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   width: min(100%, 1600px);
-  gap: clamp(0.8rem, 1.4vw, 1.6rem);
+  gap: var(--prijs-gat);
+}
+.prijzenakte .prijs {
+  flex: 0 1 calc((100% - 3 * var(--prijs-gat)) / 4);
 }
 .prijzenakte .prijs {
   padding: clamp(1rem, 1.8vw, 2rem) clamp(0.8rem, 1.2vw, 1.4rem);
@@ -2276,9 +2271,14 @@
   font-size: calc(var(--fs-lood) * 0.85);
   -webkit-line-clamp: 3;
 }
-/* Elke prijs komt groot binnen en zakt dan op zijn plek. */
+/* Elke prijs komt groot binnen en zakt dan op zijn plek, één voor één
+   vanaf het moment dat de quizmaster doorschakelt. */
 .prijzenakte .prijs {
-  animation: prijsMoment 1.1s var(--wacht) var(--deal) both;
+  animation: none;
+  opacity: 0;
+}
+.uitslagdia.prijzen .prijzenakte .prijs {
+  animation: prijsMoment 1.1s calc(var(--prijs-eerst) + var(--p, 0) * var(--prijs-stap)) var(--deal) both;
 }
 @keyframes prijsMoment {
   0% {

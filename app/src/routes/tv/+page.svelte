@@ -291,14 +291,13 @@
     const derde = 500 + rest * 650 + 500;
     const tweede = derde + 1900;
     const eerste = tweede + 3300;
-    // Het tweede bedrijf: na een paar seconden juichen schuift het beeld naar de prijzen.
-    const prijzen = eerste + 7000;
-    return {
-      rest: (k: number) => 500 + k * 650, derde, tweede, eerste, roffel: eerste - 1700,
-      prijzen, prijs: (i: number) => prijzen + 900 + i * 1300,
-    };
+    return { rest: (k: number) => 500 + k * 650, derde, tweede, eerste, roffel: eerste - 1700 };
   }
   let ceremonieNu = $derived(ceremonie(staat?.stand.length ?? 0));
+  /** De prijzen: de eerste na zoveel ms, daarna steeds een volgende. Gelijk aan de CSS. */
+  const PRIJS_EERST_MS = 900;
+  const PRIJS_MS = 1300;
+  let vorigePrijzenInBeeld = false;
   let winnaarNa = $derived(ceremonieNu.eerste);
   /** De confetti wacht op de winnaar. */
   let confettiAan = $state(false);
@@ -574,9 +573,6 @@
           setTimeout(() => geluid.plop(), c.tweede);
           setTimeout(() => geluid.tromgeroffel(1.6), c.roffel);
           setTimeout(() => geluid.fanfare(), c.eerste);
-          setTimeout(() => geluid.zwiep(), c.prijzen);
-          const aantalPrijzen = st.prijzen.length + (st.stand.length >= 3 && st.stand[st.stand.length - 1].punten < st.stand[0].punten ? 1 : 0);
-          for (let i = 0; i < aantalPrijzen; i++) setTimeout(() => geluid.stempel(), c.prijs(i) + 350);
           confettiAan = false;
           setTimeout(() => (confettiAan = true), c.eerste);
         }
@@ -586,6 +582,16 @@
       }
       vorigeFase = st.fase;
     }
+
+    // Het tweede bedrijf van de uitslag, op de knop van de quizmaster: een zwiep,
+    // en dan een stempel bij elke prijs die binnenkomt (zie PRIJS_MS hieronder).
+    const prijzenNu = st.fase === 'einde' && st.prijzenInBeeld;
+    if (prijzenNu && !vorigePrijzenInBeeld) {
+      geluid.zwiep();
+      const aantal = st.prijzen.length + (st.stand.length >= 3 && st.stand[st.stand.length - 1].punten < st.stand[0].punten ? 1 : 0);
+      for (let i = 0; i < aantal; i++) setTimeout(() => geluid.stempel(), PRIJS_EERST_MS + i * PRIJS_MS + 350);
+    }
+    vorigePrijzenInBeeld = prijzenNu;
 
     if (st.fase === 'jaaroverzicht' && st.jaaroverzicht && st.jaaroverzicht.stap !== vorigeFilmStap) {
       // De titelkaart heeft de projector al; de rest krijgt een tikje.
@@ -1161,7 +1167,7 @@
 
           <!-- ══ De uitslag ═════════════════════════════════════════════ -->
         {:else if staat.fase === 'einde'}
-          <div class="uitslagdia" style="--roffel:{ceremonieNu.roffel}ms;--eerste:{ceremonieNu.eerste}ms;--prijzen:{ceremonieNu.prijzen}ms">
+          <div class="uitslagdia" class:prijzen={staat.prijzenInBeeld} style="--roffel:{ceremonieNu.roffel}ms;--eerste:{ceremonieNu.eerste}ms;--prijs-eerst:{PRIJS_EERST_MS}ms;--prijs-stap:{PRIJS_MS}ms">
             <!-- Eerste bedrijf: het podium, met het hele scherm voor zich. -->
             <div class="akte podiumakte">
               <p class="etiket" in:fly={{ y: -14, duration: 460, easing: cubicOut }}>{staat.quizNaam}</p>
@@ -1204,7 +1210,7 @@
               {#if staat.prijzen.length || poedel}
                 <div class="prijzen">
                   {#if poedel && poedel.punten < staat.stand[0].punten}
-                    <div class="prijs" style="border-style:dashed;--wacht:{ceremonieNu.prijs(0)}ms">
+                    <div class="prijs" style="border-style:dashed;--p:0">
                       <span class="prijsicoon" aria-hidden="true">🏮</span>
                       <span class="prijstitel">Poedelprijs</span>
                       <span class="prijsnaam">{poedel.naam}</span>
@@ -1212,7 +1218,7 @@
                     </div>
                   {/if}
                   {#each staat.prijzen as p, i (p.sleutel)}
-                    <div class="prijs" style="--wacht:{ceremonieNu.prijs(i + (poedel && poedel.punten < staat.stand[0].punten ? 1 : 0))}ms">
+                    <div class="prijs" style="--p:{i + (poedel && poedel.punten < staat.stand[0].punten ? 1 : 0)}">
                       <span class="prijsicoon" aria-hidden="true">{prijsIcoon(p.sleutel)}</span>
                       <span class="prijstitel">{p.titel}</span>
                       {#if p.namen.length}<span class="prijsnaam">{p.namen.join(' & ')}</span>{/if}
