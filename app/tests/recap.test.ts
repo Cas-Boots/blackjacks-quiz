@@ -195,7 +195,7 @@ describe('voorspellingen', () => {
   it('laat open wat nog niet beslist is, en telt dat niet mee', () => {
     const u = beoordeelVoorspellingen({ analyse, aantalSpelers: null });
     expect(u.vragen.find((v) => v.nr === 7)?.open).toBe(true);
-    expect(u.vragen.find((v) => v.nr === 3)?.open).toBe(true);
+    expect(u.vragen.find((v) => v.nr === 1)?.open).toBe(true); // nieuwe banen: nog niet te zeggen
     expect(u.open).toBeGreaterThan(0);
     const joris = u.stand.find((s) => s.naam === 'Joris')!;
     expect(joris.goed + joris.fout + joris.open).toBe(14);

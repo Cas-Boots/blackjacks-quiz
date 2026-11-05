@@ -58,7 +58,7 @@ export const VOORSPELLINGEN: Voorspelling[] = [
     soort: 'janee',
     antwoorden: { Joris: 'ja', Liz: 'ja', Eva: 'nee', Rik: 'nee', Bastiaan: 'ja', Cas: 'ja' },
     inzet: alle(1),
-    uitkomst: null,
+    uitkomst: 'ja',
   },
   {
     nr: 3,
@@ -66,7 +66,8 @@ export const VOORSPELLINGEN: Voorspelling[] = [
     soort: 'janee',
     antwoorden: { Joris: 'nee', Liz: 'ja', Eva: 'nee', Rik: 'ja', Bastiaan: 'ja', Cas: 'nee' },
     inzet: alle(1),
-    uitkomst: null,
+    uitkomst: 'ja',
+    toelichting: '36,8 °C op 26 juni: de warmste junidag ooit in De Bilt (bron: KNMI, via Weeronline en ANP).',
   },
   {
     nr: 4,
