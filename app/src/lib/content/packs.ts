@@ -31,18 +31,26 @@ export const PAKKETTEN: Pakketten = {
     rondes: [
       {
         naam: "Warmdraaien",
-        suit: "♠", thema: "Waar of niet waar", sfeer: "vilt",
+        suit: "♠", thema: "Klinkt verzonnen", sfeer: "vilt",
         type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
-        uitleg: "Stellingen om in te komen. Iedereen voor zich.",
+        uitleg: "Nieuws uit 2026 dat verzonnen klinkt. Is het waar, of niet? Iedereen voor zich.",
         vragen: [
-          {v:"Sinds 1 juli betaal je minstens drie euro extra voor een pakketje van Temu of Shein.", goed:true,
+          {reserve:true, v:"Sinds 1 juli betaal je minstens drie euro extra voor een pakketje van Temu of Shein.", goed:true,
            toelichting:"Een Europese heffing op pakketjes van buiten de EU onder de 150 euro: drie euro per soort product. Een shirt, een hoesje en een oplader kosten dus negen euro extra."},
           {reserve:true, v:"Arsenal won in 2026 eindelijk zijn eerste Champions League.", goed:false,
            toelichting:"Paris Saint-Germain won de finale in Boedapest na 1-1 en strafschoppen, en prolongeerde zo zijn titel."},
-          {v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
+          {reserve:true, v:"Pogačar brak in 2026 het record voor de meeste Tourzeges.", goed:false,
            toelichting:"Hij evenaarde het. Met zijn vijfde zege staat hij naast Merckx, Hinault, Anquetil en Indurain."},
           {reserve:true, v:"Voor het eerst won een Spaanstalig album de Grammy voor album van het jaar.", goed:true,
            toelichting:"DeBÍ TiRAR MáS FOToS van Bad Bunny, op 1 februari in Los Angeles."},
+          // Klinkt verzonnen: vreemd nieuws dat bijna niemand kent, zodat
+          // iedereen op gevoel gokt. Meng echte met een geloofwaardige nep.
+          {v:"Een popster werd in maart aangehouden voor rijden onder invloed, en nodigde de agenten uit voor lasagne en een duik in haar zwembad.", goed:true,
+           toelichting:"Britney Spears, op 4 maart in Californië: ‘Ik maak eten voor jullie, lasagne of wat je maar wilt. Ik heb een zwembad.’"},
+          {v:"Hackers stookten in oktober de koelvakken van honderden Franse supermarkten op tot vijftig graden.", goed:true,
+           toelichting:"In de nacht van 11 op 12 oktober, onder meer bij Intermarché en Coopérative U. Al het verse eten moest weg, en hier en daar ontstond brand."},
+          {v:"Reality-ster Spencer Pratt, bekend van The Hills, werd dit jaar burgemeester van Los Angeles.", goed:false,
+           toelichting:"Hij deed echt mee, en lag op de verkiezingsavond zelfs voor. Maar met een kwart van de stemmen werd hij derde."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
           {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
