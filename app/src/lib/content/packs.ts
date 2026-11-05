@@ -69,7 +69,7 @@ export const PAKKETTEN: Pakketten = {
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
-        uitleg: "Nieuwe teams. Vier antwoorden, één goed — overleg snel.",
+        uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
            opties:["Henri Bontenbal","Rob Jetten","Dilan Yeşilgöz","Frans Timmermans"], goed:1,
@@ -80,6 +80,9 @@ export const PAKKETTEN: Pakketten = {
           {v:"Tegen welk land ging Oranje eruit op het WK?",
            opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
            toelichting:"Na strafschoppen, bij 1-1."},
+          {v:"Op 12 augustus werd het even nacht. Waar was de zonsverduistering totaal?",
+           opties:["Lyon","Bilbao","Belfast"], goed:1,
+           toelichting:"Een halve minuut maar: Bilbao lag vlak bij de rand van de schaduw. In Lyon en Belfast bleef het bij zo'n 93 procent van de zon."},
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
