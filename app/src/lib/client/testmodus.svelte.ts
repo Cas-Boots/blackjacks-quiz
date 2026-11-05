@@ -211,6 +211,8 @@ function basis(over: Partial<PubliekeStaat> = {}): PubliekeStaat {
     klok: null,
     mediaSpeelt: false,
     prijzenInBeeld: false,
+    standGeheim: false,
+    laatsteOpenStand: false,
     pauze: null,
     // Ver weg, zodat gewone dia's niets van middernacht merken.
     nieuwjaar: { op: Date.now() + 30 * 24 * 3_600_000, jaar: 2027 },
@@ -815,6 +817,22 @@ export const DIAS: Dia[] = [
       stand: stand(NA_STAND).map((r) => ({ ...r, dezeRonde: r.punten - (START[r.spelerId] ?? 0) })),
       reeksen: { 3: 3 },
     }),
+  },
+  {
+    id: 'stand-laatste', hoofdstuk: 'Stand', titel: 'De laatste open stand',
+    let: 'De tussenstand vlak voor de slotrondes: alles zoals altijd, en dan een knipoog dat dit de laatste keer is dat de kamer de stand ziet.',
+    vorigePunten: START,
+    maak: () => metRonde(R.voorspellingen, {
+      fase: 'stand',
+      stand: stand(NA_STAND).map((r) => ({ ...r, dezeRonde: r.punten - (START[r.spelerId] ?? 0) })),
+      laatsteOpenStand: true,
+    }),
+  },
+  {
+    id: 'stand-geheim', hoofdstuk: 'Stand', titel: 'De geheime stand',
+    let: 'In de slotrondes: geen punten, geen plekken, geen pijltjes. Alleen de namen op alfabet, met een dichte fiche. Het hostscherm ziet de echte stand.',
+    vorigePunten: NA_STAND,
+    maak: () => metRonde(R.stem, { fase: 'stand', stand: stand(NA_STAND), standGeheim: true }),
   },
 
   /* ── Uitslag ── */

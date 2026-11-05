@@ -391,6 +391,15 @@
     for (const [id, i] of nu) uit[id] = (oud.get(id) ?? i) - i;
     return uit;
   });
+  /** De geheime stand: op alfabet, zodat de volgorde niets verraadt. */
+  let geheimeVolgorde = $derived([...(staat?.stand ?? [])].sort((a, b) => a.naam.localeCompare(b.naam, 'nl')));
+  let geheimZin = $derived.by(() => {
+    if (!staat) return '';
+    const over = staat.rondeAantal - staat.rondeIndex - 1;
+    if (over <= 0) return 'Wie er wint, hoor je zo bij de uitslag.';
+    if (over === 1) return 'Pas bij de uitslag zie je wie er wint. Nog één ronde, en die telt dubbel: alles kan nog.';
+    return `Pas bij de uitslag zie je wie er wint. Nog ${TELWOORD[over] ?? over} rondes, en ze tellen dubbel: alles kan nog.`;
+  });
   let leiderPunten = $derived(Math.max(1, staat?.stand[0]?.punten ?? 1));
 
   const TELWOORD = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien'];
@@ -572,7 +581,7 @@
           setTimeout(() => (confettiAan = true), c.eerste);
         }
         // Het maatje van de stijger maakt een rondje; bij de uitslag dat van de winnaar.
-        if (st.fase === 'stand' && stijgerId !== null) laatLopen(lopersVan([stijgerId]), 'blij', 2200 + naOvergang);
+        if (st.fase === 'stand' && stijgerId !== null && !st.standGeheim) laatLopen(lopersVan([stijgerId]), 'blij', 2200 + naOvergang);
         if (st.fase === 'einde') laatLopen(lopersVan(winnaars.map((w) => w.spelerId)), 'blij', ceremonie(st.stand.length).eerste + 900, true);
       }
       vorigeFase = st.fase;
@@ -1107,6 +1116,25 @@
           <Cijfers cijfers={staat.cijfers} spelers={staat.spelers} />
 
           <!-- ══ Tussenstand ════════════════════════════════════════════ -->
+        {:else if staat.fase === 'stand' && staat.standGeheim}
+          <!-- De slotrondes: de stand blijft geheim tot de uitslag. Alleen de
+               namen, op alfabet, met een dichte fiche waar de punten stonden. -->
+          <div class="geheimstand">
+            <p class="etiket" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>{ronde?.naam} zit erop</p>
+            <h1 class="groot" in:fly={{ y: 22, duration: 520, delay: 60, easing: cubicOut }}>De stand is geheim</h1>
+            <hr class="rule" style="animation-delay:.25s" />
+            <p class="standverhaal" in:fly={{ y: 10, duration: 480, delay: 400, easing: cubicOut }}>{geheimZin}</p>
+            <div class="geheimspelers">
+              {#each geheimeVolgorde as r, i (r.spelerId)}
+                <div class="geheimspeler" style="--i:{i}">
+                  <Portret naam={r.naam} foto={r.foto} dier={r.dier} maat="m" />
+                  <span class="naam">{r.naam}</span>
+                  <span class="dichtefiche" aria-label="punten geheim">?</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+
         {:else if staat.fase === 'stand'}
           <div style="display:flex;flex-direction:column;gap:clamp(.8rem,2vh,1.6rem)">
             <p class="etiket" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>{ronde?.naam} zit erop</p>
@@ -1114,6 +1142,11 @@
             <hr class="rule" style="animation-delay:.25s" />
             {#if toonNieuweVolgorde && standVerhaal}
               <p class="standverhaal" in:fly={{ y: 10, duration: 480, delay: 500, easing: cubicOut }}>{standVerhaal}</p>
+            {/if}
+            {#if staat.laatsteOpenStand}
+              <p class="laatstekeer" in:scale={{ start: 0.8, duration: 560, delay: 1400, easing: cubicOut }}>
+                👀 Kijk goed: dit is de laatste keer dat jullie de stand zien. De slotrondes blijft hij geheim.
+              </p>
             {/if}
             {#if toonNieuweVolgorde && laatsteId !== null && standNu[standNu.length - 1].punten < standNu[0].punten}
               <p class="kwinkslag" style="animation-delay:1.1s">{staat.stand[staat.stand.length - 1].naam}: {lantaarnZin.charAt(0).toLowerCase() + lantaarnZin.slice(1)}</p>

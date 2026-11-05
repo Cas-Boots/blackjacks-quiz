@@ -671,7 +671,7 @@
 
     <!-- Stand -->
     <div class="paneel">
-      <p class="etiket stil">Stand</p>
+      <p class="etiket stil">Stand{#if staat?.standGeheim} · <span style="color:var(--goud)">🤫 geheim op de televisie en de telefoons</span>{/if}</p>
       <div class="stand">
         {#each staat?.stand ?? [] as r, i (r.spelerId)}
           <div class="standrij" class:leider={i === 0}>

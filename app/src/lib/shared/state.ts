@@ -133,6 +133,14 @@ export interface PubliekeStaat {
   mediaSpeelt: boolean;
   /** Bij de uitslag: staan de prijzen in beeld in plaats van het podium? De quizmaster schakelt. */
   prijzenInBeeld: boolean;
+  /**
+   * Vanaf de eerste dubbele slotronde tot de uitslag blijft de stand geheim op
+   * de televisie en de telefoons, zodat het tot de laatste kaart spannend
+   * blijft wie wint. Het hostscherm toont hem gewoon.
+   */
+  standGeheim: boolean;
+  /** De tussenstand vlak voor de slotrondes: de laatste die iedereen te zien krijgt. */
+  laatsteOpenStand: boolean;
   /** De quiz staat even stil. 'nieuwjaar': de televisie telt af naar middernacht. */
   pauze: Pauze | null;
   /** Middernacht waar het vanavond om draait, Nederlandse tijd. Zie nieuwjaar.ts. */

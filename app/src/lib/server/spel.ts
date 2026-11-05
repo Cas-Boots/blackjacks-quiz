@@ -428,6 +428,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   const teamLijst = ronde ? teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst) : [];
   const cor = db.select().from(correcties).where(eq(correcties.spelId, spel.id)).all();
   const bonussen = bonussenVan(spel);
+  /** De eerste dubbele slotronde: vanaf daar blijft de stand geheim tot de uitslag. */
+  const eersteSlot = bonussen.dubbel.findIndex((d) => d?.dubbel);
   const stand = telStand(
     [...bonussen.verdelingen.values()],
     cor.map((c) => ({ spelerId: c.spelerId, punten: c.punten })),
@@ -560,6 +562,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
     },
     mediaSpeelt: spel.mediaSpeelt,
     prijzenInBeeld: spel.fase === 'einde' && spel.prijzenInBeeld,
+    standGeheim: eersteSlot >= 0 && spel.rondeIndex >= eersteSlot && !['lobby', 'einde', 'jaaroverzicht'].includes(spel.fase),
+    laatsteOpenStand: spel.fase === 'stand' && eersteSlot > 0 && spel.rondeIndex === eersteSlot - 1,
     pauze: spel.pauze === 'pauze' || spel.pauze === 'nieuwjaar' ? spel.pauze : null,
     nieuwjaar: nieuwjaarVoor(nu),
     prijzen: spel.fase === 'einde' ? prijzenVan(spel, lijst) : [],

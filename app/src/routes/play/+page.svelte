@@ -622,7 +622,9 @@
           {/if}
         </div>
       {/key}
-      {#if naVraag}
+      {#if staat.standGeheim}
+        <p class="mijnplek" in:fade={{ duration: 300, delay: 250 }}>🤫 Je plek blijft geheim tot de uitslag</p>
+      {:else if naVraag}
         <p class="mijnplek" in:fade={{ duration: 300, delay: 250 }}>
           <strong>{naVraag.plek}e</strong>
           {#if naVraag.verschuiving > 0}<span class="verschuiving op">▲{naVraag.verschuiving}</span>{:else if naVraag.verschuiving < 0}<span class="verschuiving neer">▼{-naVraag.verschuiving}</span>{/if}
@@ -728,6 +730,12 @@
           <Maatjesknoppen dier={mijnDier} kies={laatMaatje} naam={ik?.dierNaam ?? ''} />
         </div>
       {/if}
+      {#if staat.standGeheim}
+        <div class="paneel" style="text-align:center">
+          <p class="etiket">Tussenstand</p>
+          <p class="lood" style="font-size:1.05rem;margin-top:.4rem">🤫 De stand is geheim tot de uitslag. De slotrondes tellen dubbel: alles kan nog.</p>
+        </div>
+      {:else}
       <div class="paneel">
         <p class="etiket">{staat.fase === 'einde' ? 'Eindstand' : 'Tussenstand'}</p>
         {#if rangwoord}<p class="lood" style="font-size:1.05rem;margin-top:.3rem">{rangwoord}</p>{/if}
@@ -742,6 +750,7 @@
           {/each}
         </div>
       </div>
+      {/if}
     {/if}
     <input bind:this={fotoInvoer} type="file" accept="image/*" capture="user" onchange={kiesFoto} hidden />
   </div>

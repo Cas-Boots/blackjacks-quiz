@@ -2572,3 +2572,73 @@
     animation: none;
   }
 }
+
+/* ===================================================================
+   DE GEHEIME STAND IN DE SLOTRONDES
+   Alleen de namen, op alfabet, met een dichte fiche waar de punten staan.
+   =================================================================== */
+.geheimstand {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.8rem, 2vh, 1.6rem);
+}
+.geheimspelers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.6rem, 1.4vw, 1.4rem);
+  margin-top: clamp(0.4rem, 1.5vh, 1.2rem);
+}
+.geheimspeler {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  padding: clamp(0.8rem, 1.6vh, 1.4rem) 1.2rem clamp(0.8rem, 1.6vh, 1.4rem) 0.9rem;
+  border-radius: 16px;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 16px 30px -14px rgba(0, 0, 0, 0.6);
+  animation: restdelen 0.5s calc(var(--i, 0) * 120ms + 300ms) var(--deal) both;
+}
+.geheimspeler .naam {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: calc(var(--fs-naam) * 1.2);
+}
+/* Een fiche die dicht ligt: de punten zie je pas bij de uitslag. */
+.dichtefiche {
+  display: grid;
+  place-items: center;
+  width: clamp(2.6rem, 3.6vw, 4rem);
+  height: clamp(2.6rem, 3.6vw, 4rem);
+  border-radius: 50%;
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: clamp(1.2rem, 1.8vw, 2rem);
+  color: var(--fiche-inkt);
+  background:
+    radial-gradient(circle, var(--fiche) 0 60%, var(--fiche-rand) 61% 66%, transparent 67%),
+    repeating-conic-gradient(var(--fiche) 0 20deg, var(--fiche-rand) 20deg 40deg);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  animation: fichetik 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 300ms);
+}
+/* De laatste open stand: een knipoog dat het hierna geheim wordt. */
+.laatstekeer {
+  margin: 0;
+  align-self: flex-start;
+  padding: 0.5em 1.1em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--goud) 22%, transparent);
+  border: 1px solid var(--goud);
+  color: var(--ivoor);
+  font-weight: 700;
+  font-size: var(--fs-lood);
+}
