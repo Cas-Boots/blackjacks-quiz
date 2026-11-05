@@ -33,7 +33,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "Warmdraaien",
         suit: "♠", thema: "Waar of niet waar", sfeer: "vilt",
         type: "waarnietwaar", tijd: 30, punten: 1, teamModus: "individueel",
-        uitleg: "Vijf stellingen om in te komen. Iedereen voor zich.",
+        uitleg: "Stellingen om in te komen. Iedereen voor zich.",
         vragen: [
           {v:"Sinds 1 juli betaal je minstens drie euro extra voor een pakketje van Temu of Shein.", goed:true,
            toelichting:"Een Europese heffing op pakketjes van buiten de EU onder de 150 euro: drie euro per soort product. Een shirt, een hoesje en een oplader kosten dus negen euro extra."},
@@ -45,8 +45,6 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"DeBÍ TiRAR MáS FOToS van Bad Bunny, op 1 februari in Los Angeles."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
-          {v:"Op 12 augustus werd het even nacht: in Bilbao was de zonsverduistering totaal.", goed:true,
-           toelichting:"Een halve minuut maar: Bilbao lag vlak bij de rand van de schaduw. In Lyon en Belfast bleef het bij zo'n 93 procent van de zon."},
           {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
            toelichting:"Omhoog, zoals elk half jaar."},
           // GTA VI hoort er hoe dan ook in. De vorm volgt na de release op
@@ -89,6 +87,9 @@ export const PAKKETTEN: Pakketten = {
           {v:"Tegen welk land ging Oranje eruit op het WK?",
            opties:["Marokko","Japan","Argentinië","Brazilië"], goed:0,
            toelichting:"Na strafschoppen, bij 1-1."},
+          {v:"Op 12 augustus werd het even nacht. Waar was de zonsverduistering totaal?",
+           opties:["Lyon","Bilbao","Belfast"], goed:1,
+           toelichting:"Een halve minuut maar: Bilbao lag vlak bij de rand van de schaduw. In Lyon en Belfast bleef het bij zo'n 93 procent van de zon."},
           {v:"Met welk nummer won Bulgarije het Songfestival?",
            opties:["Bangaranga","Tattoo","Espresso Macchiato","Europapa"], goed:0,
            toelichting:"Bangaranga van Dara, op het zeventigste Songfestival. Tattoo won in 2023, Europapa won helaas nooit."},
