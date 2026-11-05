@@ -721,11 +721,15 @@ const PAKKETTEN = {
           // gezegd. Zie CLAUDE.md.
           {v:"Rob Jetten werd de jongste premier ooit.", goed:true,
            toelichting:"38 jaar, beëdigd op 23 februari. Het record was van Ruud Lubbers: 43, in 1982."},
-          {v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
+          {v:"De VS namen de president van Venezuela gevangen.", goed:true,
+           toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
+          {reserve:true, v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
            toelichting:"AVROTROS bleef weg uit Wenen omdat Israël mocht meedoen. De NPO zond het wel uit."},
           {v:"Oranje haalde op het WK de halve finale.", goed:false,
            toelichting:"Oranje ging eruit tegen Marokko, na strafschoppen."},
-          {v:"Door een storing bleven in oktober schappen bij Albert Heijn leeg.", goed:true,
+          {v:"Het minimumloon ging dit jaar boven de 15 euro per uur.", goed:false,
+           toelichting:"Net niet: sinds 1 juli is het € 14,99 bruto per uur."},
+          {reserve:true, v:"Door een storing bleven in oktober schappen bij Albert Heijn leeg.", goed:true,
            toelichting:"Een IT-incident bij Ahold Delhaize. Ook Etos en Gall & Gall lagen eruit."},
           {reserve:true, v:"Bij haar arrestatie bood Britney Spears de agenten lasagne aan.", goed:true,
            toelichting:"Op 4 maart, voor rijden onder invloed. Een duik in haar zwembad mocht ook."},
@@ -737,10 +741,8 @@ const PAKKETTEN = {
            toelichting:"Artemis II, met vier astronauten aan boord."},
           {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
            toelichting:"Omhoog, zoals elk half jaar."},
-          // GTA VI hoort er hoe dan ook in. De vorm volgt na de release op
-          // 19 november; tot dan staat hij als nog in te vullen, zodat de
-          // controle vooraf eraan herinnert. Pas dan ook de film aan.
-          {v:"GTA VI kwam in mei uit, zoals beloofd.", goed:false, teVullen:true,
+          // GTA VI staat nu als schatvraag in Dichtstbij Wint.
+          {reserve:true, v:"GTA VI kwam in mei uit, zoals beloofd.", goed:false,
            toelichting:"Rockstar stelde de game nog een keer uit, naar 19 november."}
         ]
       },
@@ -856,7 +858,12 @@ const PAKKETTEN = {
           {reserve:true, v:"Hoeveel punten scoorde Seattle in de Super Bowl?", getal:29, eenheid:"punten",
            toelichting:"29-13 tegen New England. Kicker Jason Myers schoot een record van vijf velddoelpunten."},
           {v:"Hoeveel wandelaars haalden in juli de finish van de Vierdaagse in Nijmegen?", getal:42137, eenheid:"wandelaars",
-           toelichting:"Er gingen er 45.761 van start. Het record, 42.777, is van een jaar eerder."}
+           toelichting:"Er gingen er 45.761 van start. Het record, 42.777, is van een jaar eerder."},
+          // GTA VI hoort er hoe dan ook in (CLAUDE.md). Het getal volgt na de
+          // release op 19 november; tot dan herinnert de controle vooraf eraan.
+          // Pas dan ook de film aan.
+          {v:"Hoeveel mensen speelden GTA VI op de eerste dag?", getal:0, eenheid:"spelers", teVullen:true,
+           toelichting:"— nog invullen na de release op 19 november —"}
         ]
       },
       {
