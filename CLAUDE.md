@@ -52,6 +52,8 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   denkt "dat kan niet waar zijn", gemengd met een geloofwaardige nep. Geen
   droge feiten (een heffing, een zonsverduistering): die zijn niet leuk als
   waar-of-niet-waar. Omdat bijna niemand het kent, gokt iedereen op gevoel.
+  Houd stellingen kort, rond de tien woorden: ze moeten in één keer te
+  lezen zijn. Het verhaal eromheen gaat in de toelichting, ook kort.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026); tot dan staat de vraag in *Warmdraaien* als
   `teVullen`. Haal hem niet weg bij het inkorten.
