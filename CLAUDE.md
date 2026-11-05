@@ -109,3 +109,22 @@ nieuwsvragen, en liever een hele ronde (die kost 2 minuten aan zichzelf) dan
 overal één vraag. Gooi een nagezochte vraag niet weg: zet er
 `reserve: true` bij (standaard uitgevinkt), of `optioneel: true` op de ronde.
 Werk de aantallen in `README.md` bij als je rondes of vragen verandert.
+
+## Nog te doen in december
+
+Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
+
+- **GTA VI** (release 19 november): het getal voor de schatvraag in
+  *Dichtstbij Wint*, en de regel in de film.
+- **De Voorspellingen** (`app/src/lib/content/voorspellingen.ts`): de
+  uitkomsten van 1 (nieuwe banen), 4 (kabinet het jaar uit), 8 (AI),
+  11 (Spotify Wrapped), 12 (sportieve voornemens) en 13 (grote
+  gebeurtenis; een paar zijn al uitgekomen). Daarna samen kijken hoe we
+  de ronde het leukst maken. 2 en 3 zijn ingevuld; 7, 9, 10 en 14 rekent
+  de app zelf uit.
+- **De Hitparade**: een Spotify Wrapped-screenshot (`wrapped-01.png`) en
+  het AI-lied (`ai-nieuws-01.mp3`) in `app/media/`.
+- **Warmdraaien**: een fragment van de Songfestivalwinnaar
+  (`songfestival-2026-winnaar.mp4`) in `app/media/`.
+- **De cijfers verversen** met de laatste back-up van resolution-recap
+  (`npm run recap:snapshot`), en de achtervangteksten nalopen.
