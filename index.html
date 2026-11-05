@@ -833,10 +833,10 @@ const PAKKETTEN = {
       },
       {
         naam: "Onze Sportcompetitie",
-        suit: "♠", thema: "Resolution Recap — echte cijfers", sfeer: "gras",
+        suit: "♠", thema: "Resolution Recap — sport en taart", sfeer: "gras",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "sport",
-        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
+        uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig: het sporten en de taart. Nu gaat het over jullie.",
         // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
         // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
         // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 4 november).
@@ -851,6 +851,13 @@ const PAKKETTEN = {
           // Terugblik: 2025 was ons eerste sportjaar (cijfers in recap/vorigjaar.ts).
           {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 59 keer", live:"sport.vooruit",
            toelichting:"Dat is 195 procent meer. Daarna Eva: van 44 naar 98."},
+          // De taartteller: zelfde idee als het sporten, met een terugblik op
+          // 2024, het taartjaar (cijfers in recap/vorigjaar.ts).
+          {v:"Wie was in 2024 onze taartkoning?", a:"Joris — 33 taarten", live:"taart.koning2024",
+           toelichting:"En dit jaar? Vijf."},
+          // Een getal in een open ronde: de quizmaster vinkt wie het dichtst zit goed.
+          {v:"In 2024 aten we samen 80,5 taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.", a:"49 taarten", live:"taart.totaalVs2024",
+           toelichting:"39 procent minder. Joris at er in 2024 in zijn eentje al 33."},
           // Reserve: niet sterk genoeg, of zonder referentie om te raden.
           {reserve:true, v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst:anders",
            toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
@@ -908,21 +915,18 @@ const PAKKETTEN = {
         suit: "♣", thema: "Resolution Recap — de rest", sfeer: "suiker",
         type: "open", tijd: 30, punten: 2, teamModus: "individueel",
         cijfers: "taart",
+        // Uit: de taartvragen staan nu in Onze Sportcompetitie (zelfde tellers,
+        // zelfde idee), en de landen zijn alleen bijgehouden voor de voorspellingen.
+        optioneel: true,
         uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
         vragen: [
-          // Terugblik: 2024 was het taartjaar (cijfers in recap/vorigjaar.ts).
-          {v:"Wie was in 2024 onze taartkoning?", a:"Joris — 33 taarten", live:"taart.koning2024",
-           toelichting:"En dit jaar? Vijf."},
-          // Een getal in een open ronde: de quizmaster vinkt wie het dichtst zit goed.
-          {v:"In 2024 aten we samen 80,5 taarten. Hoeveel waren het er dit jaar? Wie het dichtst bij zit, wint.", a:"49 taarten", live:"taart.totaalVs2024",
-           toelichting:"39 procent minder. Joris at er in 2024 in zijn eentje al 33."},
           {reserve:true, v:"Wie at er dit jaar méér taart dan in 2024?", a:"Eva en Cas", live:"taart.meerDan2024", tijd:60,
            toelichting:"Eva van 1 naar 9 en Cas van 19,5 naar 24."},
           {reserve:true, v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
           {reserve:true, v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
-          {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
+          {reserve:true, v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
           {reserve:true, v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
-          {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
+          {reserve:true, v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
         ]
       },
       {
