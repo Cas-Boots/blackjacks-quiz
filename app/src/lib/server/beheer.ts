@@ -173,15 +173,17 @@ export function controleerMedia(pakketten: Pakketten, aanwezig: string[], map: s
   for (const p of Object.values(pakketten)) {
     for (const r of p.rondes) {
       for (const v of r.vragen) {
-        if (!v.media || v.media.bron.startsWith('data:')) continue;
-        verwacht.push({
-          bron: v.media.bron,
-          soort: v.media.soort,
-          pakket: p.naam,
-          ronde: r.naam,
-          vraag: v.v,
-          aanwezig: bestanden.has(v.media.bron),
-        });
+        for (const m of [v.media, v.naOnthulling]) {
+          if (!m || m.bron.startsWith('data:')) continue;
+          verwacht.push({
+            bron: m.bron,
+            soort: m.soort,
+            pakket: p.naam,
+            ronde: r.naam,
+            vraag: v.v,
+            aanwezig: bestanden.has(m.bron),
+          });
+        }
       }
     }
   }

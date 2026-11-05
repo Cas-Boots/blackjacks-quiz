@@ -723,12 +723,16 @@ const PAKKETTEN = {
            toelichting:"38 jaar, beëdigd op 23 februari. Het record was van Ruud Lubbers: 43, in 1982."},
           {v:"Nederland eindigde op de Winterspelen in de top 3 van de medaillespiegel.", goed:true,
            toelichting:"Derde, voor het eerst ooit: tien keer goud. Alleen Noorwegen (18) en de VS (12) wonnen meer."},
-          {v:"Bulgarije won voor het eerst het Songfestival.", goed:true,
-           toelichting:"Met Bangaranga van Dara. Het Songfestival van 2027 is dus in Bulgarije."},
-          {v:"De maanvlucht van Artemis II duurde langer dan twee weken.", goed:false,
+          // Na de onthulling kort de winnaar laten zien (naOnthulling).
+          {v:"Zweden won dit jaar het Songfestival.", goed:false,
+           toelichting:"Nee: Bulgarije, voor het eerst ooit, met Bangaranga van Dara. Volgend jaar is het daar.",
+           naOnthulling:{soort:"video", bron:"songfestival-2026-winnaar.mp4", bijschrift:"Dara — Bangaranga"}},
+          {v:"Taylor Swift trad op in de rust van de Super Bowl.", goed:false,
+           toelichting:"Nee, Bad Bunny, bijna helemaal in het Spaans. Midden in de show trouwde er écht een stel op het podium."},
+          {reserve:true, v:"De maanvlucht van Artemis II duurde langer dan twee weken.", goed:false,
            toelichting:"Tien dagen: van 1 tot 10 april. Ze kwamen wel verder van de aarde dan ooit een mens."},
-          {v:"De opvouwbare iPhone kost in Nederland meer dan 2.500 euro.", goed:false,
-           toelichting:"Vanaf € 2.339 voor de iPhone Duo. Wel de duurste iPhone ooit."},
+          {v:"De opvouwbare iPhone kost in Nederland meer dan 2.000 euro.", goed:true,
+           toelichting:"Vanaf € 2.339 voor de iPhone Duo: de duurste iPhone ooit."},
           {reserve:true, v:"De VS namen de president van Venezuela gevangen.", goed:true,
            toelichting:"Nicolás Maduro, op 3 januari, na Amerikaanse luchtaanvallen. Hij werd naar New York gevlogen en aangeklaagd."},
           {reserve:true, v:"Nederland deed dit jaar niet mee aan het Songfestival.", goed:true,
@@ -1764,9 +1768,11 @@ function mediaBehoefte(pakketId){
   const nodig = [];
   PAKKETTEN[pakketId].rondes.forEach((r,ri) => {
     r.vragen.forEach((q,vi) => {
-      if(q.media && q.media.bron && !/^(data:|blob:|https?:)/i.test(q.media.bron)){
-        nodig.push({bestand:q.media.bron, soort:q.media.soort, ri, vi, gekozen:vraagAan(pakketId, ri, vi)});
-      }
+      [q.media, q.naOnthulling].forEach(m => {
+        if(m && m.bron && !/^(data:|blob:|https?:)/i.test(m.bron)){
+          nodig.push({bestand:m.bron, soort:m.soort, ri, vi, gekozen:vraagAan(pakketId, ri, vi)});
+        }
+      });
     });
   });
   return nodig;
@@ -2418,7 +2424,7 @@ function schermAntwoord(){
   <div class="vlak">
     <div class="vraagkaart" data-suit="${r.suit}">
       <p class="opschrift">Vraag ${S.v + 1} van ${vragen().length}</p>
-      ${blokMedia(q, true)}
+      ${q.naOnthulling ? blokMedia({media: q.naOnthulling}, false) : blokMedia(q, true)}
       ${q.emoji ? `<div class="emoji-raadsel is-klein">${q.emoji}</div>` : ""}
       ${q.lyric ? `<p class="lyric is-klein">${esc(q.lyric)}</p>` : ""}
       <p class="vraagtekst is-klein">${esc(q.v)}</p>

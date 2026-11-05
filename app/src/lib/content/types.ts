@@ -28,6 +28,12 @@ export interface Vraag {
   lyric?: string;
   toelichting?: string;
   media?: Media;
+  /**
+   * Media die pas bij de onthulling verschijnt, in plaats van `media`. Voor
+   * een filmpje dat het antwoord zou verklappen, zoals de winnaar van het
+   * Songfestival na een stelling erover.
+   */
+  naOnthulling?: Media;
   /** Overschrijft de rondewaarde. */
   tijd?: number;
   punten?: number;

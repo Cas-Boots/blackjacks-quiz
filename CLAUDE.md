@@ -50,7 +50,7 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   (Spotify Wrapped). Niet alleen herkennen voor kenners.
 - **Warmdraaien gaat over het grote nieuws van 2026**: wat iedereen heeft
   meegekregen, ook wie het nieuws nauwelijks volgt (de premier, de Winterspelen,
-  het Songfestival, de maanvlucht, de opvouwbare iPhone). Geen obscure weetjes of een losse grabbelton
+  het Songfestival, de Super Bowl, de opvouwbare iPhone). Geen obscure weetjes of een losse grabbelton
   van rariteiten. Formuleer kort en ondubbelzinnig, rond de tien woorden; het
   verhaal eromheen gaat in een korte toelichting.
   Elke stelling moet aan beide kanten geloofwaardig zijn: niet zo gesteld
@@ -63,6 +63,8 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   Een drempel werkt vaak beter dan een losse bewering: "duurde langer dan
   twee weken", "kost meer dan 2.500 euro", "in de top 3". Dan klinken waar en
   niet waar allebei logisch. Houd wel ruimte tussen drempel en antwoord.
+  Een filmpje dat het antwoord verklapt (de Songfestivalwinnaar) hoort in
+  `naOnthulling`: dat verschijnt pas bij de onthulling.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026), waarschijnlijk "hoeveel spelers op de eerste
   dag"; tot dan staat hij als schatvraag in *Dichtstbij Wint* als `teVullen`.

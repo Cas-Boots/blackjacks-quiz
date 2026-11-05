@@ -538,7 +538,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
             emoji: vraag.emoji,
             lyric: vraag.lyric,
             eenheid: vraag.eenheid,
-            media: vraag.media,
+            // Bij de onthulling mag een filmpje komen dat de vraag zou verklappen.
+            media: spel.fase === 'antwoord' && vraag.naOnthulling ? vraag.naOnthulling : vraag.media,
             punten: vraagPunten(ronde, vraag),
             maximaal: vraagPunten(ronde, vraag) * PUNT_WAARDE * vermenigvuldigerVan(bonussen.dubbel[spel.rondeIndex], spel.vraagIndex),
             vermenigvuldiger: vermenigvuldigerVan(bonussen.dubbel[spel.rondeIndex], spel.vraagIndex),

@@ -9,6 +9,13 @@ verwijst met `media.bron` naar een bestandsnaam in deze map:
 {v:"Welke film?",  a:"…",        media:{soort:"video",  bron:"clip-01.mp4"}}
 ```
 
+Verklapt het filmpje het antwoord, zet het dan in `naOnthulling` in plaats van
+`media`: dan verschijnt het pas bij de onthulling.
+
+```js
+{v:"Zweden won het Songfestival.", goed:false, naOnthulling:{soort:"video", bron:"songfestival-2026-winnaar.mp4"}}
+```
+
 Ondersteund: jpg, png, gif, webp, avif, svg · mp4, webm, mov · mp3, m4a, aac, ogg, wav, flac.
 
 De bestanden worden op het moment zelf gelezen; herstarten is niet nodig. Ze

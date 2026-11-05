@@ -60,6 +60,16 @@ describe('controleerMedia', () => {
     expect(c.ongebruikt).toEqual(['los.mp4']);
   });
 
+  it('telt ook een filmpje dat pas bij de onthulling komt', () => {
+    const met = {
+      p: { naam: 'P', beschrijving: '', rondes: [{ naam: 'r', suit: '♠', thema: '', type: 'waarnietwaar' as const, tijd: 30, punten: 1, teamModus: 'individueel' as const, uitleg: '',
+        vragen: [{ v: 'Zweden won.', goed: false, naOnthulling: { soort: 'video' as const, bron: 'winnaar.mp4' } }] }] },
+    };
+    const c = beheer.controleerMedia(met, [], '/media', true);
+    expect(c.verwacht.map((v) => v.bron)).toEqual(['winnaar.mp4']);
+    expect(c.ontbrekend).toBe(1);
+  });
+
   it('meldt een map die er niet is zonder om te vallen', () => {
     const c = beheer.controleerMedia(pakketten, [], '/nergens', false);
     expect(c.mapBestaat).toBe(false);
