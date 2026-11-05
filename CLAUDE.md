@@ -60,6 +60,9 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   Ook niet zo simpel dat slimme spelers het meteen zien (dat er geen mensen
   op de maan landden, weet iedereen). Zet er ook specifieke stellingen in die
   níet kloppen, zodat "klinkt specifiek, dus waar" niet werkt.
+  Een drempel werkt vaak beter dan een losse bewering: "duurde langer dan
+  twee weken", "kost meer dan 2.500 euro", "in de top 3". Dan klinken waar en
+  niet waar allebei logisch. Houd wel ruimte tussen drempel en antwoord.
 - **GTA VI moet erin**, in welke ronde of vorm dan ook. De vorm kiezen we na
   de release (19 november 2026), waarschijnlijk "hoeveel spelers op de eerste
   dag"; tot dan staat hij als schatvraag in *Dichtstbij Wint* als `teVullen`.
