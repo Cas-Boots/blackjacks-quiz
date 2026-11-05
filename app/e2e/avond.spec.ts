@@ -1,13 +1,6 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { PAKKETTEN } from '../src/lib/content/packs';
-
-/**
- * Dichtstbij Wint en zijn eerste vraag, opgezocht in de inhoud zelf: de
- * vragen veranderen nog tot de avond, de proef moet dat overleven.
- */
-const DICHTSTBIJ = String(PAKKETTEN.jaar2026.rondes.findIndex((r) => r.naam === 'Dichtstbij Wint'));
-const EERSTE_GETAL = PAKKETTEN.jaar2026.rondes[Number(DICHTSTBIJ)].vragen.find((v) => !v.reserve && !v.teVullen)!.getal!;
-const EERSTE_INDEX = PAKKETTEN.jaar2026.rondes[Number(DICHTSTBIJ)].vragen.findIndex((v) => !v.reserve && !v.teVullen);
+import type { Ronde, Vraag } from '../src/lib/content/types';
 
 /**
  * De rest van de avond: dichtstbij, een teamronde, een beeldvraag, de
@@ -16,7 +9,27 @@ const EERSTE_INDEX = PAKKETTEN.jaar2026.rondes[Number(DICHTSTBIJ)].vragen.findIn
  *
  * Elke proef begint met een nieuw spel en een eigen samenstelling, zodat de
  * proeven elkaar niet in de weg zitten en de rondenummers vastliggen.
+ *
+ * Rondes en vragen zoeken we op naam en op wat ze zijn, niet op een vaste
+ * plek in `packs.ts`: die verschuift zodra er een vraag of ronde bij komt.
  */
+
+const PAKKET = PAKKETTEN.jaar2026;
+
+/** De ronde met deze naam in het pakket, en waar hij staat. */
+function ronde(naam: string): { index: number; ronde: Ronde } {
+  const index = PAKKET.rondes.findIndex((r) => r.naam === naam);
+  expect(index, `ronde "${naam}" staat niet (meer) in packs.ts`).toBeGreaterThanOrEqual(0);
+  return { index, ronde: PAKKET.rondes[index] };
+}
+
+/** De eerste vraag in een ronde die aan de voorwaarde voldoet, met zijn index. */
+function vraag(naam: string, past: (v: Vraag) => boolean): { index: number; vraag: Vraag } {
+  const { ronde: r } = ronde(naam);
+  const index = r.vragen.findIndex(past);
+  expect(index, `geen passende vraag in "${naam}"`).toBeGreaterThanOrEqual(0);
+  return { index, vraag: r.vragen[index] };
+}
 
 type Apparaat = { ctx: BrowserContext; pagina: Page };
 
@@ -43,15 +56,20 @@ async function quizmaster(browser: Browser) {
 }
 
 /**
- * Een nieuw spel met alleen de opgegeven rondes en vragen (pakketindex →
+ * Een nieuw spel met alleen de opgegeven rondes en vragen (rondenaam →
  * vraagindexen). Een ronde die je niet noemt doet niet mee: de server neemt
  * voor een ontbrekende sleutel de standaard, dus die krijgt hier een lege lijst.
  */
 async function nieuwSpel(qm: Awaited<ReturnType<typeof quizmaster>>, keuze: Record<string, number[]>) {
+  const perIndex = new Map(Object.entries(keuze).map(([naam, vragen]) => [ronde(naam).index, vragen]));
   await qm.doe('nieuw-spel', { pakket: 'jaar2026' });
-  const rondes = (await (await qm.pagina.request.get('/api/host/rondes')).json()).rondes as { pakketIndex: number }[];
+  const rondes = (await (await qm.pagina.request.get('/api/host/rondes')).json()).rondes as { pakketIndex: number; naam: string }[];
   const samenstelling: Record<string, number[]> = {};
-  for (const r of rondes) samenstelling[String(r.pakketIndex)] = keuze[String(r.pakketIndex)] ?? [];
+  for (const r of rondes) {
+    // De server en deze proef moeten hetzelfde pakket zien.
+    expect(r.naam).toBe(PAKKET.rondes[r.pakketIndex]?.naam);
+    samenstelling[String(r.pakketIndex)] = perIndex.get(r.pakketIndex) ?? [];
+  }
   await qm.doe('zet-samenstelling', { samenstelling });
 }
 
@@ -65,7 +83,10 @@ async function telefoon(browser: Browser, naam: string): Promise<Apparaat & { na
 
 test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { [DICHTSTBIJ]: [EERSTE_INDEX] }); // Dichtstbij Wint, de eerste echte vraag
+  // Een vraag met een heel getal als antwoord, die al is ingevuld.
+  const dichtstbij = vraag('Dichtstbij Wint', (v) => !v.teVullen && Number.isInteger(v.getal) && (v.getal ?? 0) > 1);
+  const getal = dichtstbij.vraag.getal!;
+  await nieuwSpel(qm, { 'Dichtstbij Wint': [dichtstbij.index] });
   const tv = await nieuwApparaat(browser, '/tv');
 
   await qm.doe('naar-ronde', { ronde: 0 });
@@ -77,9 +98,9 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
 
   await qm.doe('start-ronde');
   await expect(a.pagina.getByPlaceholder('Jullie getal')).toBeVisible({ timeout: 15_000 });
-  await a.pagina.getByPlaceholder('Jullie getal').fill(String(EERSTE_GETAL).replace('.', ','));
+  await a.pagina.getByPlaceholder('Jullie getal').fill(String(getal));
   await a.pagina.getByRole('button', { name: 'Versturen' }).click();
-  await b.pagina.getByPlaceholder('Jullie getal').fill(String(Math.round(EERSTE_GETAL / 2)));
+  await b.pagina.getByPlaceholder('Jullie getal').fill(String(Math.floor(getal / 2)));
   await b.pagina.getByRole('button', { name: 'Versturen' }).click();
   await expect(qm.pagina.getByText(/Ingeleverd — 2 van/)).toBeVisible({ timeout: 15_000 });
 
@@ -98,7 +119,7 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
 
 test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij was', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { [DICHTSTBIJ]: [0, 1] }); // Dichtstbij Wint: een getal intikken, met twee vragen
+  await nieuwSpel(qm, { 'Dichtstbij Wint': [0, 1] }); // een getal intikken, met twee vragen
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
@@ -147,7 +168,7 @@ test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij 
 
 test('teamronde: één telefoon levert in voor het hele team', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '13': [0] }); // 2027, in teams
+  await nieuwSpel(qm, { '2027': [0] }); // 2027, in teams
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
   const team = st.teams.find((t: { leden: number[] }) => t.leden.length >= 2);
@@ -176,7 +197,7 @@ test('teamronde: één telefoon levert in voor het hele team', async ({ browser 
 
 test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de meeste punten', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '13': [0] }); // 2027, twee teams
+  await nieuwSpel(qm, { '2027': [0] }); // 2027, twee teams
   const tv = await nieuwApparaat(browser, '/tv');
   await qm.doe('naar-ronde', { ronde: 0 });
   const st = await qm.staat();
@@ -222,7 +243,8 @@ test('teamronde: iedereen binnen kort de klok in, het snelste team krijgt de mee
 
 test('beeldvraag: de ingebouwde afbeelding staat op de televisie en op de telefoon', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '8': [0] }); // Jullie Jaar in Beeld, de vraag met de ingebouwde afbeelding
+  const beeld = vraag('Jullie Jaar in Beeld', (v) => v.media?.soort === 'beeld' && v.media.bron.startsWith('data:'));
+  await nieuwSpel(qm, { 'Jullie Jaar in Beeld': [beeld.index] }); // de vraag met de ingebouwde afbeelding
   const tv = await nieuwApparaat(browser, '/tv');
   const t = await telefoon(browser, 'Eva');
 
@@ -239,7 +261,7 @@ test('beeldvraag: de ingebouwde afbeelding staat op de televisie en op de telefo
 
 test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '14': [0, 1] }); // Wie van de Blackjacks?
+  await nieuwSpel(qm, { 'Wie van de Blackjacks?': [0, 1] });
   const tv = await nieuwApparaat(browser, '/tv');
 
   // Een gast die niet in de lijst staat schuift aan via het aanmeldscherm.
@@ -324,7 +346,7 @@ test('stemronde met een gast, een por, ongedaan maken en het podium', async ({ b
 
 test('zonder live stroom valt een telefoon terug op navragen en blijft meedoen', async ({ browser }) => {
   const qm = await quizmaster(browser);
-  await nieuwSpel(qm, { '0': [0] });
+  await nieuwSpel(qm, { Warmdraaien: [0] });
   const t = await nieuwApparaat(browser, '/');
   // Een proxy die de stroom blokkeert: het verzoek komt nooit aan.
   await t.ctx.route('**/api/stream', (route) => route.abort('connectionrefused'));
