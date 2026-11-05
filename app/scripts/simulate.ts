@@ -21,6 +21,7 @@
  *   --rondes     stop na zoveel rondes (standaard alle)
  */
 import { PAKKETTEN } from '../src/lib/content/packs';
+import { typeVan } from '../src/lib/content/vraagtype';
 import type { Vraag, Ronde } from '../src/lib/content/types';
 
 const args = new Map<string, string>();
@@ -89,20 +90,22 @@ function juistAntwoord(tekst: string): string | null {
   const hit = ANTWOORDEN.get(tekst);
   if (!hit) return null;
   const { vraag, ronde } = hit;
-  if (ronde.type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
-  if (ronde.type === 'meerkeuze' && typeof vraag.goed === 'number') return String.fromCharCode(65 + vraag.goed);
-  if (ronde.type === 'dichtstbij') return String(vraag.getal ?? 0);
+  const type = typeVan(ronde, vraag);
+  if (type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
+  if (type === 'meerkeuze' && typeof vraag.goed === 'number') return String.fromCharCode(65 + vraag.goed);
+  if (type === 'dichtstbij') return String(vraag.getal ?? 0);
   // Bij een stemvraag is er geen juist antwoord; de meerderheid beslist.
-  if (ronde.type === 'stem') return null;
+  if (type === 'stem') return null;
   return vraag.a ?? null;
 }
 
 function fantasieAntwoord(tekst: string): string {
   const hit = ANTWOORDEN.get(tekst);
-  if (hit?.ronde.type === 'waarnietwaar') return Math.random() < 0.5 ? 'Waar' : 'Niet waar';
-  if (hit?.ronde.type === 'meerkeuze') return String.fromCharCode(65 + Math.floor(Math.random() * 4));
-  if (hit?.ronde.type === 'dichtstbij') return String(Math.floor(Math.random() * 500));
-  if (hit?.ronde.type === 'stem') return ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva'][Math.floor(Math.random() * 5)];
+  const type = hit ? typeVan(hit.ronde, hit.vraag) : undefined;
+  if (type === 'waarnietwaar') return Math.random() < 0.5 ? 'Waar' : 'Niet waar';
+  if (type === 'meerkeuze') return String.fromCharCode(65 + Math.floor(Math.random() * 4));
+  if (type === 'dichtstbij') return String(Math.floor(Math.random() * 500));
+  if (type === 'stem') return ['Liz', 'Bastiaan', 'Joris', 'Rik', 'Eva'][Math.floor(Math.random() * 5)];
   return ['geen idee', 'Amsterdam', 'Spanje', 'de bakker', '42'][Math.floor(Math.random() * 5)];
 }
 

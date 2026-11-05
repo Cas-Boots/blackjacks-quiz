@@ -142,3 +142,16 @@ describe('ookGoed', () => {
     expect(beoordeel(r, v, 'storm')).toMatchObject({ automatisch: false, goed: false });
   });
 });
+
+describe('een vraag met een eigen vorm', () => {
+  const open = { naam: 'r', suit: '♠', thema: '', type: 'open' as const, tijd: 60, punten: 2, teamModus: 'teams' as const, uitleg: '', vragen: [] };
+  it('kijkt meerkeuze na in een open ronde', () => {
+    const v = { v: 'Welke?', type: 'meerkeuze' as const, opties: ['Een', 'Twee', 'Drie', 'Vier'], goed: 2 };
+    expect(beoordeel(open, v, 'C')).toMatchObject({ automatisch: true, goed: true });
+    expect(beoordeel(open, v, 'A')).toMatchObject({ automatisch: true, goed: false });
+  });
+  it('leest een getal bij een schatvraag in een open ronde', () => {
+    const v = { v: 'Welk jaar?', type: 'dichtstbij' as const, getal: 1983 };
+    expect(beoordeel(open, v, 'ca. 1982').reden).toBe('1982');
+  });
+});

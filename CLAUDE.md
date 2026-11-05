@@ -82,6 +82,11 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
   een terugblik daarop valt goed. Ververs de cijfers met
   `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Kies per vraag de antwoordvorm die past.** Een vraag kan een andere vorm
+  hebben dan zijn ronde (`type: "meerkeuze"`, `"dichtstbij"`,
+  `"waarnietwaar"`), zodat een ronde vormen mengt. Meerkeuze voor wat je
+  herkent maar niet zelf kunt opnoemen (een stem, een betekenis), een
+  schatvraag voor een getal of jaartal, open voor een titel of naam.
 - **Open vragen: denk aan hoe ze het intypen.** Stuur het antwoord met de
   vraag ("In één woord", "Wie werd er opgepakt?"), houd `a` kort, en zet
   andere goede antwoorden in `ookGoed`: die keurt de app automatisch goed,

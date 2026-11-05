@@ -7,6 +7,7 @@
  * die in elke momentopname meekomt.
  */
 import { eersteGeheimeRonde } from '$lib/shared/bonus';
+import { typeVan } from '$lib/content/vraagtype';
 import { eq, and, desc } from 'drizzle-orm';
 import { standaardVragen } from '$lib/content/keuze';
 import { db, huidigeProef } from './db/index';
@@ -390,11 +391,12 @@ export function raakApparaatAan(token: string, rol: Rol, spelerId: number | null
 
 /** De tekst waarmee het juiste antwoord op het scherm komt. */
 export function antwoordTekst(ronde: Ronde, vraag: Vraag): string {
-  if (ronde.type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
-  if (ronde.type === 'meerkeuze' && vraag.opties && typeof vraag.goed === 'number') {
+  const type = typeVan(ronde, vraag);
+  if (type === 'waarnietwaar') return vraag.goed === true ? 'Waar' : 'Niet waar';
+  if (type === 'meerkeuze' && vraag.opties && typeof vraag.goed === 'number') {
     return `${String.fromCharCode(65 + vraag.goed)} — ${vraag.opties[vraag.goed]}`;
   }
-  if (ronde.type === 'dichtstbij' && typeof vraag.getal === 'number') {
+  if (type === 'dichtstbij' && typeof vraag.getal === 'number') {
     return `${vraag.getal.toLocaleString('nl-NL')}${vraag.eenheid ? ' ' + vraag.eenheid : ''}`;
   }
   return vraag.a ?? '';
@@ -458,6 +460,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
 
   // Pas bij de onthulling mag de kamer zien wat iedereen heeft ingetikt.
   // Tot die tijd blijft het bij namen, anders kan een team meelezen.
+  // De antwoordvorm van deze vraag: die van de vraag zelf, of anders die van de ronde.
+  const vraagType = ronde ? typeVan(ronde, vraag) : undefined;
   const onthuld = spel.fase === 'antwoord';
   const inzendingen: PubliekeInzending[] = onthuld
     ? inzendingRijen.map((r) => ({
@@ -465,7 +469,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
         tekst: r.tekst,
         isGoed: r.isGoed,
         naMs: r.naMs,
-        getal: ronde?.type === 'dichtstbij' ? leesGetal(r.tekst) : null,
+        getal: vraagType === 'dichtstbij' ? leesGetal(r.tekst) : null,
       }))
     : [];
   const uitdeling: Record<number, number> = onthuld ? (bonussen.verdelingen.get(sleutel) ?? {}) : {};
@@ -475,12 +479,12 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   // plaats van alleen de stelling. Bij een stemvraag zijn de opties de
   // mensen aan tafel.
   const opties =
-    ronde?.type === 'waarnietwaar' ? ['Waar', 'Niet waar']
-      : ronde?.type === 'stem' ? lijst.map((s) => s.naam)
+    vraagType === 'waarnietwaar' ? ['Waar', 'Niet waar']
+      : vraagType === 'stem' ? lijst.map((s) => s.naam)
         : vraag?.opties;
   const goedeOptieIndex = !ronde || !vraag
     ? undefined
-    : ronde.type === 'waarnietwaar'
+    : vraagType === 'waarnietwaar'
       ? (vraag.goed === true ? 0 : 1)
       : typeof vraag.goed === 'number'
         ? vraag.goed
@@ -490,7 +494,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
   if (spel.fase === 'antwoord' && ronde && vraag) {
     let tekst = antwoordTekst(ronde, vraag);
     let stemmen: Onthulling['stemmen'];
-    if (ronde.type === 'stem') {
+    if (vraagType === 'stem') {
       const uitslag = bepaalStem(inzendingRijen);
       stemmen = uitslag?.telling ?? [];
       tekst = uitslag
@@ -501,8 +505,8 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       antwoord: tekst,
       toelichting: vraag.toelichting,
       goedeOptie: goedeOptieIndex,
-      getal: ronde.type === 'dichtstbij' && typeof vraag.getal === 'number' ? vraag.getal : undefined,
-      eenheid: ronde.type === 'dichtstbij' ? vraag.eenheid : undefined,
+      getal: vraagType === 'dichtstbij' && typeof vraag.getal === 'number' ? vraag.getal : undefined,
+      eenheid: vraagType === 'dichtstbij' ? vraag.eenheid : undefined,
       stemmen,
     };
   }
@@ -528,7 +532,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
         ? {
             index: spel.vraagIndex,
             aantal: ronde.vragen.length,
-            type: ronde.type,
+            type: vraagType ?? ronde.type,
             tekst: vraag.v,
             opties,
             emoji: vraag.emoji,
@@ -729,13 +733,13 @@ export function scoorAutomatisch(
 
   let winnaars: string[] = [];
   let puntenPerTeam: Record<string, number> = {};
-  if (ronde.type === 'dichtstbij' && typeof vraag.getal === 'number') {
+  if (typeVan(ronde, vraag) === 'dichtstbij' && typeof vraag.getal === 'number') {
     const uitslag = bepaalDichtstbij(gissingenUitAntwoorden(rijen), vraag.getal, punten);
     if (uitslag) {
       winnaars = uitslag.winnaars;
       puntenPerTeam = uitslag.puntenPerTeam;
     }
-  } else if (ronde.type === 'stem') {
+  } else if (typeVan(ronde, vraag) === 'stem') {
     const uitslag = bepaalStem(rijen);
     if (uitslag) winnaars = uitslag.winnaars;
   } else {

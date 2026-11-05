@@ -42,6 +42,8 @@ export interface Vraag {
   naOnthulling?: Media;
   /** Overschrijft de rondewaarde. */
   tijd?: number;
+  /** Een andere antwoordvorm dan de ronde, voor rondes die vormen mengen. */
+  type?: VraagType;
   punten?: number;
   /** Het antwoord moet nog worden ingevuld. */
   teVullen?: boolean;

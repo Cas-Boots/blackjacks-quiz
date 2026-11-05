@@ -7,6 +7,7 @@
  * "pogačar" of "Tadej Pogačar" en is een voorstel het hoogst haalbare.
  */
 import type { Ronde, Vraag } from '$lib/content/types';
+import { typeVan } from '$lib/content/vraagtype';
 
 /** Kleine woorden die er voor de vergelijking niet toe doen. */
 const RUIS = new Set(['de', 'het', 'een', 'en', 'van', 'in', 'op', 'the', 'a', 'of']);
@@ -122,8 +123,9 @@ const ZEGT_NIET = new Set(['niet waar', 'nietwaar', 'nee', 'false', 'n', 'b', 'o
 export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel {
   const tekst = String(ingetikt ?? '').trim();
   if (!tekst) return { automatisch: true, goed: false, reden: 'niets ingevuld' };
+  const type = typeVan(ronde, vraag);
 
-  if (ronde.type === 'waarnietwaar') {
+  if (type === 'waarnietwaar') {
     const n = eenvoudig(tekst);
     const waar = ZEGT_WAAR.has(n);
     const niet = ZEGT_NIET.has(n);
@@ -135,7 +137,7 @@ export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel
     };
   }
 
-  if (ronde.type === 'meerkeuze' && vraag.opties) {
+  if (type === 'meerkeuze' && vraag.opties) {
     const n = eenvoudig(tekst);
     let gekozen = -1;
     if (/^[a-d]$/.test(n)) gekozen = n.charCodeAt(0) - 97;
@@ -150,12 +152,12 @@ export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel
     };
   }
 
-  if (ronde.type === 'stem') {
+  if (type === 'stem') {
     // Wie de meerderheid heeft blijkt pas als alles binnen is; hier alleen vastleggen.
     return { automatisch: false, goed: false, reden: `stemt op ${tekst}` };
   }
 
-  if (ronde.type === 'dichtstbij') {
+  if (type === 'dichtstbij') {
     const getal = leesGetal(tekst);
     if (getal === null) return { automatisch: false, goed: false, reden: 'geen getal' };
     // Wie het dichtst zit blijkt pas als alles binnen is; hier alleen vastleggen.

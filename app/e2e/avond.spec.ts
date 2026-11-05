@@ -117,6 +117,34 @@ test('dichtstbij: de machine rekent bij de onthulling uit wie er het dichtst zat
   for (const x of [a, b, tv, qm]) await x.ctx.close();
 });
 
+test('gemengde vormen: meerkeuze en een schatvraag in een open muziekronde', async ({ browser }) => {
+  const qm = await quizmaster(browser);
+  const keuze = vraag('Hitparade 1: Wat hoor je?', (v) => v.type === 'meerkeuze');
+  const schat = vraag('Hitparade 2: Wie, wat en wanneer?', (v) => v.type === 'dichtstbij');
+  await nieuwSpel(qm, { 'Hitparade 1: Wat hoor je?': [keuze.index], 'Hitparade 2: Wie, wat en wanneer?': [schat.index] });
+
+  await qm.doe('naar-ronde', { ronde: 0 });
+  const st = await qm.staat();
+  const naamVan = (id: number) => st.spelers.find((s: { id: number }) => s.id === id).naam;
+  const a = await telefoon(browser, naamVan(st.teams[0].leden[0]));
+
+  // Meerkeuze in een open ronde: knoppen in plaats van een tekstvak.
+  await qm.doe('start-ronde');
+  const juist = keuze.vraag.opties![keuze.vraag.goed as number];
+  await a.pagina.getByRole('button', { name: new RegExp(juist.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).click({ timeout: 15_000 });
+  await expect(qm.pagina.getByText(/Ingeleverd — 1 van/)).toBeVisible({ timeout: 15_000 });
+  await qm.pagina.getByRole('button', { name: 'Toon het antwoord' }).click();
+  // Zoals bij elke meerkeuzevraag: de app stelt voor, de quizmaster vinkt aan.
+  await expect(qm.pagina.getByText('lijkt goed').first()).toBeVisible({ timeout: 15_000 });
+
+  // De schatvraag in de volgende ronde: een getal intikken.
+  await qm.doe('naar-ronde', { ronde: 1 });
+  await qm.doe('start-ronde');
+  await expect(a.pagina.getByPlaceholder('Jullie getal')).toBeVisible({ timeout: 15_000 });
+
+  for (const x of [a, qm]) await x.ctx.close();
+});
+
 test('pauze: de quiz staat stil, iedereen ziet het, en hij gaat verder waar hij was', async ({ browser }) => {
   const qm = await quizmaster(browser);
   await nieuwSpel(qm, { 'Dichtstbij Wint': [0, 1] }); // een getal intikken, met twee vragen

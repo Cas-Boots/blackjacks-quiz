@@ -19,6 +19,7 @@
  * Een proefrit verdwijnt na vier uur zonder gebruik, en bij een herstart.
  */
 import { randomUUID } from 'node:crypto';
+import { typeVan } from '$lib/content/vraagtype';
 import { and, eq, inArray } from 'drizzle-orm';
 import { binnen, db, echte, geheugenDb, type Context } from './db/index';
 import { migreer } from './db/migrate';
@@ -233,7 +234,7 @@ const kies = <T>(lijst: T[]): T => lijst[Math.floor(Math.random() * lijst.length
 /** Wat een bot intikt: het goede antwoord met kans `kansGoed`, anders iets ernaast. */
 export function botAntwoord(ronde: Ronde, vraag: Vraag, lijst: { naam: string }[], kansGoed: number): string {
   const goed = Math.random() < kansGoed;
-  switch (ronde.type) {
+  switch (typeVan(ronde, vraag)) {
     case 'waarnietwaar':
       return (vraag.goed === true) === goed ? 'Waar' : 'Niet waar';
     case 'meerkeuze': {

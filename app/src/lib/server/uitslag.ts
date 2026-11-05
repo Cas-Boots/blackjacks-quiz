@@ -6,6 +6,7 @@
  * ronde en per vraag wie er punten kreeg.
  */
 import { eq, desc } from 'drizzle-orm';
+import { typeVan } from '$lib/content/vraagtype';
 import { db } from './db/index';
 import { spellen, antwoorden, correcties } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
@@ -135,7 +136,7 @@ export function uitslagVan(spelId: number): Uitslag | null {
         ronde: ri,
         nummer: vi + 1,
         tekst: v.v,
-        antwoord: r.type === 'stem' ? 'de groep besliste' : antwoordTekst(r, v),
+        antwoord: typeVan(r, v) === 'stem' ? 'de groep besliste' : antwoordTekst(r, v),
         goed: Object.entries(verdeling ?? {}).filter(([, p]) => p > 0).map(([id]) => naamVan(Number(id))),
         inzenders,
       });

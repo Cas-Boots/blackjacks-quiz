@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { typeVan } from '$lib/content/vraagtype';
 import { standaardVragen } from '$lib/content/keuze';
 import type { RequestHandler } from './$types';
 import { actiefSpel, pakketVan, samengesteld, huidige } from '$lib/server/spel';
@@ -48,7 +49,7 @@ export const GET: RequestHandler = ({ locals }) => {
       vragen: r.vragen.map((v, i) => ({
         index: i,
         tekst: v.v,
-        antwoord: antwoordVan(r.type, v),
+        antwoord: antwoordVan(typeVan(r, v), v),
         teVullen: !!v.teVullen,
         live: !!v.live,
         media: v.media ? `${v.media.soort}: ${v.media.bron.startsWith('data:') ? 'ingebouwd' : v.media.bron}` : null,
