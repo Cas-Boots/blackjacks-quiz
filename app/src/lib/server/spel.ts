@@ -7,6 +7,7 @@
  * die in elke momentopname meekomt.
  */
 import { eq, and, desc } from 'drizzle-orm';
+import { standaardVragen } from '$lib/content/keuze';
 import { db, huidigeProef } from './db/index';
 import { spelers, spellen, deelnemers, teams, antwoorden, uitdelingen, correcties, apparaten } from './db/schema';
 import { PAKKETTEN } from '$lib/content/packs';
@@ -113,7 +114,7 @@ export function samengesteld(spel: { pakket: string; samenstelling: string }): R
   }
   const uit: Ronde[] = [];
   pakket.rondes.forEach((r, ri) => {
-    const idx = keuze[String(ri)] ?? (r.optioneel ? [] : r.vragen.map((_, i) => i));
+    const idx = keuze[String(ri)] ?? standaardVragen(r);
     if (!idx.length) return;
     uit.push({ ...r, vragen: idx.slice().sort((a, b) => a - b).map((i) => r.vragen[i]).filter(Boolean) });
   });
@@ -124,7 +125,7 @@ export function standaardSamenstelling(pakketId: string): string {
   const pakket = PAKKETTEN[pakketId];
   const uit: Record<string, number[]> = {};
   pakket.rondes.forEach((r, ri) => {
-    uit[String(ri)] = r.optioneel ? [] : r.vragen.map((_, i) => i);
+    uit[String(ri)] = standaardVragen(r);
   });
   return JSON.stringify(uit);
 }

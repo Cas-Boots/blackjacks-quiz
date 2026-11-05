@@ -27,7 +27,7 @@ const MUZIEK = { Joris: 3, Rik: 3 };
 export const PAKKETTEN: Pakketten = {
   jaar2026: {
     naam: "Blackjacks 2026 — Het Jaaroverzicht",
-    beschrijving: "De hoofdquiz, in vijf kwartier: tien korte rondes die om en om wisselen tussen het jaar en onszelf, tussen ieder voor zich en in teams. Elk onderwerp uit het nieuws komt precies één keer voor; alleen over onszelf mag het vaker. De uitgevinkte rondes zijn extra's.",
+    beschrijving: "De hoofdquiz, in twee uur en vóór middernacht klaar: negen korte rondes die om en om wisselen tussen het jaar en onszelf, tussen ieder voor zich en in teams. Elk onderwerp uit het nieuws komt precies één keer voor; alleen over onszelf mag het vaker. De uitgevinkte rondes zijn extra's.",
     rondes: [
       {
         naam: "Warmdraaien",
@@ -43,7 +43,7 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"DeBÍ TiRAR MáS FOToS van Bad Bunny, op 1 februari in Los Angeles."},
           {v:"In 2026 vlogen er voor het eerst sinds de jaren zeventig weer mensen om de maan heen.", goed:true,
            toelichting:"Artemis II bracht vier astronauten om de maan; de capsule landde op 10 april in zee."},
-          {v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
+          {reserve:true, v:"Op 1 juli 2026 ging de AOW omlaag.", goed:false,
            toelichting:"Omhoog, zoals elk half jaar."},
           {v:"GTA VI kwam in mei 2026 uit, zoals beloofd.", goed:false,
            toelichting:"Rockstar stelde de game nog een keer uit, naar 19 november."}
@@ -53,6 +53,7 @@ export const PAKKETTEN: Pakketten = {
         naam: "Hoger of Lager",
         suit: "♥", thema: "Onze eigen cijfers, geschat", sfeer: "staal",
         type: "dichtstbij", tijd: 30, punten: 3, teamModus: "individueel",
+        optioneel: true,
         uitleg: "Ieder voor zich een getal over onszelf. Het dichtstbij pakt 3 punten, precies goed levert er 5 op.",
         // Net als bij de sportcompetitie rekent de meespeelversie deze getallen
         // op de avond zelf uit; hier staat de stand van 18 september.
@@ -69,6 +70,7 @@ export const PAKKETTEN: Pakketten = {
         suit: "♦", thema: "Het jaar in meerkeuze", sfeer: "oranje",
         type: "meerkeuze", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
+        optioneel: true,
         uitleg: "Nieuwe teams. Steeds één antwoord goed — overleg snel.",
         vragen: [
           {v:"Wie werd in februari 2026 minister-president?",
@@ -131,8 +133,8 @@ export const PAKKETTEN: Pakketten = {
           {v:"Wie van ons sportte er dit jaar verreweg het vaakst?", a:"Cas — 105 keer", live:"sport.meeste",
            toelichting:"Daarna Liz met 91, Eva met 84, Bastiaan met 78, Joris met 59 en Rik met 45."},
           {v:"Wie is de enige van ons die het hele jaar geen enkele keer in de sportschool stond?", a:"Rik", live:"sport.geenGym"},
-          {v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
-          {v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
+          {reserve:true, v:"Eén sport staat bij alle zes precies één keer genoteerd. Duidelijk één gezamenlijk uitje. Welke?", a:"Klimmen", live:"sport.gezamenlijk"},
+          {reserve:true, v:"Wie is de enige die pilates heeft bijgehouden?", a:"Liz", live:"sport.enige:pilates"},
           {v:"Wie hadden hun jaardoel in september al binnen?", a:"Eva, Liz en Bastiaan", live:"sport.doelBinnen", tijd:60,
            toelichting:"Eva 84 van 60, Liz 91 van 80, Bastiaan 78 van 70. Cas, Joris en Rik zaten er nog onder."},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
@@ -155,7 +157,7 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"€1,40. En sinds juli komt je brief standaard binnen twee dagen, niet meer de volgende dag."},
           {v:"Hoeveel autobranden telde Nederland tijdens de jaarwisseling naar 2026?", getal:361, eenheid:"autobranden",
            toelichting:"Diezelfde nacht waren er ook 228 woningbranden."},
-          {v:"Hoeveel punten scoorde Seattle in de Super Bowl?", getal:29, eenheid:"punten",
+          {reserve:true, v:"Hoeveel punten scoorde Seattle in de Super Bowl?", getal:29, eenheid:"punten",
            toelichting:"29-13 tegen New England. Kicker Jason Myers schoot een record van vijf velddoelpunten."},
           {v:"Hoeveel wandelaars haalden in juli de finish van de Vierdaagse in Nijmegen?", getal:42137, eenheid:"wandelaars",
            toelichting:"Er gingen er 45.761 van start. Het record, 42.777, is van een jaar eerder."}
@@ -171,7 +173,7 @@ export const PAKKETTEN: Pakketten = {
           {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
           {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
           {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
-          {v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
+          {reserve:true, v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
           {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}
         ]
       },
@@ -188,7 +190,7 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"In januari, en voor het eerst in een Dacia."},
           {emoji:"🕷️ 🧑 🆕 🌅", v:"Welke film?", a:"Spider-Man: Brand New Day",
            toelichting:"De grootste kaskraker van het jaar in de Amerikaanse bioscopen."},
-          {emoji:"📚 🎁 🛵 👴", v:"Welk boek kreeg je in maart cadeau bij de boekwinkel?", a:"Piaggio van Hendrik Groen",
+          {reserve:true, emoji:"📚 🎁 🛵 👴", v:"Welk boek kreeg je in maart cadeau bij de boekwinkel?", a:"Piaggio van Hendrik Groen",
            toelichting:"Het Boekenweekgeschenk. Achter Hendrik Groen bleek Peter de Smet te zitten."},
           {emoji:"🎾 🍓 🇨🇿 🆚 🇨🇿", v:"Welke finale, in juli?", a:"De vrouwenfinale van Wimbledon",
            toelichting:"Linda Nosková versloeg landgenote Karolína Muchová. Bij de mannen prolongeerde Jannik Sinner."}
@@ -241,7 +243,7 @@ export const PAKKETTEN: Pakketten = {
           {v:"En wie zat er het vaakst volledig naast?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.meesteFout"},
           {v:"Welke voorspelling kwam uit terwijl niemand erin geloofde?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.tegenDeStroom"},
           {v:"Welke voorspelling deed bijna iedereen, en kwam toch niet uit?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.bijnaIedereen"},
-          {v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.pijnlijkst"}
+          {reserve:true, v:"Welke voorspelling is het pijnlijkst verkeerd afgelopen?", a:"— nog invullen —", teVullen:true, live:"voorspellingen.pijnlijkst"}
         ]
       },
       {
@@ -271,14 +273,14 @@ export const PAKKETTEN: Pakketten = {
            toelichting:"Het stond de eerste weken van januari bovenaan in de Top 40."},
           {v:"Onder januari tot en met april in de openingsfilm klonk de hit die eind januari Taylor Swift van 1 stootte, en daar elf weken bleef. Welke, en van wie?", a:"I Just Might — Bruno Mars",
            toelichting:"Van 24 januari tot begin april. Wie goed luisterde naar de film, had hem al."},
-          {v:"Shakira en Burna Boy stonden deze zomer maandenlang op 1 met Dai Dai. Welk record pakte Shakira daarmee?", a:"Geen zangeres voerde de Top 40 ooit langer aan",
+          {reserve:true, v:"Shakira en Burna Boy stonden deze zomer maandenlang op 1 met Dai Dai. Welk record pakte Shakira daarmee?", a:"Geen zangeres voerde de Top 40 ooit langer aan",
            toelichting:"Ook Burna Boy schreef geschiedenis: hij werd de succesvolste Afrikaanse artiest ooit in de Top 40."},
           {emoji:"💯 😢", v:"Welke Nederlandse hit stootte Dai Dai van de troon?", a:"100 Tranen — Qlas, Antoon en Boef"},
           {v:"Wiens Spotify Wrapped is dit?", a:"— nog invullen —", teVullen:true, media:{soort:"beeld", bron:"wrapped-01.png"},
            toelichting:"Zet een screenshot van iemands top 5 artiesten in app/media, zonder naam erop."},
           {v:"Een AI-zanger zingt een nieuwsfeit uit 2026. Welk?", a:"— nog invullen —", teVullen:true, media:{soort:"muziek", bron:"ai-nieuws-01.mp3"},
            toelichting:"Laat een AI-muziekgenerator een couplet over een nieuwsfeit inzingen, en zet het in app/media."},
-          {v:"Kennersvraag, dubbele punten: welke Roemeense dj maakte in 2026 een hit met Jason Derulo?", a:"DJ Goja, met Mi Chico", punten:4,
+          {reserve:true, v:"Kennersvraag, dubbele punten: welke Roemeense dj maakte in 2026 een hit met Jason Derulo?", a:"DJ Goja, met Mi Chico", punten:4,
            toelichting:"Het origineel kwam in maart uit; in juni volgde de versie met Derulo en de Braziliaanse zangeres Melody."}
         ]
       },
@@ -291,7 +293,7 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
            toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
-          {v:"In welk land wordt in september 2027 de Ryder Cup gespeeld?", a:"Ierland",
+          {reserve:true, v:"In welk land wordt in september 2027 de Ryder Cup gespeeld?", a:"Ierland",
            toelichting:"Op Adare Manor, bij Limerick. Het toernooi bestaat dan honderd jaar."},
           {v:"Welk land organiseert het WK rugby?", a:"Australië"},
           {v:"In welke maand kiest Frankrijk een nieuwe president?", a:"April"}
@@ -304,7 +306,7 @@ export const PAKKETTEN: Pakketten = {
         uitleg: "Iedereen kiest een naam. De meerderheid beslist: wie meestemt met de groep krijgt de punten.",
         vragen: [
           {v:"Wie kwam dit jaar het vaakst te laat?", a:"De groep beslist"},
-          {v:"Wie heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
+          {reserve:true, v:"Wie heeft het meeste geld uitgegeven aan iets volstrekt nutteloos?", a:"De groep beslist"},
           {v:"Wie verbreekt zijn goede voornemen het snelst?", a:"De groep beslist"},
           {v:"Wie wint volgend jaar deze quiz?", a:"De groep beslist"}
         ]

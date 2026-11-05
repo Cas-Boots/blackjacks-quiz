@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { standaardVragen } from '$lib/content/keuze';
 import type { RequestHandler } from './$types';
 import { actiefSpel, pakketVan, samengesteld, huidige } from '$lib/server/spel';
 import { PAKKETTEN } from '$lib/content/packs';
@@ -26,7 +27,7 @@ export const GET: RequestHandler = ({ locals }) => {
   const { vraag } = huidige(spel);
 
   const rondes = pakket.rondes.map((r, pakketIndex) => {
-    const gekozen = keuze[String(pakketIndex)] ?? (r.optioneel ? [] : r.vragen.map((_, i) => i));
+    const gekozen = keuze[String(pakketIndex)] ?? standaardVragen(r);
     const gekozenSet = new Set(gekozen);
     // Waar deze ronde in de gespeelde volgorde staat, of null als hij niet meedoet.
     const speelIndex = gekozen.length ? actief.findIndex((a) => a.naam === r.naam && a.thema === r.thema) : -1;

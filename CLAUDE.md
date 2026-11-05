@@ -65,9 +65,15 @@ daarom met praattijd, niet alleen met de klok:
 | Elke ronde (inleiden, teams, tussenstand) | 2 min |
 | Begin (telefoons, trailer) en einde (uitslag, prijzen, film) | 10 min elk |
 
-Zo kwam de hoofdquiz in november 2026 met 11 rondes en 58 vragen op ± 3 uur
-(2½ uur met een strakke quizmaster), tegen 1½ uur op alleen de klok. De
-rondes over onszelf kosten de meeste tijd, maar maken de quiz uniek: inkorten
-doe je eerst bij de nieuwsvragen. Wat er bij komt, moet er meestal ergens
-anders af. Werk de aantallen in `README.md` bij als je rondes of vragen
-toevoegt.
+**Het doel: ± 2 uur, en vóór middernacht klaar.** De quiz is op
+oudejaarsavond; we beginnen om 20:30, maar de quiz zelf rond 21:30. Met 9
+rondes en 36 vragen eindigt hij volgens het model hierboven om ± 23:35, ruim
+voor het aftellen. `app/tests/keuze.test.ts` rekent dat na en faalt boven de
+125 minuten.
+
+Wat er bij komt, moet er dus ergens anders af. De rondes over onszelf kosten
+de meeste tijd maar maken de quiz uniek: inkorten doe je eerst bij de
+nieuwsvragen, en liever een hele ronde (die kost 2 minuten aan zichzelf) dan
+overal één vraag. Gooi een nagezochte vraag niet weg: zet er
+`reserve: true` bij (standaard uitgevinkt), of `optioneel: true` op de ronde.
+Werk de aantallen in `README.md` bij als je rondes of vragen verandert.

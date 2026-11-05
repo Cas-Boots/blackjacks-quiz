@@ -34,6 +34,11 @@ export interface Vraag {
   /** Het antwoord moet nog worden ingevuld. */
   teVullen?: boolean;
   /**
+   * Reservevraag: standaard uitgevinkt, aan te vinken in de vragenkiezer.
+   * Zo houdt de avond zijn lengte zonder dat een nagezochte vraag verdwijnt.
+   */
+  reserve?: boolean;
+  /**
    * Sleutel van een levende vraag: de meespeelversie rekent vraag, antwoord
    * en toelichting uit op de cijfers uit resolution-recap. Zie
    * server/recap/vragen.ts voor de sleutels. De tekst hier is de achtervang
