@@ -86,6 +86,26 @@
 
   let mijnBonussen = $derived((staat?.bonussen ?? []).filter((b) => b.spelerId === live.spelerId));
 
+  /* Bij een vraag met opties: welke kaart je speelde, en welke de goede was. */
+  function optieVan(tekst: string, opties: string[]): number {
+    const t = tekst.trim();
+    if (/^[A-Za-z]$/.test(t)) return t.toUpperCase().charCodeAt(0) - 65;
+    return opties.findIndex((o) => o.toLowerCase() === t.toLowerCase());
+  }
+  let antwoordOpties = $derived(
+    staat?.vraag?.opties ?? (staat?.vraag?.type === 'waarnietwaar' ? ['Waar', 'Niet waar'] : null),
+  );
+  let mijnKaart = $derived.by(() => {
+    if (!antwoordOpties || !mijnInzending) return null;
+    const i = optieVan(mijnInzending.tekst, antwoordOpties);
+    return i >= 0 ? { i, tekst: antwoordOpties[i] } : null;
+  });
+  let goedeKaart = $derived.by(() => {
+    if (!antwoordOpties) return null;
+    const i = staat?.onthulling?.goedeOptie ?? optieVan(staat?.onthulling?.antwoord ?? '', antwoordOpties);
+    return i !== undefined && i >= 0 && i < antwoordOpties.length ? { i, tekst: antwoordOpties[i] } : null;
+  });
+
   /* Zoals bij Kahoot: na elke vraag je plek, en hoe ver de volgende boven je
      staat. De stand is al bijgewerkt zodra de quizmaster punten gaf. */
   let naVraag = $derived.by(() => {
@@ -97,7 +117,10 @@
     const plek = stand.findIndex((r) => r.punten === ik.punten) + 1;
     const boven = stand.slice(0, i).reverse().find((r) => r.punten > ik.punten) ?? null;
     const onder = stand.slice(i + 1).find((r) => r.punten < ik.punten) ?? null;
-    return { plek, punten: ik.punten, boven, onder };
+    // Waar je vóór deze vraag stond, voor het pijltje omhoog of omlaag.
+    const oud = (r: { spelerId: number; punten: number }) => live.vorigePunten[r.spelerId] ?? r.punten;
+    const plekVoor = stand.filter((r) => oud(r) > oud(ik)).length + 1;
+    return { plek, punten: ik.punten, boven, onder, verschuiving: plekVoor - plek };
   });
   const fmt = (n: number) => n.toLocaleString('nl-NL');
 
@@ -557,47 +580,61 @@
       {/if}
     {:else if staat.fase === 'antwoord'}
       {#if !onthulKlaar}
-        <div class="trommel" style="padding:1.4rem">
-          <span class="stokken" aria-hidden="true" style="font-size:3.4rem">🥁</span>
+        <!-- Tijdens de roffel: een dichte kaart, net als op de televisie. -->
+        <div class="dichtekaart-tel" aria-label="Kijk naar de televisie">
+          <span class="rug" aria-hidden="true"><span>?</span></span>
           <p class="etiket">Kijk naar de televisie…</p>
         </div>
       {:else}
       {#key uitslag}
-        <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
+        <!-- De kaart draait om: jouw uitslag, in het materiaal van de ronde. -->
+        <div class="uitslag" data-uitslag={uitslag}>
           {#if uitslag === 'goed'}
             <span class="stempel groen" style="--hoek:8deg">Goed!</span>
             <!-- Dezelfde knal als op de televisie, in het decor van de ronde. -->
             <span class="knal" aria-hidden="true">{#each Array(14) as _, k (k)}<i style="--k:{k}"></i>{/each}</span>
-            <span class="teken">✓</span>
-            <span>
-              <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /> {roep}</span>{/if}
-              <span class="plus">+{fmt(mijnPunten)}</span>
-              <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
-              {#each mijnBonussen as b (b.soort)}
-                <span class="bonusregel">🔥 {b.opRij} op rij · +{b.punten} bonus</span>
-              {/each}
-            </span>
+            <span class="uitslagkop"><span class="teken">✓</span><strong>{kwinkslag}</strong></span>
+            <span class="plus">+{fmt(mijnPunten)}</span>
+            <span class="fijn">{mijnPunten === 1 ? 'punt' : 'punten'}{teamRonde ? ' voor het hele team' : ''}{vraag && vraag.vermenigvuldiger > 1 ? ` · ×${vraag.vermenigvuldiger}` : ''}</span>
+            {#if mijnBonussen.length}
+              <span class="bonusfiches">
+                {#each mijnBonussen as b (b.soort)}
+                  <span class="bonusregel">🔥 {b.opRij} op rij · +{fmt(b.punten)}</span>
+                {/each}
+              </span>
+            {/if}
+            {#if mijnKaart}
+              <span class="kaartjes">
+                <span class="minikaart goed" data-suit={KLEUREN[mijnKaart.i % 4]}><b>{String.fromCharCode(65 + mijnKaart.i)}{KLEUREN[mijnKaart.i % 4]}</b>{mijnKaart.tekst}<i aria-label="goed">✓</i></span>
+              </span>
+            {/if}
+            {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="blij" /> {roep}</span>{/if}
           {:else if uitslag === 'fout'}
             <span class="stempel" style="--hoek:-9deg">Mis</span>
-            <span class="teken">✗</span>
-            <span>
-              <strong>{kwinkslag}</strong>
-              {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="sip" /> {roep}</span>{/if}
+            <span class="uitslagkop"><span class="teken">✗</span><strong>{kwinkslag}</strong></span>
+            {#if mijnKaart && goedeKaart}
+              <span class="kaartjes">
+                <span class="minikaart fout" data-suit={KLEUREN[mijnKaart.i % 4]}><b>{String.fromCharCode(65 + mijnKaart.i)}{KLEUREN[mijnKaart.i % 4]}</b>{mijnKaart.tekst}<i aria-label="fout">✗</i></span>
+                <span class="pijl" aria-hidden="true">→</span>
+                <span class="minikaart goed" data-suit={KLEUREN[goedeKaart.i % 4]}><b>{String.fromCharCode(65 + goedeKaart.i)}{KLEUREN[goedeKaart.i % 4]}</b>{goedeKaart.tekst}<i aria-label="goed">✓</i></span>
+              </span>
+            {:else}
               <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span>
-            </span>
+            {/if}
+            {#if mijnDier}<span class="dierenroep" style="justify-content:flex-start"><Pixeldier sleutel={mijnDier.sleutel} pose="sip" /> {roep}</span>{/if}
           {:else if uitslag === 'wacht'}
-            <span class="teken">…</span>
-            <span><strong>De quizmaster kijkt ernaar.</strong> <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span></span>
+            <span class="uitslagkop"><span class="teken">…</span><strong>De quizmaster kijkt ernaar.</strong></span>
+            <span class="fijn">Jullie hadden: “{mijnInzending?.tekst}”</span>
           {:else}
-            <span class="teken">—</span>
-            <span><strong>{kwinkslag}</strong></span>
+            <span class="uitslagkop"><span class="teken">—</span><strong>{kwinkslag}</strong></span>
           {/if}
         </div>
       {/key}
       {#if naVraag}
         <p class="mijnplek" in:fade={{ duration: 300, delay: 250 }}>
-          <strong>{naVraag.plek}e</strong> met {fmt(naVraag.punten)} ·
+          <strong>{naVraag.plek}e</strong>
+          {#if naVraag.verschuiving > 0}<span class="verschuiving op">▲{naVraag.verschuiving}</span>{:else if naVraag.verschuiving < 0}<span class="verschuiving neer">▼{-naVraag.verschuiving}</span>{/if}
+          met {fmt(naVraag.punten)} ·
           {#if naVraag.boven}
             {fmt(naVraag.boven.punten - naVraag.punten)} achter {naVraag.boven.naam}
           {:else if naVraag.onder}

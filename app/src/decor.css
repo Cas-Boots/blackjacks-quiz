@@ -2295,3 +2295,280 @@
     transform: none;
   }
 }
+
+/* ===================================================================
+   HET ONTHULMOMENT OP DE TELEFOON
+   Dezelfde rode draad als op de televisie: tijdens de roffel ligt er een
+   dichte kaart, dan draait hij om naar jouw uitslag in het materiaal van
+   de ronde. Goed: groot je punten en jouw kaart met een vinkje. Mis: jouw
+   kaart doorgestreept, met de goede ernaast.
+   =================================================================== */
+.dichtekaart-tel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.6rem 0 0.4rem;
+}
+.dichtekaart-tel .rug {
+  display: grid;
+  place-items: center;
+  width: min(46vw, 190px);
+  aspect-ratio: 5 / 7;
+  border-radius: 16px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.16) 0 6px, transparent 6px 14px),
+    var(--fiche);
+  box-shadow:
+    inset 0 0 0 7px var(--kaart-vlak),
+    inset 0 0 0 9px var(--goud),
+    0 22px 40px -12px rgba(0, 0, 0, 0.7);
+  animation:
+    rugLegt 0.45s var(--deal) both,
+    rugTrilt 0.16s 0.5s ease-in-out infinite;
+}
+.dichtekaart-tel .rug span {
+  display: grid;
+  place-items: center;
+  width: 44%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--kaart-vlak);
+  color: var(--kaart-inkt);
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: 2.6rem;
+}
+@keyframes rugLegt {
+  from {
+    opacity: 0;
+    transform: translateY(-40px) rotate(-10deg) scale(1.1);
+  }
+}
+@keyframes rugTrilt {
+  50% {
+    transform: rotate(2deg) scale(1.02);
+  }
+}
+
+/* De uitslag zelf: een kaart die omdraait. */
+.uitslag {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  padding: 1.15rem 1.15rem 1.2rem;
+  border: none;
+  border-radius: 18px;
+  border-top: 6px solid var(--kaart-rand);
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 22px 40px -14px rgba(0, 0, 0, 0.7);
+  transform-origin: 50% 50%;
+  animation: uitslagOm 0.7s var(--deal) both;
+}
+@keyframes uitslagOm {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateY(-95deg) scale(1.06);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(900px) rotateY(8deg) scale(1.04);
+  }
+  to {
+    transform: none;
+  }
+}
+.uitslag[data-uitslag="goed"] {
+  border-top-color: #2fbf71;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  box-shadow:
+    0 0 0 2px #2fbf71,
+    0 0 50px -10px rgba(47, 191, 113, 0.75),
+    0 22px 40px -14px rgba(0, 0, 0, 0.7);
+}
+.uitslag[data-uitslag="fout"] {
+  border-top-color: #e5484d;
+}
+.uitslag .uitslagkop {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-right: 4.5rem;
+  font-family: var(--vraagletter);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.uitslag .teken {
+  background: transparent;
+  border: 2px solid currentColor;
+  color: var(--kaart-inkt);
+  opacity: 0.8;
+}
+.uitslag[data-uitslag="goed"] .teken {
+  background: #2fbf71;
+  border-color: #2fbf71;
+  color: #fff;
+  opacity: 1;
+}
+.uitslag[data-uitslag="fout"] .teken {
+  background: #e5484d;
+  border-color: #e5484d;
+  color: #fff;
+  opacity: 1;
+}
+/* Je punten: groot, in goud, en ze springen even op. */
+.uitslag .plus {
+  display: block;
+  margin: 0.2rem 0 0;
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  font-size: 3.2rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums;
+  color: transparent;
+  background: linear-gradient(180deg, #f3d77e, #b8891c 70%, #8a6512);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: puntenOp 0.6s 0.45s var(--deal) both;
+}
+@keyframes puntenOp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.6);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.uitslag .fijn {
+  color: var(--kaart-inkt);
+  opacity: 0.7;
+}
+.uitslag .bonusfiches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.uitslag .bonusregel {
+  display: inline-flex;
+  margin: 0;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: #14110d;
+  color: #ffd27a;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.uitslag .dierenroep {
+  color: var(--kaart-inkt);
+}
+
+/* De minikaarten: welke kaart je speelde, en welke de goede was. */
+.uitslag .kaartjes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+.uitslag .kaartjes .pijl {
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+.minikaart {
+  --pip: #17171c;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.7rem 0.6rem;
+  border-radius: 12px;
+  background: #fffdf6;
+  color: #14110d;
+  font-family: var(--vraagletter);
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.1;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 6px 14px -6px rgba(0, 0, 0, 0.45);
+  animation: opkomen 0.45s 0.7s var(--deal) both;
+}
+.minikaart + .pijl + .minikaart {
+  animation-delay: 1s;
+}
+.minikaart[data-suit="♥"] {
+  --pip: var(--kleur-hart);
+}
+.minikaart[data-suit="♦"] {
+  --pip: var(--kleur-ruit);
+}
+.minikaart[data-suit="♣"] {
+  --pip: var(--kleur-klaver);
+}
+.minikaart b {
+  color: var(--pip);
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+.minikaart i {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  font-style: normal;
+  font-family: var(--ui);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+}
+.minikaart.goed {
+  box-shadow:
+    0 0 0 2px #2fbf71,
+    0 6px 14px -6px rgba(0, 0, 0, 0.45);
+}
+.minikaart.goed i {
+  background: #2fbf71;
+}
+.minikaart.fout {
+  opacity: 0.75;
+  rotate: -3deg;
+}
+.minikaart.fout i {
+  background: #e5484d;
+}
+.minikaart.fout b + * ,
+.minikaart.fout {
+  text-decoration: line-through;
+  text-decoration-color: rgba(229, 72, 77, 0.8);
+  text-decoration-thickness: 2px;
+}
+
+/* Je plek, met een pijltje als je steeg of zakte. */
+.mijnplek .verschuiving {
+  display: inline-block;
+  margin: 0 0.3rem 0 0.15rem;
+  font-family: var(--ui);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dichtekaart-tel .rug {
+    animation: none;
+  }
+}
