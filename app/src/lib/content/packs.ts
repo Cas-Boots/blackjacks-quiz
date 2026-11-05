@@ -453,14 +453,24 @@ export const PAKKETTEN: Pakketten = {
         suit: "♥", thema: "Vooruitkijken", sfeer: "vuurwerk",
         type: "open", tijd: 60, punten: 2, teamModus: "teams", aantalTeams: 2,
         kennis: NIEUWS,
-        uitleg: "In teams. Genoeg teruggekeken: wat staat er volgend jaar op de rol?",
+        uitleg: "In teams. Genoeg teruggekeken: wat brengt 2027?",
         vragen: [
-          {v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
+          // Kort, en alleen wat jullie zelf raakt. Wat in 2027 nog moet gebeuren,
+          // staat er alleen in als het al vaststaat.
+          {v:"Waar viert de koninklijke familie Koningsdag 2027?", type:"meerkeuze",
+           opties:["Almere", "Zwolle", "Lelystad", "Emmen"], goed:2,
+           toelichting:"Op 27 april in Lelystad: voor het eerst in Flevoland."},
+          {v:"Het eigen risico van je zorgverzekering gaat in 2027 omlaag.", type:"waarnietwaar", goed:false,
+           toelichting:"De beloofde verlaging naar 165 euro gaat niet door. Volgens de begroting wordt het zelfs 400 euro, nu 385."},
+          {v:"Welke Nederlandse zangeres staat in april 2027 in een uitverkochte Johan Cruijff ArenA?", type:"meerkeuze",
+           opties:["Froukje", "Roxy Dekker", "Davina Michelle", "Maan"], goed:1,
+           toelichting:"Op 24 april, de grootste show van haar carrière. Binnen een paar minuten uitverkocht."},
+          {reserve:true, v:"In welk land wordt in 2027 het WK voetbal voor vrouwen gespeeld?", a:"Brazilië",
            toelichting:"De eerste keer dat dat toernooi naar Zuid-Amerika komt."},
           {reserve:true, v:"In welk land wordt in september 2027 de Ryder Cup gespeeld?", a:"Ierland",
            toelichting:"Op Adare Manor, bij Limerick. Het toernooi bestaat dan honderd jaar."},
-          {v:"Welk land organiseert het WK rugby?", a:"Australië"},
-          {v:"In welke maand kiest Frankrijk een nieuwe president?", a:"April"}
+          {reserve:true, v:"Welk land organiseert het WK rugby?", a:"Australië"},
+          {reserve:true, v:"In welke maand kiest Frankrijk een nieuwe president?", a:"April"}
         ]
       },
       {
