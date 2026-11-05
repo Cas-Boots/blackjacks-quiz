@@ -530,6 +530,9 @@
   font-size: 1.1rem;
   font-weight: 900;
 }
+.kaartknop.gekozen::before {
+  opacity: 0;
+}
 .kaartknoppen:has(.gekozen) .kaartknop:not(.gekozen) {
   opacity: 0.5;
 }
@@ -1130,4 +1133,600 @@
   .motief::after {
     animation: none !important;
   }
+}
+
+/* ===================================================================
+   HET ONTHULMOMENT
+
+   Overal hetzelfde ritme:
+   1. tijdens de tromgeroffel leggen de spelers hun fiche op de kaart die
+      ze kozen — zo ziet de kamer wie wat dacht;
+   2. de foute kaarten vallen af, de goede draait om;
+   3. uit de goede kaart springt een knal, en het decor reageert met
+      één groot gebaar over het hele scherm;
+   4. het antwoord ligt open als kaart, in het materiaal van het decor.
+
+   Wat de knal is (fiches, confetti, sterren, sprinkels) en wat het
+   gebaar is (de lamp, de schijnwerpers, de bliksem) bepaalt het decor.
+   Bij 'iedereen fout' en 'niemand leverde in' blijft het stil.
+   =================================================================== */
+
+/* -- 1. De inzet: fiches op de gekozen kaart ------------------------ */
+.keuze .kiezers {
+  position: absolute;
+  right: clamp(0.6rem, 1.2vw, 1.4rem);
+  bottom: calc(100% - clamp(0.9rem, 1.6vw, 1.6rem));
+  display: flex;
+  flex-direction: row-reverse;
+  z-index: 2;
+}
+.keuze .inzet {
+  display: grid;
+  place-items: center;
+  width: clamp(1.9rem, 2.8vw, 3.3rem);
+  height: clamp(1.9rem, 2.8vw, 3.3rem);
+  margin-left: calc(clamp(1.9rem, 2.8vw, 3.3rem) * -0.28);
+  border-radius: 50%;
+  font-family: var(--ui);
+  font-style: normal;
+  font-weight: 800;
+  font-size: clamp(0.8rem, 1.2vw, 1.4rem);
+  color: var(--fiche-inkt);
+  background:
+    radial-gradient(circle, var(--fiche) 0 62%, var(--fiche-rand) 63% 68%, transparent 69%),
+    repeating-conic-gradient(var(--fiche) 0 20deg, var(--fiche-rand) 20deg 40deg);
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.35),
+    0 8px 14px rgba(0, 0, 0, 0.35);
+  animation: inzetten 0.42s calc(0.15s + var(--j, 0) * 0.16s) var(--deal) both;
+}
+@keyframes inzetten {
+  from {
+    opacity: 0;
+    transform: translateY(-90px) rotate(-200deg) scale(1.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Wie goed zat, ziet zijn fiche oplichten. */
+.keuze.goed .inzet {
+  animation:
+    inzetten 0.42s calc(0.15s + var(--j, 0) * 0.16s) var(--deal) both,
+    winnen 0.6s calc(var(--n, 0) * 0.32s + 0.9s + var(--j, 0) * 0.08s) var(--deal) both;
+}
+@keyframes winnen {
+  40% {
+    transform: translateY(-14px) scale(1.25);
+    box-shadow:
+      0 0 0 4px #3ddc84,
+      0 14px 24px rgba(0, 0, 0, 0.4);
+  }
+  to {
+    transform: none;
+    box-shadow:
+      0 0 0 3px #3ddc84,
+      0 8px 14px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* -- 2. De glans over de goede kaart, binnen de kaart --------------- */
+.keuze.goed {
+  overflow: visible;
+}
+.keuze.goed::after {
+  transform: none;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.65) 50%, transparent 58%) 0 0 / 300% 100%;
+  background-position: 100% 0;
+  animation-name: glansvlak;
+}
+@keyframes glansvlak {
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* -- 3a. De knal: deeltjes uit de goede kaart ----------------------- */
+.knal {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+  --ver: clamp(200px, 22vw, 440px);
+  --deeltje: var(--goud);
+  --deeltje-2: var(--goud-licht);
+  --d-b: clamp(14px, 1.4vw, 26px);
+  --d-h: clamp(14px, 1.4vw, 26px);
+  --d-r: 50%;
+  --d-duur: 1.5s;
+}
+.onthulling .knal {
+  top: 30%;
+  left: 20%;
+}
+.knal i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--d-b);
+  height: var(--d-h);
+  margin: calc(var(--d-h) / -2) 0 0 calc(var(--d-b) / -2);
+  border-radius: var(--d-r);
+  background: var(--deeltje);
+  font-style: normal;
+  opacity: 0;
+  --hoek: calc(var(--k) * 25.7deg + 7deg);
+  --f: 1;
+  animation: spat var(--d-duur) calc(var(--n, 0) * 0.32s + 0.6s) cubic-bezier(0.12, 0.75, 0.3, 1) both;
+}
+.knal i:nth-child(2n) {
+  background: var(--deeltje-2);
+}
+.knal i:nth-child(3n) {
+  --f: 1.35;
+}
+.knal i:nth-child(3n + 1) {
+  --f: 0.75;
+}
+.knal i::before {
+  content: var(--d-teken, none);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--d-h) * 1.4);
+  line-height: 1;
+  color: var(--deeltje);
+}
+.knal i:nth-child(2n)::before {
+  color: var(--deeltje-2);
+}
+.knal i::before {
+  text-shadow: 0 0 12px currentColor;
+}
+@keyframes spat {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--hoek)) translateY(0) scale(0.3);
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--hoek)) translateY(calc(var(--ver) * var(--f) * -1)) rotate(220deg) scale(1);
+  }
+}
+
+/* -- 3b. Het gebaar van het decor, over het hele scherm ------------- */
+.scherm > .onthulflits {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.onthulflits i {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: var(--gebaar-1, none) var(--gebaar-duur, 1.8s) var(--wacht, 0.5s) var(--zacht) both;
+}
+.onthulflits i + i {
+  animation: var(--gebaar-2, none) var(--gebaar-duur, 1.8s) var(--wacht, 0.5s) var(--zacht) both;
+}
+@keyframes opflakkeren {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* -- 4. Het antwoord ligt open als kaart ---------------------------- */
+.onthulling {
+  max-width: 1440px;
+  width: 100%;
+  margin-inline: auto;
+  background: linear-gradient(170deg, var(--kaart-vlak), var(--kaart-vlak-diep));
+  color: var(--kaart-inkt);
+  border: none;
+  border-left: clamp(8px, 0.8vw, 14px) solid var(--kleur-klaver);
+  border-radius: clamp(14px, 1.6vw, 30px);
+  box-shadow:
+    0 0 0 1px var(--kaart-rand),
+    0 30px 70px -20px rgba(0, 0, 0, 0.75);
+  animation: kaartopen 0.6s 0.1s var(--deal) both;
+  transform-origin: 50% 0;
+}
+.onthulling.na-keuzes {
+  animation-delay: calc(var(--n, 0) * 0.32s + 0.6s);
+}
+@keyframes kaartopen {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateX(-70deg) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.onthulling .etiket.stil {
+  color: var(--kaart-zacht);
+}
+.antwoordtekst {
+  font-family: var(--vraagletter);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--kaart-inkt);
+}
+.antwoordtekst::after {
+  content: "";
+  display: block;
+  width: 3.2em;
+  height: 0.12em;
+  margin-top: 0.12em;
+  border-radius: 99px;
+  background: var(--kleur-klaver);
+}
+.toelichting {
+  color: var(--kaart-inkt);
+  opacity: 0.75;
+}
+
+/* ===== Per decor: de knal en het gebaar ========================== */
+
+/* ♠ De kaarttafel: fiches vliegen eruit, de lamp gaat vol aan. */
+[data-sfeer="vilt"] .knal {
+  --deeltje: radial-gradient(circle, #c62f2a 0 55%, #fff 56% 64%, #c62f2a 65%);
+  --deeltje-2: radial-gradient(circle, #17171c 0 55%, #e7c25b 56% 64%, #17171c 65%);
+  --d-b: clamp(24px, 2.4vw, 46px);
+  --d-h: clamp(24px, 2.4vw, 46px);
+}
+[data-sfeer="vilt"] .onthulflits {
+  --gebaar-1: opflakkeren;
+  --gebaar-duur: 2.2s;
+}
+[data-sfeer="vilt"] .onthulflits i:first-child {
+  background: radial-gradient(ellipse 50% 60% at 50% 45%, rgba(255, 238, 180, 0.7), rgba(255, 238, 180, 0.15) 55%, transparent 75%);
+}
+
+/* ⚽ Het stadion: confetti en het flitsen van camera's op de tribune. */
+[data-sfeer="gras"] .knal {
+  --deeltje: #ffffff;
+  --deeltje-2: #d9f45b;
+  --d-b: clamp(6px, 0.5vw, 9px);
+  --d-h: clamp(16px, 1.5vw, 28px);
+  --d-r: 2px;
+}
+[data-sfeer="gras"] .onthulflits {
+  --gebaar-1: opflakkeren;
+  --gebaar-2: flitsen;
+  --gebaar-duur: 1.6s;
+}
+[data-sfeer="gras"] .onthulflits i:first-child {
+  background:
+    radial-gradient(40% 50% at 4% 0%, rgba(255, 255, 240, 0.85), transparent 70%),
+    radial-gradient(40% 50% at 96% 0%, rgba(255, 255, 240, 0.85), transparent 70%);
+}
+[data-sfeer="gras"] .onthulflits i + i {
+  background:
+    radial-gradient(circle at 12% 6%, #fff 0 4px, transparent 14px),
+    radial-gradient(circle at 27% 9%, #fff 0 3px, transparent 12px),
+    radial-gradient(circle at 44% 4%, #fff 0 4px, transparent 14px),
+    radial-gradient(circle at 63% 8%, #fff 0 3px, transparent 12px),
+    radial-gradient(circle at 79% 5%, #fff 0 4px, transparent 14px),
+    radial-gradient(circle at 91% 10%, #fff 0 3px, transparent 12px);
+}
+@keyframes flitsen {
+  0%, 100% { opacity: 0; }
+  10%, 30%, 55% { opacity: 1; }
+  20%, 42%, 70% { opacity: 0; }
+}
+
+/* 📟 Het scorebord: amberkleurige pixels, een lichtkrant die over het scherm veegt. */
+[data-sfeer="staal"] .knal {
+  --deeltje: #ffb020;
+  --deeltje-2: #ffd27a;
+  --d-r: 2px;
+}
+[data-sfeer="staal"] .onthulflits {
+  --gebaar-1: vegen;
+  --gebaar-duur: 1.3s;
+}
+[data-sfeer="staal"] .onthulflits i:first-child {
+  inset: auto 0 auto 0;
+  top: 0;
+  height: 16vh;
+  background:
+    radial-gradient(circle, rgba(255, 176, 32, 0.9) 0 2px, transparent 3px) 0 0 / 12px 12px,
+    linear-gradient(180deg, transparent, rgba(255, 176, 32, 0.35) 50%, transparent);
+}
+@keyframes vegen {
+  0% { opacity: 1; transform: translateY(-20vh); }
+  100% { opacity: 1; transform: translateY(110vh); }
+}
+
+/* 🧡 De Oranje-show: oranje confetti, de lampen zwaaien naar het midden. */
+[data-sfeer="oranje"] .knal {
+  --deeltje: #ff7a00;
+  --deeltje-2: #ffffff;
+  --d-b: clamp(8px, 0.7vw, 12px);
+  --d-h: clamp(14px, 1.3vw, 24px);
+  --d-r: 2px;
+}
+[data-sfeer="oranje"] .onthulflits {
+  --gebaar-1: zwaaien;
+  --gebaar-duur: 2s;
+}
+[data-sfeer="oranje"] .onthulflits i:first-child {
+  inset: -30%;
+  background: repeating-conic-gradient(from 0deg at 50% 100%, rgba(255, 230, 170, 0.32) 0 3deg, transparent 3deg 14deg);
+  -webkit-mask: radial-gradient(circle at 50% 100%, #000 20%, transparent 75%);
+  mask: radial-gradient(circle at 50% 100%, #000 20%, transparent 75%);
+}
+@keyframes zwaaien {
+  0% { opacity: 0; transform: rotate(-14deg); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(14deg); }
+}
+
+/* ⚡ De bliksemronde: vonken, en het hele scherm slaat twee keer wit uit. */
+[data-sfeer="bliksem"] .knal {
+  --deeltje: #ffd60a;
+  --deeltje-2: #ffffff;
+  --d-b: 4px;
+  --d-h: clamp(22px, 2.2vw, 40px);
+  --d-r: 2px;
+  --d-duur: 0.8s;
+}
+[data-sfeer="bliksem"] .onthulflits {
+  --gebaar-1: inslaan;
+  --gebaar-2: inslaan;
+  --gebaar-duur: 0.9s;
+}
+[data-sfeer="bliksem"] .onthulflits i:first-child {
+  background: rgba(255, 250, 220, 0.75);
+}
+[data-sfeer="bliksem"] .onthulflits i + i {
+  background: #ffd60a;
+  clip-path: polygon(56% 0, 38% 48%, 50% 48%, 40% 100%, 64% 40%, 52% 40%, 66% 0);
+}
+@keyframes inslaan {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 1; }
+  18% { opacity: 0.1; }
+  28% { opacity: 0.9; }
+  45% { opacity: 0; }
+}
+
+/* 🎬 De bioscoop: gouden sterren, en de projector zet een lichtbundel op het doek. */
+[data-sfeer="bioscoop"] .knal {
+  --deeltje: transparent;
+  --deeltje-2: transparent;
+  --d-teken: "★";
+  --d-b: clamp(28px, 2.8vw, 52px);
+  --d-h: clamp(28px, 2.8vw, 52px);
+}
+[data-sfeer="bioscoop"] .knal i::before {
+  color: #f6c453;
+}
+[data-sfeer="bioscoop"] .knal i:nth-child(2n)::before {
+  color: #fff3c4;
+}
+[data-sfeer="bioscoop"] .onthulflits {
+  --gebaar-1: projector;
+  --gebaar-duur: 2.6s;
+}
+[data-sfeer="bioscoop"] .onthulflits i:first-child {
+  background: linear-gradient(180deg, rgba(255, 240, 200, 0.55), rgba(255, 240, 200, 0.08) 85%, transparent);
+  clip-path: polygon(46% 0, 54% 0, 88% 100%, 12% 100%);
+  filter: blur(6px);
+}
+@keyframes projector {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  16% { opacity: 0.6; }
+  22% { opacity: 1; }
+  70% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* 🔮 De waarzegger: fonkelingen stijgen op, de kristallen bol gloeit. */
+[data-sfeer="violet"] .knal {
+  --deeltje: transparent;
+  --deeltje-2: transparent;
+  --d-teken: "✦";
+  --d-b: clamp(26px, 2.6vw, 48px);
+  --d-h: clamp(26px, 2.6vw, 48px);
+  --d-duur: 1.9s;
+}
+[data-sfeer="violet"] .knal i::before {
+  color: #e7c46e;
+}
+[data-sfeer="violet"] .knal i:nth-child(2n)::before {
+  color: #d8b8ff;
+}
+[data-sfeer="violet"] .onthulflits {
+  --gebaar-1: opflakkeren;
+  --gebaar-2: opstijgen;
+  --gebaar-duur: 2.4s;
+}
+[data-sfeer="violet"] .onthulflits i:first-child {
+  background: radial-gradient(50% 60% at 50% 110%, rgba(200, 140, 255, 0.75), transparent 70%);
+}
+[data-sfeer="violet"] .onthulflits i + i {
+  background:
+    radial-gradient(2px 2px at 20% 80%, #fff, transparent),
+    radial-gradient(2px 2px at 35% 90%, #e7c46e, transparent),
+    radial-gradient(2px 2px at 52% 85%, #fff, transparent),
+    radial-gradient(2px 2px at 66% 95%, #d8b8ff, transparent),
+    radial-gradient(2px 2px at 80% 88%, #fff, transparent);
+}
+@keyframes opstijgen {
+  0% { opacity: 0; transform: translateY(0); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50vh); }
+}
+
+/* 🥂 Het oudejaarsgala: gouden vonken, en vuurwerk links en rechts. */
+[data-sfeer="vuurwerk"] .knal {
+  --deeltje: linear-gradient(180deg, #fff0bd, #e6c46a);
+  --deeltje-2: linear-gradient(180deg, #ffffff, #ffb3c7);
+  --d-b: 3px;
+  --d-h: clamp(18px, 1.8vw, 34px);
+  --d-r: 2px;
+  --ver: clamp(180px, 20vw, 400px);
+}
+[data-sfeer="vuurwerk"] .onthulflits {
+  --gebaar-1: knallen;
+  --gebaar-2: knallen;
+  --gebaar-duur: 1.8s;
+}
+[data-sfeer="vuurwerk"] .onthulflits i {
+  inset: auto;
+  width: 42vh;
+  height: 42vh;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 230, 160, 0.9) 0 1.4deg, transparent 1.4deg 10deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 16%, #000 22% 46%, transparent 64%);
+  mask: radial-gradient(circle, transparent 0 16%, #000 22% 46%, transparent 64%);
+}
+[data-sfeer="vuurwerk"] .onthulflits i:first-child {
+  left: 8vw;
+  top: 14vh;
+}
+[data-sfeer="vuurwerk"] .onthulflits i + i {
+  right: 8vw;
+  top: 8vh;
+  background: repeating-conic-gradient(rgba(255, 180, 200, 0.9) 0 1.4deg, transparent 1.4deg 10deg);
+  animation-delay: calc(var(--wacht, 0.5s) + 0.35s);
+}
+@keyframes knallen {
+  0% { opacity: 0; transform: scale(0.2); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* 🍰 De bakkerij: sprinkels, en een regen van spikkels over het scherm. */
+[data-sfeer="suiker"] .knal {
+  --deeltje: #ffd166;
+  --deeltje-2: #8fe3cf;
+  --d-b: clamp(6px, 0.5vw, 9px);
+  --d-h: clamp(14px, 1.3vw, 24px);
+  --d-r: 99px;
+}
+[data-sfeer="suiker"] .knal i:nth-child(3n) {
+  background: #ff6fa5;
+}
+[data-sfeer="suiker"] .knal i:nth-child(5n) {
+  background: #a0c4ff;
+}
+[data-sfeer="suiker"] .onthulflits {
+  --gebaar-1: opflakkeren;
+  --gebaar-2: strooien;
+  --gebaar-duur: 2.2s;
+}
+[data-sfeer="suiker"] .onthulflits i:first-child {
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255, 180, 210, 0.35), transparent 70%);
+}
+[data-sfeer="suiker"] .onthulflits i + i {
+  background:
+    radial-gradient(3px 8px at 10% 10%, #ffd166 99%, transparent),
+    radial-gradient(3px 8px at 30% 30%, #8fe3cf 99%, transparent),
+    radial-gradient(3px 8px at 50% 5%, #ff6fa5 99%, transparent),
+    radial-gradient(3px 8px at 70% 25%, #a0c4ff 99%, transparent),
+    radial-gradient(3px 8px at 90% 15%, #ffffff 99%, transparent) 0 0 / 260px 220px;
+}
+@keyframes strooien {
+  0% { opacity: 0; transform: translateY(-30vh); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(40vh); }
+}
+
+/* 🏆 De poule: gouden munten, en stralen die rond het midden draaien. */
+[data-sfeer="poule"] .knal {
+  --deeltje: radial-gradient(circle at 35% 35%, #fff2b0, #d4a017 60%, #8a6a0c);
+  --deeltje-2: radial-gradient(circle at 35% 35%, #fff2b0, #e7b72a 60%, #9a7a12);
+  --d-b: clamp(14px, 1.4vw, 26px);
+  --d-h: clamp(14px, 1.4vw, 26px);
+}
+[data-sfeer="poule"] .onthulflits {
+  --gebaar-1: stralen;
+  --gebaar-duur: 2.4s;
+}
+[data-sfeer="poule"] .onthulflits i:first-child {
+  inset: -40%;
+  background: repeating-conic-gradient(rgba(242, 201, 76, 0.28) 0 5deg, transparent 5deg 15deg);
+  -webkit-mask: radial-gradient(circle, #000 10%, transparent 55%);
+  mask: radial-gradient(circle, #000 10%, transparent 55%);
+}
+@keyframes stralen {
+  0% { opacity: 0; transform: rotate(0deg); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(40deg); }
+}
+
+/* 🌙 De nacht: witte sterren, en een vallende ster over de hemel. */
+[data-sfeer="nacht"] .knal {
+  --deeltje: transparent;
+  --deeltje-2: transparent;
+  --d-teken: "★";
+  --d-b: clamp(22px, 2.2vw, 40px);
+  --d-h: clamp(22px, 2.2vw, 40px);
+}
+[data-sfeer="nacht"] .knal i::before {
+  color: #ffffff;
+}
+[data-sfeer="nacht"] .knal i:nth-child(2n)::before {
+  color: #c6d4ff;
+}
+[data-sfeer="nacht"] .onthulflits {
+  --gebaar-1: vallen;
+  --gebaar-duur: 1.4s;
+}
+[data-sfeer="nacht"] .onthulflits i:first-child {
+  inset: auto;
+  left: 10vw;
+  top: 12vh;
+  width: 34vw;
+  height: 4px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95));
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.8);
+  transform-origin: 100% 50%;
+}
+@keyframes vallen {
+  0% { opacity: 0; transform: translate(0, 0) rotate(18deg); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(50vw, 18vh) rotate(18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onthulflits,
+  .knal {
+    display: none;
+  }
+}
+
+/* Op de telefoon: de knal komt uit het vinkje, kleiner en meteen. */
+.uitslag {
+  overflow: visible;
+}
+.uitslag .knal {
+  left: 2.2rem;
+  top: 50%;
+  --ver: 230px;
+  --n: -0.6;
+  transform: scale(0.6);
 }

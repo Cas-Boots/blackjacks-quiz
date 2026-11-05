@@ -387,6 +387,29 @@
     return (vraag?.opties ?? []).slice(0, i).filter((_, j) => j !== goed).length;
   }
 
+  /** Welke optie een inzending koos: een letter (meerkeuze) of de tekst zelf (waar of niet waar). */
+  function optieVan(tekst: string, opties: string[]): number {
+    const t = tekst.trim();
+    if (/^[A-Za-z]$/.test(t)) return t.toUpperCase().charCodeAt(0) - 65;
+    return opties.findIndex((o) => o.toLowerCase() === t.toLowerCase());
+  }
+  /** Per optie wie erop inzette: hun fiches liggen op die kaart. */
+  let kiezersPerOptie = $derived.by(() => {
+    const opties = vraag?.opties ?? [];
+    const per: string[][] = opties.map(() => []);
+    for (const i of staat?.inzendingen ?? []) {
+      const k = optieVan(i.tekst, opties);
+      if (k >= 0 && k < per.length) per[k].push(i.inzender);
+    }
+    return per;
+  });
+  /** Het moment zelf: alleen als er iets te vieren valt. */
+  let viering = $derived(
+    staat?.fase === 'antwoord' && onthulKlaar && !niemandIngeleverd && !alleFout,
+  );
+  /** Een knal is een handvol deeltjes; het decor bepaalt wat het zijn. */
+  const DEELTJES = Array.from({ length: 14 }, (_, k) => k);
+
   /** De punten die een inzender (speler of team) bij deze vraag kreeg, per persoon. */
   function puntenVoor(inzender: string): number {
     const team = staat?.teams.find((t) => t.id === inzender);
@@ -607,6 +630,12 @@
   <Overgang moment={overgang} />
   <!-- Motief dat bij het onderwerp hoort; fluisterend, nooit storend. -->
   <div class="motief" aria-hidden="true"></div>
+  <!-- Het onthulmoment van het decor: de lamp, de schijnwerpers, de bliksem… -->
+  {#if viering}
+    {#key vraagSleutelNu}
+      <div class="onthulflits" aria-hidden="true" style="--wacht:{vraag?.opties ? aantalFout * 0.32 + 0.55 : 0.25}s"><i></i><i></i></div>
+    {/key}
+  {/if}
   <!-- Randgloed in de laatste seconden. Puur sfeer, vangt geen klikken. -->
   <div class="spanningsrand" aria-hidden="true"></div>
   <!-- Reacties van de telefoons zweven omhoog en zijn dan weg. -->
@@ -893,6 +922,16 @@
                     style="--n:{beurt(i)};--i:{i}"
                   >
                     <span class="letter" aria-hidden="true">{String.fromCharCode(65 + i)}<i>{KLEUREN[i % 4]}</i></span><span class="optie">{optie}</span>
+                    {#if kiezersPerOptie[i]?.length}
+                      <span class="kiezers">
+                        {#each kiezersPerOptie[i] as wie, n (wie)}
+                          <i class="inzet" style="--j:{n}" title={naamVan(wie)}>{naamVan(wie).slice(0, 1)}</i>
+                        {/each}
+                      </span>
+                    {/if}
+                    {#if viering && i === staat.onthulling?.goedeOptie}
+                      <span class="knal" aria-hidden="true">{#each DEELTJES as k (k)}<i style="--k:{k}"></i>{/each}</span>
+                    {/if}
                   </div>
                 {/each}
               </div>
@@ -913,6 +952,9 @@
                 <span class="stempel" style="--hoek:-8deg">Iedereen fout</span>
               {:else if alleGoed}
                 <span class="stempel groen" style="--hoek:6deg">Iedereen goed</span>
+              {/if}
+              {#if viering && !vraag.opties}
+                <span class="knal" aria-hidden="true">{#each DEELTJES as k (k)}<i style="--k:{k}"></i>{/each}</span>
               {/if}
               <p class="etiket stil">Het antwoord</p>
               <p class="antwoordtekst">{staat.onthulling?.antwoord}</p>

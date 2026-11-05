@@ -565,6 +565,8 @@
         <div class="uitslag" data-uitslag={uitslag} in:fly={{ y: 14, duration: 360, easing: cubicOut }}>
           {#if uitslag === 'goed'}
             <span class="stempel groen" style="--hoek:8deg">Goed!</span>
+            <!-- Dezelfde knal als op de televisie, in het decor van de ronde. -->
+            <span class="knal" aria-hidden="true">{#each Array(14) as _, k (k)}<i style="--k:{k}"></i>{/each}</span>
             <span class="teken">✓</span>
             <span>
               <strong>{kwinkslag}</strong>
