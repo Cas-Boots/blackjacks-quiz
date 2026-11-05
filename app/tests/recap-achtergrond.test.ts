@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
-import snapshot from '../src/lib/content/recap-snapshot.json';
+import snapshot from './fixtures/recap-2026-09-18.json';
 
 /**
  * Het bijna live houden van de cijfers: wanneer de achtergrond ververst, en

@@ -165,18 +165,18 @@ export const PAKKETTEN: Pakketten = {
         uitleg: "Het hele jaar bijgehouden, tot op de dag nauwkeurig. Nu gaat het over jullie.",
         // `live` koppelt een vraag aan de cijfers uit resolution-recap. De
         // meespeelversie rekent vraag en antwoord dan op de avond zelf uit;
-        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 18 september).
+        // de tekst hier is de achtervang voor de losse HTML-quiz (stand van 4 november).
         vragen: [
-          {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 140 procent", live:"sport.doelProcent",
-           toelichting:"84 keer sporten op een doel van 60. Daarna Liz met 114 procent."},
-          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 91 tegen 84", live:"sport.duel:Liz/Eva"},
-          {v:"In welke maand sportten we met z’n allen het meest?", a:"april — 68 keer", live:"sport.drukkeMaand",
-           toelichting:"Daarna maart met 60."},
-          {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Hardlopen — 65 tegen 61", live:"sport.sportDuel",
+          {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 163 procent", live:"sport.doelProcent",
+           toelichting:"98 keer sporten op een doel van 60. Daarna Liz met 136 procent."},
+          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 109 tegen 98", live:"sport.duel:Liz/Eva"},
+          {v:"In welke maand sportten we met z’n allen het meest?", a:"oktober — 75 keer", live:"sport.drukkeMaand",
+           toelichting:"Daarna april met 68."},
+          {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Padel — 90 tegen 80", live:"sport.sportDuel",
            toelichting:"Na de sportschool, die met afstand bovenaan staat."},
           // Terugblik: 2025 was ons eerste sportjaar (cijfers in recap/vorigjaar.ts).
-          {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 45 keer", live:"sport.vooruit",
-           toelichting:"Dat is 125 procent meer. Daarna Eva: van 44 naar 84."},
+          {v:"Wie ging er vergeleken met vorig jaar het meest op vooruit?", a:"Rik — van 20 naar 59 keer", live:"sport.vooruit",
+           toelichting:"Dat is 195 procent meer. Daarna Eva: van 44 naar 98."},
           // Reserve: niet sterk genoeg, of zonder referentie om te raden.
           {reserve:true, v:"Wie had als eerste zijn jaardoel binnen?", a:"Eva — op 27 juli", live:"sport.doelEerst:anders",
            toelichting:"Daarna Liz op 10 augustus en Bastiaan op 23 augustus."},
@@ -236,8 +236,13 @@ export const PAKKETTEN: Pakketten = {
         cijfers: "taart",
         uitleg: "Terug naar onszelf. De taartteller en de landenteller.",
         vragen: [
-          {v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
-          {v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
+          // Terugblik: 2024 was het taartjaar (cijfers in recap/vorigjaar.ts).
+          {v:"Wie was in 2024 onze taartkoning?", a:"Joris — 33 taarten", live:"taart.koning2024",
+           toelichting:"En dit jaar? Vijf."},
+          {v:"Wie at er dit jaar méér taart dan in 2024?", a:"Eva en Cas", live:"taart.meerDan2024", tijd:60,
+           toelichting:"Eva van 1 naar 9 en Cas van 19,5 naar 24."},
+          {reserve:true, v:"Hoeveel taarten hebben we dit jaar samen weggewerkt?", a:"46", live:"taart.totaal"},
+          {reserve:true, v:"Wie at daar in zijn eentje precies de helft van?", a:"Cas — 23 taarten", live:"taart.meeste"},
           {v:"Wie kwam het hele jaar niet verder dan één enkele taart?", a:"Bastiaan", live:"taart.minste"},
           {reserve:true, v:"Cas deed op één dag in augustus drie landen aan. Welke?", a:"Saoedi-Arabië, de Verenigde Arabische Emiraten en Kroatië", live:"landen.opEenDag", tijd:60},
           {v:"Wie van ons kwamen het hele jaar niet buiten Nederland?", a:"Liz en Bastiaan", live:"landen.thuisblijvers", tijd:60}

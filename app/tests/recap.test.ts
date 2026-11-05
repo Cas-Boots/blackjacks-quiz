@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import snapshot from '../src/lib/content/recap-snapshot.json';
+import snapshot from './fixtures/recap-2026-09-18.json';
 import { analyseer, opsomming, telwoord, datumTekst, landNaam, vlag, zoekSportTag, type RecapExport } from '../src/lib/server/recap/analyse';
 import { beantwoord, LIVE_SLEUTELS, verlevendig } from '../src/lib/server/recap/vragen';
 import { beoordeelVoorspellingen, verdelingUitVoorspellingen } from '../src/lib/server/recap/voorspellingen';
@@ -325,6 +325,15 @@ describe('jaardoelen en sporten na de sportschool', () => {
   });
   it('vindt de populairste sport na de sportschool', () => {
     expect(beantwoord('sport.naGym', analyse)?.a).toBe('Hardlopen — 65 keer');
+  });
+});
+
+describe('taart: terugblik op 2024', () => {
+  it('noemt de taartkoning van 2024, en hoe het nu met hem gaat', () => {
+    expect(beantwoord('taart.koning2024', analyse)).toMatchObject({ a: 'Joris — 33 taarten', toelichting: 'En dit jaar? Vijf.' });
+  });
+  it('vindt wie er meer taart at dan in 2024', () => {
+    expect(beantwoord('taart.meerDan2024', analyse)).toMatchObject({ a: 'Eva en Cas', toelichting: 'Eva van 1 naar 8 en Cas van 19,5 naar 23.' });
   });
 });
 

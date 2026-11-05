@@ -22,7 +22,8 @@
     "verify": "tsx scripts/verify.ts",
     "e2e": "playwright test",
     "content:sync": "tsx scripts/sync-content.ts",
-    "content:check": "tsx scripts/sync-content.ts --check"
+    "content:check": "tsx scripts/sync-content.ts --check",
+    "recap:snapshot": "tsx scripts/snapshot.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
