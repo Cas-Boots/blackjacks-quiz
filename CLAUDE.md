@@ -76,6 +76,10 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
   een terugblik daarop valt goed. Ververs de cijfers met
   `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Open vragen: denk aan hoe ze het intypen.** Stuur het antwoord met de
+  vraag ("In één woord", "Wie werd er opgepakt?"), houd `a` kort, en zet
+  andere goede antwoorden in `ookGoed`: die keurt de app automatisch goed,
+  zonder dat ze op het scherm komen. De rest beoordeelt de quizmaster.
 - **Feiten worden nagezocht**, niet gegokt. Kan iets nog niet (de rest van
   het jaar, eigen foto's), zet er dan `teVullen: true` bij.
 

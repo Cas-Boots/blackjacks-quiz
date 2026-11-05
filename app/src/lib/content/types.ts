@@ -19,6 +19,12 @@ export interface Vraag {
   v: string;
   /** Het antwoord bij open vragen. */
   a?: string;
+  /**
+   * Andere antwoorden die bij een open vraag ook goed zijn ("sneeuwval" bij
+   * "Sneeuw"). Alleen voor het automatisch nakijken; ze komen niet op het
+   * scherm. Wat er niet op lijkt, beoordeelt de quizmaster zelf.
+   */
+  ookGoed?: string[];
   /** Bij waarnietwaar: de stelling klopt. Bij meerkeuze: index van het goede antwoord. */
   goed?: boolean | number;
   opties?: string[];
