@@ -67,12 +67,6 @@ export interface Vraag {
    * wat hier staat is de achtervang. `a` blijft de tekst op het scherm.
    */
   eigenGetal?: Record<string, number>;
-  /**
-   * Een regel per speler, op naam, die alleen op diens eigen telefoon onder
-   * de vraag komt: het houvast ("Jij sportte dit jaar 80 keer."). Geen
-   * antwoord, want de televisie en de andere telefoons zien hem niet.
-   */
-  perSpelerTekst?: Record<string, string>;
 }
 
 export interface Ronde {

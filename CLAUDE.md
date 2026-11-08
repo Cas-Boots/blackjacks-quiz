@@ -91,10 +91,9 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om
   middernacht met sporten, jij gaat door in je eigen tempo. In welke week van
   2027 haal jij hem in?* (`live: "sport.inhalen:Cas"`, 45 seconden). Positief
-  gesteld: iedereen haalt Cas in, de vraag is wanneer. Zonder houvast is het
-  gokken, dus het totaal van Cas staat in de vraag en ieder ziet op de
-  telefoon zijn eigen totaal (`perSpelerTekst`); het tempo per week geven we
-  bewust niet, anders wordt het een rekensom. De app kijkt na met een
+  gesteld: iedereen haalt Cas in, de vraag is wanneer. Als houvast staat het
+  totaal van Cas in de vraag; je eigen totaal en tempo bewust niet: met
+  allebei is het een rekensom, zonder schat je je eigen sporttempo in. De app kijkt na met een
   speling die meegroeit: per vijf weken een week, en altijd minstens twee
   (`shared/eigengetal.ts`). Een vaste marge in weken is oneerlijk voor wie
   een groot getal heeft (`npm run marge`). Vooraf geen speling per speler
@@ -163,7 +162,7 @@ spannender kan: breid het script uit met een nieuwe regel als variant naast
 de huidige, en vergelijk. Het model (de profielen en hoe een ronde uitpakt)
 staat in `scripts/spanning-model.ts` en is gedeeld. Een vraag met
 `eigenGetal` rekent het model na met echte gokken op ieders eigen getal
-(`EIGEN_GOK`: ± 25% en ± 3 weken) tegen de speling van de app; `npm run marge`
+(`EIGEN_GOK`: ± 35% en ± 3 weken) tegen de speling van de app; `npm run marge`
 vergelijkt die speling met andere regels. Met de inhaalrace in plaats van
 *Liz of Eva* (november 2026) verschuift er niets: de winkansen bewegen
 hooguit een procent.

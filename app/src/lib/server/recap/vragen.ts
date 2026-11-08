@@ -28,8 +28,6 @@ export interface LevendAntwoord {
   eenheid?: string;
   /** Bij ieder zijn eigen getal: het juiste antwoord per speler. */
   eigenGetal?: Record<string, number>;
-  /** Een regel per speler, alleen op diens eigen telefoon: het houvast bij de vraag. */
-  perSpelerTekst?: Record<string, string>;
 }
 
 type Oplosser = (a: Analyse, arg: string) => LevendAntwoord;
@@ -257,9 +255,9 @@ const OPLOSSERS: Record<string, Oplosser> = {
    * peildatum (op oudejaarsdag het hele jaar). Wie de haas al voorbij is,
    * zit op week 0; wie niets bijhield, kan niet inhalen en blijft erbuiten.
    *
-   * Als houvast staat het totaal van de haas in de vraag, en krijgt ieder
-   * op de telefoon zijn eigen totaal: zo valt het te beredeneren, zonder
-   * dat het een rekensom met één antwoord wordt.
+   * Als houvast staat het totaal van de haas in de vraag. Je eigen totaal
+   * bewust niet: met allebei is het een rekensom, zonder moet je je eigen
+   * sporttempo inschatten.
    */
   'sport.inhalen': (a, arg) => {
     const haas = arg.trim()
@@ -290,7 +288,6 @@ const OPLOSSERS: Record<string, Oplosser> = {
       a: lijst.map((x) => `${x.p.naam} ${x.week}`).join(' · '),
       toelichting: `${wie(eerste)}${laatste !== eerste ? `, ${laatste.p.naam} ${laatste.week === 0 ? 'ook' : `pas ${wanneer(laatste.week)}`}` : ''}. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee.`,
       eigenGetal: Object.fromEntries(lijst.map((x) => [x.p.naam, x.week])),
-      perSpelerTekst: Object.fromEntries(lijst.map((x) => [x.p.naam, `Jij sportte dit jaar ${keer(x.p.sport.totaal)}.`])),
       eenheid: 'week',
     };
   },
@@ -671,6 +668,6 @@ export function verlevendig(vraag: Vraag, analyse: Analyse | null, voorspellinge
   const uit = beantwoord(vraag.live, analyse, voorspellingen);
   if (!uit) return vraag;
   const getal = uit.getal === undefined ? {} : { getal: uit.getal, eenheid: uit.eenheid ?? vraag.eenheid };
-  const eigen = uit.eigenGetal === undefined ? {} : { eigenGetal: uit.eigenGetal, perSpelerTekst: uit.perSpelerTekst, eenheid: uit.eenheid ?? vraag.eenheid };
+  const eigen = uit.eigenGetal === undefined ? {} : { eigenGetal: uit.eigenGetal, eenheid: uit.eenheid ?? vraag.eenheid };
   return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, ...eigen, teVullen: false };
 }

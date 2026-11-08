@@ -227,13 +227,12 @@ export const PAKKETTEN: Pakketten = {
           // Ieder zijn eigen getal: elke speler raadt zijn eigen inhaalweek, en
           // de app kijkt na met een speling die meegroeit (shared/eigengetal.ts:
           // per vijf weken één week, minstens twee). Als houvast staat het
-          // totaal van Cas in de vraag en ziet ieder op de telefoon zijn eigen
-          // totaal (perSpelerTekst). Op de televisie volgt de ladder.
+          // totaal van Cas in de vraag; je eigen totaal bewust niet, anders
+          // is het een rekensom. Op de televisie volgt de ladder.
           {v:"Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?",
            a:"Liz 12 · Eva 18 · Bastiaan 21 · Joris 35 · Rik 59", tijd:45,
            live:"sport.inhalen:Cas", eenheid:"week",
            eigenGetal:{Liz:12, Eva:18, Bastiaan:21, Joris:35, Rik:59},
-           perSpelerTekst:{Liz:"Jij sportte dit jaar 109 keer.", Eva:"Jij sportte dit jaar 98 keer.", Bastiaan:"Jij sportte dit jaar 94 keer.", Joris:"Jij sportte dit jaar 77 keer.", Rik:"Jij sportte dit jaar 59 keer."},
            toelichting:"Liz haalt Cas in maart in, Rik pas in februari 2028. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee."},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"oktober — 75 keer", live:"sport.drukkeMaand",
            toelichting:"Daarna april met 68."},

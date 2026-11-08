@@ -358,8 +358,8 @@ nek aan nek eindigt.
 Eén vraag in de sportronde heeft per speler een ander antwoord: Cas stopt om
 middernacht met sporten, in welke week van 2027 haal jij hem in, in je eigen
 tempo (`eigenGetal` in `packs.ts`, `live: "sport.inhalen:Cas"`). Als houvast
-staat het totaal van Cas in de vraag en ziet ieder op de telefoon alleen zijn
-eigen totaal (`perSpelerTekst`).
+staat het totaal van Cas in de vraag; je eigen totaal niet, anders is het een
+rekensom.
 De app kijkt elke gok na tegen het eigen getal, met een speling die meegroeit:
 per vijf weken een week, en altijd minstens twee (`src/lib/shared/eigengetal.ts`).
 Op de televisie volgt een ladder met per speler het getal, de speling als vak

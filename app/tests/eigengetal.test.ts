@@ -90,7 +90,6 @@ describe('sport.inhalen', () => {
     expect(uit).toMatchObject({ eigenGetal: { Bo: 12 }, eenheid: 'week', a: 'Bo 12' });
     expect(uit?.v).toContain('na 3 keer dit jaar');
     expect(uit?.v).toContain('In welke week van 2027');
-    expect(uit?.perSpelerTekst).toEqual({ Bo: 'Jij sportte dit jaar 2 keer.' });
   });
 
   it('zonder naam is de haas wie het vaakst sportte', () => {
@@ -101,10 +100,9 @@ describe('sport.inhalen', () => {
     expect(beantwoord('sport.inhalen:Bo', analyse)?.eigenGetal).toEqual({ An: 0 });
   });
 
-  it('komt in de vraag terecht bij het verlevendigen, met het houvast', () => {
+  it('komt in de vraag terecht bij het verlevendigen', () => {
     const v = verlevendig({ v: 'x', a: 'y', live: 'sport.inhalen:An', eigenGetal: { Bo: 1 } }, analyse);
     expect(v.eigenGetal).toEqual({ Bo: 12 });
-    expect(v.perSpelerTekst).toEqual({ Bo: 'Jij sportte dit jaar 2 keer.' });
     expect(v.eenheid).toBe('week');
   });
 
@@ -114,6 +112,5 @@ describe('sport.inhalen', () => {
     expect(r.teamModus).toBe('individueel');
     expect(v && !v.reserve).toBe(true);
     expect(Object.keys(v!.eigenGetal ?? {}).sort()).toEqual(['Bastiaan', 'Eva', 'Joris', 'Liz', 'Rik']);
-    expect(Object.keys(v!.perSpelerTekst ?? {}).sort()).toEqual(['Bastiaan', 'Eva', 'Joris', 'Liz', 'Rik']);
   });
 });

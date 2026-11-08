@@ -540,11 +540,6 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
             lyric: vraag.lyric,
             eenheid: vraag.eenheid,
             eigenGetal: vraag.eigenGetal ? true : undefined,
-            // De totalen zijn geen geheim (ze staan na de ronde op de televisie),
-            // maar de telefoon toont alleen de eigen regel.
-            perSpeler: vraag.perSpelerTekst
-              ? Object.fromEntries(lijst.flatMap((s) => (vraag.perSpelerTekst?.[s.naam] ? [[s.id, vraag.perSpelerTekst[s.naam]]] : [])))
-              : undefined,
             // Bij de onthulling mag een filmpje komen dat de vraag zou verklappen.
             media: spel.fase === 'antwoord' && vraag.naOnthulling ? vraag.naOnthulling : vraag.media,
             punten: vraagPunten(ronde, vraag),

@@ -959,7 +959,7 @@
               {/if}
               {#if vraag.eenheid}
                 <p class="fijn eenheid">
-                  {#if vraag.eigenGetal}Ieder zijn eigen antwoord{vraag.eenheid === 'week' ? ', als weeknummer' : ` in ${vraag.eenheid}`}.{#if vraag.perSpeler} Op je telefoon staat jouw houvast.{/if}
+                  {#if vraag.eigenGetal}Ieder zijn eigen antwoord{vraag.eenheid === 'week' ? ', als weeknummer' : ` in ${vraag.eenheid}`}.
                   {:else}Antwoord in {vraag.eenheid}.{/if}
                 </p>
               {/if}

@@ -313,7 +313,7 @@ const V = {
   fragment: { index: 1, tekst: 'Welk nummer hoor je hier?', media: { soort: 'muziek', bron: '', bijschrift: 'Fragment van twee seconden' } },
   video: { index: 2, tekst: 'Wat gebeurt er hierna?', media: { soort: 'video', bron: 'proef-ontbreekt.mp4' } },
   dichtstbij: { index: 3, tekst: 'Hoeveel kilometer fietste Bastiaan in 2026, volgens zijn eigen app?', eenheid: 'km' },
-  eigen: { index: 1, tekst: 'Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?', eenheid: 'week', eigenGetal: true, perSpeler: { 1: 'Jij sportte dit jaar 109 keer.' } },
+  eigen: { index: 1, tekst: 'Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?', eenheid: 'week', eigenGetal: true },
   stem: { index: 0, tekst: 'Wie van de Blackjacks appt het vaakst “ik ben er over vijf minuten” terwijl dat niet zo is?', opties: [...NAMEN] },
   bliksem: { index: 7, tekst: 'Een jaar heeft 52 weken.', opties: ['Waar', 'Niet waar'] },
   lang: {
@@ -662,7 +662,7 @@ export const DIAS: Dia[] = [
   },
   {
     id: 'vraag-eigen', hoofdstuk: 'Vraag', titel: 'Ieder zijn eigen getal',
-    let: 'De inhaalrace: één vraag, en op elke telefoon een eigen houvast (“Jij sportte dit jaar 109 keer.”). De televisie toont alleen de vraag.',
+    let: 'De inhaalrace: één vraag, ieder een eigen antwoord. Het totaal van Cas staat erin als houvast; je eigen totaal bewust niet.',
     maak: () => vraag(R.sport, V.eigen),
   },
   {

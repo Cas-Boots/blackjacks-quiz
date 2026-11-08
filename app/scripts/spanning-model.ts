@@ -33,10 +33,12 @@ const OVER_ONSZELF = 0.45;
 /**
  * Ieder zijn eigen getal (de week waarin je Cas inhaalt): hoe ver iemand er
  * naast zit. Een mix: in verhouding (wie een jaar nodig heeft, schat
- * ruwer) en een vaste onzekerheid (niemand weet het op de week). Zie ook
- * scripts/marge.ts, dat de speling hiermee vergelijkt.
+ * ruwer) en een vaste onzekerheid (niemand weet het op de week). Ruim
+ * gekozen: je eigen totaal staat er bewust niet bij, dus je schat ook je
+ * eigen sporttempo. Zie ook scripts/marge.ts, dat de speling hiermee
+ * vergelijkt.
  */
-export const EIGEN_GOK = { deel: 0.25, weken: 3 };
+export const EIGEN_GOK = { deel: 0.35, weken: 3 };
 /** Een gok op je eigen getal, volgens EIGEN_GOK, afgerond op hele getallen. */
 export function gokEigen(doel: number, model = EIGEN_GOK): number {
   return Math.round(doel * Math.exp(normaal(0, model.deel)) + normaal(0, model.weken));
