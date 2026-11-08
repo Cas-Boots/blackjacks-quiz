@@ -562,9 +562,9 @@
              de knop uit; bovendien mag "1,5" gewoon. Het toetsenbord blijft numeriek. -->
         <input
           type="text"
-          inputmode={vraag.type === 'dichtstbij' ? 'decimal' : 'text'}
+          inputmode={vraag.type === 'dichtstbij' || vraag.eigenGetal ? 'decimal' : 'text'}
           bind:value={antwoord}
-          placeholder={vraag.type === 'dichtstbij' ? 'Jullie getal' : 'Jullie antwoord'}
+          placeholder={vraag.eigenGetal ? (vraag.eenheid === 'week' ? 'Weeknummer' : `Jouw aantal ${vraag.eenheid ?? ''}`.trim()) : vraag.type === 'dichtstbij' ? 'Jullie getal' : 'Jullie antwoord'}
           onkeydown={(e) => e.key === 'Enter' && stuur()}
         />
         <button class="knop hoofd vol groot" onclick={() => stuur()} disabled={bezig || !antwoord.trim()}>

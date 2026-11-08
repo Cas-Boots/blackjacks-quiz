@@ -11,6 +11,7 @@
   import Teller from '$lib/client/Teller.svelte';
   import Confetti from '$lib/client/Confetti.svelte';
   import Getallenlijn from '$lib/client/Getallenlijn.svelte';
+  import Ladder from '$lib/client/Ladder.svelte';
   import Podium from '$lib/client/Podium.svelte';
   import Media from '$lib/client/Media.svelte';
   import Cijfers from '$lib/client/Cijfers.svelte';
@@ -957,7 +958,10 @@
                 <Media media={vraag.media} speelt={staat.mediaSpeelt} />
               {/if}
               {#if vraag.eenheid}
-                <p class="fijn eenheid">Antwoord in {vraag.eenheid}.</p>
+                <p class="fijn eenheid">
+                  {#if vraag.eigenGetal}Ieder zijn eigen antwoord{vraag.eenheid === 'week' ? ', als weeknummer' : ` in ${vraag.eenheid}`}.
+                  {:else}Antwoord in {vraag.eenheid}.{/if}
+                </p>
               {/if}
             </div>
 
@@ -1078,6 +1082,10 @@
                       <span class="stemmers">{t.van.map(naamVan).join(', ')}</span>
                     </div>
                   {/each}
+                </div>
+              {:else if staat.onthulling?.eigen?.length}
+                <div in:fade={{ duration: 400, delay: 500 }}>
+                  <Ladder rijen={staat.onthulling.eigen} eenheid={staat.onthulling.eenheid ?? ''} />
                 </div>
               {:else if vraag.type === 'dichtstbij' && staat.onthulling?.getal !== undefined}
                 <div in:fade={{ duration: 400, delay: 600 }}>

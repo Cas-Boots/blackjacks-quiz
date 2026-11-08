@@ -59,6 +59,14 @@ export interface Vraag {
    * voor de losse HTML-quiz.
    */
   live?: string;
+  /**
+   * Ieder zijn eigen getal: het juiste antwoord per speler, op naam
+   * ("in welke week van 2027 haal jij Cas in?"). De app kijkt elk antwoord na
+   * tegen het getal van wie het intikte, met een speling die meegroeit (zie
+   * shared/eigengetal.ts). Bij een levende vraag rekent de server dit uit;
+   * wat hier staat is de achtervang. `a` blijft de tekst op het scherm.
+   */
+  eigenGetal?: Record<string, number>;
 }
 
 export interface Ronde {

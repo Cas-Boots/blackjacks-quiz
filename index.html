@@ -896,7 +896,18 @@ const PAKKETTEN = {
         vragen: [
           {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 163 procent", live:"sport.doelProcent",
            toelichting:"98 keer sporten op een doel van 60. Daarna Liz met 136 procent."},
-          {v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 109 tegen 98", live:"sport.duel:Liz/Eva"},
+          // Vervangen door de inhaalrace hieronder: die laat het verschil tussen iedereen zien, niet tussen twee.
+          {reserve:true, v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 109 tegen 98", live:"sport.duel:Liz/Eva"},
+          // Ieder zijn eigen getal: elke speler raadt zijn eigen inhaalweek, en
+          // de app kijkt na met een speling die meegroeit (shared/eigengetal.ts:
+          // per vijf weken één week, minstens twee). Als houvast staat het
+          // totaal van Cas in de vraag; je eigen totaal bewust niet, anders
+          // is het een rekensom. Op de televisie volgt de ladder.
+          {v:"Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?",
+           a:"Liz 12 · Eva 18 · Bastiaan 21 · Joris 35 · Rik 59", tijd:45,
+           live:"sport.inhalen:Cas", eenheid:"week",
+           eigenGetal:{Liz:12, Eva:18, Bastiaan:21, Joris:35, Rik:59},
+           toelichting:"Liz haalt Cas in maart in, Rik pas in februari 2028. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee."},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"oktober — 75 keer", live:"sport.drukkeMaand",
            toelichting:"Daarna april met 68."},
           {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Padel — 90 tegen 80", live:"sport.sportDuel",

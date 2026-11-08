@@ -313,6 +313,7 @@ const V = {
   fragment: { index: 1, tekst: 'Welk nummer hoor je hier?', media: { soort: 'muziek', bron: '', bijschrift: 'Fragment van twee seconden' } },
   video: { index: 2, tekst: 'Wat gebeurt er hierna?', media: { soort: 'video', bron: 'proef-ontbreekt.mp4' } },
   dichtstbij: { index: 3, tekst: 'Hoeveel kilometer fietste Bastiaan in 2026, volgens zijn eigen app?', eenheid: 'km' },
+  eigen: { index: 1, tekst: 'Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?', eenheid: 'week', eigenGetal: true },
   stem: { index: 0, tekst: 'Wie van de Blackjacks appt het vaakst “ik ben er over vijf minuten” terwijl dat niet zo is?', opties: [...NAMEN] },
   bliksem: { index: 7, tekst: 'Een jaar heeft 52 weken.', opties: ['Waar', 'Niet waar'] },
   lang: {
@@ -660,6 +661,11 @@ export const DIAS: Dia[] = [
     maak: () => vraag(R.cijfers, V.dichtstbij),
   },
   {
+    id: 'vraag-eigen', hoofdstuk: 'Vraag', titel: 'Ieder zijn eigen getal',
+    let: 'De inhaalrace: één vraag, ieder een eigen antwoord. Het totaal van Cas staat erin als houvast; je eigen totaal bewust niet.',
+    maak: () => vraag(R.sport, V.eigen),
+  },
+  {
     id: 'vraag-stem', hoofdstuk: 'Vraag', titel: 'Stemvraag',
     let: 'De mensen aan tafel als keuzes.',
     maak: () => vraag(R.stem, V.stem),
@@ -769,6 +775,29 @@ export const DIAS: Dia[] = [
       { antwoord: '3.140 km', toelichting: 'Zeg maar Amsterdam–Rome, en dan nog een stukje.', getal: 3140, eenheid: 'km' },
       [inz('s_1', '3000', true, 9000, 3000), inz('s_2', '2500', false, 12000, 2500), inz('s_3', '4100', false, 6000, 4100), inz('s_4', '9000', false, 20000, 9000), inz('s_5', '3300', false, 15000, 3300), inz('s_6', 'geen idee', false, 25000, null)],
       { stand: stand(erbij({ 1: 870 })), uitdeling: { 1: 870 } },
+    ),
+  },
+  {
+    id: 'antwoord-eigen', hoofdstuk: 'Onthulling', titel: 'Ieder zijn eigen getal: de ladder',
+    let: 'De inhaalrace: per speler een balk tot de eigen inhaalweek, de speling als vak eromheen en de gok als stip. In het vak is raak. Tom typte geen getal.',
+    vorigePunten: START,
+    maak: () => antwoord(
+      R.sport, V.eigen,
+      {
+        antwoord: 'Liz 12 · Eva 18 · Bastiaan 21 · Joris 35 · Rik 59',
+        toelichting: 'Liz haalt Cas in maart in, Rik pas in februari 2028. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee.',
+        eenheid: 'week',
+        eigen: [
+          { naam: 'Liz', doel: 12, speling: 2.4, gok: 13, goed: true },
+          { naam: 'Eva', doel: 18, speling: 3.6, gok: 10, goed: false },
+          { naam: 'Bastiaan', doel: 21, speling: 4.2, gok: 24, goed: true },
+          { naam: 'Joris', doel: 35, speling: 7, gok: 20, goed: false },
+          { naam: 'Tom', doel: 40, speling: 8, gok: null, goed: false },
+          { naam: 'Rik', doel: 59, speling: 11.8, gok: 52, goed: true },
+        ],
+      },
+      [inz('s_1', '13', true, 5000, 13), inz('s_2', '24', true, 9000, 24), inz('s_3', '20', false, 7000, 20), inz('s_4', '52', true, 12000, 52), inz('s_5', '10', false, 6000, 10), inz('s_6', 'geen idee', false, 20000)],
+      { stand: stand(erbij({ 1: 760, 2: 640, 4: 520 })), uitdeling: { 1: 760, 2: 640, 4: 520 } },
     ),
   },
   {

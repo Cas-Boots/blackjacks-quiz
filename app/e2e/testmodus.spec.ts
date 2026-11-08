@@ -96,6 +96,12 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
   await expect(page.locator('.getallenlijn .gok')).toHaveCount(5);
   await expect(page.locator('.getallenlijn .gok.wint')).toHaveCount(1);
 
+  // Ieder zijn eigen getal: één rij per speler, in het vak is raak.
+  await ga('antwoord-eigen');
+  await expect(page.locator('.ladder .rij')).toHaveCount(6);
+  await expect(page.locator('.ladder .rij.goed')).toHaveCount(3);
+  await expect(page.locator('.ladder .rij').first()).toContainText('Liz');
+
   await ga('antwoord-iedereen-fout');
   await expect(page.locator('.stempel')).toContainText('Iedereen fout');
 

@@ -55,6 +55,7 @@
   let vraag = $derived(staat?.vraag ?? null);
   let dichtstbij = $derived(vraag?.type === 'dichtstbij');
   let stemvraag = $derived(vraag?.type === 'stem');
+  let eigenGetal = $derived(!!vraag?.eigenGetal);
   /** Wie er nog niets heeft ingeleverd bij de open vraag. */
   let achterblijvers = $derived((staat?.teams ?? []).filter((t) => !(staat?.ingeleverd ?? []).includes(t.id)));
   let laatsteTerug = $derived(logboek.find((r) => r.terugTeDraaien) ?? null);
@@ -512,7 +513,7 @@
             {staat.mediaSpeelt ? '⏸ Fragment stoppen' : '▶ Nog eens afspelen'}
           </button>
         {/if}
-        {#if dichtstbij || stemvraag}
+        {#if dichtstbij || stemvraag || eigenGetal}
           <button class="knop" onclick={() => doe('bereken')} disabled={bezig}>Opnieuw berekenen</button>
         {/if}
         <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>
@@ -613,7 +614,9 @@
           {#if staat.fase === 'vraag'}<span class="fijn"> (antwoorden blijven verborgen tot je ze onthult)</span>{/if}
         </p>
         {#if staat.fase === 'antwoord'}
-          {#if dichtstbij}
+          {#if eigenGetal}
+            <p class="fijn" style="margin:.5rem 0">Ieder zijn eigen getal: de machine heeft elke gok nagekeken tegen het getal van die speler, met de speling (per vijf een, minstens twee). Tik aan om zelf te corrigeren.</p>
+          {:else if dichtstbij}
             <p class="fijn" style="margin:.5rem 0">De machine heeft bij de onthulling uitgerekend wie het dichtst zat. Tik aan om zelf te corrigeren.</p>
           {:else if stemvraag}
             <p class="fijn" style="margin:.5rem 0">Wie met de meerderheid meestemde heeft de punten al. Tik aan om zelf te corrigeren.</p>

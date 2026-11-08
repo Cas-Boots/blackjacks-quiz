@@ -17,7 +17,7 @@ import type { Pakket, Ronde, Vraag } from '$lib/content/types';
 import { maakTeams, verplaats, type Team } from './teams';
 import { ontdubbelDieren } from './dieren';
 import {
-  vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, telStand,
+  vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, bepaalEigenGetal, gissingenUitAntwoorden, telStand,
 } from './scoring';
 import { beoordeel, leesGetal } from './antwoord';
 import { bepaalPrijzen, type Prijs } from './prijzen';
@@ -506,8 +506,9 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
       toelichting: vraag.toelichting,
       goedeOptie: goedeOptieIndex,
       getal: vraagType === 'dichtstbij' && typeof vraag.getal === 'number' ? vraag.getal : undefined,
-      eenheid: vraagType === 'dichtstbij' ? vraag.eenheid : undefined,
       stemmen,
+      eigen: vraag.eigenGetal ? eigenVan(vraag.eigenGetal, teamLijst, lijst, inzendingRijen).uitslag : undefined,
+      eenheid: vraag.eigenGetal ? vraag.eenheid : vraagType === 'dichtstbij' ? vraag.eenheid : undefined,
     };
   }
 
@@ -538,6 +539,7 @@ export function bouwStaat(rol: Rol): PubliekeStaat | null {
             emoji: vraag.emoji,
             lyric: vraag.lyric,
             eenheid: vraag.eenheid,
+            eigenGetal: vraag.eigenGetal ? true : undefined,
             // Bij de onthulling mag een filmpje komen dat de vraag zou verklappen.
             media: spel.fase === 'antwoord' && vraag.naOnthulling ? vraag.naOnthulling : vraag.media,
             punten: vraagPunten(ronde, vraag),
@@ -702,6 +704,19 @@ export function leverIn(spel: typeof spellen.$inferSelect, spelerId: number, inv
   return { inzender: mijnTeam.id, teLaat };
 }
 
+/** Ieder zijn eigen getal: de uitslag, met per team (in een individuele ronde: per speler) de naam erbij. */
+function eigenVan(
+  perSpeler: Record<string, number>,
+  teamLijst: Team[],
+  lijst: { id: number; naam: string }[],
+  rijen: { inzender: string; tekst: string }[],
+) {
+  const spelersMetInzender = teamLijst.flatMap((t) =>
+    t.leden.length === 1 ? lijst.filter((s) => s.id === t.leden[0]).map((s) => ({ naam: s.naam, inzender: t.id })) : [],
+  );
+  return bepaalEigenGetal(perSpeler, spelersMetInzender, rijen);
+}
+
 /** Zet de vinkjes op de antwoorden van één vraag: goed voor de winnaars, fout voor de rest. */
 export function markeerAntwoorden(spelId: number, vraagSleutel: string, winnaars: string[]) {
   const rijen = db.select().from(antwoorden).where(and(eq(antwoorden.spelId, spelId), eq(antwoorden.vraagSleutel, vraagSleutel))).all();
@@ -711,7 +726,8 @@ export function markeerAntwoorden(spelId: number, vraagSleutel: string, winnaars
 }
 
 /**
- * Rekent de vragen uit waar de machine dat zeker kan: dichtstbij en stem.
+ * Rekent de vragen uit waar de machine dat zeker kan: dichtstbij, stem en
+ * ieder zijn eigen getal.
  * Draait vanzelf bij de onthulling en op verzoek van de quizmaster; die
  * kan het resultaat daarna altijd nog met de hand bijsturen.
  *
@@ -733,7 +749,9 @@ export function scoorAutomatisch(
 
   let winnaars: string[] = [];
   let puntenPerTeam: Record<string, number> = {};
-  if (typeVan(ronde, vraag) === 'dichtstbij' && typeof vraag.getal === 'number') {
+  if (vraag.eigenGetal) {
+    winnaars = eigenVan(vraag.eigenGetal, teamsVoorRonde(spel.id, spel.rondeIndex, ronde, lijst), lijst, rijen).winnaars;
+  } else if (typeVan(ronde, vraag) === 'dichtstbij' && typeof vraag.getal === 'number') {
     const uitslag = bepaalDichtstbij(gissingenUitAntwoorden(rijen), vraag.getal, punten);
     if (uitslag) {
       winnaars = uitslag.winnaars;
@@ -752,4 +770,4 @@ export function scoorAutomatisch(
   return true;
 }
 
-export { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, gissingenUitAntwoorden, beoordeel, verplaats };
+export { vraagPunten, vraagTijd, verdeelOverTeams, bepaalDichtstbij, bepaalStem, bepaalEigenGetal, gissingenUitAntwoorden, beoordeel, verplaats };

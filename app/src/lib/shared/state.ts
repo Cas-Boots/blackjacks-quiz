@@ -35,6 +35,8 @@ export interface PubliekeVraag {
   emoji?: string;
   lyric?: string;
   eenheid?: string;
+  /** Ieder zijn eigen getal: elke speler heeft een ander antwoord (zie shared/eigengetal.ts). */
+  eigenGetal?: boolean;
   media?: { soort: string; bron: string; bijschrift?: string };
   /** De punten van de vraag zelf (1, 2, 3); op het scorebord maal PUNT_WAARDE. */
   punten: number;
@@ -55,6 +57,17 @@ export interface Onthulling {
   eenheid?: string;
   /** Bij stem: de telling per genoemde naam, meeste stemmen eerst. */
   stemmen?: { naam: string; aantal: number; van: string[] }[];
+  /** Bij ieder zijn eigen getal: per speler het juiste getal, de speling en de gok, kleinste getal eerst. */
+  eigen?: EigenUitslag[];
+}
+
+export interface EigenUitslag {
+  naam: string;
+  doel: number;
+  speling: number;
+  /** null: niets (bruikbaars) ingeleverd. */
+  gok: number | null;
+  goed: boolean;
 }
 
 /** Een por van de quizmaster: "schiet op", voor wie nog niet heeft ingeleverd. */

@@ -355,6 +355,25 @@ meet de winkans per speler, hoe vaak de koploper halverwege of vlak voor de
 geheime stand ook wint, hoeveel kanshebbers er dan nog zijn, en hoe vaak het
 nek aan nek eindigt.
 
+Eén vraag in de sportronde heeft per speler een ander antwoord: Cas stopt om
+middernacht met sporten, in welke week van 2027 haal jij hem in, in je eigen
+tempo (`eigenGetal` in `packs.ts`, `live: "sport.inhalen:Cas"`). Als houvast
+staat het totaal van Cas in de vraag; je eigen totaal niet, anders is het een
+rekensom.
+De app kijkt elke gok na tegen het eigen getal, met een speling die meegroeit:
+per vijf weken een week, en altijd minstens twee (`src/lib/shared/eigengetal.ts`).
+Op de televisie volgt een ladder met per speler het getal, de speling als vak
+en de gok als stip. Of die speling eerlijk is, vergelijk je met:
+
+```bash
+npm run marge                            # vaste weken, procenten en de regel van de app naast elkaar
+```
+
+Dat bootst per speler duizenden gokken na, onder drie aannames over hoe mensen
+ernaast zitten, en telt hoe vaak ieder binnen de speling valt. De simulatie van
+de spanning rekent de vraag op dezelfde manier mee (`EIGEN_GOK` in
+`scripts/spanning-model.ts`).
+
 De losse `index.html` kent geen antwoordtijden en telt dus nog op de oude
 manier: de punten van de vraag, zonder snelheid of vermenigvuldigers.
 

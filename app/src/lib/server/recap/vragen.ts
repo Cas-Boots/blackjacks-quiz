@@ -26,6 +26,8 @@ export interface LevendAntwoord {
   /** Bij een dichtstbij-vraag: het getal dat het dichtst benaderd moet worden. */
   getal?: number;
   eenheid?: string;
+  /** Bij ieder zijn eigen getal: het juiste antwoord per speler. */
+  eigenGetal?: Record<string, number>;
 }
 
 type Oplosser = (a: Analyse, arg: string) => LevendAntwoord;
@@ -241,6 +243,52 @@ const OPLOSSERS: Record<string, Oplosser> = {
       v: 'Wie had als eerste zijn jaardoel binnen?',
       a: `${eerste.p.naam} — op ${datumTekst(eerste.dag)}`,
       toelichting: rest.length ? `Daarna ${opsomming(rest.map((x) => `${x.p.naam} op ${datumTekst(x.dag)}`))}.` : undefined,
+    };
+  },
+
+  /**
+   * De inhaalrace ('sport.inhalen:Cas'; zonder naam wie het vaakst sportte):
+   * de haas stopt om middernacht met sporten, ieder ander sport in het
+   * nieuwe jaar door in zijn eigen tempo van dit jaar. In welke week haalt
+   * hij de haas in? Ieder heeft zijn eigen antwoord, de haas zelf doet niet
+   * mee. Het tempo is het totaal gedeeld door het aantal weken tot de
+   * peildatum (op oudejaarsdag het hele jaar). Wie de haas al voorbij is,
+   * zit op week 0; wie niets bijhield, kan niet inhalen en blijft erbuiten.
+   *
+   * Als houvast staat het totaal van de haas in de vraag. Je eigen totaal
+   * bewust niet: met allebei is het een rekensom, zonder moet je je eigen
+   * sporttempo inschatten.
+   */
+  'sport.inhalen': (a, arg) => {
+    const haas = arg.trim()
+      ? a.personen.find((p) => p.naam.toLowerCase() === arg.trim().toLowerCase())
+      : gesorteerd(a, (p) => p.sport.totaal)[0];
+    if (!haas) throw new Error(`onbekende haas: ${arg}`);
+    const eind = a.peildatum < `${a.jaar}-12-31` ? a.peildatum : `${a.jaar}-12-31`;
+    const verstreken = (Date.parse(eind) - Date.parse(`${a.jaar}-01-01`)) / (7 * 86_400_000) + 1 / 7;
+    const lijst = a.personen
+      .filter((p) => p !== haas && p.sport.totaal > 0)
+      .map((p) => {
+        const tempo = p.sport.totaal / verstreken;
+        return { p, week: Math.max(0, Math.ceil((haas.sport.totaal - p.sport.totaal) / tempo - 1e-9)) };
+      })
+      .sort((x, y) => x.week - y.week || x.p.naam.localeCompare(y.p.naam));
+    if (!lijst.length) throw new Error('niemand om te vergelijken');
+    const volgend = a.jaar + 1;
+    /** 'in maart' of 'in februari 2028': het midden van die week. */
+    const wanneer = (week: number) => {
+      const dag = new Date(Date.UTC(volgend, 0, 1) + (7 * Math.max(1, week) - 4) * 86_400_000).toISOString().slice(0, 10);
+      return `in ${maandNaam(dag)}${Number(dag.slice(0, 4)) > volgend ? ` ${dag.slice(0, 4)}` : ''}`;
+    };
+    const [eerste] = lijst;
+    const laatste = lijst[lijst.length - 1];
+    const wie = (x: (typeof lijst)[number]) => (x.week === 0 ? `${x.p.naam} is ${haas.naam} al voorbij` : `${x.p.naam} haalt ${haas.naam} ${wanneer(x.week)} in`);
+    return {
+      v: `Om middernacht stopt ${haas.naam} met sporten, na ${keer(haas.sport.totaal)} dit jaar. Jij gaat door, in je eigen tempo van ${a.jaar}. In welke week van ${volgend} haal jij ${haas.naam} in?`,
+      a: lijst.map((x) => `${x.p.naam} ${x.week}`).join(' · '),
+      toelichting: `${wie(eerste)}${laatste !== eerste ? `, ${laatste.p.naam} ${laatste.week === 0 ? 'ook' : `pas ${wanneer(laatste.week)}`}` : ''}. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee.`,
+      eigenGetal: Object.fromEntries(lijst.map((x) => [x.p.naam, x.week])),
+      eenheid: 'week',
     };
   },
 
@@ -620,5 +668,6 @@ export function verlevendig(vraag: Vraag, analyse: Analyse | null, voorspellinge
   const uit = beantwoord(vraag.live, analyse, voorspellingen);
   if (!uit) return vraag;
   const getal = uit.getal === undefined ? {} : { getal: uit.getal, eenheid: uit.eenheid ?? vraag.eenheid };
-  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, teVullen: false };
+  const eigen = uit.eigenGetal === undefined ? {} : { eigenGetal: uit.eigenGetal, eenheid: uit.eenheid ?? vraag.eenheid };
+  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, ...eigen, teVullen: false };
 }

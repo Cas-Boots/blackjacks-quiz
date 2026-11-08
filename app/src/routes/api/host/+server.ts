@@ -206,7 +206,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     case 'toon-antwoord': {
       stopKlok();
       zet({ fase: 'antwoord' });
-      // Dichtstbij en stem rekent de machine meteen uit; de quizmaster hoeft
+      // Dichtstbij, stem en ieder zijn eigen getal rekent de machine meteen uit; de quizmaster hoeft
       // er niet meer aan te denken en kan het altijd nog bijsturen.
       if (ronde && vraag && spel.fase !== 'antwoord') scoorAutomatisch(spel, ronde, vraag, lijst);
       log = { omschrijving: `Antwoord getoond bij vraag ${spel.vraagIndex + 1}`, terug: true };

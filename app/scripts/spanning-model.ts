@@ -9,6 +9,7 @@ import type { Ronde } from '../src/lib/content/types';
 import { maakTeams } from '../src/lib/server/teams';
 import { PUNT_WAARDE, type BonusVraag } from '../src/lib/server/bonus';
 import { isAfrekening } from '../src/lib/shared/state';
+import { binnenSpeling } from '../src/lib/shared/eigengetal';
 
 /* ---- De aannames: wie weet wat, en hoe snel ------------------------------ */
 
@@ -29,6 +30,19 @@ const KANS = {
 const MUZIEK: Record<Naam, number> = { Joris: 0.55, Rik: 0.55, Eva: 0.25, Liz: 0.25, Bastiaan: 0.25 };
 /** Vragen over onszelf (de sportcompetitie): voor iedereen even moeilijk. */
 const OVER_ONSZELF = 0.45;
+/**
+ * Ieder zijn eigen getal (de week waarin je Cas inhaalt): hoe ver iemand er
+ * naast zit. Een mix: in verhouding (wie een jaar nodig heeft, schat
+ * ruwer) en een vaste onzekerheid (niemand weet het op de week). Ruim
+ * gekozen: je eigen totaal staat er bewust niet bij, dus je schat ook je
+ * eigen sporttempo. Zie ook scripts/marge.ts, dat de speling hiermee
+ * vergelijkt.
+ */
+export const EIGEN_GOK = { deel: 0.35, weken: 3 };
+/** Een gok op je eigen getal, volgens EIGEN_GOK, afgerond op hele getallen. */
+export function gokEigen(doel: number, model = EIGEN_GOK): number {
+  return Math.round(doel * Math.exp(normaal(0, model.deel)) + normaal(0, model.weken));
+}
 /** Een voorspelling uit januari die uitkwam. */
 const VOORSPELLING_UIT = 0.35;
 /** Bij een stemvraag met de meerderheid meestemmen. */
@@ -143,9 +157,11 @@ export function speelRonde(r: Ronde, ri: number): GespeeldeRonde {
         antwoorden.push({ inzender: t.id, isGoed: goed, naMs: duurMs * 0.7, leden: t.leden });
       }
     } else {
+      const eigen = r.vragen[vi].eigenGetal;
       for (const s of spelers) {
         const niveau = NIEUWS[s.naam];
-        const p =
+        const doel = eigen?.[s.naam];
+        const p = doel !== undefined ? (binnenSpeling(gokEigen(doel), doel) ? 1 : 0) :
           soort === 'stem' ? MET_DE_MEERDERHEID
             : soort === 'onszelf' ? OVER_ONSZELF
               : r.type === 'waarnietwaar' ? KANS.waarnietwaar[niveau]

@@ -7,6 +7,8 @@
  * half blijft hangen kan niet bestaan.
  */
 import type { Ronde, Vraag } from '$lib/content/types';
+import type { EigenUitslag } from '$lib/shared/state';
+import { binnenSpeling, spelingVoor } from '$lib/shared/eigengetal';
 import { leesGetal } from './antwoord';
 
 export type Verdeling = Record<number, number>;
@@ -78,6 +80,33 @@ export function bepaalDichtstbij(
   for (const w of winnaars) puntenPerTeam[w] = waarde;
 
   return { winnaars, afstand: beste, precies, puntenPerTeam };
+}
+
+/**
+ * Ieder zijn eigen getal: elke gok tegen het getal van wie hem intikte, met
+ * de speling uit shared/eigengetal.ts. Alleen wie meespeelt én een eigen
+ * getal heeft, staat in de uitslag (ook zonder antwoord, dan fout); een gast
+ * zonder getal beoordeelt de quizmaster zelf. Kleinste getal eerst: zo staat
+ * de ladder op de televisie meteen in volgorde.
+ */
+export function bepaalEigenGetal(
+  perSpeler: Record<string, number>,
+  spelers: { naam: string; inzender: string }[],
+  rijen: { inzender: string; tekst: string }[],
+): { uitslag: EigenUitslag[]; winnaars: string[] } {
+  const uitslag: (EigenUitslag & { inzender: string })[] = [];
+  for (const s of spelers) {
+    const doel = perSpeler[s.naam];
+    if (typeof doel !== 'number') continue;
+    const rij = rijen.find((r) => r.inzender === s.inzender);
+    const gok = rij ? leesGetal(rij.tekst) : null;
+    uitslag.push({ naam: s.naam, inzender: s.inzender, doel, speling: spelingVoor(doel), gok, goed: gok !== null && binnenSpeling(gok, doel) });
+  }
+  uitslag.sort((a, b) => a.doel - b.doel || a.naam.localeCompare(b.naam, 'nl'));
+  return {
+    uitslag: uitslag.map(({ inzender: _, ...rest }) => rest),
+    winnaars: uitslag.filter((u) => u.goed).map((u) => u.inzender),
+  };
 }
 
 export interface StemTelling {
