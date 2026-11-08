@@ -247,6 +247,12 @@ function controleerJaaroverzicht() {
 
 function vraagGebreken(ronde: Ronde, v: Vraag): string[] {
   const uit: string[] = [];
+  if (v.eigenGetal) {
+    const getallen = Object.values(v.eigenGetal);
+    if (!getallen.length) uit.push("'eigenGetal' is leeg");
+    if (getallen.some((n) => typeof n !== 'number' || !Number.isFinite(n))) uit.push("'eigenGetal' bevat iets wat geen getal is");
+    if (ronde.teamModus !== 'individueel') uit.push("'eigenGetal' kan alleen ieder voor zich");
+  }
   switch (ronde.type) {
     case 'waarnietwaar':
       if (typeof v.goed !== 'boolean') uit.push("'goed' moet true of false zijn");

@@ -87,6 +87,14 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
   een terugblik daarop valt goed. Ververs de cijfers met
   `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
+  ander antwoord heeft, nu *hoeveel weken loop jij achter op Cas?* in de
+  sportronde (`live: "sport.achterstand:Cas"`). De app kijkt na met een speling
+  die meegroeit: per vijf weken een week, en altijd minstens twee
+  (`shared/eigengetal.ts`). Zo heeft wie dicht bij Cas zit evenveel kans als
+  wie een halfjaar achterloopt; een vaste marge in weken of alleen procenten
+  is oneerlijk (`npm run marge`). Vooraf geen speling per speler tonen: die
+  verraadt de grootte van je achterstand. Alleen ieder voor zich.
 - **Kies per vraag de antwoordvorm die past.** Een vraag kan een andere vorm
   hebben dan zijn ronde (`type: "meerkeuze"`, `"dichtstbij"`,
   `"waarnietwaar"`), zodat een ronde vormen mengt. Meerkeuze voor wat je
@@ -149,7 +157,12 @@ de snelheid (50% of 75%) maakt geen verschil, en zonder snelheid eindigt het
 minder vaak nek aan nek. Hiermee willen we later verder kijken of het nog
 spannender kan: breid het script uit met een nieuwe regel als variant naast
 de huidige, en vergelijk. Het model (de profielen en hoe een ronde uitpakt)
-staat in `scripts/spanning-model.ts` en is gedeeld.
+staat in `scripts/spanning-model.ts` en is gedeeld. Een vraag met
+`eigenGetal` rekent het model na met echte gokken op ieders eigen getal
+(`EIGEN_GOK`: ± 25% en ± 3 weken) tegen de speling van de app; `npm run marge`
+vergelijkt die speling met andere regels. Met de achterstandsvraag in plaats
+van *Liz of Eva* (november 2026) verschuift er niets: de winkansen bewegen
+hooguit een procent.
 
 `npm run volgorde` rekent alle 5.040 volgordes van de rondes door (Warmdraaien
 blijft voorop). De volgorde bepaalt welke twee rondes als slotronde dubbel

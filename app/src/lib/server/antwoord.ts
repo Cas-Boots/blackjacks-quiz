@@ -157,6 +157,13 @@ export function beoordeel(ronde: Ronde, vraag: Vraag, ingetikt: string): Oordeel
     return { automatisch: false, goed: false, reden: `stemt op ${tekst}` };
   }
 
+  if (vraag.eigenGetal) {
+    const getal = leesGetal(tekst);
+    if (getal === null) return { automatisch: false, goed: false, reden: 'geen getal' };
+    // Het juiste getal hangt af van wie het intikte; dat rekent scoorAutomatisch uit.
+    return { automatisch: false, goed: false, reden: String(getal) };
+  }
+
   if (type === 'dichtstbij') {
     const getal = leesGetal(tekst);
     if (getal === null) return { automatisch: false, goed: false, reden: 'geen getal' };

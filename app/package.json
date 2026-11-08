@@ -21,6 +21,7 @@
     "simulate": "tsx scripts/simulate.ts",
     "spanning": "tsx scripts/spanning.ts",
     "volgorde": "tsx scripts/volgorde.ts",
+    "marge": "tsx scripts/marge.ts",
     "verify": "tsx scripts/verify.ts",
     "e2e": "playwright test",
     "content:sync": "tsx scripts/sync-content.ts",

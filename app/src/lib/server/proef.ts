@@ -19,6 +19,7 @@
  * Een proefrit verdwijnt na vier uur zonder gebruik, en bij een herstart.
  */
 import { randomUUID } from 'node:crypto';
+import { spelingVoor } from '$lib/shared/eigengetal';
 import { typeVan } from '$lib/content/vraagtype';
 import { and, eq, inArray } from 'drizzle-orm';
 import { binnen, db, echte, geheugenDb, type Context } from './db/index';
@@ -220,7 +221,7 @@ function botsKijken(p: Proef) {
         const nu = actiefSpel();
         if (!nu || nu.fase !== 'vraag' || sleutelVan(nu.rondeIndex, nu.vraagIndex) !== sleutel) return;
         if (mensen().has(speler)) return;
-        const r = leverIn(nu, speler, botAntwoord(ronde, vraag, lijst, p.instellingen.kansGoed));
+        const r = leverIn(nu, speler, botAntwoord(ronde, vraag, lijst, p.instellingen.kansGoed, lijst.find((s) => s.id === speler)?.naam));
         if (!('fout' in r)) bumpVersie(nu.id);
       });
     }, wacht);
@@ -232,8 +233,13 @@ const ONZIN = ['geen idee', 'Amsterdam', 'Spanje', 'de bakker', '42', 'Taylor Sw
 const kies = <T>(lijst: T[]): T => lijst[Math.floor(Math.random() * lijst.length)];
 
 /** Wat een bot intikt: het goede antwoord met kans `kansGoed`, anders iets ernaast. */
-export function botAntwoord(ronde: Ronde, vraag: Vraag, lijst: { naam: string }[], kansGoed: number): string {
+export function botAntwoord(ronde: Ronde, vraag: Vraag, lijst: { naam: string }[], kansGoed: number, naam?: string): string {
   const goed = Math.random() < kansGoed;
+  if (vraag.eigenGetal) {
+    const doel = (naam ? vraag.eigenGetal[naam] : undefined) ?? 10;
+    // Goed: binnen de speling (een tiende ernaast); fout: er ruim naast.
+    return String(Math.round(goed ? doel * (1 + (Math.random() - 0.5) * 0.2) : doel + 3 * spelingVoor(doel)));
+  }
   switch (typeVan(ronde, vraag)) {
     case 'waarnietwaar':
       return (vraag.goed === true) === goed ? 'Waar' : 'Niet waar';
@@ -355,7 +361,7 @@ function vulVraag(spelId: number, rondes: Ronde[], ri: number, vi: number, kansG
     if (al.has(team.id) || team.leden[0] === undefined) continue;
     db.insert(antwoorden).values({
       spelId, vraagSleutel: sleutel, inzender: team.id, spelerId: team.leden[0],
-      tekst: botAntwoord(ronde, vraag, lijst, kansGoed), ingediendOp: Date.now(),
+      tekst: botAntwoord(ronde, vraag, lijst, kansGoed, lijst.find((s) => s.id === team.leden[0])?.naam), ingediendOp: Date.now(),
       naMs: Math.round(1500 + Math.random() * tijd * 0.7),
     }).run();
   }

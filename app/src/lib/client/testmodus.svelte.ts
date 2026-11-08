@@ -313,6 +313,7 @@ const V = {
   fragment: { index: 1, tekst: 'Welk nummer hoor je hier?', media: { soort: 'muziek', bron: '', bijschrift: 'Fragment van twee seconden' } },
   video: { index: 2, tekst: 'Wat gebeurt er hierna?', media: { soort: 'video', bron: 'proef-ontbreekt.mp4' } },
   dichtstbij: { index: 3, tekst: 'Hoeveel kilometer fietste Bastiaan in 2026, volgens zijn eigen app?', eenheid: 'km' },
+  eigen: { index: 1, tekst: 'Hoeveel weken eerder dan jij had Cas al zo vaak gesport als jij nu?', eenheid: 'weken', eigenGetal: true },
   stem: { index: 0, tekst: 'Wie van de Blackjacks appt het vaakst “ik ben er over vijf minuten” terwijl dat niet zo is?', opties: [...NAMEN] },
   bliksem: { index: 7, tekst: 'Een jaar heeft 52 weken.', opties: ['Waar', 'Niet waar'] },
   lang: {
@@ -769,6 +770,29 @@ export const DIAS: Dia[] = [
       { antwoord: '3.140 km', toelichting: 'Zeg maar Amsterdam–Rome, en dan nog een stukje.', getal: 3140, eenheid: 'km' },
       [inz('s_1', '3000', true, 9000, 3000), inz('s_2', '2500', false, 12000, 2500), inz('s_3', '4100', false, 6000, 4100), inz('s_4', '9000', false, 20000, 9000), inz('s_5', '3300', false, 15000, 3300), inz('s_6', 'geen idee', false, 25000, null)],
       { stand: stand(erbij({ 1: 870 })), uitdeling: { 1: 870 } },
+    ),
+  },
+  {
+    id: 'antwoord-eigen', hoofdstuk: 'Onthulling', titel: 'Ieder zijn eigen getal: de ladder',
+    let: 'Per speler een balk tot het eigen getal, de speling als vak eromheen en de gok als stip: in het vak is raak. Tom typte geen getal.',
+    vorigePunten: START,
+    maak: () => antwoord(
+      R.sport, V.eigen,
+      {
+        antwoord: 'Liz 5 · Eva 15 · Bastiaan 16 · Joris 22 · Rik 29 weken',
+        toelichting: 'Cas sportte 137 keer. Speling: per vijf weken een week, en altijd minstens twee.',
+        eenheid: 'weken',
+        eigen: [
+          { naam: 'Liz', doel: 5, speling: 2, gok: 6, goed: true },
+          { naam: 'Eva', doel: 15, speling: 3, gok: 10, goed: false },
+          { naam: 'Bastiaan', doel: 16, speling: 3.2, gok: 18, goed: true },
+          { naam: 'Joris', doel: 22, speling: 4.4, gok: 12, goed: false },
+          { naam: 'Rik', doel: 29, speling: 5.8, gok: 25, goed: true },
+          { naam: 'Tom', doel: 31, speling: 6.2, gok: null, goed: false },
+        ],
+      },
+      [inz('s_1', '6', true, 5000, 6), inz('s_2', '18', true, 9000, 18), inz('s_3', '12', false, 7000, 12), inz('s_4', '25', true, 12000, 25), inz('s_5', '10', false, 6000, 10), inz('s_6', 'geen idee', false, 20000)],
+      { stand: stand(erbij({ 1: 760, 2: 640, 4: 520 })), uitdeling: { 1: 760, 2: 640, 4: 520 } },
     ),
   },
   {

@@ -26,6 +26,8 @@ export interface LevendAntwoord {
   /** Bij een dichtstbij-vraag: het getal dat het dichtst benaderd moet worden. */
   getal?: number;
   eenheid?: string;
+  /** Bij ieder zijn eigen getal: het juiste antwoord per speler. */
+  eigenGetal?: Record<string, number>;
 }
 
 type Oplosser = (a: Analyse, arg: string) => LevendAntwoord;
@@ -241,6 +243,47 @@ const OPLOSSERS: Record<string, Oplosser> = {
       v: 'Wie had als eerste zijn jaardoel binnen?',
       a: `${eerste.p.naam} — op ${datumTekst(eerste.dag)}`,
       toelichting: rest.length ? `Daarna ${opsomming(rest.map((x) => `${x.p.naam} op ${datumTekst(x.dag)}`))}.` : undefined,
+    };
+  },
+
+  /**
+   * Hoeveel weken loopt ieder van ons achter op één van ons, de haas
+   * ('sport.achterstand:Cas'; zonder naam wie het vaakst sportte)? Gemeten
+   * als: hoeveel weken vóór de peildatum stond de haas al op jouw totaal.
+   * Ieder heeft zijn eigen antwoord; de haas zelf doet niet mee. Wie vóór de
+   * haas ligt, krijgt een negatief getal: zoveel weken eerder stond jij op
+   * diens totaal.
+   */
+  'sport.achterstand': (a, arg) => {
+    const haas = arg.trim()
+      ? a.personen.find((p) => p.naam.toLowerCase() === arg.trim().toLowerCase())
+      : gesorteerd(a, (p) => p.sport.totaal)[0];
+    if (!haas) throw new Error(`onbekende haas: ${arg}`);
+    const eind = a.peildatum < `${a.jaar}-12-31` ? a.peildatum : `${a.jaar}-12-31`;
+    const weken = (dag: string) => Math.round((Date.parse(eind) - Date.parse(dag)) / (7 * 86_400_000));
+    /** De dag waarop p voor het eerst op n stond. */
+    const dagVan = (p: Persoon, n: number) => {
+      let som = 0;
+      return Object.entries(p.sport.dagen)
+        .sort(([x], [y]) => x.localeCompare(y))
+        .find(([, k]) => (som += k) >= n)?.[0] ?? eind;
+    };
+    const lijst = a.personen
+      .filter((p) => p !== haas)
+      .map((p) => ({
+        naam: p.naam,
+        weken: p.sport.totaal <= haas.sport.totaal
+          ? weken(dagVan(haas, Math.max(1, p.sport.totaal)))
+          : -weken(dagVan(p, Math.max(1, haas.sport.totaal))),
+      }))
+      .sort((x, y) => x.weken - y.weken || x.naam.localeCompare(y.naam));
+    if (!lijst.length) throw new Error('niemand om te vergelijken');
+    return {
+      v: `Hoeveel weken eerder dan jij had ${haas.naam} al zo vaak gesport als jij nu?`,
+      a: lijst.map((x) => `${x.naam} ${x.weken}`).join(' · ') + ' weken',
+      toelichting: `${haas.naam} sportte ${keer(haas.sport.totaal)}. Speling: per vijf weken een week, en altijd minstens twee.`,
+      eigenGetal: Object.fromEntries(lijst.map((x) => [x.naam, x.weken])),
+      eenheid: 'weken',
     };
   },
 
@@ -620,5 +663,6 @@ export function verlevendig(vraag: Vraag, analyse: Analyse | null, voorspellinge
   const uit = beantwoord(vraag.live, analyse, voorspellingen);
   if (!uit) return vraag;
   const getal = uit.getal === undefined ? {} : { getal: uit.getal, eenheid: uit.eenheid ?? vraag.eenheid };
-  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, teVullen: false };
+  const eigen = uit.eigenGetal === undefined ? {} : { eigenGetal: uit.eigenGetal, eenheid: uit.eenheid ?? vraag.eenheid };
+  return { ...vraag, v: uit.v, a: uit.a, toelichting: uit.toelichting, ...getal, ...eigen, teVullen: false };
 }
