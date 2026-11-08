@@ -31,7 +31,8 @@
         {#if r.gok !== null}<i class="gok" style="left:{x(r.gok)}%"></i>{/if}
       </span>
       <span class="cijfer">
-        <span><b>{fmt(r.doel)}</b>{eenheid ? ' ' + eenheid : ''}</span>
+        <!-- 'week 12' leest beter dan '12 week'; andere eenheden komen erachter. -->
+        <span>{#if eenheid === 'week'}week <b>{fmt(r.doel)}</b>{:else}<b>{fmt(r.doel)}</b>{eenheid ? ' ' + eenheid : ''}{/if}</span>
         <small>± {fmt(r.speling)} · gok {r.gok === null ? '—' : fmt(r.gok)}</small>
       </span>
       <span class="oordeel" aria-hidden="true">{r.goed ? '✓' : '✗'}</span>

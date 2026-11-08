@@ -31,8 +31,8 @@ const MUZIEK: Record<Naam, number> = { Joris: 0.55, Rik: 0.55, Eva: 0.25, Liz: 0
 /** Vragen over onszelf (de sportcompetitie): voor iedereen even moeilijk. */
 const OVER_ONSZELF = 0.45;
 /**
- * Ieder zijn eigen getal (je eigen achterstand in weken): hoe ver iemand er
- * naast zit. Een mix: in verhouding (wie een halfjaar achterloopt, schat
+ * Ieder zijn eigen getal (de week waarin je Cas inhaalt): hoe ver iemand er
+ * naast zit. Een mix: in verhouding (wie een jaar nodig heeft, schat
  * ruwer) en een vaste onzekerheid (niemand weet het op de week). Zie ook
  * scripts/marge.ts, dat de speling hiermee vergelijkt.
  */

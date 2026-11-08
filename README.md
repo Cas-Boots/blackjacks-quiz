@@ -72,7 +72,8 @@ momentopname:
 
 - **Onze Sportcompetitie** — wie het vaakst sportte, wie nooit in de sportschool
   kwam, welke sport iedereen precies één keer deed, wie zijn jaardoel al haalde,
-  en hoeveel weken ieder achterloopt op Cas (ieder raadt zijn eigen getal).
+  en in welke week van 2027 ieder Cas inhaalt als die stopt (ieder raadt zijn
+  eigen getal).
 - **Taart & Verre Landen** — de taartteller, de landenteller, de drukste
   taartdag van het jaar.
 - **Hoger of Lager** — dichtstbij wint, over onszelf: hoe vaak we samen

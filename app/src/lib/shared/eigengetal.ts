@@ -1,13 +1,13 @@
 /**
  * Ieder zijn eigen getal: een vraag waarop elke speler een ander antwoord
- * heeft, zoals "hoeveel weken loop jij achter op Cas?".
+ * heeft, zoals "in welke week van 2027 haal jij Cas in?".
  *
- * Wie er een paar weken naast zit, zit er bij een kleine achterstand ver
- * naast en bij een grote nauwelijks. Daarom groeit de speling mee: per vijf
+ * Wie er een paar weken naast zit, zit er bij een klein getal ver naast en
+ * bij een groot nauwelijks. Daarom groeit de speling mee: per vijf
  * weken één week, en altijd minstens twee. Zo heeft iedereen ongeveer
  * evenveel kans (zie `npm run marge`), en blijft de regel uit te leggen:
  *
- *   "Per vijf weken achterstand krijg je een week speling, en altijd minstens twee."
+ *   "Per vijf weken krijg je een week speling, en altijd minstens twee."
  */
 
 export const SPELING = {

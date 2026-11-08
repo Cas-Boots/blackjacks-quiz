@@ -517,6 +517,9 @@
           {#if vraag.emoji}<div class="emoji" style="font-size:2.6rem">{vraag.emoji}</div>{/if}
           {#if vraag.lyric}<p class="lyric" style="font-size:1.25rem">“{vraag.lyric}”</p>{/if}
           <p class="vraagtekst" style="font-size:1.35rem">{vraag.tekst}</p>
+          {#if live.spelerId != null && vraag.perSpeler?.[live.spelerId]}
+            <p class="houvast" style="margin-top:.5rem;padding:.35rem .7rem;border-radius:8px;background:rgba(201,162,39,.14);color:var(--goud-licht);font-family:var(--mono);font-size:1rem">{vraag.perSpeler[live.spelerId]}</p>
+          {/if}
           {#if vraag.media}
             <Media media={vraag.media} alleenBeeld klein />
           {/if}
@@ -564,7 +567,7 @@
           type="text"
           inputmode={vraag.type === 'dichtstbij' || vraag.eigenGetal ? 'decimal' : 'text'}
           bind:value={antwoord}
-          placeholder={vraag.eigenGetal ? `Jouw aantal ${vraag.eenheid ?? ''}`.trim() : vraag.type === 'dichtstbij' ? 'Jullie getal' : 'Jullie antwoord'}
+          placeholder={vraag.eigenGetal ? (vraag.eenheid === 'week' ? 'Weeknummer' : `Jouw aantal ${vraag.eenheid ?? ''}`.trim()) : vraag.type === 'dichtstbij' ? 'Jullie getal' : 'Jullie antwoord'}
           onkeydown={(e) => e.key === 'Enter' && stuur()}
         />
         <button class="knop hoofd vol groot" onclick={() => stuur()} disabled={bezig || !antwoord.trim()}>

@@ -61,12 +61,18 @@ export interface Vraag {
   live?: string;
   /**
    * Ieder zijn eigen getal: het juiste antwoord per speler, op naam
-   * ("hoeveel weken loop jij achter op Cas?"). De app kijkt elk antwoord na
+   * ("in welke week van 2027 haal jij Cas in?"). De app kijkt elk antwoord na
    * tegen het getal van wie het intikte, met een speling die meegroeit (zie
    * shared/eigengetal.ts). Bij een levende vraag rekent de server dit uit;
    * wat hier staat is de achtervang. `a` blijft de tekst op het scherm.
    */
   eigenGetal?: Record<string, number>;
+  /**
+   * Een regel per speler, op naam, die alleen op diens eigen telefoon onder
+   * de vraag komt: het houvast ("Jij sportte dit jaar 80 keer."). Geen
+   * antwoord, want de televisie en de andere telefoons zien hem niet.
+   */
+  perSpelerTekst?: Record<string, string>;
 }
 
 export interface Ronde {

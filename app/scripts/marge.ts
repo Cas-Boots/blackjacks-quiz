@@ -1,8 +1,8 @@
 /**
  * Is de speling bij ieder zijn eigen getal eerlijk? Een vergelijking.
  *
- * Bij "hoeveel weken loop jij achter op Cas?" heeft iedereen een ander
- * antwoord, van een paar weken tot een halfjaar. Dit script bootst per
+ * Bij "in welke week van 2027 haal jij Cas in?" heeft iedereen een ander
+ * antwoord, van een paar maanden tot meer dan een jaar. Dit script bootst per
  * speler duizenden gokken na en telt hoe vaak die binnen de speling vallen,
  * voor een vaste marge in weken, een marge in procenten, en de regel die de
  * app gebruikt (shared/eigengetal.ts: per vijf weken een week, minstens twee).
@@ -27,14 +27,15 @@ for (let i = 2; i < process.argv.length; i++) {
 const HAAS = args.get('haas') ?? 'Cas';
 const GOKKEN = Number(args.get('gokken') ?? 50_000);
 
-const uit = beantwoord(`sport.achterstand:${HAAS}`, analyseer(snapshot as unknown as RecapExport));
-if (!uit?.eigenGetal) throw new Error('geen achterstanden uit te rekenen');
+const uit = beantwoord(`sport.inhalen:${HAAS}`, analyseer(snapshot as unknown as RecapExport));
+if (!uit?.eigenGetal) throw new Error('geen inhaalweken uit te rekenen');
 const doelen = Object.entries(uit.eigenGetal).filter(([naam]) => (SPELERS as readonly string[]).includes(naam));
 
 const regels: [string, (gok: number, doel: number) => boolean][] = [
   ['binnen 2 weken', (g, d) => Math.abs(g - d) <= 2],
   ['binnen 3 weken', (g, d) => Math.abs(g - d) <= 3],
   ['binnen 4 weken', (g, d) => Math.abs(g - d) <= 4],
+  ['binnen 6 weken', (g, d) => Math.abs(g - d) <= 6],
   ['binnen 20%', (g, d) => binnenSpeling(g, d, { minimaal: 0, deel: 0.2 })],
   ['binnen 30%', (g, d) => binnenSpeling(g, d, { minimaal: 0, deel: 0.3 })],
   [`de app: ${SPELING.minimaal} weken of ${SPELING.deel * 100}%`, (g, d) => binnenSpeling(g, d)],
@@ -46,8 +47,8 @@ const modellen: [string, { deel: number; weken: number }][] = [
   [`mix (±${EIGEN_GOK.deel * 100}% en ±${EIGEN_GOK.weken} weken), het spanningsmodel`, EIGEN_GOK],
 ];
 
-console.log(`\nAchterstand op ${HAAS} (peildatum ${analyseer(snapshot as unknown as RecapExport).peildatum}), ${GOKKEN.toLocaleString('nl-NL')} gokken per speler.`);
-console.log('De namen staan op volgorde van achterstand; de getallen zelf laat het script weg, zodat je ze nog kunt raden.');
+console.log(`\nInhaalweek op ${HAAS} (peildatum ${analyseer(snapshot as unknown as RecapExport).peildatum}), ${GOKKEN.toLocaleString('nl-NL')} gokken per speler.`);
+console.log('De namen staan op volgorde van hun inhaalweek; de getallen zelf laat het script weg, zodat je ze nog kunt raden.');
 for (const [label, model] of modellen) {
   zaai(20261231);
   console.log(`\nAls je ${label}: kans om te scoren`);

@@ -958,7 +958,10 @@
                 <Media media={vraag.media} speelt={staat.mediaSpeelt} />
               {/if}
               {#if vraag.eenheid}
-                <p class="fijn eenheid">Antwoord in {vraag.eenheid}.</p>
+                <p class="fijn eenheid">
+                  {#if vraag.eigenGetal}Ieder zijn eigen antwoord{vraag.eenheid === 'week' ? ', als weeknummer' : ` in ${vraag.eenheid}`}.{#if vraag.perSpeler} Op je telefoon staat jouw houvast.{/if}
+                  {:else}Antwoord in {vraag.eenheid}.{/if}
+                </p>
               {/if}
             </div>
 

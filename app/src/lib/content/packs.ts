@@ -222,16 +222,19 @@ export const PAKKETTEN: Pakketten = {
         vragen: [
           {v:"Wie haalde dit jaar het hoogste percentage van zijn eigen jaardoel?", a:"Eva — 163 procent", live:"sport.doelProcent",
            toelichting:"98 keer sporten op een doel van 60. Daarna Liz met 136 procent."},
-          // Vervangen door de achterstand hieronder: die laat het verschil tussen iedereen zien, niet tussen twee.
+          // Vervangen door de inhaalrace hieronder: die laat het verschil tussen iedereen zien, niet tussen twee.
           {reserve:true, v:"Wie sportte dit jaar vaker: Liz of Eva?", a:"Liz — 109 tegen 98", live:"sport.duel:Liz/Eva"},
-          // Ieder zijn eigen getal: elke speler raadt zijn eigen achterstand op
-          // de quizmaster, en de app kijkt na met een speling die meegroeit
-          // (shared/eigengetal.ts: per vijf weken één week, minstens twee).
-          // Op de televisie volgt de ladder van wie hoeveel weken achterloopt.
-          {v:"Hoeveel weken eerder dan jij had Cas al zo vaak gesport als jij nu?", a:"Liz 5 · Eva 15 · Bastiaan 16 · Joris 22 · Rik 29 weken",
-           live:"sport.achterstand:Cas", eenheid:"weken",
-           eigenGetal:{Liz:5, Eva:15, Bastiaan:16, Joris:22, Rik:29},
-           toelichting:"Cas sportte 137 keer. Speling: per vijf weken een week, en altijd minstens twee."},
+          // Ieder zijn eigen getal: elke speler raadt zijn eigen inhaalweek, en
+          // de app kijkt na met een speling die meegroeit (shared/eigengetal.ts:
+          // per vijf weken één week, minstens twee). Als houvast staat het
+          // totaal van Cas in de vraag en ziet ieder op de telefoon zijn eigen
+          // totaal (perSpelerTekst). Op de televisie volgt de ladder.
+          {v:"Om middernacht stopt Cas met sporten, na 137 keer dit jaar. Jij gaat door, in je eigen tempo van 2026. In welke week van 2027 haal jij Cas in?",
+           a:"Liz 12 · Eva 18 · Bastiaan 21 · Joris 35 · Rik 59", tijd:45,
+           live:"sport.inhalen:Cas", eenheid:"week",
+           eigenGetal:{Liz:12, Eva:18, Bastiaan:21, Joris:35, Rik:59},
+           perSpelerTekst:{Liz:"Jij sportte dit jaar 109 keer.", Eva:"Jij sportte dit jaar 98 keer.", Bastiaan:"Jij sportte dit jaar 94 keer.", Joris:"Jij sportte dit jaar 77 keer.", Rik:"Jij sportte dit jaar 59 keer."},
+           toelichting:"Liz haalt Cas in maart in, Rik pas in februari 2028. Je tempo: wat je dit jaar sportte, gedeeld door het aantal weken. Speling: per vijf weken een week, en altijd minstens twee."},
           {v:"In welke maand sportten we met z’n allen het meest?", a:"oktober — 75 keer", live:"sport.drukkeMaand",
            toelichting:"Daarna april met 68."},
           {v:"Wat deden we dit jaar vaker: hardlopen of padel?", a:"Padel — 90 tegen 80", live:"sport.sportDuel",

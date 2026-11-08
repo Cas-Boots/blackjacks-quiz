@@ -41,7 +41,7 @@ describe('bepaalEigenGetal', () => {
       { inzender: 's_3', tekst: '3' },
     ]);
     expect(winnaars).toEqual(['s_1', 's_2']);
-    // Kleinste achterstand eerst; de gast zonder getal en Cas (speelt niet) staan er niet in.
+    // Kleinste getal eerst; de gast zonder getal en Cas (speelt niet) staan er niet in.
     expect(uitslag.map((u) => u.naam)).toEqual(['Liz', 'Eva', 'Rik']);
     expect(uitslag.find((u) => u.naam === 'Eva')).toMatchObject({ gok: null, goed: false, speling: 3 });
     expect(uitslag.find((u) => u.naam === 'Rik')).toMatchObject({ gok: 24, goed: true });
@@ -62,7 +62,7 @@ describe('beoordeel bij ieder zijn eigen getal', () => {
   });
 });
 
-describe('sport.achterstand', () => {
+describe('sport.inhalen', () => {
   const data: RecapExport = {
     exportedAt: '2026-06-15T10:00:00.000Z',
     seasons: [{ id: 1, year: 2026, name: '2026', is_active: 1 }],
@@ -83,32 +83,37 @@ describe('sport.achterstand', () => {
   };
   const analyse = analyseer(data);
 
-  it('meet hoeveel weken eerder de haas al op jouw totaal stond', () => {
-    // Bo staat op 2; An stond daar al op 6 januari, 23 weken voor 15 juni.
-    const uit = beantwoord('sport.achterstand:An', analyse);
-    expect(uit).toMatchObject({ eigenGetal: { Bo: 23 }, eenheid: 'weken', a: 'Bo 23 weken' });
-    expect(uit?.v).toContain('An');
+  // An sportte 3 keer, Bo 2 keer, in 23,9 weken (1 januari tot en met 15 juni).
+  it('rekent de inhaalweek uit het eigen tempo', () => {
+    // Bo: 1 keer achter, in een tempo van 2 per 23,9 weken: 12 weken, dus in week 12.
+    const uit = beantwoord('sport.inhalen:An', analyse);
+    expect(uit).toMatchObject({ eigenGetal: { Bo: 12 }, eenheid: 'week', a: 'Bo 12' });
+    expect(uit?.v).toContain('na 3 keer dit jaar');
+    expect(uit?.v).toContain('In welke week van 2027');
+    expect(uit?.perSpelerTekst).toEqual({ Bo: 'Jij sportte dit jaar 2 keer.' });
   });
 
   it('zonder naam is de haas wie het vaakst sportte', () => {
-    expect(beantwoord('sport.achterstand', analyse)?.eigenGetal).toEqual({ Bo: 23 });
+    expect(beantwoord('sport.inhalen', analyse)?.eigenGetal).toEqual({ Bo: 12 });
   });
 
-  it('wie vóór de haas ligt, krijgt een negatief getal', () => {
-    expect(beantwoord('sport.achterstand:Bo', analyse)?.eigenGetal).toEqual({ An: -23 });
+  it('wie de haas al voorbij is, zit op week 0', () => {
+    expect(beantwoord('sport.inhalen:Bo', analyse)?.eigenGetal).toEqual({ An: 0 });
   });
 
-  it('komt in de vraag terecht bij het verlevendigen', () => {
-    const v = verlevendig({ v: 'x', a: 'y', live: 'sport.achterstand:An', eigenGetal: { Bo: 1 } }, analyse);
-    expect(v.eigenGetal).toEqual({ Bo: 23 });
-    expect(v.eenheid).toBe('weken');
+  it('komt in de vraag terecht bij het verlevendigen, met het houvast', () => {
+    const v = verlevendig({ v: 'x', a: 'y', live: 'sport.inhalen:An', eigenGetal: { Bo: 1 } }, analyse);
+    expect(v.eigenGetal).toEqual({ Bo: 12 });
+    expect(v.perSpelerTekst).toEqual({ Bo: 'Jij sportte dit jaar 2 keer.' });
+    expect(v.eenheid).toBe('week');
   });
 
   it('staat in de sportronde, ieder voor zich', () => {
     const r = PAKKETTEN.jaar2026.rondes.find((x) => x.naam === 'Onze Sportcompetitie')!;
-    const v = r.vragen.find((x) => x.live?.startsWith('sport.achterstand'));
+    const v = r.vragen.find((x) => x.live?.startsWith('sport.inhalen'));
     expect(r.teamModus).toBe('individueel');
     expect(v && !v.reserve).toBe(true);
     expect(Object.keys(v!.eigenGetal ?? {}).sort()).toEqual(['Bastiaan', 'Eva', 'Joris', 'Liz', 'Rik']);
+    expect(Object.keys(v!.perSpelerTekst ?? {}).sort()).toEqual(['Bastiaan', 'Eva', 'Joris', 'Liz', 'Rik']);
   });
 });

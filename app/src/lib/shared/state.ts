@@ -37,6 +37,8 @@ export interface PubliekeVraag {
   eenheid?: string;
   /** Ieder zijn eigen getal: elke speler heeft een ander antwoord (zie shared/eigengetal.ts). */
   eigenGetal?: boolean;
+  /** Per speler-id een regel die alleen op diens eigen telefoon komt: het houvast bij de vraag. */
+  perSpeler?: Record<number, string>;
   media?: { soort: string; bron: string; bijschrift?: string };
   /** De punten van de vraag zelf (1, 2, 3); op het scorebord maal PUNT_WAARDE. */
   punten: number;

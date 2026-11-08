@@ -355,8 +355,11 @@ meet de winkans per speler, hoe vaak de koploper halverwege of vlak voor de
 geheime stand ook wint, hoeveel kanshebbers er dan nog zijn, en hoe vaak het
 nek aan nek eindigt.
 
-Eén vraag in de sportronde heeft per speler een ander antwoord: hoeveel weken
-loop jij achter op Cas (`eigenGetal` in `packs.ts`, `live: "sport.achterstand:Cas"`).
+Eén vraag in de sportronde heeft per speler een ander antwoord: Cas stopt om
+middernacht met sporten, in welke week van 2027 haal jij hem in, in je eigen
+tempo (`eigenGetal` in `packs.ts`, `live: "sport.inhalen:Cas"`). Als houvast
+staat het totaal van Cas in de vraag en ziet ieder op de telefoon alleen zijn
+eigen totaal (`perSpelerTekst`).
 De app kijkt elke gok na tegen het eigen getal, met een speling die meegroeit:
 per vijf weken een week, en altijd minstens twee (`src/lib/shared/eigengetal.ts`).
 Op de televisie volgt een ladder met per speler het getal, de speling als vak
