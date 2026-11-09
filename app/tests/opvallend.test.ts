@@ -41,7 +41,7 @@ describe('opvallend', () => {
       Bo: samen,
       An: [...samen, ...dagen([4], 6).map(met('running'))],
     })));
-    const f = feiten.find((x) => x.kop === 'Nooit zonder An');
+    const f = feiten.find((x) => x.kop === 'Bo nooit zonder An');
     expect(f?.tekst).toBe('Bo sportte dit jaar op 40 dagen, en op elk daarvan sportte An ook. An ging wel zes keer zonder Bo.');
     expect(f?.namen).toEqual(['Bo', 'An']);
   });
@@ -52,7 +52,7 @@ describe('opvallend', () => {
       Bo: [...samen, ['2026-03-13', 'running']],
       An: [...samen, ...dagen([4], 6).map(met('running'))],
     })));
-    expect(feiten.find((x) => x.kop === 'Bijna nooit zonder An')?.tekst).toBe(
+    expect(feiten.find((x) => x.kop === 'Bo bijna nooit zonder An')?.tekst).toBe(
       'Bo sportte dit jaar op 41 dagen. Op één na sportte An die dag ook: alleen op vrijdag 13 maart niet.',
     );
   });
@@ -86,13 +86,22 @@ describe('opvallend', () => {
     expect(feiten.find((x) => x.kop === 'Eén dinsdag')?.tekst).toBe('Rik sportte dit jaar 43 keer. Op een dinsdag maar één keer: 21 april.');
   });
 
-  it('ziet een lievelingssport die op één doordeweekse dag nooit gebeurt', () => {
+  it('noemt Bastiaan Bas, maar houdt de volledige naam voor het portret', () => {
+    const samen = dagen([0, 2], 20).map(met('gym'));
+    const feiten = opvallend(analyseer(jaar({
+      Bastiaan: samen,
+      Liz: [...samen, ...dagen([4], 6).map(met('running'))],
+    })));
+    expect(feiten[0].kop).toBe('Bas nooit zonder Liz');
+    expect(feiten[0].tekst).toBe('Bas sportte dit jaar op 40 dagen, en op elk daarvan sportte Liz ook. Liz ging wel zes keer zonder Bas.');
+    expect(feiten[0].namen).toEqual(['Bastiaan', 'Liz']);
+  });
+
+  it('zegt niets over een sport die op één weekdag nooit gebeurt', () => {
     const feiten = opvallend(analyseer(jaar({
       Joris: [...dagen([0, 1, 2, 3, 5, 6], 6).map(met('gym')), ...dagen([4], 6).map(met('running'))],
     })));
-    expect(feiten.find((x) => x.kop === 'Nooit sportschool op vrijdag')?.tekst).toBe(
-      'Joris ging dit jaar 36 keer naar de sportschool, maar nooit op een vrijdag. Wel zes keer iets anders.',
-    );
+    expect(feiten).toEqual([]);
   });
 
   it('laat de dia weg als er niets opvalt', () => {

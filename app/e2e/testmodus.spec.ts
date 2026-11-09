@@ -111,8 +111,8 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
   await expect(page.locator('.cijfers .hokjes')).toBeVisible();
 
   await ga('cijfers-sport-opvallend');
-  await expect(page.locator('.cijfers .weetje')).toHaveCount(4);
-  await expect(page.locator('.cijfers .weetje').first()).toContainText('Nooit zonder Liz');
+  await expect(page.locator('.cijfers .weetje')).toHaveCount(3);
+  await expect(page.locator('.cijfers .weetje').first()).toContainText('Bas nooit zonder Liz');
 
   await ga('stand');
   await expect(page.locator('.romp').getByRole('heading', { name: 'Tussenstand' })).toBeVisible();

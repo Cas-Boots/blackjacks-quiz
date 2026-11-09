@@ -7,10 +7,20 @@
  * laatste cijfers; wat niet meer klopt, valt vanzelf weg.
  *
  * Bewust niet: wie samen sport (dat zijn de stellen, dat weet iedereen),
- * gezamenlijke uitjes en de drukste dag. Te voorspelbaar.
+ * gezamenlijke uitjes, de drukste dag en een sport die op één weekdag nooit
+ * gebeurt (Joris nooit naar de sportschool op vrijdag). Te saai.
  */
 import type { CijfersFeit } from '$lib/shared/state';
-import { opsomming, sportEmoji, sportNaam, telwoord, type Analyse, type Persoon } from './analyse';
+import { opsomming, telwoord, type Analyse, type Persoon } from './analyse';
+
+/** Zo noemen we elkaar. De portretjes gaan op de volledige naam. */
+const ROEPNAAM: Record<string, string> = {
+  Bastiaan: 'Bas',
+};
+
+function roep(naam: string): string {
+  return ROEPNAAM[naam] ?? naam;
+}
 
 /** Pas vanaf zoveel sportdagen zegt "nooit zonder" iets. */
 const MIN_DAGEN_SAMEN = 30;
@@ -56,26 +66,27 @@ function nooitZonder(personen: Persoon[]): CijfersFeit[] {
       if (gehad.has(sleutel)) continue;
       gehad.add(sleutel);
       const bAlleen = [...b.sportPerDag.keys()].filter((d) => !a.sportPerDag.has(d)).length;
-      const aantal = `${a.naam} sportte dit jaar op ${dagenA.length} dagen`;
+      const [x, y] = [roep(a.naam), roep(b.naam)];
+      const aantal = `${x} sportte dit jaar op ${dagenA.length} dagen`;
       if (zonder.length === 0 && bAlleen === 0) {
         feiten.push({
           emoji: '👯',
-          kop: 'Altijd samen',
-          tekst: `${a.naam} en ${b.naam} sportten dit jaar op precies dezelfde ${dagenA.length} dagen. Geen enkele keer ging één van beiden alleen.`,
+          kop: `${x} en ${y} altijd samen`,
+          tekst: `${x} en ${y} sportten dit jaar op precies dezelfde ${dagenA.length} dagen. Geen enkele keer ging één van beiden alleen.`,
           namen: [a.naam, b.naam],
         });
       } else if (zonder.length === 0) {
         feiten.push({
           emoji: '🫶',
-          kop: `Nooit zonder ${b.naam}`,
-          tekst: `${aantal}, en op elk daarvan sportte ${b.naam} ook. ${b.naam} ging wel ${keer(bAlleen)} zonder ${a.naam}.`,
+          kop: `${x} nooit zonder ${y}`,
+          tekst: `${aantal}, en op elk daarvan sportte ${y} ook. ${y} ging wel ${keer(bAlleen)} zonder ${x}.`,
           namen: [a.naam, b.naam],
         });
       } else {
         feiten.push({
           emoji: '🫶',
-          kop: `Bijna nooit zonder ${b.naam}`,
-          tekst: `${aantal}. Op één na sportte ${b.naam} die dag ook: alleen op ${dagTekst(zonder[0])} niet.`,
+          kop: `${x} bijna nooit zonder ${y}`,
+          tekst: `${aantal}. Op één na sportte ${y} die dag ook: alleen op ${dagTekst(zonder[0])} niet.`,
           namen: [a.naam, b.naam],
         });
       }
@@ -124,52 +135,21 @@ function weekdagFeiten(lege: LegeDag[]): CijfersFeit[] {
     .map((groep) => {
       const { dag, aantal } = groep[0];
       const namen = groep.map((l) => l.persoon.naam);
+      const genoemd = namen.map(roep);
       const dagNaam = WEEKDAGEN[dag];
       if (aantal === 0) {
         const tekst =
           groep.length === 1
-            ? `${namen[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer, en geen enkele keer op een ${dagNaam}.`
-            : `${opsomming(namen)} sportten dit jaar ${opsomming(groep.map((l) => String(l.persoon.sport.totaal)))} keer, en geen van ${groep.length === 2 ? 'beiden' : 'allen'} ooit op een ${dagNaam}.`;
+            ? `${genoemd[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer, en geen enkele keer op een ${dagNaam}.`
+            : `${opsomming(genoemd)} sportten dit jaar ${opsomming(groep.map((l) => String(l.persoon.sport.totaal)))} keer, en geen van ${groep.length === 2 ? 'beiden' : 'allen'} ooit op een ${dagNaam}.`;
         return { emoji: '🚫', kop: `Nooit op ${dagNaam}`, tekst, namen };
       }
       const tekst =
         groep.length === 1
-          ? `${namen[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer. Op een ${dagNaam} maar één keer: ${dagTekst(groep[0].datums[0]).replace(`${dagNaam} `, '')}.`
-          : `${opsomming(namen)} sportten dit jaar elk maar één keer op een ${dagNaam}.`;
+          ? `${genoemd[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer. Op een ${dagNaam} maar één keer: ${dagTekst(groep[0].datums[0]).replace(`${dagNaam} `, '')}.`
+          : `${opsomming(genoemd)} sportten dit jaar elk maar één keer op een ${dagNaam}.`;
       return { emoji: '☝️', kop: `Eén ${dagNaam}`, tekst, namen };
     });
-}
-
-/* ---- De lievelingssport, maar nooit op die dag ----------------------- */
-
-function sportWeekdagFeiten(personen: Persoon[], lege: LegeDag[]): CijfersFeit[] {
-  const feiten: CijfersFeit[] = [];
-  for (const p of personen) {
-    const top = [...p.perSport.entries()].sort((a, b) => b[1] - a[1])[0];
-    if (!top || top[1] < MIN_KEER_WEEKDAG || top[0] === 'onbekend') continue;
-    const [tag, aantal] = top;
-    const perDag = new Array(7).fill(0);
-    const welDag = new Array(7).fill(0);
-    for (const [datum, tags] of p.sportPerDag) {
-      welDag[weekdag(datum)] += tags.length;
-      perDag[weekdag(datum)] += tags.filter((t) => t === tag).length;
-    }
-    // Alleen doordeweeks, en alleen als je op die dag wél iets anders deed:
-    // anders zegt de lege weekdag het al.
-    for (let dag = 0; dag < 5; dag++) {
-      if (perDag[dag] > 0 || welDag[dag] === 0) continue;
-      if (lege.some((l) => l.persoon === p && l.dag === dag)) continue;
-      const dagNaam = WEEKDAGEN[dag];
-      const wat = tag === 'gym' ? `ging dit jaar ${aantal} keer naar de sportschool` : `deed dit jaar ${aantal} keer ${sportNaam(tag).toLowerCase()}`;
-      feiten.push({
-        emoji: sportEmoji(tag),
-        kop: tag === 'gym' ? `Nooit sportschool op ${dagNaam}` : `Nooit ${sportNaam(tag).toLowerCase()} op ${dagNaam}`,
-        tekst: `${p.naam} ${wat}, maar nooit op een ${dagNaam}. Wel ${keer(welDag[dag])} iets anders.`,
-        namen: [p.naam],
-      });
-    }
-  }
-  return feiten;
 }
 
 /** De weetjes voor de laatste dia van de sportcijfers, belangrijkste eerst. */
@@ -178,6 +158,5 @@ export function opvallend(analyse: Analyse): CijfersFeit[] {
   return [
     ...nooitZonder(analyse.personen),
     ...weekdagFeiten(lege),
-    ...sportWeekdagFeiten(analyse.personen, lege),
   ].slice(0, MAX_FEITEN);
 }
