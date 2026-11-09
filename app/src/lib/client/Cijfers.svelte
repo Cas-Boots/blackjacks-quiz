@@ -24,9 +24,13 @@
 
   let sport = $derived(cijfers.soort === 'sport');
   let voorspellingen = $derived(cijfers.soort === 'voorspellingen');
+  /** De laatste stap bij de sport: de opvallende weetjes, op de televisie én de telefoon. */
+  let weetjes = $derived(
+    sport && cijfers.opvallend?.length && cijfers.stap === cijfers.stappen - 1 ? cijfers.opvallend : null,
+  );
   /** Wie er op deze stap centraal staat. */
   let persoon = $derived<CijfersPersoon | null>(
-    voorspellingen ? null
+    voorspellingen || weetjes ? null
       : alleen ? cijfers.personen.find((p) => p.naam === alleen) ?? null
         : cijfers.stap > 0 ? cijfers.personen[cijfers.stap - 1] ?? null : null,
   );
@@ -175,6 +179,26 @@
         </p>
       {/if}
     {/if}
+  {:else if weetjes}
+    <!-- ══ Opvallend ═════════════════════════════════════════════════ -->
+    <div class="kop" in:fly={{ x: -18, duration: 420, easing: cubicOut }}>
+      <p class="etiket">Onze sportcompetitie · tot {peildatumTekst}</p>
+      <h2 class="vraag">Opvallend</h2>
+    </div>
+    <div class="weetjes">
+      {#each weetjes as f, i (f.kop)}
+        <div class="weetje" class:ik={!!alleen && f.namen.includes(alleen)} in:fly={{ y: 16, duration: 420, delay: 250 + i * 700, easing: cubicOut }}>
+          <span class="teken" aria-hidden="true">{f.emoji}</span>
+          <div>
+            <h3>{f.kop}</h3>
+            <p>{f.tekst}</p>
+          </div>
+          <span class="portretten">
+            {#each f.namen as naam (naam)}<Portret {naam} foto={fotoVan(naam)} dier={dierVanNaam(naam)} />{/each}
+          </span>
+        </div>
+      {/each}
+    </div>
   {:else if persoon}
     <!-- ══ Eén persoon ═══════════════════════════════════════════════ -->
     {@const p = persoon}
@@ -545,6 +569,57 @@
   }
   .compact .vlaggenrij {
     display: none;
+  }
+
+  /* ---- opvallend ---- */
+  .weetjes {
+    display: grid;
+    gap: clamp(0.6rem, 1.4vh, 1rem);
+  }
+  .weetje {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: clamp(0.7rem, 1.6vw, 1.3rem);
+    padding: clamp(0.7rem, 1.4vw, 1.1rem) clamp(0.9rem, 1.8vw, 1.5rem);
+    border-radius: 14px;
+    border: 1px solid var(--rand);
+    background: linear-gradient(170deg, var(--vilt-hoog), var(--vilt-diep));
+  }
+  .weetje.ik {
+    border-color: var(--goud-diep);
+  }
+  .weetje .teken {
+    font-size: calc(var(--fs-naam) * 1.1);
+    line-height: 1;
+  }
+  .weetje h3 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: calc(var(--fs-naam) * 0.85);
+    color: var(--goud-licht);
+  }
+  .weetje p {
+    margin: 0.2rem 0 0;
+    font-size: calc(var(--fs-lood) * 0.9);
+    color: var(--ivoor-zacht);
+  }
+  .weetje .portretten {
+    display: flex;
+    gap: 0.3rem;
+  }
+  .compact .weetje {
+    grid-template-columns: auto 1fr;
+  }
+  .compact .weetje .portretten {
+    display: none;
+  }
+  .compact .weetje h3 {
+    font-size: 1.05rem;
+  }
+  .compact .weetje p {
+    font-size: 0.9rem;
   }
 
   /* ---- voorspellingen ---- */

@@ -87,6 +87,12 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
   een terugblik daarop valt goed. Ververs de cijfers met
   `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Na de sportcijfers komt "Opvallend"**: één dia met weetjes van het
+  soort nooit, één keer, altijd (Bastiaan sportte nooit zonder Liz, Rik
+  één keer op een dinsdag). De app rekent ze op de avond uit
+  (`server/recap/opvallend.ts`); wat niet meer klopt, valt weg. Rik en Eva,
+  en Bastiaan en Liz zijn stellen: dat ze samen sporten is dus niet
+  opvallend. Gezamenlijke uitjes en de drukste dag vond Cas saai.
 - **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om
   middernacht met sporten, jij gaat door in je eigen tempo. In welke week van
