@@ -11,6 +11,7 @@
  * gebeurt (Joris nooit naar de sportschool op vrijdag). Te saai.
  */
 import type { CijfersFeit } from '$lib/shared/state';
+import { VERKLARING } from '$lib/content/opvallend';
 import { opsomming, telwoord, type Analyse, type Persoon } from './analyse';
 
 /** Zo noemen we elkaar. De portretjes gaan op de volledige naam. */
@@ -152,11 +153,33 @@ function weekdagFeiten(lege: LegeDag[]): CijfersFeit[] {
     });
 }
 
-/** De weetjes voor de laatste dia van de sportcijfers, belangrijkste eerst. */
+/** De sleutel waarmee een verklaring in `content/opvallend.ts` staat. */
+export function verklaringSleutel(feit: CijfersFeit): string {
+  return `${feit.kop}: ${[...feit.namen].sort().join(' + ')}`;
+}
+
+/**
+ * Zet de weetjes zo neer dat niemand twee keer achter elkaar aan de beurt
+ * is: anders staan de stellen met twee weetjes onder elkaar. Lukt het niet
+ * meer, dan komt de rest in de oorspronkelijke volgorde.
+ */
+function afgewisseld(feiten: CijfersFeit[]): CijfersFeit[] {
+  const over = [...feiten];
+  const uit: CijfersFeit[] = [];
+  while (over.length) {
+    const vorige = uit.at(-1);
+    const i = vorige ? over.findIndex((f) => !f.namen.some((n) => vorige.namen.includes(n))) : 0;
+    uit.push(over.splice(Math.max(0, i), 1)[0]);
+  }
+  return uit;
+}
+
+/** De weetjes voor de laatste dia van de sportcijfers. */
 export function opvallend(analyse: Analyse): CijfersFeit[] {
   const lege = legeDagen(analyse.personen);
-  return [
-    ...nooitZonder(analyse.personen),
-    ...weekdagFeiten(lege),
-  ].slice(0, MAX_FEITEN);
+  const feiten = [...nooitZonder(analyse.personen), ...weekdagFeiten(lege)].slice(0, MAX_FEITEN);
+  return afgewisseld(feiten).map((f) => {
+    const bij = VERKLARING[verklaringSleutel(f)];
+    return bij ? { ...f, bij } : f;
+  });
 }

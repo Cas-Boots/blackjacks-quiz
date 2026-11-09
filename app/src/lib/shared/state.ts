@@ -285,6 +285,8 @@ export interface CijfersFeit {
   emoji: string;
   kop: string;
   tekst: string;
+  /** Wat erachter zit, als Cas dat erbij heeft gezet (`content/opvallend.ts`). */
+  bij?: string;
   /** Om wie het gaat, voor de portretjes. */
   namen: string[];
 }

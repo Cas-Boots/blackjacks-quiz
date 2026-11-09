@@ -192,6 +192,7 @@
           <div>
             <h3>{f.kop}</h3>
             <p>{f.tekst}</p>
+            {#if f.bij}<p class="bij">{f.bij}</p>{/if}
           </div>
           <span class="portretten">
             {#each f.namen as naam (naam)}<Portret {naam} foto={fotoVan(naam)} dier={dierVanNaam(naam)} />{/each}
@@ -604,6 +605,10 @@
     margin: 0.2rem 0 0;
     font-size: calc(var(--fs-lood) * 0.9);
     color: var(--ivoor-zacht);
+  }
+  .weetje p.bij {
+    font-style: italic;
+    color: var(--salie);
   }
   .weetje .portretten {
     display: flex;

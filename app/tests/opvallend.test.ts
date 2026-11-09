@@ -104,6 +104,20 @@ describe('opvallend', () => {
     expect(feiten).toEqual([]);
   });
 
+  it('zet niemand twee keer achter elkaar, en zet de verklaring erbij', () => {
+    // Bas en Liz: altijd samen, nooit op zaterdag. Rik: één dinsdag.
+    const week = [0, 1, 2, 3, 4, 6];
+    const samen = dagen(week, 7).map(met('gym'));
+    const feiten = opvallend(analyseer(jaar({
+      Bastiaan: samen,
+      Liz: [...samen, ...dagen([0], 4, 10).map(met('running'))],
+      Rik: [...dagen([0, 2, 3, 4, 5, 6], 7).map(met('padel')), ['2026-04-21', 'padel']],
+    })));
+    expect(feiten.map((f) => f.kop)).toEqual(['Bas nooit zonder Liz', 'Eén dinsdag', 'Nooit op zaterdag']);
+    expect(feiten[2].bij).toBe('Op zaterdag klussen ze.');
+    expect(feiten[0].bij).toBeUndefined();
+  });
+
   it('laat de dia weg als er niets opvalt', () => {
     const a = analyseer(jaar({ An: dagen([0, 1, 2, 3, 4, 5, 6], 2).map(met('gym')) }));
     expect(opvallend(a)).toEqual([]);

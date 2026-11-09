@@ -94,7 +94,9 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   en Bastiaan en Liz zijn stellen: dat ze samen sporten is dus niet
   opvallend. Gezamenlijke uitjes, de drukste dag en "nooit sportschool op
   vrijdag" vond Cas saai. Dat Bas en Liz nooit op zaterdag sporten, komt
-  doordat ze dit jaar elke zaterdag klussen: grappig, en mag blijven.
+  doordat ze dit jaar elke zaterdag klussen: dat mag blijven, mét die
+  verklaring erbij (`content/opvallend.ts`). Niemand staat twee keer
+  achter elkaar, dus de weetjes van een stel niet onder elkaar.
 - **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om
   middernacht met sporten, jij gaat door in je eigen tempo. In welke week van
