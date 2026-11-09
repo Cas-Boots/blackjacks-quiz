@@ -185,9 +185,9 @@
       <p class="etiket">Onze sportcompetitie · tot {peildatumTekst}</p>
       <h2 class="vraag">Opvallend</h2>
     </div>
-    <div class="weetjes">
+    <div class="weetjes" class:twee={weetjes.length > 4}>
       {#each weetjes as f, i (f.kop)}
-        <div class="weetje" class:ik={!!alleen && f.namen.includes(alleen)} in:fly={{ y: 16, duration: 420, delay: 250 + i * 700, easing: cubicOut }}>
+        <div class="weetje" class:ik={!!alleen && f.namen.includes(alleen)} in:fly={{ y: 16, duration: 420, delay: 250 + i * (weetjes.length > 4 ? 450 : 700), easing: cubicOut }}>
           <span class="teken" aria-hidden="true">{f.emoji}</span>
           <div>
             <h3>{f.kop}</h3>
@@ -576,6 +576,18 @@
   .weetjes {
     display: grid;
     gap: clamp(0.6rem, 1.4vh, 1rem);
+  }
+  .weetjes.twee {
+    grid-template-columns: 1fr 1fr;
+  }
+  .compact .weetjes.twee {
+    grid-template-columns: 1fr;
+  }
+  .weetjes.twee .weetje p {
+    font-size: calc(var(--fs-lood) * 0.75);
+  }
+  .weetjes.twee .weetje h3 {
+    font-size: calc(var(--fs-naam) * 0.7);
   }
   .weetje {
     display: grid;

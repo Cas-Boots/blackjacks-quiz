@@ -418,6 +418,11 @@ const OPVALLEND: CijfersFeit[] = [
   { emoji: '🫶', kop: 'Bas nooit zonder Liz', tekst: 'Bas sportte dit jaar op 93 dagen, en op elk daarvan sportte Liz ook. Liz ging wel veertien keer zonder Bas.', namen: ['Bastiaan', 'Liz'] },
   { emoji: '☝️', kop: 'Eén dinsdag', tekst: 'Rik sportte dit jaar 59 keer. Op een dinsdag maar één keer: 21 april.', namen: ['Rik'] },
   { emoji: '🚫', kop: 'Nooit op zaterdag', tekst: 'Liz en Bas sportten dit jaar 109 en 94 keer, en geen van beiden ooit op een zaterdag.', bij: 'Op zaterdag klussen ze.', namen: ['Liz', 'Bastiaan'] },
+  { emoji: '🚴', kop: 'Eén keer gefietst', tekst: 'Cas sportte dit jaar 137 keer. Fietsen: één keer, op 16 april.', namen: ['Cas'] },
+  { emoji: '🍰', kop: 'Nooit de dag na de taart', tekst: 'Joris at dit jaar op vijf dagen taart, en sportte de dag erna geen enkele keer.', namen: ['Joris'] },
+  { emoji: '💘', kop: 'Valentijnsdag', tekst: 'Op Valentijnsdag sportte er maar één van ons: Eva.', namen: ['Eva'] },
+  { emoji: '🛋️', kop: 'Niemand sportte', tekst: 'Op Koningsdag sportte niemand van ons. Op de dag van de WK-finale ook niet.', namen: [] },
+  { emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: 'Op 13 februari en 13 maart sportte niemand van ons. Allebei vrijdag de dertiende. En 13 november moet nog komen.', namen: [] },
 ];
 
 function voorspellingen(stap: number): Cijfers {

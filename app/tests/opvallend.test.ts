@@ -14,19 +14,22 @@ function dagen(weekdagen: number[], weken: number, vanafWeek = 0): string[] {
 }
 
 /** Een verzonnen jaar: per persoon een lijst [datum, sport]. */
-function jaar(personen: Record<string, [string, string][]>): RecapExport {
+function jaar(personen: Record<string, [string, string][]>, peildatum = '2026-11-05', taart: Record<string, string[]> = {}): RecapExport {
   const namen = Object.keys(personen);
   let id = 0;
   return {
-    exportedAt: '2026-11-05T00:00:00.000Z',
+    exportedAt: `${peildatum}T00:00:00.000Z`,
     seasons: [{ id: 1, year: 2026, name: '2026', is_active: 1 }],
     people: namen.map((name, i) => ({ id: i + 1, name, emoji: '', is_active: 1 })),
     metrics: [{ id: 1, name: 'Sporting' }, { id: 2, name: 'Cakes Eaten' }],
-    entries: namen.flatMap((naam, i) =>
-      personen[naam].map(([entry_date, tags]) => ({
+    entries: namen.flatMap((naam, i) => [
+      ...personen[naam].map(([entry_date, tags]) => ({
         id: ++id, season_id: 1, person_id: i + 1, metric_id: 1, entry_date, deleted_at: null, tags,
       })),
-    ),
+      ...(taart[naam] ?? []).map((entry_date) => ({
+        id: ++id, season_id: 1, person_id: i + 1, metric_id: 2, entry_date, deleted_at: null, tags: null,
+      })),
+    ]),
     goals: [],
     countries_visited: [],
   };
@@ -101,7 +104,7 @@ describe('opvallend', () => {
     const feiten = opvallend(analyseer(jaar({
       Joris: [...dagen([0, 1, 2, 3, 5, 6], 6).map(met('gym')), ...dagen([4], 6).map(met('running'))],
     })));
-    expect(feiten).toEqual([]);
+    expect(feiten.filter((f) => f.kop.includes('vrijdag') || f.kop.includes('sportschool'))).toEqual([]);
   });
 
   it('zet niemand twee keer achter elkaar, en zet de verklaring erbij', () => {
@@ -113,13 +116,46 @@ describe('opvallend', () => {
       Liz: [...samen, ...dagen([0], 4, 10).map(met('running'))],
       Rik: [...dagen([0, 2, 3, 4, 5, 6], 7).map(met('padel')), ['2026-04-21', 'padel']],
     })));
-    expect(feiten.map((f) => f.kop)).toEqual(['Bas nooit zonder Liz', 'Eén dinsdag', 'Nooit op zaterdag']);
+    expect(feiten.map((f) => f.kop).slice(0, 3)).toEqual(['Bas nooit zonder Liz', 'Eén dinsdag', 'Nooit op zaterdag']);
     expect(feiten[2].bij).toBe('Op zaterdag klussen ze.');
     expect(feiten[0].bij).toBeUndefined();
   });
 
+  it('ziet een vrijdag de dertiende zonder sport, en noemt wat nog komt', () => {
+    const feiten = opvallend(analyseer(jaar({ An: [['2026-02-12', 'gym'], ['2026-03-14', 'gym']] })));
+    expect(feiten.find((f) => f.kop === 'Vrijdag de dertiende')?.tekst).toBe(
+      'Op 13 februari en 13 maart sportte niemand van ons. Allebei vrijdag de dertiende. En 13 november moet nog komen.',
+    );
+    const wel = opvallend(analyseer(jaar({ An: [['2026-03-13', 'gym']] })));
+    expect(wel.find((f) => f.kop === 'Vrijdag de dertiende')).toBeUndefined();
+  });
+
+  it('ziet wie op een bijzondere dag alleen sportte, en waar niemand sportte', () => {
+    const feiten = opvallend(analyseer(jaar({ Eva: [['2026-02-14', 'gym'], ['2026-07-19', 'padel']], Rik: [['2026-07-19', 'padel']] })));
+    expect(feiten.find((f) => f.kop === 'Valentijnsdag')).toMatchObject({ tekst: 'Op Valentijnsdag sportte er maar één van ons: Eva.', namen: ['Eva'] });
+    expect(feiten.find((f) => f.kop === 'Niemand sportte')?.tekst).toBe('Op Koningsdag sportte niemand van ons.');
+  });
+
+  it('ziet wie de dag na een taart nooit sportte', () => {
+    const taart = ['2026-02-03', '2026-02-19', '2026-03-15', '2026-07-23'];
+    const sport = dagen([0, 2], 30).map(met('gym')).filter(([d]) => !['2026-02-04', '2026-02-20', '2026-03-16', '2026-07-24'].includes(d));
+    const feiten = opvallend(analyseer(jaar({ Joris: sport }, '2026-11-05', { Joris: taart })));
+    expect(feiten.find((f) => f.kop === 'Nooit de dag na de taart')?.tekst).toBe(
+      'Joris at dit jaar op vier dagen taart, en sportte de dag erna geen enkele keer.',
+    );
+    const welErna = opvallend(analyseer(jaar({ Joris: dagen([0, 2], 30).map(met('gym')) }, '2026-11-05', { Joris: taart })));
+    expect(welErna.find((f) => f.kop === 'Nooit de dag na de taart')).toBeUndefined();
+  });
+
+  it('noemt een sport die maar één keer gedaan is, zolang dat zo blijft', () => {
+    const feiten = opvallend(analyseer(jaar({ Cas: [...dagen([0], 3).map(met('gym')), ['2026-04-16', 'cycling']] })));
+    expect(feiten.find((f) => f.kop === 'Eén keer gefietst')?.tekst).toBe('Cas sportte dit jaar 4 keer. Fietsen: één keer, op 16 april.');
+    const twee = opvallend(analyseer(jaar({ Cas: [['2026-04-16', 'cycling'], ['2026-05-16', 'cycling']] })));
+    expect(twee.find((f) => f.kop === 'Eén keer gefietst')).toBeUndefined();
+  });
+
   it('laat de dia weg als er niets opvalt', () => {
-    const a = analyseer(jaar({ An: dagen([0, 1, 2, 3, 4, 5, 6], 2).map(met('gym')) }));
+    const a = analyseer(jaar({ An: dagen([0, 1, 2, 3, 4, 5, 6], 2).map(met('gym')) }, '2026-01-20'));
     expect(opvallend(a)).toEqual([]);
     expect(aantalStappen('sport', a)).toBe(2);
     expect(cijfersVoor('sport', a, 1, { analyse: a, aantalSpelers: 1 }).opvallend).toBeUndefined();
