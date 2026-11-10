@@ -262,9 +262,8 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   was bij het schrijven nog voorlopig; controleer hem.
 - **De cijfers verversen** met de laatste back-up van resolution-recap
   (`npm run recap:snapshot`), en de achtervangteksten nalopen.
-- **Opvallend nalopen** na het verversen (`/tv?test=cijfers-sport-opvallend`
-  toont de vaste testversie; de echte staat in de testproef op de host).
-  Kwetsbaar tot oud en nieuw: Rik nog een keer op dinsdag, Bas één keer
+- **Opvallend nalopen** na het verversen. Let op: `/tv?test=cijfers-sport-opvallend`
+  toont een vaste testversie, niet de echte cijfers. Kwetsbaar tot oud en nieuw: Rik nog een keer op dinsdag, Bas één keer
   zonder Liz, Eva terug in de sportschool, Joris sport de dag na het
   hardlopen. Dan valt dat weetje weg en moet er voor die persoon iets
   anders komen. Vrijdag 13 november: sporten er één of twee, dan wordt dat
