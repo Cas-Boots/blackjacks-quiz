@@ -20,5 +20,5 @@ export const VERKLARING: Record<string, string> = {
  * diegene er nog een keer op uit, dan valt het weetje weg.
  */
 export const EEN_KEER: { wie: string; sport: string; kop: string }[] = [
-  { wie: 'Cas', sport: 'cycling', kop: 'Eén keer gefietst' },
+  // Cas en fietsen stond hier; Cas koos liever "helemaal alleen".
 ];

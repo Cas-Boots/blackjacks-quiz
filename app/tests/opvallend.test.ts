@@ -144,11 +144,33 @@ describe('opvallend', () => {
     expect(feiten.map((f) => f.kop)).not.toContain('Niemand sportte');
   });
 
-  it('noemt een sport die maar één keer gedaan is, zolang dat zo blijft', () => {
-    const feiten = opvallend(analyseer(jaar({ Cas: [...dagen([0], 3).map(met('gym')), ['2026-04-16', 'cycling']] })));
-    expect(feiten.find((f) => f.kop === 'Eén keer gefietst')?.tekst).toBe('Cas sportte dit jaar 4 keer. Fietsen: één keer, op 16 april.');
-    const twee = opvallend(analyseer(jaar({ Cas: [['2026-04-16', 'cycling'], ['2026-05-16', 'cycling']] })));
-    expect(twee.find((f) => f.kop === 'Eén keer gefietst')).toBeUndefined();
+  it('ziet wie verreweg het vaakst helemaal alleen sportte', () => {
+    const feiten = opvallend(analyseer(jaar({
+      Cas: dagen([0, 1, 2, 3], 10).map(met('gym')),
+      Joris: dagen([0], 10).map(met('gym')),
+    })));
+    expect(feiten.find((f) => f.kop === 'Helemaal alleen')).toMatchObject({
+      tekst: 'Op 30 dagen sportte Cas, en verder niemand van ons.',
+      namen: ['Cas'],
+    });
+    const gelijk = opvallend(analyseer(jaar({
+      Cas: dagen([0, 1, 2, 3], 10).map(met('gym')),
+      Joris: dagen([4, 5, 6], 10).map(met('gym')),
+    })));
+    expect(gelijk.find((f) => f.kop === 'Helemaal alleen')).toBeUndefined();
+  });
+
+  it('ziet wie een sport inruilde voor een andere', () => {
+    const feiten = opvallend(analyseer(jaar({
+      Eva: [...dagen([0, 2], 15).map(met('gym')), ...dagen([0, 2, 4], 6, 30).map(met('padel'))],
+    })));
+    expect(feiten.find((f) => f.kop === 'Van de sportschool naar padel')?.tekst).toBe(
+      'Eva ging dit jaar 30 keer naar de sportschool, maar sinds 15 april niet meer. Sindsdien: achttien keer padel.',
+    );
+    const nogBezig = opvallend(analyseer(jaar({
+      Eva: [...dagen([0, 2], 15).map(met('gym')), ...dagen([0, 2, 4], 6, 30).map(met('padel')), ['2026-10-30', 'gym']],
+    })));
+    expect(nogBezig.find((f) => f.kop.startsWith('Van de sportschool'))).toBeUndefined();
   });
 
   it('laat de dia weg als er niets opvalt', () => {

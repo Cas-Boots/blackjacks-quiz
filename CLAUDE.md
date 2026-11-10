@@ -97,11 +97,12 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   doordat ze dit jaar elke zaterdag klussen: dat mag blijven, mét die
   verklaring erbij (`content/opvallend.ts`). Niemand staat twee keer
   achter elkaar, dus de weetjes van een stel niet onder elkaar. Het doel:
-  voor iedereen één. Nu ook vrijdag de dertiende (favoriet), Cas die één
-  keer fietste en Joris die na het hardlopen de dag erna nooit sportte.
-  "Eén keer"-sporten staan in `content/opvallend.ts`. Niet doen: feestdagen
-  (Valentijnsdag, Koningsdag, de WK-finale), Joris die na taart nooit
-  sportte (vervangen), nooit drie dagen achter
+  voor iedereen één. Nu ook vrijdag de dertiende (favoriet), Cas die op
+  41 dagen helemaal alleen sportte, Eva die de sportschool inruilde voor
+  padel en Joris die na het hardlopen de dag erna nooit sportte.
+  "Eén keer"-sporten kun je in `content/opvallend.ts` zetten. Niet doen:
+  feestdagen (Valentijnsdag, Koningsdag, de WK-finale), Joris die na taart
+  nooit sportte en Cas die één keer fietste (vervangen), nooit drie dagen achter
   elkaar (saai), de langste reeks (staat al op de persoonlijke kaart).
 - **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om

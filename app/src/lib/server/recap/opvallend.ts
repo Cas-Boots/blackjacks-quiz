@@ -32,6 +32,13 @@ function roep(naam: string): string {
 const MIN_DAGEN_SAMEN = 30;
 /** Pas vanaf zoveel keer sporten zegt een lege weekdag iets (gemiddeld vijf per weekdag). */
 const MIN_KEER_WEEKDAG = 35;
+/** Pas vanaf zoveel dagen zegt "helemaal alleen" iets, en dan minstens twee keer zo vaak als de rest. */
+const MIN_ALLEEN = 20;
+/** Een sport die je zo vaak deed en al zoveel dagen niet meer, heb je ingeruild. */
+const MIN_KEER_GERUILD = 20;
+const DAGEN_GESTOPT = 42;
+/** Wat je ervoor in de plaats deed, moet je sindsdien minstens zo vaak gedaan hebben. */
+const MIN_KEER_NIEUW = 10;
 /** Zoveel weetjes passen op één dia (in twee kolommen). */
 const MAX_FEITEN = 8;
 /** Pas vanaf zoveel keer zegt "nooit de dag na deze sport" iets. */
@@ -242,6 +249,60 @@ function dagErnaFeiten(analyse: Analyse): CijfersFeit[] {
   return feiten;
 }
 
+/* ---- Helemaal alleen, en ingeruild ---------------------------------- */
+
+/** Wie het vaakst de enige van ons was die die dag sportte, als dat ver boven de rest uitsteekt. */
+function alleenFeiten(personen: Persoon[]): CijfersFeit[] {
+  const alleen = personen
+    .map((p) => ({
+      p,
+      n: [...p.sportPerDag.keys()].filter((d) => personen.every((o) => o === p || !o.sportPerDag.has(d))).length,
+    }))
+    .sort((a, b) => b.n - a.n);
+  const [eerste, tweede] = alleen;
+  if (!eerste || eerste.n < MIN_ALLEEN || (tweede && eerste.n < 2 * tweede.n)) return [];
+  const naam = roep(eerste.p.naam);
+  const rest = tweede && tweede.n > 0 ? ` Bij ${roep(tweede.p.naam)}, de nummer twee, was dat ${keer(tweede.n)}.` : '';
+  return [{
+    emoji: '🦸',
+    kop: 'Helemaal alleen',
+    tekst: `Op ${eerste.n} dagen sportte ${naam}, en verder niemand van ons.${rest}`,
+    namen: [eerste.p.naam],
+  }];
+}
+
+function dagenTussen(van: string, tot: string): number {
+  return Math.round((Date.parse(`${tot}T00:00:00Z`) - Date.parse(`${van}T00:00:00Z`)) / 86_400_000);
+}
+
+/** Een sport die iemand vaak deed en opeens niet meer, met wat ervoor in de plaats kwam. */
+function geruildFeiten(analyse: Analyse): CijfersFeit[] {
+  const feiten: CijfersFeit[] = [];
+  for (const p of analyse.personen) {
+    for (const [oud, aantal] of p.perSport) {
+      if (aantal < MIN_KEER_GERUILD || oud === 'onbekend') continue;
+      const laatste = [...p.sportPerDag].filter(([, tags]) => tags.includes(oud)).map(([d]) => d).sort().at(-1);
+      if (!laatste || dagenTussen(laatste, analyse.peildatum) < DAGEN_GESTOPT) continue;
+      const sinds = new Map<string, number>();
+      for (const [d, tags] of p.sportPerDag) {
+        if (d > laatste) for (const t of tags) sinds.set(t, (sinds.get(t) ?? 0) + 1);
+      }
+      const nieuw = [...sinds].sort((a, b) => b[1] - a[1])[0];
+      if (!nieuw || nieuw[1] < MIN_KEER_NIEUW || nieuw[0] === 'onbekend') continue;
+      const naam = roep(p.naam);
+      const oudNaam = oud === 'gym' ? 'de sportschool' : sportNaam(oud).toLowerCase();
+      const nieuwNaam = nieuw[0] === 'gym' ? 'de sportschool' : sportNaam(nieuw[0]).toLowerCase();
+      feiten.push({
+        emoji: '🔁',
+        kop: `Van ${oudNaam} naar ${nieuwNaam}`,
+        tekst: `${naam} ${deedKeer(oud, aantal)}, maar sinds ${datumTekst(laatste)} niet meer. Sindsdien: ${keer(nieuw[1])} ${nieuwNaam}.`,
+        namen: [p.naam],
+      });
+    }
+  }
+  return feiten;
+}
+
 /** De sleutel waarmee een verklaring in `content/opvallend.ts` staat. */
 export function verklaringSleutel(feit: CijfersFeit): string {
   return `${feit.kop}: ${[...feit.namen].sort().join(' + ')}`;
@@ -270,6 +331,8 @@ export function opvallend(analyse: Analyse): CijfersFeit[] {
     ...nooitZonder(analyse.personen),
     ...weekdagFeiten(lege),
     ...eenKeerFeiten(analyse.personen),
+    ...alleenFeiten(analyse.personen),
+    ...geruildFeiten(analyse),
     ...dagErnaFeiten(analyse),
     ...dertiendeFeit(analyse),
   ].slice(0, MAX_FEITEN);
