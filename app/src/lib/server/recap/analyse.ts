@@ -37,6 +37,8 @@ export interface Persoon extends CijfersPersoon {
   id: number;
   /** Aantal keer per sporttag (na het gelijktrekken van oude namen). */
   perSport: Map<string, number>;
+  /** Per sportdag de sporttags van die dag, 'JJJJ-MM-DD' → tags. */
+  sportPerDag: Map<string, string[]>;
 }
 
 export interface Analyse {
@@ -191,6 +193,7 @@ export function analyseer(data: RecapExport): Analyse {
       const sportDagen: Record<string, number> = {};
       const taartDagen: Record<string, number> = {};
       const perSport = new Map<string, number>();
+      const sportPerDag = new Map<string, string[]>();
       let sportTotaal = 0;
       let taartTotaal = 0;
       for (const e of mijn) {
@@ -199,6 +202,7 @@ export function analyseer(data: RecapExport): Analyse {
           sportDagen[e.entry_date] = (sportDagen[e.entry_date] ?? 0) + 1;
           const tag = sportTag(e.tags);
           perSport.set(tag, (perSport.get(tag) ?? 0) + 1);
+          sportPerDag.set(e.entry_date, [...(sportPerDag.get(e.entry_date) ?? []), tag]);
           sporten.set(tag, (sporten.get(tag) ?? 0) + 1);
         } else if (e.metric_id === taartId) {
           taartTotaal += 1;
@@ -220,6 +224,7 @@ export function analyseer(data: RecapExport): Analyse {
         naam: p.name,
         emoji: p.emoji ?? '',
         perSport,
+        sportPerDag,
         sport: {
           totaal: sportTotaal,
           doel: doel ? doel.target : null,

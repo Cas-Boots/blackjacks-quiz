@@ -1,16 +1,20 @@
 /**
  * De dia's met cijfers na een recap-ronde: eerst het overzicht van
- * iedereen, dan één persoon per stap, in volgorde van de ranglijst.
+ * iedereen, dan één persoon per stap, in volgorde van de ranglijst. Bij de
+ * sport komt daar als laatste stap "Opvallend" achter, als er iets opvalt.
  */
 import type { CijfersSoort } from '$lib/content/types';
 import type { Cijfers } from '$lib/shared/state';
 import { publiek, type Analyse } from './analyse';
+import { opvallend } from './opvallend';
 import { beoordeelVoorspellingen, type Omgeving } from './voorspellingen';
 import { VOORSPELLINGEN } from '$lib/content/voorspellingen';
 
-/** Het overzicht, plus één stap per persoon — of per voorspelling. */
+/** Het overzicht, plus één stap per persoon — of per voorspelling — en bij de sport de weetjes. */
 export function aantalStappen(soort: CijfersSoort, analyse: Analyse): number {
-  return (soort === 'voorspellingen' ? VOORSPELLINGEN.length : analyse.personen.length) + 1;
+  if (soort === 'voorspellingen') return VOORSPELLINGEN.length + 1;
+  const weetjes = soort === 'sport' && opvallend(analyse).length ? 1 : 0;
+  return analyse.personen.length + 1 + weetjes;
 }
 
 export function cijfersVoor(soort: CijfersSoort, analyse: Analyse, stap: number, omgeving: Omgeving): Cijfers {
@@ -30,5 +34,6 @@ export function cijfersVoor(soort: CijfersSoort, analyse: Analyse, stap: number,
     peildatum: analyse.peildatum,
     personen,
     voorspellingen: soort === 'voorspellingen' ? beoordeelVoorspellingen(omgeving) : undefined,
+    opvallend: soort === 'sport' && stappen > personen.length + 1 ? opvallend(analyse) : undefined,
   };
 }

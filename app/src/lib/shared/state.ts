@@ -273,6 +273,22 @@ export interface Cijfers {
   personen: CijfersPersoon[];
   /** Alleen bij soort 'voorspellingen'. */
   voorspellingen?: VoorspellingenUitslag;
+  /**
+   * Alleen bij soort 'sport', en alleen als er iets opvalt: de weetjes van
+   * de laatste stap, na de persoonlijke kaarten.
+   */
+  opvallend?: CijfersFeit[];
+}
+
+/** Een opvallend weetje uit de sportcijfers: nooit, één keer, altijd. */
+export interface CijfersFeit {
+  emoji: string;
+  kop: string;
+  tekst: string;
+  /** Wat erachter zit, als Cas dat erbij heeft gezet (`content/opvallend.ts`). */
+  bij?: string;
+  /** Om wie het gaat, voor de portretjes. */
+  namen: string[];
 }
 
 export interface AntwoordInzending {

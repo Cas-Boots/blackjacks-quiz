@@ -110,6 +110,10 @@ test('de testmodus loopt alle dia’s door zonder spel en zonder de server te ra
   await page.getByRole('button', { name: /Stap verder/ }).click();
   await expect(page.locator('.cijfers .hokjes')).toBeVisible();
 
+  await ga('cijfers-sport-opvallend');
+  await expect(page.locator('.cijfers .weetje')).toHaveCount(7);
+  await expect(page.locator('.cijfers .weetje').first()).toContainText('Bas nooit zonder Liz');
+
   await ga('stand');
   await expect(page.locator('.romp').getByRole('heading', { name: 'Tussenstand' })).toBeVisible();
   await expect(page.locator('.standrij')).toHaveCount(6);

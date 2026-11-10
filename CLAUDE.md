@@ -87,6 +87,26 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   seizoenen (sport 2025, taart 2024) staan in `app/src/lib/server/recap/vorigjaar.ts`:
   een terugblik daarop valt goed. Ververs de cijfers met
   `npm run recap:snapshot -- --backup <db-….db.gz>` uit resolution-recap/backups.
+- **Na de sportcijfers komt "Opvallend"**: één dia met weetjes van het
+  soort nooit, één keer, altijd (Bas sportte nooit zonder Liz, Rik
+  één keer op een dinsdag; Bastiaan heet daar Bas). De app rekent ze op de avond uit
+  (`server/recap/opvallend.ts`); wat niet meer klopt, valt weg. Rik en Eva,
+  en Bastiaan en Liz zijn stellen: dat ze samen sporten is dus niet
+  opvallend. Gezamenlijke uitjes, de drukste dag en "nooit sportschool op
+  vrijdag" vond Cas saai. Dat Bas en Liz nooit op zaterdag sporten, komt
+  doordat ze dit jaar elke zaterdag klussen: dat mag blijven, mét die
+  verklaring erbij (`content/opvallend.ts`). Niemand staat twee keer
+  achter elkaar, dus de weetjes van een stel niet onder elkaar. Het doel:
+  voor iedereen één. Nu ook vrijdag de dertiende (favoriet), Cas die op
+  41 dagen helemaal alleen sportte, Eva die de sportschool inruilde voor
+  padel en Joris die na het hardlopen de dag erna nooit sportte.
+  "Eén keer"-sporten kun je in `content/opvallend.ts` zetten. Niet doen:
+  feestdagen (Valentijnsdag, Koningsdag, de WK-finale), Joris die na taart
+  nooit sportte en Cas die één keer fietste (vervangen), nooit drie dagen achter
+  elkaar (saai), de langste reeks (staat al op de persoonlijke kaart).
+  De toon is die van Cas: kort, met een knipoog, en over zichzelf "ik"
+  ("Op 41 dagen sportte ik in mijn eentje."). Vragen aan het eind mogen
+  ("Rik, wat was er die dag?", "Eva, opgezegd?").
 - **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om
   middernacht met sporten, jij gaat door in je eigen tempo. In welke week van
@@ -242,3 +262,9 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   was bij het schrijven nog voorlopig; controleer hem.
 - **De cijfers verversen** met de laatste back-up van resolution-recap
   (`npm run recap:snapshot`), en de achtervangteksten nalopen.
+- **Opvallend nalopen** na het verversen. Let op: `/tv?test=cijfers-sport-opvallend`
+  toont een vaste testversie, niet de echte cijfers. Kwetsbaar tot oud en nieuw: Rik nog een keer op dinsdag, Bas twee keer
+  zonder Liz, Eva terug in de sportschool, Joris sport de dag na het
+  hardlopen. Dan valt dat weetje weg en moet er voor die persoon iets
+  anders komen. Vrijdag 13 november: sporten er één of twee, dan wordt dat
+  de clou; meer, dan valt het weg.

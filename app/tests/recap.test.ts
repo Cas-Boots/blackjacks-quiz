@@ -250,7 +250,7 @@ describe('voorspellingen', () => {
 describe('cijfers voor de televisie', () => {
   it('zet het overzicht voorop en dan iedereen op volgorde', () => {
     const c = cijfersVoor('sport', analyse, 0, { analyse, aantalSpelers: 6 });
-    expect(c.stappen).toBe(7);
+    expect(c.stappen).toBe(8); // overzicht, zes personen, opvallend
     expect(c.personen[0].naam).toBe('Cas');
     expect(c.personen.map((p) => p.naam)).toEqual(['Cas', 'Liz', 'Eva', 'Bastiaan', 'Joris', 'Rik']);
     expect(c.voorspellingen).toBeUndefined();

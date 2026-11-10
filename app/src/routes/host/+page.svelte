@@ -524,7 +524,7 @@
         {/if}
       {:else if staat?.fase === 'cijfers' && staat.cijfers}
         <span class="fijn">
-          {staat.cijfers.stap === 0 ? 'Overzicht' : staat.cijfers.soort === 'voorspellingen' ? `Voorspelling ${staat.cijfers.stap}` : staat.cijfers.personen[staat.cijfers.stap - 1]?.naam}
+          {staat.cijfers.stap === 0 ? 'Overzicht' : staat.cijfers.soort === 'voorspellingen' ? `Voorspelling ${staat.cijfers.stap}` : staat.cijfers.personen[staat.cijfers.stap - 1]?.naam ?? 'Opvallend'}
           · {staat.cijfers.stap + 1} van {staat.cijfers.stappen}
         </span>
         <button class="knop hoofd" onclick={() => doe('volgende')} disabled={bezig}>

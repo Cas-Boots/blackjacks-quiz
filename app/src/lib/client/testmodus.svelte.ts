@@ -22,7 +22,7 @@ import { PUNT_WAARDE } from '$lib/shared/bonus';
 import { REACTIES, hash } from '$lib/shared/kwinkslagen';
 import { OPDRACHTEN } from '$lib/shared/dieren';
 import type {
-  Cijfers, CijfersPersoon, Fase, JaarDia, JaarRegel, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat,
+  Cijfers, CijfersFeit, CijfersPersoon, Fase, JaarDia, JaarRegel, Onthulling, PubliekeInzending, PubliekeSpeler, PubliekeStaat,
   PubliekTeam, PubliekeVraag, VoorspellingUitslag, VoorspellerStand,
 } from '$lib/shared/state';
 
@@ -407,8 +407,22 @@ function personen(): CijfersPersoon[] {
 
 function cijfers(soort: 'sport' | 'taart', stap: number): Cijfers {
   const lijst = personen();
+  if (soort === 'sport') {
+    // Overzicht, iedereen, en als laatste de weetjes.
+    return { soort, stap, stappen: lijst.length + 2, jaar: JAAR, peildatum: PEILDATUM, personen: lijst, opvallend: OPVALLEND };
+  }
   return { soort, stap, stappen: lijst.length, jaar: JAAR, peildatum: PEILDATUM, personen: lijst };
 }
+
+const OPVALLEND: CijfersFeit[] = [
+  { emoji: '🫶', kop: 'Bas nooit zonder Liz', tekst: 'Op 93 dagen sportte Bas dit jaar. Elke keer was Liz er ook. Liz ging wel veertien keer zonder Bas.', namen: ['Bastiaan', 'Liz'] },
+  { emoji: '☝️', kop: 'Eén dinsdag', tekst: '59 keer gesport, en één keer op een dinsdag: 21 april. Rik, wat was er die dag?', namen: ['Rik'] },
+  { emoji: '🚫', kop: 'Nooit op zaterdag', tekst: 'Liz en Bas: samen 203 keer gesport, nul keer op zaterdag.', bij: 'Dan klussen ze.', namen: ['Liz', 'Bastiaan'] },
+  { emoji: '🦸', kop: 'Helemaal alleen', tekst: 'Op 41 dagen sportte ik in mijn eentje. Niemand anders. Joris komt op vijftien.', namen: ['Cas'] },
+  { emoji: '🔁', kop: 'Van de sportschool naar padel', tekst: '42 keer naar de sportschool, en sinds 17 september niet meer. Wel dertien keer padel. Eva, opgezegd?', namen: ['Eva'] },
+  { emoji: '🏃', kop: 'Na het hardlopen: rust', tekst: 'Joris liep 21 keer hard. En de dag erna? Nooit iets.', namen: ['Joris'] },
+  { emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: 'Vrijdag 13 februari en vrijdag 13 maart: niemand van ons kwam van de bank. Op 13 november zien we wie het durft.', namen: [] },
+];
 
 function voorspellingen(stap: number): Cijfers {
   const zet = (nr: number, vraag: string, soort: VoorspellingUitslag['soort'], uitkomst: string | null, antwoorden: [string, string, number, boolean | null, string?][], extra: Partial<VoorspellingUitslag> = {}): VoorspellingUitslag => ({
@@ -829,6 +843,11 @@ export const DIAS: Dia[] = [
     id: 'cijfers-sport-persoon', hoofdstuk: 'Cijfers van het jaar', titel: 'Sport: één persoon',
     let: 'De jaarkaart met een hokje per dag, het aantal per maand, de sporten en de langste reeks. De dagen na 15 november zijn nog leeg.',
     maak: () => metRonde(R.sport, { fase: 'cijfers', cijfers: cijfers('sport', 1) }),
+  },
+  {
+    id: 'cijfers-sport-opvallend', hoofdstuk: 'Cijfers van het jaar', titel: 'Sport: opvallend',
+    let: 'De laatste stap na de persoonlijke kaarten: nooit, één keer, altijd. Op de avond rekent de app ze zelf uit; wat niet meer klopt, valt weg.',
+    maak: () => metRonde(R.sport, { fase: 'cijfers', cijfers: cijfers('sport', personen().length + 1) }),
   },
   {
     id: 'cijfers-taart', hoofdstuk: 'Cijfers van het jaar', titel: 'Taart: iedereen naast elkaar',
