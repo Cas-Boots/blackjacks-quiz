@@ -28,6 +28,9 @@ function roep(naam: string): string {
   return ROEPNAAM[naam] ?? naam;
 }
 
+/** De quizmaster schrijft de dia, en zegt over zichzelf "ik". */
+const QUIZMASTER = 'Cas';
+
 /** Pas vanaf zoveel sportdagen zegt "nooit zonder" iets. */
 const MIN_DAGEN_SAMEN = 30;
 /** Pas vanaf zoveel keer sporten zegt een lege weekdag iets (gemiddeld vijf per weekdag). */
@@ -82,7 +85,6 @@ function nooitZonder(personen: Persoon[]): CijfersFeit[] {
       gehad.add(sleutel);
       const bAlleen = [...b.sportPerDag.keys()].filter((d) => !a.sportPerDag.has(d)).length;
       const [x, y] = [roep(a.naam), roep(b.naam)];
-      const aantal = `${x} sportte dit jaar op ${dagenA.length} dagen`;
       if (zonder.length === 0 && bAlleen === 0) {
         feiten.push({
           emoji: '👯',
@@ -94,14 +96,14 @@ function nooitZonder(personen: Persoon[]): CijfersFeit[] {
         feiten.push({
           emoji: '🫶',
           kop: `${x} nooit zonder ${y}`,
-          tekst: `${aantal}, en op elk daarvan sportte ${y} ook. ${y} ging wel ${keer(bAlleen)} zonder ${x}.`,
+          tekst: `Op ${dagenA.length} dagen sportte ${x} dit jaar. Elke keer was ${y} er ook. ${y} ging wel ${keer(bAlleen)} zonder ${x}.`,
           namen: [a.naam, b.naam],
         });
       } else {
         feiten.push({
           emoji: '🫶',
           kop: `${x} bijna nooit zonder ${y}`,
-          tekst: `${aantal}. Op één na sportte ${y} die dag ook: alleen op ${dagTekst(zonder[0])} niet.`,
+          tekst: `Op ${dagenA.length} dagen sportte ${x} dit jaar. Op één na was ${y} er elke keer ook: alleen op ${dagTekst(zonder[0])} niet.`,
           namen: [a.naam, b.naam],
         });
       }
@@ -155,14 +157,14 @@ function weekdagFeiten(lege: LegeDag[]): CijfersFeit[] {
       if (aantal === 0) {
         const tekst =
           groep.length === 1
-            ? `${genoemd[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer, en geen enkele keer op een ${dagNaam}.`
-            : `${opsomming(genoemd)} sportten dit jaar ${opsomming(groep.map((l) => String(l.persoon.sport.totaal)))} keer, en geen van ${groep.length === 2 ? 'beiden' : 'allen'} ooit op een ${dagNaam}.`;
+            ? `${genoemd[0]}: ${groep[0].persoon.sport.totaal} keer gesport, nul keer op ${dagNaam}.`
+            : `${opsomming(genoemd)}: samen ${groep.reduce((n, l) => n + l.persoon.sport.totaal, 0)} keer gesport, nul keer op ${dagNaam}.`;
         return { emoji: '🚫', kop: `Nooit op ${dagNaam}`, tekst, namen };
       }
       const tekst =
         groep.length === 1
-          ? `${genoemd[0]} sportte dit jaar ${groep[0].persoon.sport.totaal} keer. Op een ${dagNaam} maar één keer: ${dagTekst(groep[0].datums[0]).replace(`${dagNaam} `, '')}.`
-          : `${opsomming(genoemd)} sportten dit jaar elk maar één keer op een ${dagNaam}.`;
+          ? `${groep[0].persoon.sport.totaal} keer gesport, en één keer op een ${dagNaam}: ${datumTekst(groep[0].datums[0])}. ${genoemd[0]}, wat was er die dag?`
+          : `${opsomming(genoemd)}: elk maar één keer op een ${dagNaam}.`;
       return { emoji: '☝️', kop: `Eén ${dagNaam}`, tekst, namen };
     });
 }
@@ -183,19 +185,31 @@ function vrijdagenDeDertiende(jaar: number): string[] {
   return uit;
 }
 
-/** Op vrijdag de dertiende bleef iedereen thuis. Alleen als dat voor álle geweest zijn geldt. */
+/**
+ * Op vrijdag de dertiende bleef iedereen op de bank. Telt alleen als de
+ * eerdere allemaal leeg bleven. Durfde er op de laatste toch iemand (één of
+ * twee van ons), dan wordt dat de clou.
+ */
 function dertiendeFeit(analyse: Analyse): CijfersFeit[] {
   const alle = vrijdagenDeDertiende(analyse.jaar);
   const geweest = alle.filter((d) => d <= analyse.peildatum);
   const nog = alle.filter((d) => d > analyse.peildatum);
-  if (!geweest.length || geweest.some((d) => wieSportteOp(analyse.personen, d).length)) return [];
-  const welke = opsomming(geweest.map(datumTekst));
-  const tekst =
-    geweest.length === 1
-      ? `Op vrijdag ${welke} sportte niemand van ons.`
-      : `Op ${welke} sportte niemand van ons. ${geweest.length === 2 ? 'Allebei' : `Alle ${telwoord(geweest.length)}`} vrijdag de dertiende.`;
-  const vooruit = nog.length ? ` En ${opsomming(nog.map(datumTekst))} moet nog komen.` : '';
-  return [{ emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: tekst + vooruit, namen: [] }];
+  if (!geweest.length) return [];
+  const leeg = geweest.filter((d) => !wieSportteOp(analyse.personen, d).length);
+  const laatste = geweest.at(-1) as string;
+  const durvers = wieSportteOp(analyse.personen, laatste).map((p) => (p.naam === QUIZMASTER ? 'ik' : roep(p.naam)));
+  const opDeBank = (dagen: string[]) => `${opsomming(dagen.map((d) => `vrijdag ${datumTekst(d)}`)).replace(/^./, (c) => c.toUpperCase())}: niemand van ons kwam van de bank.`;
+  let tekst: string;
+  if (leeg.length === geweest.length) {
+    tekst = opDeBank(leeg) + (nog.length ? ` Op ${datumTekst(nog[0])} zien we wie het durft.` : '');
+  } else if (!leeg.includes(laatste) && leeg.length === geweest.length - 1 && leeg.length >= 1 && durvers.length <= 2) {
+    const wie = opsomming(durvers);
+    const ww = durvers.length === 1 ? (durvers[0] === 'ik' ? 'durfde ik' : `durfde alleen ${wie}`) : `durfden alleen ${wie}`;
+    tekst = `${opDeBank(leeg)} Op ${datumTekst(laatste)} ${ww} het aan.`;
+  } else {
+    return [];
+  }
+  return [{ emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst, namen: [] }];
 }
 
 /* ---- Eén keer, en de dag erna --------------------------------------- */
@@ -224,9 +238,16 @@ function dagErna(datum: string): string {
 
 /** 'liep 21 keer hard', 'ging 48 keer naar de sportschool', 'deed 39 keer padel' */
 function deedKeer(tag: string, n: number): string {
-  if (tag === 'running') return `liep dit jaar ${n} keer hard`;
-  if (tag === 'gym') return `ging dit jaar ${n} keer naar de sportschool`;
-  return `deed dit jaar ${n} keer ${sportNaam(tag).toLowerCase()}`;
+  if (tag === 'running') return `liep ${n} keer hard`;
+  if (tag === 'gym') return `ging ${n} keer naar de sportschool`;
+  return `deed ${n} keer ${sportNaam(tag).toLowerCase()}`;
+}
+
+/** '42 keer naar de sportschool', '21 keer hardgelopen', '39 keer padel' */
+function keerSport(tag: string, n: number): string {
+  if (tag === 'running') return `${keer(n)} hardgelopen`;
+  if (tag === 'gym') return `${keer(n)} naar de sportschool`;
+  return `${keer(n)} ${sportNaam(tag).toLowerCase()}`;
 }
 
 /** Wie na een bepaalde sport de dag erna nooit sportte: na het hardlopen altijd rust. */
@@ -241,7 +262,7 @@ function dagErnaFeiten(analyse: Analyse): CijfersFeit[] {
       feiten.push({
         emoji: sportEmoji(tag),
         kop: `Na ${tag === 'running' ? 'het hardlopen' : sportNaam(tag).toLowerCase()}: rust`,
-        tekst: `${roep(p.naam)} ${deedKeer(tag, aantal)}, en sportte de dag erna geen enkele keer.`,
+        tekst: `${roep(p.naam)} ${deedKeer(tag, aantal)}. En de dag erna? Nooit iets.`,
         namen: [p.naam],
       });
     }
@@ -261,12 +282,18 @@ function alleenFeiten(personen: Persoon[]): CijfersFeit[] {
     .sort((a, b) => b.n - a.n);
   const [eerste, tweede] = alleen;
   if (!eerste || eerste.n < MIN_ALLEEN || (tweede && eerste.n < 2 * tweede.n)) return [];
-  const naam = roep(eerste.p.naam);
-  const rest = tweede && tweede.n > 0 ? ` Bij ${roep(tweede.p.naam)}, de nummer twee, was dat ${keer(tweede.n)}.` : '';
+  const ik = eerste.p.naam === QUIZMASTER;
+  const wie = ik ? 'sportte ik in mijn eentje' : `sportte ${roep(eerste.p.naam)} helemaal alleen`;
+  const rest =
+    tweede && tweede.n > 0
+      ? tweede.p.naam === QUIZMASTER
+        ? ` Ik kom op ${telwoord(tweede.n)}.`
+        : ` ${roep(tweede.p.naam)} komt op ${telwoord(tweede.n)}.`
+      : '';
   return [{
     emoji: '🦸',
     kop: 'Helemaal alleen',
-    tekst: `Op ${eerste.n} dagen sportte ${naam}, en verder niemand van ons.${rest}`,
+    tekst: `Op ${eerste.n} dagen ${wie}. Niemand anders.${rest}`,
     namen: [eerste.p.naam],
   }];
 }
@@ -295,7 +322,7 @@ function geruildFeiten(analyse: Analyse): CijfersFeit[] {
       feiten.push({
         emoji: '🔁',
         kop: `Van ${oudNaam} naar ${nieuwNaam}`,
-        tekst: `${naam} ${deedKeer(oud, aantal)}, maar sinds ${datumTekst(laatste)} niet meer. Sindsdien: ${keer(nieuw[1])} ${nieuwNaam}.`,
+        tekst: `${keerSport(oud, aantal).replace(/^./, (c) => c.toUpperCase())}, en sinds ${datumTekst(laatste)} niet meer. Wel ${keerSport(nieuw[0], nieuw[1])}. ${naam}, ${oud === 'gym' ? 'opgezegd' : 'gestopt'}?`,
         namen: [p.naam],
       });
     }

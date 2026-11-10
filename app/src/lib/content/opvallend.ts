@@ -12,7 +12,7 @@
  * ertussen.
  */
 export const VERKLARING: Record<string, string> = {
-  'Nooit op zaterdag: Bastiaan + Liz': 'Op zaterdag klussen ze.',
+  'Nooit op zaterdag: Bastiaan + Liz': 'Dan klussen ze.',
 };
 
 /**

@@ -415,13 +415,13 @@ function cijfers(soort: 'sport' | 'taart', stap: number): Cijfers {
 }
 
 const OPVALLEND: CijfersFeit[] = [
-  { emoji: '🫶', kop: 'Bas nooit zonder Liz', tekst: 'Bas sportte dit jaar op 93 dagen, en op elk daarvan sportte Liz ook. Liz ging wel veertien keer zonder Bas.', namen: ['Bastiaan', 'Liz'] },
-  { emoji: '☝️', kop: 'Eén dinsdag', tekst: 'Rik sportte dit jaar 59 keer. Op een dinsdag maar één keer: 21 april.', namen: ['Rik'] },
-  { emoji: '🚫', kop: 'Nooit op zaterdag', tekst: 'Liz en Bas sportten dit jaar 109 en 94 keer, en geen van beiden ooit op een zaterdag.', bij: 'Op zaterdag klussen ze.', namen: ['Liz', 'Bastiaan'] },
-  { emoji: '🦸', kop: 'Helemaal alleen', tekst: 'Op 41 dagen sportte Cas, en verder niemand van ons. Bij Joris, de nummer twee, was dat vijftien keer.', namen: ['Cas'] },
-  { emoji: '🔁', kop: 'Van de sportschool naar padel', tekst: 'Eva ging dit jaar 42 keer naar de sportschool, maar sinds 17 september niet meer. Sindsdien: dertien keer padel.', namen: ['Eva'] },
-  { emoji: '🏃', kop: 'Na het hardlopen: rust', tekst: 'Joris liep dit jaar 21 keer hard, en sportte de dag erna geen enkele keer.', namen: ['Joris'] },
-  { emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: 'Op 13 februari en 13 maart sportte niemand van ons. Allebei vrijdag de dertiende. En 13 november moet nog komen.', namen: [] },
+  { emoji: '🫶', kop: 'Bas nooit zonder Liz', tekst: 'Op 93 dagen sportte Bas dit jaar. Elke keer was Liz er ook. Liz ging wel veertien keer zonder Bas.', namen: ['Bastiaan', 'Liz'] },
+  { emoji: '☝️', kop: 'Eén dinsdag', tekst: '59 keer gesport, en één keer op een dinsdag: 21 april. Rik, wat was er die dag?', namen: ['Rik'] },
+  { emoji: '🚫', kop: 'Nooit op zaterdag', tekst: 'Liz en Bas: samen 203 keer gesport, nul keer op zaterdag.', bij: 'Dan klussen ze.', namen: ['Liz', 'Bastiaan'] },
+  { emoji: '🦸', kop: 'Helemaal alleen', tekst: 'Op 41 dagen sportte ik in mijn eentje. Niemand anders. Joris komt op vijftien.', namen: ['Cas'] },
+  { emoji: '🔁', kop: 'Van de sportschool naar padel', tekst: '42 keer naar de sportschool, en sinds 17 september niet meer. Wel dertien keer padel. Eva, opgezegd?', namen: ['Eva'] },
+  { emoji: '🏃', kop: 'Na het hardlopen: rust', tekst: 'Joris liep 21 keer hard. En de dag erna? Nooit iets.', namen: ['Joris'] },
+  { emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: 'Vrijdag 13 februari en vrijdag 13 maart: niemand van ons kwam van de bank. Op 13 november zien we wie het durft.', namen: [] },
 ];
 
 function voorspellingen(stap: number): Cijfers {

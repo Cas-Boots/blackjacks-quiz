@@ -104,6 +104,9 @@ Dit is een bewuste keuze. Het moet niet opvallen dat er gestuurd wordt.
   feestdagen (Valentijnsdag, Koningsdag, de WK-finale), Joris die na taart
   nooit sportte en Cas die één keer fietste (vervangen), nooit drie dagen achter
   elkaar (saai), de langste reeks (staat al op de persoonlijke kaart).
+  De toon is die van Cas: kort, met een knipoog, en over zichzelf "ik"
+  ("Op 41 dagen sportte ik in mijn eentje."). Vragen aan het eind mogen
+  ("Rik, wat was er die dag?", "Eva, opgezegd?").
 - **Ieder zijn eigen getal** (`eigenGetal`): een vraag waarop elke speler een
   ander antwoord heeft, nu de inhaalrace in de sportronde: *Cas stopt om
   middernacht met sporten, jij gaat door in je eigen tempo. In welke week van
@@ -259,3 +262,10 @@ Wat nu nog niet kan, en vóór oudejaarsavond moet gebeuren:
   was bij het schrijven nog voorlopig; controleer hem.
 - **De cijfers verversen** met de laatste back-up van resolution-recap
   (`npm run recap:snapshot`), en de achtervangteksten nalopen.
+- **Opvallend nalopen** na het verversen (`/tv?test=cijfers-sport-opvallend`
+  toont de vaste testversie; de echte staat in de testproef op de host).
+  Kwetsbaar tot oud en nieuw: Rik nog een keer op dinsdag, Bas één keer
+  zonder Liz, Eva terug in de sportschool, Joris sport de dag na het
+  hardlopen. Dan valt dat weetje weg en moet er voor die persoon iets
+  anders komen. Vrijdag 13 november: sporten er één of twee, dan wordt dat
+  de clou; meer, dan valt het weg.
