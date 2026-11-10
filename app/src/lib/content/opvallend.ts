@@ -16,16 +16,6 @@ export const VERKLARING: Record<string, string> = {
 };
 
 /**
- * Dagen waarvan het opvalt als niemand, of maar één van ons, sportte.
- * Sportten er twee of meer, dan zegt de dag niets en valt hij weg.
- */
-export const BIJZONDERE_DAGEN: { datum: string; naam: string; emoji: string }[] = [
-  { datum: '2026-02-14', naam: 'Valentijnsdag', emoji: '💘' },
-  { datum: '2026-04-27', naam: 'Koningsdag', emoji: '👑' },
-  { datum: '2026-07-19', naam: 'de dag van de WK-finale', emoji: '⚽' },
-];
-
-/**
  * Een sport die iemand maar één keer deed, en waarvan dat opvalt. Gaat
  * diegene er nog een keer op uit, dan valt het weetje weg.
  */

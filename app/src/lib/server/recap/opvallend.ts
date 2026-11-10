@@ -3,18 +3,20 @@
  *
  * Geen ranglijst, maar de weetjes van het soort "nooit", "één keer" en
  * "altijd": wie nooit zonder een ander sportte, op welke dag iemand het hele
- * jaar (bijna) niet ging, wat er op vrijdag de dertiende gebeurde. Alles
+ * jaar (bijna) niet ging, wat er op vrijdag de dertiende gebeurde, wie na een
+ * sport de dag erna altijd rust nam. Alles
  * wordt op de avond zelf uitgerekend op de laatste cijfers; wat niet meer
  * klopt, valt vanzelf weg. Het liefst staat iedereen er één keer in.
  *
  * Bewust niet: wie samen sport (dat zijn de stellen, dat weet iedereen),
  * gezamenlijke uitjes, de drukste dag, de langste reeks (die staat al op de
- * persoonlijke kaart), wie nooit drie dagen achter elkaar sportte, en een
+ * persoonlijke kaart), wie nooit drie dagen achter elkaar sportte, feestdagen
+ * (Valentijnsdag, Koningsdag, de WK-finale), Joris en de taart, en een
  * sport die op één weekdag nooit gebeurt (Joris nooit naar de sportschool op
  * vrijdag). Te saai.
  */
 import type { CijfersFeit } from '$lib/shared/state';
-import { BIJZONDERE_DAGEN, EEN_KEER, VERKLARING } from '$lib/content/opvallend';
+import { EEN_KEER, VERKLARING } from '$lib/content/opvallend';
 import { datumTekst, opsomming, sportEmoji, sportNaam, telwoord, type Analyse, type Persoon } from './analyse';
 
 /** Zo noemen we elkaar. De portretjes gaan op de volledige naam. */
@@ -32,8 +34,8 @@ const MIN_DAGEN_SAMEN = 30;
 const MIN_KEER_WEEKDAG = 35;
 /** Zoveel weetjes passen op één dia (in twee kolommen). */
 const MAX_FEITEN = 8;
-/** Pas vanaf zoveel taartdagen zegt "nooit de dag erna" iets. */
-const MIN_TAARTDAGEN = 4;
+/** Pas vanaf zoveel keer zegt "nooit de dag na deze sport" iets. */
+const MIN_KEER_DAG_ERNA = 15;
 
 const WEEKDAGEN = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 const MAANDEN = [
@@ -158,38 +160,10 @@ function weekdagFeiten(lege: LegeDag[]): CijfersFeit[] {
     });
 }
 
-/* ---- Bijzondere dagen ------------------------------------------------ */
+/* ---- Vrijdag de dertiende ------------------------------------------- */
 
 function wieSportteOp(personen: Persoon[], datum: string): Persoon[] {
   return personen.filter((p) => p.sportPerDag.has(datum));
-}
-
-/** Valentijnsdag, Koningsdag, de WK-finale: niemand, of maar één van ons. */
-function dagFeiten(analyse: Analyse): CijfersFeit[] {
-  const feiten: CijfersFeit[] = [];
-  const niemand: string[] = [];
-  for (const dag of BIJZONDERE_DAGEN) {
-    if (dag.datum > analyse.peildatum) continue;
-    const wie = wieSportteOp(analyse.personen, dag.datum);
-    if (wie.length === 0) niemand.push(dag.naam);
-    if (wie.length === 1) {
-      const naam = roep(wie[0].naam);
-      feiten.push({
-        emoji: dag.emoji,
-        kop: dag.naam.charAt(0).toUpperCase() + dag.naam.slice(1),
-        tekst: `Op ${dag.naam} sportte er maar één van ons: ${naam}.`,
-        namen: [wie[0].naam],
-      });
-    }
-  }
-  if (niemand.length) {
-    const [eerste, ...rest] = niemand;
-    const tekst = rest.length
-      ? `Op ${eerste} sportte niemand van ons. Op ${opsomming(rest)} ook niet.`
-      : `Op ${eerste} sportte niemand van ons.`;
-    feiten.push({ emoji: '🛋️', kop: 'Niemand sportte', tekst, namen: [] });
-  }
-  return feiten;
 }
 
 /** Alle vrijdagen de dertiende van het jaar, 'JJJJ-MM-DD'. */
@@ -217,7 +191,7 @@ function dertiendeFeit(analyse: Analyse): CijfersFeit[] {
   return [{ emoji: '🐈‍⬛', kop: 'Vrijdag de dertiende', tekst: tekst + vooruit, namen: [] }];
 }
 
-/* ---- Eén keer, en taart ---------------------------------------------- */
+/* ---- Eén keer, en de dag erna --------------------------------------- */
 
 function eenKeerFeiten(personen: Persoon[]): CijfersFeit[] {
   const feiten: CijfersFeit[] = [];
@@ -236,23 +210,34 @@ function eenKeerFeiten(personen: Persoon[]): CijfersFeit[] {
   return feiten;
 }
 
-/** Wie na een taart de volgende dag nooit sportte. */
-function taartFeiten(personen: Persoon[]): CijfersFeit[] {
+function dagErna(datum: string): string {
+  const d = new Date(Date.UTC(Number(datum.slice(0, 4)), Number(datum.slice(5, 7)) - 1, Number(datum.slice(8, 10)) + 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/** 'liep 21 keer hard', 'ging 48 keer naar de sportschool', 'deed 39 keer padel' */
+function deedKeer(tag: string, n: number): string {
+  if (tag === 'running') return `liep dit jaar ${n} keer hard`;
+  if (tag === 'gym') return `ging dit jaar ${n} keer naar de sportschool`;
+  return `deed dit jaar ${n} keer ${sportNaam(tag).toLowerCase()}`;
+}
+
+/** Wie na een bepaalde sport de dag erna nooit sportte: na het hardlopen altijd rust. */
+function dagErnaFeiten(analyse: Analyse): CijfersFeit[] {
   const feiten: CijfersFeit[] = [];
-  for (const p of personen) {
-    const taartDagen = Object.keys(p.taart.dagen);
-    if (taartDagen.length < MIN_TAARTDAGEN) continue;
-    const dagErna = (datum: string) => {
-      const d = new Date(Date.UTC(Number(datum.slice(0, 4)), Number(datum.slice(5, 7)) - 1, Number(datum.slice(8, 10)) + 1));
-      return d.toISOString().slice(0, 10);
-    };
-    if (taartDagen.some((d) => p.sportPerDag.has(dagErna(d)))) continue;
-    feiten.push({
-      emoji: '🍰',
-      kop: 'Nooit de dag na de taart',
-      tekst: `${roep(p.naam)} at dit jaar op ${telwoord(taartDagen.length)} dagen taart, en sportte de dag erna geen enkele keer.`,
-      namen: [p.naam],
-    });
+  for (const p of analyse.personen) {
+    for (const [tag, aantal] of p.perSport) {
+      if (aantal < MIN_KEER_DAG_ERNA || tag === 'onbekend') continue;
+      // Wat op de peildatum gebeurde, heeft nog geen dag erna.
+      const dagen = [...p.sportPerDag].filter(([d, tags]) => tags.includes(tag) && d < analyse.peildatum).map(([d]) => d);
+      if (dagen.some((d) => p.sportPerDag.has(dagErna(d)))) continue;
+      feiten.push({
+        emoji: sportEmoji(tag),
+        kop: `Na ${tag === 'running' ? 'het hardlopen' : sportNaam(tag).toLowerCase()}: rust`,
+        tekst: `${roep(p.naam)} ${deedKeer(tag, aantal)}, en sportte de dag erna geen enkele keer.`,
+        namen: [p.naam],
+      });
+    }
   }
   return feiten;
 }
@@ -285,8 +270,7 @@ export function opvallend(analyse: Analyse): CijfersFeit[] {
     ...nooitZonder(analyse.personen),
     ...weekdagFeiten(lege),
     ...eenKeerFeiten(analyse.personen),
-    ...taartFeiten(analyse.personen),
-    ...dagFeiten(analyse),
+    ...dagErnaFeiten(analyse),
     ...dertiendeFeit(analyse),
   ].slice(0, MAX_FEITEN);
   return afgewisseld(feiten).map((f) => {
